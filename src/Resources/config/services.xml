@@ -1,0 +1,66 @@
+<?xml version="1.0" ?>
+
+<container xmlns="http://symfony.com/schema/dic/services"
+           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+           xsi:schemaLocation="http://symfony.com/schema/dic/services http://symfony.com/schema/dic/services/services-1.0.xsd">
+
+    <parameters>
+        <parameter key="openapi.generated.code.language.level">7.4.0</parameter>
+        <parameter key="openapi.generated.code.dir.permissions">0755</parameter>
+        <parameter key="openapi.generated.code.root.namespace">App\Generated</parameter>
+        <parameter key="openapi.generated.code.root.path">%kernel.project_dir%/src/Generated</parameter>
+        <parameter key="openapi.generated.code.media.type">application/json</parameter>
+    </parameters>
+    <services>
+        <defaults autoconfigure="true" autowire="true" public="false" />
+        <service id="OnMoon\OpenApiServerBundle\Router\RouteLoader">
+            <tag name="routing.loader" />
+            <argument key="$locator" type="service" id="file_locator" />
+        </service>
+        <service id="OnMoon\OpenApiServerBundle\Controller\ApiController">
+            <tag name="controller.service_arguments" />
+        </service>
+        <service id="OnMoon\OpenApiServerBundle\OpenApi\ArgumentResolver" />
+        <service id="OnMoon\OpenApiServerBundle\OpenApi\ScalarTypesResolver" />
+        <service id="PhpParser\BuilderFactory" />
+        <service id="OnMoon\OpenApiServerBundle\CodeGenerator\Naming\NamingStrategy" class="OnMoon\OpenApiServerBundle\CodeGenerator\Naming\DefaultNamingStrategy">
+            <argument key="$rootNamespace">%openapi.generated.code.root.namespace%</argument>
+        </service>
+        <service id="OnMoon\OpenApiServerBundle\CodeGenerator\Dto\RootDtoFactory" class="\OnMoon\OpenApiServerBundle\CodeGenerator\Dto\PhpParserRootDtoFactory">
+            <argument key="$languageLevel">%openapi.generated.code.language.level%</argument>
+        </service>
+        <service id="OnMoon\OpenApiServerBundle\CodeGenerator\Dto\DtoFactory" class="OnMoon\OpenApiServerBundle\CodeGenerator\Dto\PhpParserDtoFactory">
+            <argument key="$languageLevel">%openapi.generated.code.language.level%</argument>
+        </service>
+        <service id="OnMoon\OpenApiServerBundle\CodeGenerator\ServiceInterface\ServiceInterfaceFactory" class="OnMoon\OpenApiServerBundle\CodeGenerator\ServiceInterface\PhpParserServiceInterfaceFactory">
+            <argument key="$languageLevel">%openapi.generated.code.language.level%</argument>
+        </service>
+        <service id="OnMoon\OpenApiServerBundle\CodeGenerator\ServiceSubscriber\ServiceSubscriberFactory" class="OnMoon\OpenApiServerBundle\CodeGenerator\ServiceSubscriber\PhpParserServiceSubscriberFactory" />
+        <service id="OnMoon\OpenApiServerBundle\CodeGenerator\Filesystem\FileWriter" class="OnMoon\OpenApiServerBundle\CodeGenerator\Filesystem\FilePutContentsFileWriter">
+            <argument key="$dirPemissions">%openapi.generated.code.dir.permissions%</argument>
+        </service>
+        <service id="OnMoon\OpenApiServerBundle\Command\GenerateApiCodeCommand">
+            <argument key="$rootNamespace">%openapi.generated.code.root.namespace%</argument>
+            <argument key="$rootPath">%openapi.generated.code.root.path%</argument>
+            <argument key="$mediaType">%openapi.generated.code.media.type%</argument>
+        </service>
+        <service id="Symfony\Component\PropertyInfo\Extractor\PhpDocExtractor" />
+        <service id="Symfony\Component\Serializer\Normalizer\PropertyNormalizer">
+            <argument key="$propertyTypeExtractor" type="service" id="Symfony\Component\PropertyInfo\Extractor\PhpDocExtractor" />
+        </service>
+        <service id="Symfony\Component\Serializer\Normalizer\DateTimeNormalizer" />
+        <service id="Symfony\Component\Serializer\Encoder\JsonEncoder" />
+        <service id="openapi.bundle.serializer" class="Symfony\Component\Serializer\Serializer">
+            <argument key="$normalizers" type="collection">
+                <argument type="service" id="Symfony\Component\Serializer\Normalizer\PropertyNormalizer" />
+                <argument type="service" id="Symfony\Component\Serializer\Normalizer\DateTimeNormalizer" />
+            </argument>
+            <argument key="$encoders" type="collection">
+                <argument type="service" id="Symfony\Component\Serializer\Encoder\JsonEncoder" />
+            </argument>
+        </service>
+        <service id="OnMoon\OpenApiServerBundle\Serializer\DtoSerializer" class="OnMoon\OpenApiServerBundle\Serializer\ReflectionDtoSerializer">
+            <argument key="$serializer" type="service" id="openapi.bundle.serializer" />
+        </service>
+    </services>
+</container>

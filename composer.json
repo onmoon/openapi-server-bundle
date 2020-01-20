@@ -1,0 +1,58 @@
+{
+    "name": "onmoon/openapi-server-bundle",
+    "description": "Symfony bundle to create a fully-featured API server from an OpenAPI v3 specification",
+    "type": "library",
+    "version": "0.0.1",
+    "license": "MIT",
+    "keywords": [
+        "openapi",
+        "server",
+        "bundle",
+        "generator",
+        "validator",
+        "symfony"
+    ],
+    "authors": [
+        {
+            "name": "Patrik Foldes",
+            "email": "pf@csgo.com"
+        },
+        {
+            "name": "Dmitry Kuskov",
+            "email": "dk@csgo.com"
+        }
+    ],
+    "require": {
+        "php": "^7.4",
+        "ext-json": "*",
+        "cebe/php-openapi": "^1.3",
+        "league/openapi-psr7-validator": "^0.6.0",
+        "nikic/php-parser": "^4.3",
+        "nyholm/psr7": "^1.2",
+        "phpdocumentor/reflection-docblock": "^4.3",
+        "symfony/config": "4.4.*",
+        "symfony/console": "4.4.*",
+        "symfony/dependency-injection": "4.4.*",
+        "symfony/http-kernel": "4.4.*",
+        "symfony/property-access": "4.4.*",
+        "symfony/psr-http-message-bridge": "^2.0",
+        "symfony/routing": "4.4.*",
+        "symfony/serializer": "4.4.*",
+        "symfony/yaml": "4.4.*",
+        "thecodingmachine/safe": "^1.0"
+    },
+    "require-dev": {
+    },
+    "minimum-stability": "stable",
+    "config": {
+        "preferred-install": {
+            "*": "dist"
+        },
+        "sort-packages": true
+    },
+    "autoload": {
+        "psr-4": {
+            "OnMoon\\OpenApiServerBundle\\": "src/"
+        }
+    }
+}
