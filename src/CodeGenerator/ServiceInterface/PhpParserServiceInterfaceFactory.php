@@ -49,7 +49,7 @@ final class PhpParserServiceInterfaceFactory implements ServiceInterfaceFactory
                               * This interface was automatically generated
                               * You should not change it manually as it will be overwritten
                               */');
-        $methodBuilder    = $this->factory->method($methodName);
+        $methodBuilder    = $this->factory->method($methodName)->makePublic();
 
         if ($summary !== null) {
             $methodBuilder->setDocComment(sprintf('/** %s */', $summary));

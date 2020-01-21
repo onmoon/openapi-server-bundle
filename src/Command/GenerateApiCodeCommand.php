@@ -89,7 +89,7 @@ class GenerateApiCodeCommand extends Command
     }
 
     /** @var string */
-    protected static $defaultName = 'app:openapi-generate-code';
+    protected static $defaultName = 'openapi:generate-code';
 
     protected function execute(InputInterface $input, OutputInterface $output) : ?int
     {
