@@ -18,6 +18,12 @@ or add
 
 to the require section of your `composer.json` file.
 
+Then add 
+```php
+OnMoon\OpenApiServerBundle\OpenApiServerBundle::class => ['all' => true],
+```
+to array in `config/bundles.php`.
+
 ## Confirugation
 
 You can configure the bundle by adding the following parameters to your `/config/services.xml`
