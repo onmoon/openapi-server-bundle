@@ -31,7 +31,10 @@ You can configure the bundle by adding the following parameters to your `/config
 ```yaml
 open_api_server:
   # root_name_space: App\Generated # NameSpace for DTOs and Api Interfaces
-  # root_path: %kernel.project_dir%/src/Generated # We will try to derive it from NameSpace
+  ## We will try to derive path for generated files from namespace. If you do not want them to be 
+  ## stored in App namespace or if you App namespace is not in %kernel.project_dir%/src/, then you
+  ## can specify path manually:
+  # root_path: %kernel.project_dir%/src/Generated 
   # language_level: 7.4.0 # minimum PHP version the generated code should be compatible with
   # generated_dir_permissions: 0755 # permissions for the generated directories
   specs:
@@ -42,14 +45,15 @@ open_api_server:
       media_type: 'application/json' # media type from the specification files to use for generating request and response DTOs
 ```
 
-Add your OpenApi specifications to the application routes configuration file:
+Add your OpenApi specifications to the application routes configuration file using standard `resource` keyword 
+with `open_api` type:
 
 ```yaml
 petstore-api:
-  resource: 'petstore'
+  resource: 'petstore' # This should be same as in specs section of bundle config
   type: open_api
-  # prefix: '/first' # Add this standard parameter to add base path to all paths in api
-  # name_prefix: 'first_' # This will add prefix to route names 
+  # prefix: '/api' # Add this standard parameter to add base path to all paths in api
+  # name_prefix: 'petstore_' # This will add prefix to route names 
 ```
 
 Generate the server code: `php bin/console open-api:generate-code`
