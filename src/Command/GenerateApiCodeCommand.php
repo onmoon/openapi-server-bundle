@@ -17,6 +17,8 @@ use OnMoon\OpenApiServerBundle\CodeGenerator\ServiceInterface\ServiceInterfaceFa
 use OnMoon\OpenApiServerBundle\CodeGenerator\ServiceSubscriber\ServiceSubscriberFactory;
 use OnMoon\OpenApiServerBundle\Exception\CannotGenerateCodeForOperation;
 use OnMoon\OpenApiServerBundle\Router\RouteLoader;
+use OnMoon\OpenApiServerBundle\Specification\Specification;
+use OnMoon\OpenApiServerBundle\Specification\SpecificationLoader;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -44,9 +46,9 @@ class GenerateApiCodeCommand extends Command
     private ServiceSubscriberFactory $serviceSubscriberFactory;
     private FileWriter $fileWriter;
     private RouterInterface $router;
+    private SpecificationLoader $loader;
     private string $rootNamespace;
     private string $rootPath;
-    private string $mediaType;
 
     /**
      * @param NamingStrategy $namingStrategy
@@ -56,9 +58,9 @@ class GenerateApiCodeCommand extends Command
      * @param ServiceSubscriberFactory $serviceSubscriberFactory
      * @param FileWriter $fileWriter
      * @param RouterInterface $router
+     * @param SpecificationLoader $loader
      * @param string $rootNamespace
      * @param string $rootPath
-     * @param string $mediaType
      * @param string|null $name
      */
     public function __construct(
@@ -69,9 +71,9 @@ class GenerateApiCodeCommand extends Command
         ServiceSubscriberFactory $serviceSubscriberFactory,
         FileWriter $fileWriter,
         RouterInterface $router,
+        SpecificationLoader $loader,
         string $rootNamespace,
         string $rootPath,
-        string $mediaType,
         ?string $name = null
     ) {
         $this->namingStrategy           = $namingStrategy;
@@ -83,13 +85,13 @@ class GenerateApiCodeCommand extends Command
         $this->router                   = $router;
         $this->rootNamespace            = $rootNamespace;
         $this->rootPath                 = $rootPath;
-        $this->mediaType                = $mediaType;
+        $this->loader                   = $loader;
 
         parent::__construct($name);
     }
 
     /** @var string */
-    protected static $defaultName = 'openapi:generate-code';
+    protected static $defaultName = 'open-api:generate-code';
 
     protected function execute(InputInterface $input, OutputInterface $output) : ?int
     {
@@ -98,14 +100,15 @@ class GenerateApiCodeCommand extends Command
         /** @var GeneratedClass[] $serviceInterfaces */
         $serviceInterfaces = [];
 
-        foreach ($this->findSpecifications() as $specificationFile=>$parsedSpecification) {
-            /** @var OpenApi $parsedSpecification */
+        foreach ($this->loader->list() as $specificationName=>$specification) {
+            $parsedSpecification = $this->loader->load($specificationName);
 
             if ($parsedSpecification->paths === null) {
                 continue;
             }
 
-            $apiName      = $this->namingStrategy->stringToNamespace($parsedSpecification->info->title);
+            $apiName      = $specification->getNameSpace();
+            $specMediaType    = $specification->getMediaType();
             $apiNamespace = $this->namingStrategy->buildNamespace($this->rootNamespace, self::APIS_NAMESPACE, $apiName);
             $apiPath      = $this->namingStrategy->buildPath($this->rootPath, self::APIS_NAMESPACE, $apiName);
 
@@ -115,14 +118,14 @@ class GenerateApiCodeCommand extends Command
                     $summary     = $operation->summary;
 
                     $operationName      = $this->namingStrategy->stringToNamespace($operationId);
-                    $operationNamesapce = $this->namingStrategy->buildNamespace($apiNamespace, $operationName);
+                    $operationNamespace = $this->namingStrategy->buildNamespace($apiNamespace, $operationName);
                     $operationPath      = $this->namingStrategy->buildPath($apiPath, $operationName);
 
                     if ($operationId === null) {
                         throw CannotGenerateCodeForOperation::becauseNoOperationIdSpecified(
                             $url,
                             $method,
-                            $specificationFile->getFilePath()
+                            $specification->getPath()
                         );
                     }
 
@@ -138,15 +141,15 @@ class GenerateApiCodeCommand extends Command
 
                     if ($requestBody !== null &&
                         $requestBody->content !== null &&
-                        array_key_exists($this->mediaType, $requestBody->content)
+                        array_key_exists($specMediaType, $requestBody->content)
                     ) {
-                        $mediaType = $requestBody->content[$this->mediaType];
+                        $mediaType = $requestBody->content[$specMediaType];
 
                         if ($mediaType->schema instanceof Schema) {
                             $schema = $mediaType->schema;
 
                             $dtoNamespace = $this->namingStrategy->buildNamespace(
-                                $operationNamesapce,
+                                $operationNamespace,
                                 self::DTO_NAMESPACE,
                                 self::REQUEST_SUFFIX
                             );
@@ -179,15 +182,15 @@ class GenerateApiCodeCommand extends Command
                     if ($responses !== null &&
                         $responses[200] !== null &&
                         $responses[200]->content !== null &&
-                        array_key_exists($this->mediaType, $responses[200]->content)
+                        array_key_exists($specMediaType, $responses[200]->content)
                     ) {
-                        $mediaType = $responses[200]->content[$this->mediaType];
+                        $mediaType = $responses[200]->content[$specMediaType];
 
                         if ($mediaType->schema instanceof Schema) {
                             $schema = $mediaType->schema;
 
                             $dtoNamespace = $this->namingStrategy->buildNamespace(
-                                $operationNamesapce,
+                                $operationNamespace,
                                 self::DTO_NAMESPACE,
                                 self::RESPONSE_SUFFIX
                             );
@@ -220,7 +223,7 @@ class GenerateApiCodeCommand extends Command
                     // Root dto generation
 
                     $dtoNamespace = $this->namingStrategy->buildNamespace(
-                        $operationNamesapce,
+                        $operationNamespace,
                         self::DTO_NAMESPACE,
                         self::REQUEST_SUFFIX
                     );
@@ -334,16 +337,4 @@ class GenerateApiCodeCommand extends Command
         );
     }
 
-    private function findSpecifications() {
-        $specs = [];
-        foreach ($this->router->getRouteCollection()->all() as $route) {
-            if($path = $route->getOption(RouteLoader::OPENAPI_SPEC_PATH)) {
-                if(!isset($specs[$path])) {
-                    $specs[$path] = $route->getOption(RouteLoader::OPENAPI_SPEC);
-                }
-            }
-        }
-
-        return $specs;
-    }
 }

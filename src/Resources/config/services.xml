@@ -3,19 +3,10 @@
 <container xmlns="http://symfony.com/schema/dic/services"
            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
            xsi:schemaLocation="http://symfony.com/schema/dic/services http://symfony.com/schema/dic/services/services-1.0.xsd">
-
-    <parameters>
-        <parameter key="openapi.generated.code.language.level">7.4.0</parameter>
-        <parameter key="openapi.generated.code.dir.permissions">0755</parameter>
-        <parameter key="openapi.generated.code.root.namespace">App\Generated</parameter>
-        <parameter key="openapi.generated.code.root.path">%kernel.project_dir%/src/Generated</parameter>
-        <parameter key="openapi.generated.code.media.type">application/json</parameter>
-    </parameters>
     <services>
         <defaults autoconfigure="true" autowire="true" public="false" />
         <service id="OnMoon\OpenApiServerBundle\Router\RouteLoader">
             <tag name="routing.loader" />
-            <argument key="$locator" type="service" id="file_locator" />
         </service>
         <service id="OnMoon\OpenApiServerBundle\Controller\ApiController">
             <tag name="controller.service_arguments" />
@@ -42,7 +33,6 @@
         <service id="OnMoon\OpenApiServerBundle\Command\GenerateApiCodeCommand">
             <argument key="$rootNamespace">%openapi.generated.code.root.namespace%</argument>
             <argument key="$rootPath">%openapi.generated.code.root.path%</argument>
-            <argument key="$mediaType">%openapi.generated.code.media.type%</argument>
         </service>
         <service id="Symfony\Component\PropertyInfo\Extractor\PhpDocExtractor" />
         <service id="Symfony\Component\Serializer\Normalizer\PropertyNormalizer">
@@ -61,6 +51,9 @@
         </service>
         <service id="OnMoon\OpenApiServerBundle\Serializer\DtoSerializer" class="OnMoon\OpenApiServerBundle\Serializer\ReflectionDtoSerializer">
             <argument key="$serializer" type="service" id="openapi.bundle.serializer" />
+        </service>
+        <service id="OnMoon\OpenApiServerBundle\Specification\SpecificationLoader">
+            <argument key="$locator" type="service" id="file_locator" />
         </service>
     </services>
 </container>

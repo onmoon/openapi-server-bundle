@@ -32,12 +32,12 @@ class DefaultNamingStrategy implements NamingStrategy
         return ! preg_match('/^\d/', $name) && preg_match('/^[A-Za-z0-9_]+$/i', $name);
     }
 
-    public function getInterfaceFQCN(string $apiTitle, string $operationId) : string
+    public function getInterfaceFQCN(string $apiNameSpace, string $operationId) : string
     {
         return $this->buildNamespace(
             $this->rootNamespace,
             GenerateApiCodeCommand::APIS_NAMESPACE,
-            $this->stringToNamespace($apiTitle),
+            $apiNameSpace,
             $this->stringToNamespace($operationId),
             $this->stringToNamespace($operationId) . GenerateApiCodeCommand::SERVICE_SUFFIX,
         );

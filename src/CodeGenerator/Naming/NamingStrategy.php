@@ -6,7 +6,7 @@ namespace OnMoon\OpenApiServerBundle\CodeGenerator\Naming;
 
 interface NamingStrategy
 {
-    public function getInterfaceFQCN(string $apiTitle, string $operationId) : string;
+    public function getInterfaceFQCN(string $apiNameSpace, string $operationId) : string;
 
     public function stringToNamespace(string $text) : string;
 
