@@ -15,6 +15,7 @@ use OnMoon\OpenApiServerBundle\Serializer\DtoSerializer;
 use League\OpenAPIValidation\PSR7\OperationAddress;
 use League\OpenAPIValidation\PSR7\ValidatorBuilder;
 use Nyholm\Psr7\Factory\Psr17Factory;
+use OnMoon\OpenApiServerBundle\Specification\SpecificationLoader;
 use Symfony\Bridge\PsrHttpMessage\Factory\PsrHttpFactory;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -27,24 +28,27 @@ use const JSON_UNESCAPED_UNICODE;
 class ApiController
 {
     private ?ApiLoader $apiLoader = null;
-    private DtoSerializer $serializer;
 
-    public function setApiLoader(
-        ApiLoader $loader,
-        DtoSerializer $serializer
-    ) {
+    public function setApiLoader(ApiLoader $loader) {
         $this->apiLoader  = $loader;
-        $this->serializer = $serializer;
     }
 
-    public function handle(Request $request, RouterInterface $router, NamingStrategy $namingStrategy) {
+    public function handle(
+        Request $request,
+        RouterInterface $router,
+        NamingStrategy $namingStrategy,
+        DtoSerializer $serializer,
+        SpecificationLoader $loader
+    ) {
         $routeName = $request->attributes->get('_route');
         $route = $router->getRouteCollection()->get($routeName);
 
         $path = $route->getOption(RouteLoader::OPENAPI_PATH);
         $method = $route->getOption(RouteLoader::OPENAPI_METHOD);
-        /** @var OpenApi $spec $spec */
-        $spec = $route->getOption(RouteLoader::OPENAPI_SPEC);
+        $specName = $route->getOption(RouteLoader::OPENAPI_SPEC);
+        $nameSpace = $loader->get($specName)->getNameSpace();
+        $spec = $loader->load($specName);
+
         $operationId = $spec->paths[$path]->{$method}->operationId;
 
         $psr17Factory = new Psr17Factory();
@@ -65,7 +69,7 @@ class ApiController
             throw ApiCallFailed::becauseApiLoaderNotFound();
         }
 
-        $apiInterface = $namingStrategy->getInterfaceFQCN($spec->info->title, $operationId);
+        $apiInterface = $namingStrategy->getInterfaceFQCN($nameSpace, $operationId);
         $methodName = $namingStrategy->stringToMethodName($operationId);
 
         $service = $this->apiLoader->get($apiInterface);
@@ -82,14 +86,14 @@ class ApiController
             $service->setClientIp($request->getClientIp());
         }
 
-        $requestDto  = $this->serializer->createRequestDto($request, $route, $apiInterface, $methodName);
+        $requestDto  = $serializer->createRequestDto($request, $route, $apiInterface, $methodName);
         $responseDto = $requestDto ? $service->{$methodName}($requestDto) : $service->{$methodName}();
 
         $response = new JsonResponse();
         $response->setEncodingOptions(JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_THROW_ON_ERROR);
 
         if (is_object($responseDto)) {
-            $response->setContent($this->serializer->createResponse($responseDto));
+            $response->setContent($serializer->createResponse($responseDto));
         }
 
         return $response;
