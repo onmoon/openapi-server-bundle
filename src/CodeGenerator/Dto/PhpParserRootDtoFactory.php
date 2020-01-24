@@ -97,7 +97,7 @@ final class PhpParserRootDtoFactory implements RootDtoFactory
         }
 
         if (count($queryParameters)) {
-            $queryParametersDtoClassName = rtrim($className, 'Dto') . self::QUERY_PARAMETERS_PREFIX;
+            $queryParametersDtoClassName = preg_replace('/Dto$/', '', $className)  . self::QUERY_PARAMETERS_PREFIX;
             $queryParametersDtoFileName  = $queryParametersDtoClassName . '.php';
 
             $generatedClasses[] = $this->dtoFactory->generateParamDto(

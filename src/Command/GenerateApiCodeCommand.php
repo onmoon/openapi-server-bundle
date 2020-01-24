@@ -222,37 +222,41 @@ class GenerateApiCodeCommand extends Command
 
                     // Root dto generation
 
-                    $dtoNamespace = $this->namingStrategy->buildNamespace(
-                        $operationNamespace,
-                        self::DTO_NAMESPACE,
-                        self::REQUEST_SUFFIX
-                    );
-                    $dtoClassName = $this->namingStrategy->stringToNamespace(
-                        $operationName . self::REQUEST_SUFFIX . self::DTO_SUFFIX
-                    );
-                    $dtoPath      = $this->namingStrategy->buildPath(
-                        $operationPath, self::DTO_NAMESPACE, self::REQUEST_SUFFIX
-                    );
-                    $dtoFileName  = $dtoClassName . '.php';
-
-                    $rootDtoNamespace = $dtoNamespace;
-                    $rootDtoClassName = $dtoClassName;
-
                     $parameters = array_merge($pathItem->parameters, $operation->parameters);
 
-                    $filesToGenerate = array_merge(
-                        $filesToGenerate,
-                        $this->rootDtoFactory->generateRootDto(
-                            $dtoPath,
-                            $dtoFileName,
-                            $dtoNamespace,
-                            $dtoClassName,
-                            $inputDtoNamespace,
-                            $inputDtoClassName,
-                            $this->filterAllowedParameters($parameters, 'path'),
-                            $this->filterAllowedParameters($parameters, 'query')
-                        )
-                    );
+                    if(count($parameters) or !is_null($inputDtoClassName)) {
+
+                        $dtoNamespace = $this->namingStrategy->buildNamespace(
+                            $operationNamespace,
+                            self::DTO_NAMESPACE,
+                            self::REQUEST_SUFFIX
+                        );
+                        $dtoClassName = $this->namingStrategy->stringToNamespace(
+                            $operationName . self::REQUEST_SUFFIX . self::DTO_SUFFIX
+                        );
+                        $dtoPath = $this->namingStrategy->buildPath(
+                            $operationPath, self::DTO_NAMESPACE, self::REQUEST_SUFFIX
+                        );
+                        $dtoFileName = $dtoClassName . '.php';
+
+                        $rootDtoNamespace = $dtoNamespace;
+                        $rootDtoClassName = $dtoClassName;
+
+                        $filesToGenerate = array_merge(
+                            $filesToGenerate,
+                            $this->rootDtoFactory->generateRootDto(
+                                $dtoPath,
+                                $dtoFileName,
+                                $dtoNamespace,
+                                $dtoClassName,
+                                $inputDtoNamespace,
+                                $inputDtoClassName,
+                                $this->filterAllowedParameters($parameters, 'path'),
+                                $this->filterAllowedParameters($parameters, 'query')
+                            )
+                        );
+
+                    }
 
                     // Service interface generation
 
