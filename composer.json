@@ -2,7 +2,6 @@
     "name": "onmoon/openapi-server-bundle",
     "description": "Symfony bundle to create a fully-featured API server from an OpenAPI v3 specification",
     "type": "library",
-    "version": "0.0.1",
     "license": "MIT",
     "keywords": [
         "openapi",
