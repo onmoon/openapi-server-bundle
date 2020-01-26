@@ -119,7 +119,7 @@ class ReflectionDtoSerializer implements DtoSerializer
         );
     }
 
-    private function getInputDtoFQCN(string $serviceInterface, string $methodName) : string
+    private function getInputDtoFQCN(string $serviceInterface, string $methodName) : ?string
     {
         $interfaceReflectionClass  = new ReflectionClass($serviceInterface);
         $method                    = $interfaceReflectionClass->getMethod($methodName);
