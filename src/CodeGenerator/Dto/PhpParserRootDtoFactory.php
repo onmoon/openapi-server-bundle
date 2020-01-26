@@ -91,6 +91,7 @@ final class PhpParserRootDtoFactory implements RootDtoFactory
                     $this
                         ->factory
                         ->method('getPathParameters')
+                        ->makePublic()
                         ->setReturnType($pathParametersDtoClassName)
                         ->addStmt(new Return_(new Variable('this->pathParameters')))
                 );
@@ -120,6 +121,7 @@ final class PhpParserRootDtoFactory implements RootDtoFactory
                     $this
                         ->factory
                         ->method('getQueryParameters')
+                        ->makePublic()
                         ->setReturnType($queryParametersDtoClassName)
                         ->addStmt(new Return_(new Variable('this->queryParameters')))
                 );
@@ -138,6 +140,7 @@ final class PhpParserRootDtoFactory implements RootDtoFactory
                     $this
                         ->factory
                         ->method('getBody')
+                        ->makePublic()
                         ->setReturnType($requestBodyDtoClassName)
                         ->addStmt(new Return_(new Variable('this->body')))
                 );
