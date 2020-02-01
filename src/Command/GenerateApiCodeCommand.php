@@ -8,6 +8,7 @@ use cebe\openapi\spec\MediaType;
 use cebe\openapi\spec\Parameter;
 use cebe\openapi\spec\Reference;
 use cebe\openapi\spec\RequestBody;
+use cebe\openapi\spec\Response;
 use cebe\openapi\spec\Schema;
 use cebe\openapi\spec\Type;
 use OnMoon\OpenApiServerBundle\CodeGenerator\Dto\DtoFactory;
@@ -131,7 +132,8 @@ class GenerateApiCodeCommand extends Command
                     $outputDtoClassName = null;
 
                     $requestBody = $operation->requestBody;
-                    $responses   = $operation->responses;
+                    /** @var Response[]|null $responses */
+                    $responses = $operation->responses;
 
                     if ($requestBody instanceof RequestBody &&
                         array_key_exists($specMediaType, $requestBody->content)

@@ -6,7 +6,7 @@ namespace OnMoon\OpenApiServerBundle\OpenApi;
 
 use cebe\openapi\spec\Parameter;
 use cebe\openapi\spec\Schema;
-use function preg_match;
+use function Safe\preg_match;
 
 class ArgumentResolver
 {
@@ -45,7 +45,8 @@ class ArgumentResolver
                 $pattern = $this->typesResolver->getPattern($type);
 
                 if (preg_match('/^\^(.*)\$$/', $schema->pattern, $matches)) {
-                    $patterns[$parameter->name] = $matches[1];
+                    /** @psalm-suppress PossiblyNullArrayAccess */
+                    $patterns[$parameter->name] = (string) $matches[1];
                 } elseif ($pattern) {
                     $patterns[$parameter->name] = $pattern;
                 }

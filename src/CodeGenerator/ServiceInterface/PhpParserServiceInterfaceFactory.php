@@ -12,7 +12,7 @@ use PhpParser\Node\Scalar\LNumber;
 use PhpParser\Node\Stmt\Declare_;
 use PhpParser\Node\Stmt\DeclareDeclare;
 use PhpParser\PrettyPrinter\Standard;
-use function sprintf;
+use function Safe\sprintf;
 
 final class PhpParserServiceInterfaceFactory implements ServiceInterfaceFactory
 {

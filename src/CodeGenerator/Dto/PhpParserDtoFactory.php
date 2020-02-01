@@ -33,7 +33,7 @@ use function in_array;
 use function is_array;
 use function ltrim;
 use function rtrim;
-use function sprintf;
+use function Safe\sprintf;
 use function trim;
 use function ucfirst;
 use function version_compare;
@@ -105,12 +105,8 @@ final class PhpParserDtoFactory implements DtoFactory
                 switch ($parameter->schema->type) {
                     case Type::ANY:
                         throw new Exception('\'any\' type is not supported in query and path parameters');
-
-                        break;
                     case Type::OBJECT:
                         throw new Exception('\'object\' type is not supported in query and path parameters');
-
-                        break;
                     case Type::ARRAY:
                         $type = 'array';
 
@@ -239,8 +235,6 @@ final class PhpParserDtoFactory implements DtoFactory
                 switch ($property->type) {
                     case Type::ANY:
                         throw new Exception('\'any\' type is not supported');
-
-                        break;
                     case Type::OBJECT:
                         $generatedClassGraph = $this->generatePropertyDto(
                             $propertyName,
@@ -441,7 +435,7 @@ final class PhpParserDtoFactory implements DtoFactory
             $property->setType(($nullable ? '?' : '') . ($iterableType ? 'array' : $type));
         }
 
-        if ($docCommentLines > 0) {
+        if (count($docCommentLines) > 0) {
             $docCommentLines[] = '';
         }
 
@@ -455,7 +449,7 @@ final class PhpParserDtoFactory implements DtoFactory
             $property->setDocComment(
                 sprintf('/** %s */', trim($docCommentLines[0]))
             );
-        } elseif (count($docCommentLines) > 1) {
+        } else {
             $property->setDocComment(
                 implode(
                     PHP_EOL,

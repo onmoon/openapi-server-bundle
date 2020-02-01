@@ -6,9 +6,9 @@ namespace OnMoon\OpenApiServerBundle\OpenApi;
 
 use cebe\openapi\spec\Schema;
 use cebe\openapi\spec\Type;
-use DateTime;
+use Safe\DateTime;
 use function Safe\base64_decode;
-use function settype;
+use function Safe\settype;
 
 class ScalarTypesResolver
 {

@@ -10,13 +10,25 @@
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xmlns="https://getpsalm.org/schema/config"
     xsi:schemaLocation="https://getpsalm.org/schema/config vendor/vimeo/psalm/config.xsd"
-    errorBaseline="psalm-baseline.xml"
 >
     <projectFiles>
         <directory name="src" />
     </projectFiles>
 
     <issueHandlers>
+            <MissingPropertyType errorLevel="suppress" />
+
+        <MixedMethodCall>
+            <errorLevel type="suppress">
+                <file name="src/DependencyInjection/Configuration.php" />
+            </errorLevel>
+        </MixedMethodCall>
+        <PossiblyUndefinedMethod>
+            <errorLevel type="suppress">
+                <file name="src/DependencyInjection/Configuration.php" />
+            </errorLevel>
+        </PossiblyUndefinedMethod>
+
         <LessSpecificReturnType errorLevel="error"/>
 
         <DeprecatedMethod errorLevel="error"/>

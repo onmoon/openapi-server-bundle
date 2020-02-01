@@ -59,6 +59,9 @@ class ReflectionDtoSerializer implements DtoSerializer
         return $this->serializer->serialize($dto, 'json');
     }
 
+    /**
+     * @param ReflectionClass<Dto> $inputDtoRefl
+     */
     private function setRequestQueryParameters(object $inputDto, ReflectionClass $inputDtoRefl, Request $request) : void
     {
         if (! $inputDtoRefl->hasProperty('queryParameters')) {
@@ -83,6 +86,9 @@ class ReflectionDtoSerializer implements DtoSerializer
         $dtoQueryParametersProperty->setValue($inputDto, $queryParametersDto);
     }
 
+    /**
+     * @param ReflectionClass<Dto> $inputDtoRefl
+     */
     private function setRequestPathParameters(object $inputDto, ReflectionClass $inputDtoRefl, Request $request) : void
     {
         /** @psalm-var array<string, string> $pathParameters */
@@ -112,6 +118,9 @@ class ReflectionDtoSerializer implements DtoSerializer
         $dtoPathParametersProperty->setValue($inputDto, $pathParametersDto);
     }
 
+    /**
+     * @param ReflectionClass<Dto> $inputDtoRefl
+     */
     private function setRequestBody(object $inputDto, ReflectionClass $inputDtoRefl, Request $request) : void
     {
         if (! $inputDtoRefl->hasProperty('body')) {

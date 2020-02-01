@@ -13,7 +13,7 @@ use function file_exists;
 use function implode;
 use function is_string;
 use function pathinfo;
-use function sprintf;
+use function Safe\sprintf;
 use function stream_is_local;
 use const PATHINFO_EXTENSION;
 
