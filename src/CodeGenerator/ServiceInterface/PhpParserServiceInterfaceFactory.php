@@ -6,6 +6,7 @@ namespace OnMoon\OpenApiServerBundle\CodeGenerator\ServiceInterface;
 
 use OnMoon\OpenApiServerBundle\CodeGenerator\GeneratedClass;
 use OnMoon\OpenApiServerBundle\CodeGenerator\Naming\NamingStrategy;
+use OnMoon\OpenApiServerBundle\Interfaces\Service;
 use PhpParser\BuilderFactory;
 use PhpParser\Node\Scalar\LNumber;
 use PhpParser\Node\Stmt\Declare_;
@@ -41,10 +42,15 @@ final class PhpParserServiceInterfaceFactory implements ServiceInterfaceFactory
         ?string $outputDtoNamespace = null,
         ?string $outputDtoClassName = null
     ) : GeneratedClass {
-        $fileBuilder      = $this->factory->namespace($namespace);
+        $fileBuilder = $this
+            ->factory
+            ->namespace($namespace)
+            ->addStmt($this->factory->use(Service::class));
+
         $interfaceBuilder = $this
             ->factory
             ->interface($className)
+            ->extend('Service')
             ->setDocComment('/**
                               * This interface was automatically generated
                               * You should not change it manually as it will be overwritten

@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<files psalm-version="3.8.3@389af1bfc739bfdff3f9e3dc7bd6499aee51a831">
+  <file src="src/DependencyInjection/Configuration.php">
+    <MixedMethodCall occurrences="36">
+      <code>scalarNode</code>
+      <code>end</code>
+      <code>scalarNode</code>
+      <code>defaultValue</code>
+      <code>cannotBeEmpty</code>
+      <code>end</code>
+      <code>scalarNode</code>
+      <code>defaultValue</code>
+      <code>cannotBeEmpty</code>
+      <code>end</code>
+      <code>scalarNode</code>
+      <code>defaultValue</code>
+      <code>cannotBeEmpty</code>
+      <code>end</code>
+      <code>arrayNode</code>
+      <code>arrayPrototype</code>
+      <code>children</code>
+      <code>scalarNode</code>
+      <code>isRequired</code>
+      <code>cannotBeEmpty</code>
+      <code>end</code>
+      <code>enumNode</code>
+      <code>values</code>
+      <code>end</code>
+      <code>scalarNode</code>
+      <code>isRequired</code>
+      <code>cannotBeEmpty</code>
+      <code>end</code>
+      <code>enumNode</code>
+      <code>values</code>
+      <code>isRequired</code>
+      <code>cannotBeEmpty</code>
+      <code>end</code>
+      <code>end</code>
+      <code>end</code>
+      <code>end</code>
+    </MixedMethodCall>
+    <PossiblyUndefinedMethod occurrences="1">
+      <code>children</code>
+    </PossiblyUndefinedMethod>
+  </file>
+</files>

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace OnMoon\OpenApiServerBundle\OpenApi;
 
 use cebe\openapi\spec\Parameter;
+use cebe\openapi\spec\Schema;
 use function preg_match;
 
 class ArgumentResolver
@@ -33,16 +34,17 @@ class ArgumentResolver
                     continue;
                 }
 
+                if (! ($parameter->schema instanceof Schema)) {
+                    continue;
+                }
+
                 $type                    = $this->typesResolver->findScalarType($parameter->schema);
                 $types[$parameter->name] = $type;
 
                 $schema  = $parameter->schema;
                 $pattern = $this->typesResolver->getPattern($type);
 
-                if ($schema !== null &&
-                    $schema->pattern !== null &&
-                    preg_match('/^\^(.*)\$$/', $schema->pattern, $matches)
-                ) {
+                if (preg_match('/^\^(.*)\$$/', $schema->pattern, $matches)) {
                     $patterns[$parameter->name] = $matches[1];
                 } elseif ($pattern) {
                     $patterns[$parameter->name] = $pattern;

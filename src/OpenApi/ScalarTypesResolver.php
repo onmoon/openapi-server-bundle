@@ -7,12 +7,21 @@ namespace OnMoon\OpenApiServerBundle\OpenApi;
 use cebe\openapi\spec\Schema;
 use cebe\openapi\spec\Type;
 use DateTime;
-use function base64_decode;
+use function Safe\base64_decode;
 use function settype;
 
 class ScalarTypesResolver
 {
-    /** @var mixed[] */
+    /**
+     * @psalm-var list<array{
+     *     type:string,
+     *     phpType:string,
+     *     format?:string,
+     *     pattern?:string,
+     *     serializer?:\Closure
+     * }>
+     * @var mixed[]
+     */
     private array $scalarTypes = [];
 
     public function __construct()
@@ -53,7 +62,7 @@ class ScalarTypesResolver
     }
 
     /**
-     * @return bool|mixed
+     * @return bool|string
      */
     public function getPattern(int $id)
     {
@@ -68,7 +77,7 @@ class ScalarTypesResolver
 
     public function getPhpType(int $id) : string
     {
-        return $this->scalarTypes[$id]['phpType'];
+        return (string) $this->scalarTypes[$id]['phpType'];
     }
 
     /**
@@ -88,12 +97,9 @@ class ScalarTypesResolver
         return $value;
     }
 
-    /**
-     * @return int|string
-     */
-    public function findScalarType(Schema $schema)
+    public function findScalarType(Schema $schema) : int
     {
-        if (empty($schema) || empty($schema->type)) {
+        if (empty($schema->type)) {
             return 0;
         }
 

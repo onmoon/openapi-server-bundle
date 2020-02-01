@@ -6,6 +6,8 @@ namespace OnMoon\OpenApiServerBundle\CodeGenerator\ServiceSubscriber;
 
 use OnMoon\OpenApiServerBundle\CodeGenerator\GeneratedClass;
 use OnMoon\OpenApiServerBundle\CodeGenerator\Naming\NamingStrategy;
+use OnMoon\OpenApiServerBundle\Interfaces\ApiLoader;
+use OnMoon\OpenApiServerBundle\Interfaces\Service;
 use PhpParser\Builder\Use_;
 use PhpParser\BuilderFactory;
 use PhpParser\Node\Arg;
@@ -25,6 +27,8 @@ use PhpParser\Node\Stmt\DeclareDeclare;
 use PhpParser\Node\Stmt\If_;
 use PhpParser\Node\Stmt\Return_;
 use PhpParser\PrettyPrinter\Standard;
+use Psr\Container\ContainerInterface;
+use Symfony\Contracts\Service\ServiceSubscriberInterface;
 use function array_map;
 use function array_merge;
 
@@ -54,9 +58,10 @@ final class PhpParserServiceSubscriberFactory implements ServiceSubscriberFactor
         $fileBuilder->addStmts(
             array_merge(
                 [
-                    $this->factory->use('Psr\Container\ContainerInterface'),
-                    $this->factory->use('Symfony\Contracts\Service\ServiceSubscriberInterface'),
-                    $this->factory->use('OnMoon\OpenApiServerBundle\Interfaces\ApiLoader'),
+                    $this->factory->use(ContainerInterface::class),
+                    $this->factory->use(ServiceSubscriberInterface::class),
+                    $this->factory->use(ApiLoader::class),
+                    $this->factory->use(Service::class),
                 ],
                 array_map(
                     fn (GeneratedClass $generatedClass) : Use_ => $this->factory->use($generatedClass->getFQCN()),
@@ -122,6 +127,7 @@ final class PhpParserServiceSubscriberFactory implements ServiceSubscriberFactor
                         ->factory
                         ->method('get')
                         ->makePublic()
+                        ->setReturnType('?Service')
                         ->addParam(
                             $this->factory->param('interface')->setType('string')
                         )

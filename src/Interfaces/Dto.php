@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace OnMoon\OpenApiServerBundle\Interfaces;
 
-interface ApiLoader
+interface Dto
 {
-    public function get(string $interfaceName) : ?Service;
 }

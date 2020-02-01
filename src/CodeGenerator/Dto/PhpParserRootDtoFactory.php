@@ -7,6 +7,7 @@ namespace OnMoon\OpenApiServerBundle\CodeGenerator\Dto;
 use cebe\openapi\spec\Parameter;
 use OnMoon\OpenApiServerBundle\CodeGenerator\GeneratedClass;
 use OnMoon\OpenApiServerBundle\CodeGenerator\Naming\NamingStrategy;
+use OnMoon\OpenApiServerBundle\Interfaces\Dto;
 use PhpParser\BuilderFactory;
 use PhpParser\Node\Expr\Variable;
 use PhpParser\Node\Scalar\LNumber;
@@ -15,7 +16,7 @@ use PhpParser\Node\Stmt\DeclareDeclare;
 use PhpParser\Node\Stmt\Return_;
 use PhpParser\PrettyPrinter\Standard;
 use function count;
-use function preg_replace;
+use function Safe\preg_replace;
 
 final class PhpParserRootDtoFactory implements RootDtoFactory
 {
@@ -57,11 +58,15 @@ final class PhpParserRootDtoFactory implements RootDtoFactory
     ) : array {
         $generatedClasses = [];
 
-        $fileBuilder = $this->factory->namespace($namespace);
+        $fileBuilder = $this
+            ->factory
+            ->namespace($namespace)
+            ->addStmt($this->factory->use(Dto::class));
 
         $classBuilder = $this
             ->factory
             ->class($className)
+            ->implement('Dto')
             ->makeFinal()
             ->setDocComment('/**
                               * This class was automatically generated
@@ -69,7 +74,9 @@ final class PhpParserRootDtoFactory implements RootDtoFactory
                               */');
 
         if (count($pathParameters)) {
-            $pathParametersDtoClassName = preg_replace('/Dto$/', '', $className) . self::PATH_PARAMETERS_PREFIX;
+            /** @var string $baseClassName */
+            $baseClassName              = preg_replace('/Dto$/', '', $className);
+            $pathParametersDtoClassName = $baseClassName . self::PATH_PARAMETERS_PREFIX;
             $pathParametersDtoFileName  = $pathParametersDtoClassName . '.php';
 
             $generatedClasses[] = $this->dtoFactory->generateParamDto(
@@ -99,7 +106,9 @@ final class PhpParserRootDtoFactory implements RootDtoFactory
         }
 
         if (count($queryParameters)) {
-            $queryParametersDtoClassName = preg_replace('/Dto$/', '', $className) . self::QUERY_PARAMETERS_PREFIX;
+            /** @var string $baseClassName */
+            $baseClassName               = preg_replace('/Dto$/', '', $className);
+            $queryParametersDtoClassName = $baseClassName . self::QUERY_PARAMETERS_PREFIX;
             $queryParametersDtoFileName  = $queryParametersDtoClassName . '.php';
 
             $generatedClasses[] = $this->dtoFactory->generateParamDto(

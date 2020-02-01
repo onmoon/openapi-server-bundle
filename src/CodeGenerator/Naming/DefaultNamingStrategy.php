@@ -9,9 +9,9 @@ use function array_map;
 use function implode;
 use function in_array;
 use function lcfirst;
-use function preg_replace;
 use function rtrim;
 use function Safe\preg_match;
+use function Safe\preg_replace;
 use function str_replace;
 use function trim;
 use function ucfirst;
@@ -34,13 +34,16 @@ class DefaultNamingStrategy implements NamingStrategy
 
     public function getInterfaceFQCN(string $apiNameSpace, string $operationId) : string
     {
-        return $this->buildNamespace(
+        /** @psalm-var class-string<\OnMoon\OpenApiServerBundle\Interfaces\Service> $interfaceNamespace */
+        $interfaceNamespace = $this->buildNamespace(
             $this->rootNamespace,
             GenerateApiCodeCommand::APIS_NAMESPACE,
             $apiNameSpace,
             $this->stringToNamespace($operationId),
             $this->stringToNamespace($operationId) . GenerateApiCodeCommand::SERVICE_SUFFIX,
         );
+
+        return $interfaceNamespace;
     }
 
     public function stringToNamespace(string $text) : string
@@ -79,9 +82,10 @@ class DefaultNamingStrategy implements NamingStrategy
 
     private function prepareTextForPhp(string $text) : string
     {
-        return str_replace(' ', '', ucwords(
-            preg_replace('/[^\w]/', ' ', $text)
-        ));
+        /** @var string $filteredText */
+        $filteredText = preg_replace('/[^\w]/', ' ', $text);
+
+        return str_replace(' ', '', ucwords($filteredText));
     }
 
     public function isPhpReservedWord(string $text) : bool

@@ -18,10 +18,7 @@ class CompilerPass implements CompilerPassInterface
         $this->tag = $tag;
     }
 
-    /**
-     * @inheritDoc
-     */
-    public function process(ContainerBuilder $container)
+    public function process(ContainerBuilder $container) : void
     {
         if (! $container->has(ApiController::class)) {
             return;
@@ -29,10 +26,12 @@ class CompilerPass implements CompilerPassInterface
 
         $definition = $container->findDefinition(ApiController::class);
 
+        /** @psalm-var array<string, array> $taggedServices */
         $taggedServices = $container->findTaggedServiceIds($this->tag);
 
         foreach ($taggedServices as $id => $tags) {
             $definition->addMethodCall('setApiLoader', [new Reference($id)]);
+
             break;
         }
     }

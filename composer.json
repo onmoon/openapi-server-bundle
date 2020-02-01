@@ -43,7 +43,8 @@
     },
     "require-dev": {
         "doctrine/coding-standard": "^7.0",
-        "squizlabs/php_codesniffer": "^3.5"
+        "squizlabs/php_codesniffer": "^3.5",
+        "vimeo/psalm": "^3.8"
     },
     "minimum-stability": "stable",
     "config": {
@@ -60,6 +61,7 @@
     "scripts": {
         "cs": "phpcs",
         "csfix": "phpcbf",
-        "all": "composer cs"
+        "psalm": "psalm --show-info=false",
+        "all": "composer psalm && composer cs"
     }
 }

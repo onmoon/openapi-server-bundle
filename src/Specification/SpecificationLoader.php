@@ -11,6 +11,7 @@ use Symfony\Component\Config\FileLocatorInterface;
 use function array_keys;
 use function file_exists;
 use function implode;
+use function is_string;
 use function pathinfo;
 use function sprintf;
 use function stream_is_local;
@@ -18,7 +19,10 @@ use const PATHINFO_EXTENSION;
 
 class SpecificationLoader
 {
-    /** @var Specification[] */
+    /**
+     * @var Specification[]
+     * @psalm-var array<string, Specification>
+     */
     private array $specs = [];
     private FileLocatorInterface $locator;
 
@@ -42,6 +46,8 @@ class SpecificationLoader
 
     /**
      * @return Specification[]
+     *
+     * @psalm-return array<string, Specification>
      */
     public function list() : array
     {
@@ -60,9 +66,12 @@ class SpecificationLoader
 
     public function load(string $name) : OpenApi
     {
-        $spec = $this->get($name);
-
+        $spec     = $this->get($name);
         $specPath = $this->locator->locate($spec->getPath());
+
+        if (! is_string($specPath)) {
+            throw new Exception(sprintf('More than one file path found for specification "%s".', $spec->getPath()));
+        }
 
         if (! stream_is_local($specPath)) {
             throw new Exception(sprintf('This is not a local file "%s".', $specPath));
@@ -79,18 +88,31 @@ class SpecificationLoader
         }
 
         if ($type === 'yaml') {
-            $openApi = Reader::readFromYamlFile($specPath);
-        } elseif ($type === 'json') {
-            $openApi = Reader::readFromJsonFile($specPath);
-        } else {
-            throw new Exception('Failed to determine spec type for "' . $specPath . '". ' .
-                'Try specifying "type" parameter in bundle config with either "yaml" or "json" value');
+            /**
+             * phpcs:disable SlevomatCodingStandard.PHP.RequireExplicitAssertion.RequiredExplicitAssertion
+             * @var OpenApi $specification
+             */
+            $specification = Reader::readFromYamlFile($specPath);
+
+            return $specification;
         }
 
-        if ($openApi === null) {
-            throw new Exception(sprintf('File "%s" is could not be loaded.', $specPath));
+        if ($type === 'json') {
+            /**
+             * phpcs:disable SlevomatCodingStandard.PHP.RequireExplicitAssertion.RequiredExplicitAssertion
+             * @var OpenApi $specification
+             */
+            $specification = Reader::readFromJsonFile($specPath);
+
+            return $specification;
         }
 
-        return $openApi;
+        throw new Exception(
+            sprintf(
+                'Failed to determine spec type for "%s".
+                Try specifying "type" parameter in bundle config with either "yaml" or "json" value',
+                $specPath
+            )
+        );
     }
 }

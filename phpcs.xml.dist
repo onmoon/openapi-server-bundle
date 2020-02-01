@@ -10,7 +10,9 @@
     <arg name="extensions" value="php"/>
     <arg value="nps"/>
 
-    <rule ref="Doctrine" />
+    <rule ref="Doctrine">
+        <exclude name="SlevomatCodingStandard.PHP.RequireExplicitAssertion.RequiredExplicitAssertion" />
+    </rule>
 
     <file>src/</file>
 

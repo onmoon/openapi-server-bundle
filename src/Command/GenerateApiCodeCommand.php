@@ -4,7 +4,10 @@ declare(strict_types=1);
 
 namespace OnMoon\OpenApiServerBundle\Command;
 
+use cebe\openapi\spec\MediaType;
 use cebe\openapi\spec\Parameter;
+use cebe\openapi\spec\Reference;
+use cebe\openapi\spec\RequestBody;
 use cebe\openapi\spec\Schema;
 use cebe\openapi\spec\Type;
 use OnMoon\OpenApiServerBundle\CodeGenerator\Dto\DtoFactory;
@@ -24,6 +27,7 @@ use function array_filter;
 use function array_key_exists;
 use function array_merge;
 use function count;
+use function is_array;
 
 class GenerateApiCodeCommand extends Command
 {
@@ -91,16 +95,18 @@ class GenerateApiCodeCommand extends Command
         foreach ($this->loader->list() as $specificationName => $specification) {
             $parsedSpecification = $this->loader->load($specificationName);
 
-            if ($parsedSpecification->paths === null) {
-                continue;
-            }
-
             $apiName       = $specification->getNameSpace();
             $specMediaType = $specification->getMediaType();
             $apiNamespace  = $this->namingStrategy->buildNamespace($this->rootNamespace, self::APIS_NAMESPACE, $apiName);
             $apiPath       = $this->namingStrategy->buildPath($this->rootPath, self::APIS_NAMESPACE, $apiName);
 
+            /**
+             * @var string $url
+             */
             foreach ($parsedSpecification->paths as $url => $pathItem) {
+                /**
+                 * @var string $method
+                 */
                 foreach ($pathItem->getOperations() as $method => $operation) {
                     $operationId = $operation->operationId;
                     $summary     = $operation->summary;
@@ -109,7 +115,7 @@ class GenerateApiCodeCommand extends Command
                     $operationNamespace = $this->namingStrategy->buildNamespace($apiNamespace, $operationName);
                     $operationPath      = $this->namingStrategy->buildPath($apiPath, $operationName);
 
-                    if ($operationId === null) {
+                    if ($operationId === '') {
                         throw CannotGenerateCodeForOperation::becauseNoOperationIdSpecified(
                             $url,
                             $method,
@@ -127,8 +133,7 @@ class GenerateApiCodeCommand extends Command
                     $requestBody = $operation->requestBody;
                     $responses   = $operation->responses;
 
-                    if ($requestBody !== null &&
-                        $requestBody->content !== null &&
+                    if ($requestBody instanceof RequestBody &&
                         array_key_exists($specMediaType, $requestBody->content)
                     ) {
                         $mediaType = $requestBody->content[$specMediaType];
@@ -169,11 +174,11 @@ class GenerateApiCodeCommand extends Command
                         }
                     }
 
-                    if ($responses !== null &&
-                        $responses[200] !== null &&
-                        $responses[200]->content !== null &&
+                    if (is_array($responses) &&
+                        array_key_exists(200, $responses) &&
                         array_key_exists($specMediaType, $responses[200]->content)
                     ) {
+                        /** @var MediaType $mediaType */
                         $mediaType = $responses[200]->content[$specMediaType];
 
                         if ($mediaType->schema instanceof Schema) {
@@ -301,13 +306,19 @@ class GenerateApiCodeCommand extends Command
     }
 
     /**
-     * @param Parameter[] $parameters
+     * @param Parameter[]|Reference[] $parameters
      *
      * @return Parameter[]
      */
     private function filterAllowedParameters(array $parameters, string $in) : array
     {
-        return array_filter($parameters, static fn (Parameter $parameter) : bool => $parameter->in === $in);
+        /** @var Parameter[] $parameters */
+        $parameters = array_filter(
+            $parameters,
+            static fn ($parameter) : bool =>$parameter instanceof Parameter && $parameter->in === $in
+        );
+
+        return $parameters;
     }
 
     /**

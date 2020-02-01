@@ -11,8 +11,8 @@ use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Extension\Extension;
 use Symfony\Component\DependencyInjection\Extension\ExtensionInterface;
 use Symfony\Component\DependencyInjection\Loader\XmlFileLoader;
-use function preg_replace;
 use function Safe\preg_match;
+use function Safe\preg_replace;
 use function str_replace;
 
 class OpenApiServerExtension extends Extension implements ExtensionInterface
@@ -26,7 +26,21 @@ class OpenApiServerExtension extends Extension implements ExtensionInterface
         $loader->load('services.xml');
 
         $configuration = new Configuration();
-        $config        = $this->processConfiguration($configuration, $configs);
+        /**
+         * @psalm-var array{
+         *     root_path?:string,
+         *     root_name_space:string,
+         *     language_level:string,
+         *     generated_dir_permissions: string,
+         *     specs: array{
+         *         path: string,
+         *         type?: string,
+         *         name_space: string,
+         *         media_type: string
+         *     }
+         * } $config
+         */
+        $config = $this->processConfiguration($configuration, $configs);
 
         $rootNameSpace = $config['root_name_space'];
 

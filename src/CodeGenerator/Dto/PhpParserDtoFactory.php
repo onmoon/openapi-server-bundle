@@ -5,12 +5,14 @@ declare(strict_types=1);
 namespace OnMoon\OpenApiServerBundle\CodeGenerator\Dto;
 
 use cebe\openapi\spec\Parameter;
+use cebe\openapi\spec\Reference;
 use cebe\openapi\spec\Schema;
 use cebe\openapi\spec\Type;
 use Exception;
 use OnMoon\OpenApiServerBundle\CodeGenerator\GeneratedClass;
 use OnMoon\OpenApiServerBundle\CodeGenerator\Naming\CannotCreatePropertyName;
 use OnMoon\OpenApiServerBundle\CodeGenerator\Naming\NamingStrategy;
+use OnMoon\OpenApiServerBundle\Interfaces\Dto;
 use OnMoon\OpenApiServerBundle\OpenApi\ScalarTypesResolver;
 use PhpParser\Builder\Method;
 use PhpParser\Builder\Param;
@@ -29,6 +31,7 @@ use function count;
 use function implode;
 use function in_array;
 use function is_array;
+use function ltrim;
 use function rtrim;
 use function sprintf;
 use function trim;
@@ -71,6 +74,7 @@ final class PhpParserDtoFactory implements DtoFactory
         $classBuilder = $this
             ->factory
             ->class($className)
+            ->implement('Dto')
             ->makeFinal()
             ->setDocComment('/**
                               * This class was automatically generated
@@ -90,6 +94,10 @@ final class PhpParserDtoFactory implements DtoFactory
             $iterableType = null;
             $required     = $parameter->required;
 
+            if (! $parameter->schema instanceof Schema) {
+                continue;
+            }
+
             if (Type::isScalar($parameter->schema->type)) {
                 $typeId = $this->typeResolver->findScalarType($parameter->schema);
                 $type   = $this->typeResolver->getPhpType($typeId);
@@ -104,25 +112,32 @@ final class PhpParserDtoFactory implements DtoFactory
 
                         break;
                     case Type::ARRAY:
-                        $type         = 'array';
-                        $iterableType = $parameter->schema->items instanceof Schema ?
-                            $parameter->schema->items->type :
-                            null;
+                        $type = 'array';
+
+                        if (! ($parameter->schema->items instanceof Schema)) {
+                            $iterableType = null;
+
+                            break;
+                        }
+
+                        $iterableType = $parameter->schema->items->type;
 
                         if ($iterableType === Type::OBJECT) {
                             throw new Exception('\'object\' type is not supported in query and path parameters');
                         }
 
-                        $iterableType = $iterableType ?
-                            $this->typeResolver->getPhpType(
-                                $this->typeResolver->findScalarType($parameter->schema->items)
-                            ) :
-                            null;
+                        $iterableType = $this->typeResolver->getPhpType(
+                            $this->typeResolver->findScalarType($parameter->schema->items)
+                        );
 
                         break;
                     default:
                         break;
                 }
+            }
+
+            if ($type === null) {
+                throw new Exception('Could not determine property type');
             }
 
             $classBuilder
@@ -145,7 +160,10 @@ final class PhpParserDtoFactory implements DtoFactory
                 );
         }
 
-        $fileBuilder = $this->factory->namespace($namespace);
+        $fileBuilder = $this
+            ->factory
+            ->namespace($namespace)
+            ->addStmt($this->factory->use(Dto::class));
 
         $fileBuilder = $fileBuilder->addStmt($classBuilder);
 
@@ -177,6 +195,7 @@ final class PhpParserDtoFactory implements DtoFactory
         $classBuilder = $this
             ->factory
             ->class($className)
+            ->implement('Dto')
             ->makeFinal()
             ->setDocComment('/**
                               * This class was automatically generated
@@ -188,8 +207,11 @@ final class PhpParserDtoFactory implements DtoFactory
         $getterBuilders      = [];
         $setterBuilders      = [];
         $constructorDocBlock = [];
-        $imports             = [];
+        $imports             = [Dto::class];
 
+        /**
+         * @var string $propertyName
+         */
         foreach ($schema->properties as $propertyName => $property) {
             if (! $this->namingStrategy->isAllowedPhpPropertyName($propertyName)) {
                 throw CannotCreatePropertyName::becauseIsNotValidPhpPropertyName($propertyName);
@@ -201,7 +223,14 @@ final class PhpParserDtoFactory implements DtoFactory
 
             $type         = null;
             $iterableType = null;
-            $required     = is_array($schema->required) && in_array($propertyName, $schema->required);
+            /**
+             * @psalm-suppress RedundantConditionGivenDocblockType
+             */
+            $required = is_array($schema->required) && in_array($propertyName, $schema->required);
+
+            if ($property instanceof Reference) {
+                throw new Exception('Cannot work with References');
+            }
 
             if (Type::isScalar($property->type)) {
                 $typeId = $this->typeResolver->findScalarType($property);
@@ -228,10 +257,15 @@ final class PhpParserDtoFactory implements DtoFactory
 
                         break;
                     case Type::ARRAY:
-                        $type         = 'array';
-                        $iterableType = $property->items instanceof Schema ?
-                            $property->items->type :
-                            null;
+                        $type = 'array';
+
+                        if (! ($property->items instanceof Schema)) {
+                            $iterableType = null;
+
+                            break;
+                        }
+
+                        $iterableType = $property->items->type;
 
                         if ($iterableType === Type::OBJECT) {
                             $generatedClassGraph = $this->generatePropertyDto(
@@ -314,7 +348,7 @@ final class PhpParserDtoFactory implements DtoFactory
         $fileBuilder = $this->factory->namespace($namespace);
 
         foreach ($imports as $import) {
-            $fileBuilder->addStmt($this->factory->use($import));
+            $fileBuilder->addStmt($this->factory->use(ltrim($import, '\\')));
         }
 
         $fileBuilder = $fileBuilder->addStmt($classBuilder);
@@ -353,19 +387,8 @@ final class PhpParserDtoFactory implements DtoFactory
             $dtoFileName  = self::DUPLICATE_NAME_CLASS_PREFIX . $dtoFileName;
         }
 
-        /*if ($dtoClassName === $parentClassName) {
-            $import = sprintf(
-                '\\%s\\%s as %s%s',
-                $dtoNamespace,
-                $dtoClassName,
-                self::DUPLICATE_NAME_CLASS_PREFIX,
-                $dtoClassName
-            );
-            $type = self::DUPLICATE_NAME_CLASS_PREFIX . $dtoClassName;
-        } else {*/
-            $import = '\\' . $dtoNamespace . '\\' . $dtoClassName;
-            $type   = $dtoClassName;
-        /*}*/
+        $import = '\\' . $dtoNamespace . '\\' . $dtoClassName;
+        $type   = $dtoClassName;
 
         return new GeneratedPropertyDtoClassGraph(
             $import,
@@ -383,6 +406,8 @@ final class PhpParserDtoFactory implements DtoFactory
 
     /**
      * @param string[] $lines
+     *
+     * @psalm-param list<string> $lines
      */
     private function getConstructorDocBlock(array $lines) : string
     {
