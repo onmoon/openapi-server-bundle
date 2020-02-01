@@ -31,7 +31,7 @@ class CompilerPass implements CompilerPassInterface
 
         $taggedServices = $container->findTaggedServiceIds($this->tag);
 
-        foreach ($taggedServices as $id=>$tags) {
+        foreach ($taggedServices as $id => $tags) {
             $definition->addMethodCall('setApiLoader', [new Reference($id)]);
             break;
         }

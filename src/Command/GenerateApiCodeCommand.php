@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace OnMoon\OpenApiServerBundle\Command;
 
-use cebe\openapi\spec\OpenApi;
 use cebe\openapi\spec\Parameter;
 use cebe\openapi\spec\Schema;
 use cebe\openapi\spec\Type;
@@ -16,8 +15,6 @@ use OnMoon\OpenApiServerBundle\CodeGenerator\Naming\NamingStrategy;
 use OnMoon\OpenApiServerBundle\CodeGenerator\ServiceInterface\ServiceInterfaceFactory;
 use OnMoon\OpenApiServerBundle\CodeGenerator\ServiceSubscriber\ServiceSubscriberFactory;
 use OnMoon\OpenApiServerBundle\Exception\CannotGenerateCodeForOperation;
-use OnMoon\OpenApiServerBundle\Router\RouteLoader;
-use OnMoon\OpenApiServerBundle\Specification\Specification;
 use OnMoon\OpenApiServerBundle\Specification\SpecificationLoader;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
@@ -26,6 +23,7 @@ use Symfony\Component\Routing\RouterInterface;
 use function array_filter;
 use function array_key_exists;
 use function array_merge;
+use function count;
 
 class GenerateApiCodeCommand extends Command
 {
@@ -50,19 +48,6 @@ class GenerateApiCodeCommand extends Command
     private string $rootNamespace;
     private string $rootPath;
 
-    /**
-     * @param NamingStrategy $namingStrategy
-     * @param RootDtoFactory $rootDtoFactory
-     * @param DtoFactory $dtoFactory
-     * @param ServiceInterfaceFactory $serviceInterfaceFactory
-     * @param ServiceSubscriberFactory $serviceSubscriberFactory
-     * @param FileWriter $fileWriter
-     * @param RouterInterface $router
-     * @param SpecificationLoader $loader
-     * @param string $rootNamespace
-     * @param string $rootPath
-     * @param string|null $name
-     */
     public function __construct(
         NamingStrategy $namingStrategy,
         RootDtoFactory $rootDtoFactory,
@@ -90,7 +75,10 @@ class GenerateApiCodeCommand extends Command
         parent::__construct($name);
     }
 
-    /** @var string */
+    /**
+     * phpcs:disable SlevomatCodingStandard.TypeHints.PropertyTypeHint.MissingNativeTypeHint
+     * @var string
+     */
     protected static $defaultName = 'open-api:generate-code';
 
     protected function execute(InputInterface $input, OutputInterface $output) : ?int
@@ -100,17 +88,17 @@ class GenerateApiCodeCommand extends Command
         /** @var GeneratedClass[] $serviceInterfaces */
         $serviceInterfaces = [];
 
-        foreach ($this->loader->list() as $specificationName=>$specification) {
+        foreach ($this->loader->list() as $specificationName => $specification) {
             $parsedSpecification = $this->loader->load($specificationName);
 
             if ($parsedSpecification->paths === null) {
                 continue;
             }
 
-            $apiName      = $specification->getNameSpace();
-            $specMediaType    = $specification->getMediaType();
-            $apiNamespace = $this->namingStrategy->buildNamespace($this->rootNamespace, self::APIS_NAMESPACE, $apiName);
-            $apiPath      = $this->namingStrategy->buildPath($this->rootPath, self::APIS_NAMESPACE, $apiName);
+            $apiName       = $specification->getNameSpace();
+            $specMediaType = $specification->getMediaType();
+            $apiNamespace  = $this->namingStrategy->buildNamespace($this->rootNamespace, self::APIS_NAMESPACE, $apiName);
+            $apiPath       = $this->namingStrategy->buildPath($this->rootPath, self::APIS_NAMESPACE, $apiName);
 
             foreach ($parsedSpecification->paths as $url => $pathItem) {
                 foreach ($pathItem->getOperations() as $method => $operation) {
@@ -157,7 +145,9 @@ class GenerateApiCodeCommand extends Command
                                 $operationName . self::REQUEST_BODY_SUFFIX . self::DTO_SUFFIX
                             );
                             $dtoPath      = $this->namingStrategy->buildPath(
-                                $operationPath, self::DTO_NAMESPACE, self::REQUEST_SUFFIX
+                                $operationPath,
+                                self::DTO_NAMESPACE,
+                                self::REQUEST_SUFFIX
                             );
                             $dtoFileName  = $dtoClassName . '.php';
 
@@ -198,7 +188,9 @@ class GenerateApiCodeCommand extends Command
                                 $operationName . self::RESPONSE_SUFFIX . self::DTO_SUFFIX
                             );
                             $dtoPath      = $this->namingStrategy->buildPath(
-                                $operationPath, self::DTO_NAMESPACE, self::RESPONSE_SUFFIX
+                                $operationPath,
+                                self::DTO_NAMESPACE,
+                                self::RESPONSE_SUFFIX
                             );
                             $dtoFileName  = $dtoClassName . '.php';
 
@@ -224,8 +216,7 @@ class GenerateApiCodeCommand extends Command
 
                     $parameters = array_merge($pathItem->parameters, $operation->parameters);
 
-                    if(count($parameters) or !is_null($inputDtoClassName)) {
-
+                    if (count($parameters) || $inputDtoClassName !== null) {
                         $dtoNamespace = $this->namingStrategy->buildNamespace(
                             $operationNamespace,
                             self::DTO_NAMESPACE,
@@ -234,10 +225,12 @@ class GenerateApiCodeCommand extends Command
                         $dtoClassName = $this->namingStrategy->stringToNamespace(
                             $operationName . self::REQUEST_SUFFIX . self::DTO_SUFFIX
                         );
-                        $dtoPath = $this->namingStrategy->buildPath(
-                            $operationPath, self::DTO_NAMESPACE, self::REQUEST_SUFFIX
+                        $dtoPath      = $this->namingStrategy->buildPath(
+                            $operationPath,
+                            self::DTO_NAMESPACE,
+                            self::REQUEST_SUFFIX
                         );
-                        $dtoFileName = $dtoClassName . '.php';
+                        $dtoFileName  = $dtoClassName . '.php';
 
                         $rootDtoNamespace = $dtoNamespace;
                         $rootDtoClassName = $dtoClassName;
@@ -255,7 +248,6 @@ class GenerateApiCodeCommand extends Command
                                 $this->filterAllowedParameters($parameters, 'query')
                             )
                         );
-
                     }
 
                     // Service interface generation
@@ -310,14 +302,17 @@ class GenerateApiCodeCommand extends Command
 
     /**
      * @param Parameter[] $parameters
-     * @param string $in
+     *
      * @return Parameter[]
      */
     private function filterAllowedParameters(array $parameters, string $in) : array
     {
-        return array_filter($parameters, fn (Parameter $parameter) : bool => $parameter->in === $in);
+        return array_filter($parameters, static fn (Parameter $parameter) : bool => $parameter->in === $in);
     }
 
+    /**
+     * @return GeneratedClass[]
+     */
     private function generateDtoGraph(
         Schema $schema,
         string $dtoPath,
@@ -330,7 +325,6 @@ class GenerateApiCodeCommand extends Command
             return [];
         }
 
-        /** @var GeneratedClass[] $filesToGenerate */
         return $this->dtoFactory->generateDtoClassGraph(
             $dtoPath,
             $dtoFileName,
@@ -340,5 +334,4 @@ class GenerateApiCodeCommand extends Command
             $schema
         );
     }
-
 }

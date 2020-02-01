@@ -29,7 +29,9 @@ use function count;
 use function implode;
 use function in_array;
 use function is_array;
+use function rtrim;
 use function sprintf;
+use function trim;
 use function ucfirst;
 use function version_compare;
 use const PHP_EOL;
@@ -53,7 +55,7 @@ final class PhpParserDtoFactory implements DtoFactory
         $this->factory        = $builderFactory;
         $this->namingStrategy = $namingStrategy;
         $this->languageLevel  = $languageLevel;
-        $this->typeResolver = $typeResolver;
+        $this->typeResolver   = $typeResolver;
     }
 
     /**
@@ -65,7 +67,7 @@ final class PhpParserDtoFactory implements DtoFactory
         string $namespace,
         string $className,
         array $parameters
-    ): GeneratedClass {
+    ) : GeneratedClass {
         $classBuilder = $this
             ->factory
             ->class($className)
@@ -88,19 +90,21 @@ final class PhpParserDtoFactory implements DtoFactory
             $iterableType = null;
             $required     = $parameter->required;
 
-            if(Type::isScalar($parameter->schema->type)) {
+            if (Type::isScalar($parameter->schema->type)) {
                 $typeId = $this->typeResolver->findScalarType($parameter->schema);
-                $type = $this->typeResolver->getPhpType($typeId);
+                $type   = $this->typeResolver->getPhpType($typeId);
             } else {
                 switch ($parameter->schema->type) {
-                    case Type::ANY;
+                    case Type::ANY:
                         throw new Exception('\'any\' type is not supported in query and path parameters');
+
                         break;
                     case Type::OBJECT:
                         throw new Exception('\'object\' type is not supported in query and path parameters');
+
                         break;
                     case Type::ARRAY:
-                        $type = 'array';
+                        $type         = 'array';
                         $iterableType = $parameter->schema->items instanceof Schema ?
                             $parameter->schema->items->type :
                             null;
@@ -116,7 +120,8 @@ final class PhpParserDtoFactory implements DtoFactory
                             null;
 
                         break;
-                    default;
+                    default:
+                        break;
                 }
             }
 
@@ -151,7 +156,7 @@ final class PhpParserDtoFactory implements DtoFactory
             $className,
             (new Standard())->prettyPrintFile([
                 new Declare_([new DeclareDeclare('strict_types', new LNumber(1))]),
-                $fileBuilder->getNode()
+                $fileBuilder->getNode(),
             ])
         );
     }
@@ -178,12 +183,12 @@ final class PhpParserDtoFactory implements DtoFactory
                               * You should not change it manually as it will be overwritten
                               */');
 
-        $constructorBuilder    = $this->factory->method('__construct')->makePublic();
-        $constructorRequired   = false;
-        $getterBuilders        = [];
-        $setterBuilders        = [];
-        $constructorDocBlock   = [];
-        $imports               = [];
+        $constructorBuilder  = $this->factory->method('__construct')->makePublic();
+        $constructorRequired = false;
+        $getterBuilders      = [];
+        $setterBuilders      = [];
+        $constructorDocBlock = [];
+        $imports             = [];
 
         foreach ($schema->properties as $propertyName => $property) {
             if (! $this->namingStrategy->isAllowedPhpPropertyName($propertyName)) {
@@ -198,13 +203,14 @@ final class PhpParserDtoFactory implements DtoFactory
             $iterableType = null;
             $required     = is_array($schema->required) && in_array($propertyName, $schema->required);
 
-            if(Type::isScalar($property->type)) {
+            if (Type::isScalar($property->type)) {
                 $typeId = $this->typeResolver->findScalarType($property);
-                $type = $this->typeResolver->getPhpType($typeId);
+                $type   = $this->typeResolver->getPhpType($typeId);
             } else {
                 switch ($property->type) {
-                    case Type::ANY;
+                    case Type::ANY:
                         throw new Exception('\'any\' type is not supported');
+
                         break;
                     case Type::OBJECT:
                         $generatedClassGraph = $this->generatePropertyDto(
@@ -217,12 +223,12 @@ final class PhpParserDtoFactory implements DtoFactory
                         );
 
                         $generatedClasses = array_merge($generatedClasses, $generatedClassGraph->getClassGraph());
-                        $imports[] = $generatedClassGraph->getImport();
-                        $type = $generatedClassGraph->getType();
+                        $imports[]        = $generatedClassGraph->getImport();
+                        $type             = $generatedClassGraph->getType();
 
                         break;
                     case Type::ARRAY:
-                        $type = 'array';
+                        $type         = 'array';
                         $iterableType = $property->items instanceof Schema ?
                             $property->items->type :
                             null;
@@ -238,8 +244,8 @@ final class PhpParserDtoFactory implements DtoFactory
                             );
 
                             $generatedClasses = array_merge($generatedClasses, $generatedClassGraph->getClassGraph());
-                            $imports[] = $generatedClassGraph->getImport();
-                            $iterableType = $generatedClassGraph->getType();
+                            $imports[]        = $generatedClassGraph->getImport();
+                            $iterableType     = $generatedClassGraph->getType();
                         } else {
                             $iterableType = $iterableType ?
                                 $this->typeResolver->getPhpType(
@@ -249,7 +255,8 @@ final class PhpParserDtoFactory implements DtoFactory
                         }
 
                         break;
-                    default;
+                    default:
+                        break;
                 }
             }
 
@@ -299,6 +306,7 @@ final class PhpParserDtoFactory implements DtoFactory
         foreach ($getterBuilders as $getterBuilder) {
             $classBuilder->addStmt($getterBuilder);
         }
+
         foreach ($setterBuilders as $setterBuilder) {
             $classBuilder->addStmt($setterBuilder);
         }
@@ -318,7 +326,7 @@ final class PhpParserDtoFactory implements DtoFactory
             $className,
             (new Standard())->prettyPrintFile([
                 new Declare_([new DeclareDeclare('strict_types', new LNumber(1))]),
-                $fileBuilder->getNode()
+                $fileBuilder->getNode(),
             ])
         );
 
@@ -356,7 +364,7 @@ final class PhpParserDtoFactory implements DtoFactory
             $type = self::DUPLICATE_NAME_CLASS_PREFIX . $dtoClassName;
         } else {*/
             $import = '\\' . $dtoNamespace . '\\' . $dtoClassName;
-            $type = $dtoClassName;
+            $type   = $dtoClassName;
         /*}*/
 
         return new GeneratedPropertyDtoClassGraph(
@@ -429,10 +437,10 @@ final class PhpParserDtoFactory implements DtoFactory
                     [
                         '/**',
                         ...array_map(
-                            fn (string $docCommentLine) : string => ' *' . rtrim($docCommentLine),
+                            static fn (string $docCommentLine) : string => ' *' . rtrim($docCommentLine),
                             $docCommentLines
                         ),
-                        ' */'
+                        ' */',
                     ]
                 )
             );

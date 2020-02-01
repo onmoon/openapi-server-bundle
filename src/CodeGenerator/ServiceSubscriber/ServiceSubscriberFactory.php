@@ -10,7 +10,6 @@ interface ServiceSubscriberFactory
 {
     /**
      * @param GeneratedClass[] $serviceInterfaces
-     * @return GeneratedClass
      */
     public function generateServiceSubscriber(
         string $fileDirectoryPath,

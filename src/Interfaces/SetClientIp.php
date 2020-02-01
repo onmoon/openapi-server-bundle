@@ -6,5 +6,5 @@ namespace OnMoon\OpenApiServerBundle\Interfaces;
 
 interface SetClientIp
 {
-    public function setClientIp(string $ip);
+    public function setClientIp(string $ip) : void;
 }

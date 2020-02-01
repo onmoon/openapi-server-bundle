@@ -24,9 +24,9 @@ final class PhpParserServiceInterfaceFactory implements ServiceInterfaceFactory
         NamingStrategy $namingStrategy,
         string $languageLevel
     ) {
-        $this->factory = $builderFactory;
+        $this->factory        = $builderFactory;
         $this->namingStrategy = $namingStrategy;
-        $this->languageLevel = $languageLevel;
+        $this->languageLevel  = $languageLevel;
     }
 
     public function generateServiceInterface(
@@ -87,7 +87,7 @@ final class PhpParserServiceInterfaceFactory implements ServiceInterfaceFactory
             $className,
             (new Standard())->prettyPrintFile([
                 new Declare_([new DeclareDeclare('strict_types', new LNumber(1))]),
-                $fileBuilder->getNode()
+                $fileBuilder->getNode(),
             ])
         );
     }

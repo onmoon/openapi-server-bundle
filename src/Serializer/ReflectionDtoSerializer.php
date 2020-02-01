@@ -9,6 +9,7 @@ use ReflectionNamedType;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Route;
 use Symfony\Component\Serializer\SerializerInterface;
+use function assert;
 use function count;
 
 class ReflectionDtoSerializer implements DtoSerializer
@@ -47,15 +48,15 @@ class ReflectionDtoSerializer implements DtoSerializer
         return $this->serializer->serialize($dto, 'json');
     }
 
-    private function setRequestQueryParameters(object $inputDto, ReflectionClass $inputDtoRefl, Request $request)
+    private function setRequestQueryParameters(object $inputDto, ReflectionClass $inputDtoRefl, Request $request) : void
     {
         if (! $inputDtoRefl->hasProperty('queryParameters')) {
             return;
         }
 
-        $dtoQueryParametersProperty = $inputDtoRefl->getProperty('queryParameters');
-        /** @var ReflectionNamedType $dtoQueryParametersPropertyType */
-        $dtoQueryParametersPropertyType     = $dtoQueryParametersProperty->getType();
+        $dtoQueryParametersProperty     = $inputDtoRefl->getProperty('queryParameters');
+        $dtoQueryParametersPropertyType = $dtoQueryParametersProperty->getType();
+        assert($dtoQueryParametersPropertyType instanceof ReflectionNamedType);
         $dtoQueryParametersPropertyTypeFQCN = $dtoQueryParametersPropertyType->getName();
 
         $queryParametersDto                = new $dtoQueryParametersPropertyTypeFQCN();
@@ -78,9 +79,9 @@ class ReflectionDtoSerializer implements DtoSerializer
             return;
         }
 
-        $dtoPathParametersProperty = $inputDtoRefl->getProperty('pathParameters');
-        /** @var ReflectionNamedType $dtoPathParametersPropertyType */
-        $dtoPathParametersPropertyType     = $dtoPathParametersProperty->getType();
+        $dtoPathParametersProperty     = $inputDtoRefl->getProperty('pathParameters');
+        $dtoPathParametersPropertyType = $dtoPathParametersProperty->getType();
+        assert($dtoPathParametersPropertyType instanceof ReflectionNamedType);
         $dtoPathParametersPropertyTypeFQCN = $dtoPathParametersPropertyType->getName();
 
         $pathParametersDto                = new $dtoPathParametersPropertyTypeFQCN();
@@ -103,9 +104,9 @@ class ReflectionDtoSerializer implements DtoSerializer
             return;
         }
 
-        $dtoBodyProperty = $inputDtoRefl->getProperty('body');
-        /** @var ReflectionNamedType $dtoBodyPropertyType */
-        $dtoBodyPropertyType     = $dtoBodyProperty->getType();
+        $dtoBodyProperty     = $inputDtoRefl->getProperty('body');
+        $dtoBodyPropertyType = $dtoBodyProperty->getType();
+        assert($dtoBodyPropertyType instanceof ReflectionNamedType);
         $dtoBodyPropertyTypeFQCN = $dtoBodyPropertyType->getName();
 
         $dtoBodyProperty->setAccessible(true);
@@ -121,16 +122,16 @@ class ReflectionDtoSerializer implements DtoSerializer
 
     private function getInputDtoFQCN(string $serviceInterface, string $methodName) : ?string
     {
-        $interfaceReflectionClass  = new ReflectionClass($serviceInterface);
-        $method                    = $interfaceReflectionClass->getMethod($methodName);
-        $methodParameters          = $method->getParameters();
+        $interfaceReflectionClass = new ReflectionClass($serviceInterface);
+        $method                   = $interfaceReflectionClass->getMethod($methodName);
+        $methodParameters         = $method->getParameters();
 
         if (count($methodParameters) === 0) {
             return null;
         }
 
-        /** @var ReflectionNamedType $inputType */
         $inputType = $methodParameters[0]->getType();
+        assert($inputType instanceof ReflectionNamedType);
 
         return $inputType->getName();
     }

@@ -25,6 +25,7 @@ use PhpParser\Node\Stmt\DeclareDeclare;
 use PhpParser\Node\Stmt\If_;
 use PhpParser\Node\Stmt\Return_;
 use PhpParser\PrettyPrinter\Standard;
+use function array_map;
 use function array_merge;
 
 final class PhpParserServiceSubscriberFactory implements ServiceSubscriberFactory
@@ -34,7 +35,7 @@ final class PhpParserServiceSubscriberFactory implements ServiceSubscriberFactor
 
     public function __construct(BuilderFactory $builderFactory, NamingStrategy $namingStrategy)
     {
-        $this->factory = $builderFactory;
+        $this->factory        = $builderFactory;
         $this->namingStrategy = $namingStrategy;
     }
 
@@ -102,7 +103,7 @@ final class PhpParserServiceSubscriberFactory implements ServiceSubscriberFactor
                             new Return_(
                                 new Array_(
                                     array_map(
-                                        fn (GeneratedClass $generatedClass) : ArrayItem =>
+                                        static fn (GeneratedClass $generatedClass) : ArrayItem =>
                                             new ArrayItem(
                                                 new Concat(
                                                     new String_('?'),
@@ -131,7 +132,7 @@ final class PhpParserServiceSubscriberFactory implements ServiceSubscriberFactor
                                 [
                                     new Arg(
                                         new Variable('interface')
-                                    )
+                                    ),
                                 ]
                             )), ['stmts' => [new Return_($this->factory->val(null))]])
                         )
@@ -143,11 +144,11 @@ final class PhpParserServiceSubscriberFactory implements ServiceSubscriberFactor
                                     [
                                         new Arg(
                                             new Variable('interface')
-                                        )
+                                        ),
                                     ]
                                 )
                             )
-                        )
+                        ),
                 ]
             );
 
@@ -160,7 +161,7 @@ final class PhpParserServiceSubscriberFactory implements ServiceSubscriberFactor
             $className,
             (new Standard())->prettyPrintFile([
                 new Declare_([new DeclareDeclare('strict_types', new LNumber(1))]),
-                $fileBuilder->getNode()
+                $fileBuilder->getNode(),
             ])
         );
     }

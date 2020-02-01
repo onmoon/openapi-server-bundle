@@ -27,7 +27,7 @@ class DefaultNamingStrategy implements NamingStrategy
         $this->rootNamespace = $rootNamespace;
     }
 
-    public function isAllowedPhpPropertyName(string $name): bool
+    public function isAllowedPhpPropertyName(string $name) : bool
     {
         return ! preg_match('/^\d/', $name) && preg_match('/^[A-Za-z0-9_]+$/i', $name);
     }
@@ -80,9 +80,8 @@ class DefaultNamingStrategy implements NamingStrategy
     private function prepareTextForPhp(string $text) : string
     {
         return str_replace(' ', '', ucwords(
-                preg_replace('/[^\w]/', ' ', $text)
-            )
-        );
+            preg_replace('/[^\w]/', ' ', $text)
+        ));
     }
 
     public function isPhpReservedWord(string $text) : bool
@@ -92,14 +91,14 @@ class DefaultNamingStrategy implements NamingStrategy
 
     public function buildNamespace(string ...$parts) : string
     {
-        return implode('\\', array_map(fn(string $part) : string => trim($part, '\\'), $parts));
+        return implode('\\', array_map(static fn(string $part) : string => trim($part, '\\'), $parts));
     }
 
     public function buildPath(string ...$parts) : string
     {
         return implode(
             DIRECTORY_SEPARATOR,
-            array_map(fn(string $part) : string => rtrim($part, DIRECTORY_SEPARATOR), $parts)
+            array_map(static fn(string $part) : string => rtrim($part, DIRECTORY_SEPARATOR), $parts)
         );
     }
 

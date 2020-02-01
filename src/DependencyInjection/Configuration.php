@@ -1,5 +1,6 @@
 <?php
 
+declare(strict_types=1);
 
 namespace OnMoon\OpenApiServerBundle\DependencyInjection;
 
@@ -8,7 +9,6 @@ use Symfony\Component\Config\Definition\ConfigurationInterface;
 
 class Configuration implements ConfigurationInterface
 {
-
     /**
      * @inheritDoc
      */
@@ -26,7 +26,7 @@ class Configuration implements ConfigurationInterface
                     ->arrayPrototype()
                         ->children()
                             ->scalarNode('path')->isRequired()->cannotBeEmpty()->end()
-                            ->enumNode('type')->values(['yaml','json'])->end()
+                            ->enumNode('type')->values(['yaml', 'json'])->end()
                             ->scalarNode('name_space')->isRequired()->cannotBeEmpty()->end()
                             ->enumNode('media_type')
                                 ->values(['application/json'])
@@ -35,8 +35,7 @@ class Configuration implements ConfigurationInterface
                             ->end()
                         ->end()
                 ->end()
-            ->end()
-        ;
+            ->end();
 
         return $treeBuilder;
     }

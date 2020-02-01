@@ -12,6 +12,7 @@ interface RootDtoFactory
     /**
      * @param Parameter[] $pathParameters
      * @param Parameter[] $queryParameters
+     *
      * @return GeneratedClass[]
      */
     public function generateRootDto(

@@ -15,11 +15,11 @@ use PhpParser\Node\Stmt\DeclareDeclare;
 use PhpParser\Node\Stmt\Return_;
 use PhpParser\PrettyPrinter\Standard;
 use function count;
-use function rtrim;
+use function preg_replace;
 
 final class PhpParserRootDtoFactory implements RootDtoFactory
 {
-    private const PATH_PARAMETERS_PREFIX = 'PathParametersDto';
+    private const PATH_PARAMETERS_PREFIX  = 'PathParametersDto';
     private const QUERY_PARAMETERS_PREFIX = 'QueryParametersDto';
 
     private BuilderFactory $factory;
@@ -42,6 +42,7 @@ final class PhpParserRootDtoFactory implements RootDtoFactory
     /**
      * @param Parameter[] $pathParameters
      * @param Parameter[] $queryParameters
+     *
      * @return GeneratedClass[]
      */
     public function generateRootDto(
@@ -98,7 +99,7 @@ final class PhpParserRootDtoFactory implements RootDtoFactory
         }
 
         if (count($queryParameters)) {
-            $queryParametersDtoClassName = preg_replace('/Dto$/', '', $className)  . self::QUERY_PARAMETERS_PREFIX;
+            $queryParametersDtoClassName = preg_replace('/Dto$/', '', $className) . self::QUERY_PARAMETERS_PREFIX;
             $queryParametersDtoFileName  = $queryParametersDtoClassName . '.php';
 
             $generatedClasses[] = $this->dtoFactory->generateParamDto(
@@ -155,7 +156,7 @@ final class PhpParserRootDtoFactory implements RootDtoFactory
             $className,
             (new Standard())->prettyPrintFile([
                 new Declare_([new DeclareDeclare('strict_types', new LNumber(1))]),
-                $fileBuilder->getNode()
+                $fileBuilder->getNode(),
             ])
         );
 
