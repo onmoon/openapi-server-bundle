@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace OnMoon\OpenApiServerBundle\CodeGenerator\ServiceSubscriber;
 
 use OnMoon\OpenApiServerBundle\CodeGenerator\GeneratedClass;
-use OnMoon\OpenApiServerBundle\CodeGenerator\Naming\NamingStrategy;
 use OnMoon\OpenApiServerBundle\Interfaces\ApiLoader;
 use OnMoon\OpenApiServerBundle\Interfaces\Service;
 use PhpParser\Builder\Use_;
@@ -35,12 +34,10 @@ use function array_merge;
 final class PhpParserServiceSubscriberFactory implements ServiceSubscriberFactory
 {
     private BuilderFactory $factory;
-    private NamingStrategy $namingStrategy;
 
-    public function __construct(BuilderFactory $builderFactory, NamingStrategy $namingStrategy)
+    public function __construct(BuilderFactory $builderFactory)
     {
-        $this->factory        = $builderFactory;
-        $this->namingStrategy = $namingStrategy;
+        $this->factory = $builderFactory;
     }
 
     /**

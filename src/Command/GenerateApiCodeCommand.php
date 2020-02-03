@@ -23,7 +23,6 @@ use OnMoon\OpenApiServerBundle\Specification\SpecificationLoader;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
-use Symfony\Component\Routing\RouterInterface;
 use function array_filter;
 use function array_key_exists;
 use function array_merge;
@@ -48,7 +47,6 @@ class GenerateApiCodeCommand extends Command
     private ServiceInterfaceFactory $serviceInterfaceFactory;
     private ServiceSubscriberFactory $serviceSubscriberFactory;
     private FileWriter $fileWriter;
-    private RouterInterface $router;
     private SpecificationLoader $loader;
     private string $rootNamespace;
     private string $rootPath;
@@ -60,7 +58,6 @@ class GenerateApiCodeCommand extends Command
         ServiceInterfaceFactory $serviceInterfaceFactory,
         ServiceSubscriberFactory $serviceSubscriberFactory,
         FileWriter $fileWriter,
-        RouterInterface $router,
         SpecificationLoader $loader,
         string $rootNamespace,
         string $rootPath,
@@ -72,7 +69,6 @@ class GenerateApiCodeCommand extends Command
         $this->serviceInterfaceFactory  = $serviceInterfaceFactory;
         $this->serviceSubscriberFactory = $serviceSubscriberFactory;
         $this->fileWriter               = $fileWriter;
-        $this->router                   = $router;
         $this->rootNamespace            = $rootNamespace;
         $this->rootPath                 = $rootPath;
         $this->loader                   = $loader;

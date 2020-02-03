@@ -6,7 +6,6 @@ namespace OnMoon\OpenApiServerBundle\CodeGenerator\Dto;
 
 use cebe\openapi\spec\Parameter;
 use OnMoon\OpenApiServerBundle\CodeGenerator\GeneratedClass;
-use OnMoon\OpenApiServerBundle\CodeGenerator\Naming\NamingStrategy;
 use OnMoon\OpenApiServerBundle\Interfaces\Dto;
 use PhpParser\BuilderFactory;
 use PhpParser\Node\Expr\Variable;
@@ -24,20 +23,12 @@ final class PhpParserRootDtoFactory implements RootDtoFactory
     private const QUERY_PARAMETERS_PREFIX = 'QueryParametersDto';
 
     private BuilderFactory $factory;
-    private NamingStrategy $namingStrategy;
     private DtoFactory $dtoFactory;
-    private string $languageLevel;
 
-    public function __construct(
-        BuilderFactory $builderFactory,
-        NamingStrategy $namingStrategy,
-        DtoFactory $dtoFactory,
-        string $languageLevel
-    ) {
-        $this->factory        = $builderFactory;
-        $this->namingStrategy = $namingStrategy;
-        $this->dtoFactory     = $dtoFactory;
-        $this->languageLevel  = $languageLevel;
+    public function __construct(BuilderFactory $builderFactory, DtoFactory $dtoFactory)
+    {
+        $this->factory    = $builderFactory;
+        $this->dtoFactory = $dtoFactory;
     }
 
     /**

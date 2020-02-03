@@ -18,16 +18,11 @@ final class PhpParserServiceInterfaceFactory implements ServiceInterfaceFactory
 {
     private BuilderFactory $factory;
     private NamingStrategy $namingStrategy;
-    private string $languageLevel;
 
-    public function __construct(
-        BuilderFactory $builderFactory,
-        NamingStrategy $namingStrategy,
-        string $languageLevel
-    ) {
+    public function __construct(BuilderFactory $builderFactory, NamingStrategy $namingStrategy)
+    {
         $this->factory        = $builderFactory;
         $this->namingStrategy = $namingStrategy;
-        $this->languageLevel  = $languageLevel;
     }
 
     public function generateServiceInterface(
