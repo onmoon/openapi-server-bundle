@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace OnMoon\OpenApiServerBundle\CodeGenerator\Naming;
 
-use OnMoon\OpenApiServerBundle\Command\GenerateApiCodeCommand;
+use OnMoon\OpenApiServerBundle\CodeGenerator\ApiServerCodeGenerator;
 use function array_map;
 use function implode;
 use function in_array;
@@ -37,10 +37,10 @@ class DefaultNamingStrategy implements NamingStrategy
         /** @psalm-var class-string<\OnMoon\OpenApiServerBundle\Interfaces\Service> $interfaceNamespace */
         $interfaceNamespace = $this->buildNamespace(
             $this->rootNamespace,
-            GenerateApiCodeCommand::APIS_NAMESPACE,
+            ApiServerCodeGenerator::APIS_NAMESPACE,
             $apiNameSpace,
             $this->stringToNamespace($operationId),
-            $this->stringToNamespace($operationId) . GenerateApiCodeCommand::SERVICE_SUFFIX,
+            $this->stringToNamespace($operationId) . ApiServerCodeGenerator::SERVICE_SUFFIX,
         );
 
         return $interfaceNamespace;
