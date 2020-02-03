@@ -19,6 +19,7 @@ script: ./vendor/bin/phpunit
 jobs:
   allow_failures:
     - php: nightly
+    - stage: Security
   include:
     - stage: Psalm
       php: 7.4
