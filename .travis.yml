@@ -35,4 +35,7 @@ jobs:
 
     - stage: Code Style
       php: 7.4
-      script: ./vendor/bin/phpcs
+      script:
+        - composer show squizlabs/php_codesniffer
+        - composer show doctrine/coding-standard
+        - ./vendor/bin/phpcs
