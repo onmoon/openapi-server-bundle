@@ -9,6 +9,7 @@ use cebe\openapi\spec\Parameter;
 use cebe\openapi\spec\Reference;
 use cebe\openapi\spec\RequestBody;
 use cebe\openapi\spec\Response;
+use cebe\openapi\spec\Responses;
 use cebe\openapi\spec\Schema;
 use cebe\openapi\spec\Type;
 use OnMoon\OpenApiServerBundle\CodeGenerator\Dto\DtoFactory;
@@ -27,7 +28,6 @@ use function array_filter;
 use function array_key_exists;
 use function array_merge;
 use function count;
-use function is_array;
 
 class GenerateApiCodeCommand extends Command
 {
@@ -128,8 +128,7 @@ class GenerateApiCodeCommand extends Command
                     $outputDtoClassName = null;
 
                     $requestBody = $operation->requestBody;
-                    /** @var Response[]|null $responses */
-                    $responses = $operation->responses;
+                    $responses   = $operation->responses;
 
                     if ($requestBody instanceof RequestBody &&
                         array_key_exists($specMediaType, $requestBody->content)
@@ -172,46 +171,52 @@ class GenerateApiCodeCommand extends Command
                         }
                     }
 
-                    if (is_array($responses) &&
-                        array_key_exists(200, $responses) &&
-                        array_key_exists($specMediaType, $responses[200]->content)
+                    if ($responses instanceof Responses &&
+                        $responses->hasResponse('200') &&
+                        $responses->getResponse('200') instanceof Response
                     ) {
-                        /** @var MediaType $mediaType */
-                        $mediaType = $responses[200]->content[$specMediaType];
+                        /** @var Response $response */
+                        $response = $responses->getResponse('200');
 
-                        if ($mediaType->schema instanceof Schema) {
-                            $schema = $mediaType->schema;
+                        if (array_key_exists($specMediaType, $response->content) &&
+                            $response->content[$specMediaType] instanceof MediaType
+                        ) {
+                            $mediaType = $response->content[$specMediaType];
 
-                            $dtoNamespace = $this->namingStrategy->buildNamespace(
-                                $operationNamespace,
-                                self::DTO_NAMESPACE,
-                                self::RESPONSE_SUFFIX
-                            );
-                            $dtoClassName = $this->namingStrategy->stringToNamespace(
-                                $operationName . self::RESPONSE_SUFFIX . self::DTO_SUFFIX
-                            );
-                            $dtoPath      = $this->namingStrategy->buildPath(
-                                $operationPath,
-                                self::DTO_NAMESPACE,
-                                self::RESPONSE_SUFFIX
-                            );
-                            $dtoFileName  = $dtoClassName . '.php';
+                            if ($mediaType->schema instanceof Schema) {
+                                $schema = $mediaType->schema;
 
-                            $outputDtoNamespace = $dtoNamespace;
-                            $outputDtoClassName = $dtoClassName;
+                                $dtoNamespace = $this->namingStrategy->buildNamespace(
+                                    $operationNamespace,
+                                    self::DTO_NAMESPACE,
+                                    self::RESPONSE_SUFFIX
+                                );
+                                $dtoClassName = $this->namingStrategy->stringToNamespace(
+                                    $operationName . self::RESPONSE_SUFFIX . self::DTO_SUFFIX
+                                );
+                                $dtoPath      = $this->namingStrategy->buildPath(
+                                    $operationPath,
+                                    self::DTO_NAMESPACE,
+                                    self::RESPONSE_SUFFIX
+                                );
+                                $dtoFileName  = $dtoClassName . '.php';
 
-                            /** @var GeneratedClass[] $filesToGenerate */
-                            $filesToGenerate = array_merge(
-                                $filesToGenerate,
-                                $this->generateDtoGraph(
-                                    $schema,
-                                    $dtoPath,
-                                    $dtoFileName,
-                                    $dtoNamespace,
-                                    $dtoClassName,
-                                    false
-                                )
-                            );
+                                $outputDtoNamespace = $dtoNamespace;
+                                $outputDtoClassName = $dtoClassName;
+
+                                /** @var GeneratedClass[] $filesToGenerate */
+                                $filesToGenerate = array_merge(
+                                    $filesToGenerate,
+                                    $this->generateDtoGraph(
+                                        $schema,
+                                        $dtoPath,
+                                        $dtoFileName,
+                                        $dtoNamespace,
+                                        $dtoClassName,
+                                        false
+                                    )
+                                );
+                            }
                         }
                     }
 
