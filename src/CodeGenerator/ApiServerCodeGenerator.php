@@ -109,12 +109,14 @@ class ApiServerCodeGenerator
                         );
                     }
 
-                    $rootDtoNamespace   = null;
-                    $rootDtoClassName   = null;
-                    $inputDtoNamespace  = null;
-                    $inputDtoClassName  = null;
-                    $outputDtoNamespace = null;
-                    $outputDtoClassName = null;
+                    $rootDtoNamespace  = null;
+                    $rootDtoClassName  = null;
+                    $inputDtoNamespace = null;
+                    $inputDtoClassName = null;
+                    /** @psalm-var list<array{namespace: string, className: string, code: int}> $outputDtos */
+                    $outputDtos                        = [];
+                    $outputDtoMarkerInterfaceNamespace = null;
+                    $outputDtoMarkerInterfaceClassName = null;
 
                     $requestBody = $operation->requestBody;
                     $responses   = $operation->responses;
@@ -160,52 +162,102 @@ class ApiServerCodeGenerator
                         }
                     }
 
-                    if ($responses instanceof Responses &&
-                        $responses->hasResponse('200') &&
-                        $responses->getResponse('200') instanceof Response
-                    ) {
-                        /** @var Response $response */
-                        $response = $responses->getResponse('200');
+                    if ($responses instanceof Responses) {
+                        $outputDtosToGenerate = [];
+                        /**
+                         * @var int $responseCode
+                         */
+                        foreach ($responses->getResponses() as $responseCode => $response) {
+                            if (! ($response instanceof Response)) {
+                                continue;
+                            }
 
-                        if (array_key_exists($specMediaType, $response->content) &&
-                            $response->content[$specMediaType] instanceof MediaType
-                        ) {
+                            if (! array_key_exists($specMediaType, $response->content) ||
+                                ! $response->content[$specMediaType] instanceof MediaType
+                            ) {
+                                continue;
+                            }
+
                             $mediaType = $response->content[$specMediaType];
 
-                            if ($mediaType->schema instanceof Schema) {
-                                $schema = $mediaType->schema;
-
-                                $dtoNamespace = $this->namingStrategy->buildNamespace(
-                                    $operationNamespace,
-                                    self::DTO_NAMESPACE,
-                                    self::RESPONSE_SUFFIX
-                                );
-                                $dtoClassName = $this->namingStrategy->stringToNamespace(
-                                    $operationName . self::RESPONSE_SUFFIX . self::DTO_SUFFIX
-                                );
-                                $dtoPath      = $this->namingStrategy->buildPath(
-                                    $operationPath,
-                                    self::DTO_NAMESPACE,
-                                    self::RESPONSE_SUFFIX
-                                );
-                                $dtoFileName  = $dtoClassName . '.php';
-
-                                $outputDtoNamespace = $dtoNamespace;
-                                $outputDtoClassName = $dtoClassName;
-
-                                /** @var GeneratedClass[] $filesToGenerate */
-                                $filesToGenerate = array_merge(
-                                    $filesToGenerate,
-                                    $this->generateDtoGraph(
-                                        $schema,
-                                        $dtoPath,
-                                        $dtoFileName,
-                                        $dtoNamespace,
-                                        $dtoClassName,
-                                        false
-                                    )
-                                );
+                            if (! ($mediaType->schema instanceof Schema)) {
+                                continue;
                             }
+
+                            $schema = $mediaType->schema;
+
+                            $dtoNamespace = $this->namingStrategy->buildNamespace(
+                                $operationNamespace,
+                                self::DTO_NAMESPACE,
+                                self::RESPONSE_SUFFIX,
+                                (string) '_' . $responseCode
+                            );
+                            $dtoClassName = $this->namingStrategy->stringToNamespace(
+                                $operationName . self::RESPONSE_SUFFIX . '_' . $responseCode . self::DTO_SUFFIX
+                            );
+                            $dtoPath      = $this->namingStrategy->buildPath(
+                                $operationPath,
+                                self::DTO_NAMESPACE,
+                                self::RESPONSE_SUFFIX,
+                                (string) '_' . $responseCode
+                            );
+                            $dtoFileName  = $dtoClassName . '.php';
+
+                            $outputDtos[]           = [
+                                'namespace' => $dtoNamespace,
+                                'className' => $dtoClassName,
+                                'code' => $responseCode,
+                            ];
+                            $outputDtosToGenerate[] = [
+                                'schema' => $schema,
+                                'dtoPath' => $dtoPath,
+                                'dtoFileName' => $dtoFileName,
+                                'dtoNameSpace' => $dtoNamespace,
+                                'dtoClassName' => $dtoClassName,
+                                'responseCode' => (int) $responseCode === 0 ? 200 : (int) $responseCode,
+                            ];
+                        }
+
+                        if (count($outputDtos) > 1) {
+                            $outputDtoMarkerInterfaceNamespace = $this->namingStrategy->buildNamespace(
+                                $operationNamespace,
+                                self::DTO_NAMESPACE,
+                                self::RESPONSE_SUFFIX
+                            );
+                            $outputDtoMarkerInterfaceClassName = $this->namingStrategy->stringToNamespace(
+                                $operationName . self::RESPONSE_SUFFIX
+                            );
+                            $interfacePath                     = $this->namingStrategy->buildPath(
+                                $operationPath,
+                                self::DTO_NAMESPACE,
+                                self::RESPONSE_SUFFIX
+                            );
+                            $interfaceFileName                 = $outputDtoMarkerInterfaceClassName . '.php';
+
+                            $filesToGenerate[] = $this->dtoFactory->generateOutputMarkerInterface(
+                                $interfacePath,
+                                $interfaceFileName,
+                                $outputDtoMarkerInterfaceNamespace,
+                                $outputDtoMarkerInterfaceClassName
+                            );
+                        }
+
+                        foreach ($outputDtosToGenerate as $outputDtoToGenerate) {
+                            /** @var GeneratedClass[] $filesToGenerate */
+                            $filesToGenerate = array_merge(
+                                $filesToGenerate,
+                                $this->generateDtoGraph(
+                                    $outputDtoToGenerate['schema'],
+                                    $outputDtoToGenerate['dtoPath'],
+                                    $outputDtoToGenerate['dtoFileName'],
+                                    $outputDtoToGenerate['dtoNameSpace'],
+                                    $outputDtoToGenerate['dtoClassName'],
+                                    false,
+                                    $outputDtoToGenerate['responseCode'],
+                                    $outputDtoMarkerInterfaceNamespace,
+                                    $outputDtoMarkerInterfaceClassName
+                                )
+                            );
                         }
                     }
 
@@ -268,8 +320,9 @@ class ApiServerCodeGenerator
                         $summary,
                         $rootDtoNamespace,
                         $rootDtoClassName,
-                        $outputDtoNamespace,
-                        $outputDtoClassName
+                        $outputDtos,
+                        $outputDtoMarkerInterfaceNamespace,
+                        $outputDtoMarkerInterfaceClassName
                     );
 
                     $filesToGenerate[]   = $serviceInterface;
@@ -353,7 +406,10 @@ class ApiServerCodeGenerator
         string $dtoFileName,
         string $dtoNamespace,
         string $dtoClassName,
-        bool $immutable
+        bool $immutable,
+        ?int $outputResponseCode = null,
+        ?string $outputMarkerInterfaceNamespace = null,
+        ?string $outputMarkerInterfaceClassName = null
     ) : array {
         if ($schema->type !== Type::OBJECT) {
             return [];
@@ -365,7 +421,10 @@ class ApiServerCodeGenerator
             $dtoNamespace,
             $dtoClassName,
             $immutable,
-            $schema
+            $schema,
+            $outputResponseCode,
+            $outputMarkerInterfaceNamespace,
+            $outputMarkerInterfaceClassName
         );
     }
 }

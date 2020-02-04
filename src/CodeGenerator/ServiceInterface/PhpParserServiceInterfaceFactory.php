@@ -12,6 +12,8 @@ use PhpParser\Node\Scalar\LNumber;
 use PhpParser\Node\Stmt\Declare_;
 use PhpParser\Node\Stmt\DeclareDeclare;
 use PhpParser\PrettyPrinter\Standard;
+use function count;
+use function implode;
 use function Safe\sprintf;
 
 final class PhpParserServiceInterfaceFactory implements ServiceInterfaceFactory
@@ -25,6 +27,11 @@ final class PhpParserServiceInterfaceFactory implements ServiceInterfaceFactory
         $this->namingStrategy = $namingStrategy;
     }
 
+    /**
+     * @param string[][] $outputDtos
+     *
+     * @psalm-param list<array{namespace: string, className: string, code: int}> $outputDtos
+     */
     public function generateServiceInterface(
         string $fileDirectoryPath,
         string $fileName,
@@ -34,8 +41,9 @@ final class PhpParserServiceInterfaceFactory implements ServiceInterfaceFactory
         ?string $summary = null,
         ?string $inputDtoNamespace = null,
         ?string $inputDtoClassName = null,
-        ?string $outputDtoNamespace = null,
-        ?string $outputDtoClassName = null
+        array $outputDtos = [],
+        ?string $outputDtoMarkerInterfaceNamespace = null,
+        ?string $outputDtoMarkerInterfaceClassName = null
     ) : GeneratedClass {
         $fileBuilder = $this
             ->factory
@@ -67,15 +75,51 @@ final class PhpParserServiceInterfaceFactory implements ServiceInterfaceFactory
             );
         }
 
-        if ($outputDtoNamespace && $outputDtoClassName) {
+        $numberOfOutputs = count($outputDtos);
+
+        if ($numberOfOutputs === 0) {
+            $methodBuilder->setReturnType('void');
+        } elseif ($numberOfOutputs === 1) {
+            $outputDto = $outputDtos[0];
+
             $fileBuilder->addStmt(
                 $this->factory->use(
-                    $this->namingStrategy->buildNamespace($outputDtoNamespace, $outputDtoClassName)
+                    $this->namingStrategy->buildNamespace($outputDto['namespace'], $outputDto['className'])
                 )
             );
-            $methodBuilder->setReturnType(
-                $outputDtoClassName
+            $methodBuilder->setReturnType($outputDto['className']);
+        } elseif ($numberOfOutputs > 1 &&
+                  $outputDtoMarkerInterfaceNamespace !== null &&
+                  $outputDtoMarkerInterfaceClassName !== null
+        ) {
+            $fileBuilder->addStmt(
+                $this->factory->use(
+                    $this->namingStrategy->buildNamespace(
+                        $outputDtoMarkerInterfaceNamespace,
+                        $outputDtoMarkerInterfaceClassName
+                    )
+                )
             );
+
+            $docCommentReturnTypes = [];
+
+            foreach ($outputDtos as $outputDto) {
+                $fileBuilder->addStmt(
+                    $this->factory->use(
+                        $this->namingStrategy->buildNamespace(
+                            $outputDto['namespace'],
+                            $outputDto['className']
+                        )
+                    )
+                );
+                $docCommentReturnTypes[] = $outputDto['className'];
+            }
+
+            $methodBuilder
+                ->setReturnType($outputDtoMarkerInterfaceClassName)
+                ->setDocComment('/**
+                              * @return ' . implode('|', $docCommentReturnTypes) . '
+                              */');
         }
 
         $interfaceBuilder = $interfaceBuilder->addStmt($methodBuilder);

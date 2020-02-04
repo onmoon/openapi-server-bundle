@@ -13,7 +13,7 @@ use Nyholm\Psr7\Factory\Psr17Factory;
 use OnMoon\OpenApiServerBundle\CodeGenerator\Naming\NamingStrategy;
 use OnMoon\OpenApiServerBundle\Exception\ApiCallFailed;
 use OnMoon\OpenApiServerBundle\Interfaces\ApiLoader;
-use OnMoon\OpenApiServerBundle\Interfaces\Dto;
+use OnMoon\OpenApiServerBundle\Interfaces\ResponseDto;
 use OnMoon\OpenApiServerBundle\Interfaces\SetClientIp;
 use OnMoon\OpenApiServerBundle\Interfaces\SetRequest;
 use OnMoon\OpenApiServerBundle\Router\RouteLoader;
@@ -100,14 +100,17 @@ class ApiController
         }
 
         $requestDto = $serializer->createRequestDto($request, $route, $apiInterface, $methodName);
-        /** @var Dto|null $responseDto */
+        /** @var ResponseDto|null $responseDto */
         $responseDto = $requestDto ? $service->{$methodName}($requestDto) : $service->{$methodName}();
 
         $response = new JsonResponse();
         $response->setEncodingOptions(JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_THROW_ON_ERROR);
 
-        if ($responseDto instanceof Dto) {
+        if ($responseDto instanceof ResponseDto) {
             $response->setContent($serializer->createResponse($responseDto));
+            $response->setStatusCode($responseDto::_getResponseCode());
+        } else {
+            $response->setStatusCode(200);
         }
 
         return $response;
