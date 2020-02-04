@@ -13,7 +13,6 @@ use PhpParser\Node\Stmt\Declare_;
 use PhpParser\Node\Stmt\DeclareDeclare;
 use PhpParser\PrettyPrinter\Standard;
 use function count;
-use function implode;
 use function Safe\sprintf;
 
 final class PhpParserServiceInterfaceFactory implements ServiceInterfaceFactory
@@ -101,25 +100,8 @@ final class PhpParserServiceInterfaceFactory implements ServiceInterfaceFactory
                 )
             );
 
-            $docCommentReturnTypes = [];
-
-            foreach ($outputDtos as $outputDto) {
-                $fileBuilder->addStmt(
-                    $this->factory->use(
-                        $this->namingStrategy->buildNamespace(
-                            $outputDto['namespace'],
-                            $outputDto['className']
-                        )
-                    )
-                );
-                $docCommentReturnTypes[] = $outputDto['className'];
-            }
-
             $methodBuilder
-                ->setReturnType($outputDtoMarkerInterfaceClassName)
-                ->setDocComment('/**
-                              * @return ' . implode('|', $docCommentReturnTypes) . '
-                              */');
+                ->setReturnType($outputDtoMarkerInterfaceClassName);
         }
 
         $interfaceBuilder = $interfaceBuilder->addStmt($methodBuilder);

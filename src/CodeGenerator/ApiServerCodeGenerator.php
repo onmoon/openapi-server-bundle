@@ -14,6 +14,7 @@ use cebe\openapi\spec\Response;
 use cebe\openapi\spec\Responses;
 use cebe\openapi\spec\Schema;
 use cebe\openapi\spec\Type;
+use Lukasoppermann\Httpstatus\Httpstatus;
 use OnMoon\OpenApiServerBundle\CodeGenerator\Dto\DtoFactory;
 use OnMoon\OpenApiServerBundle\CodeGenerator\Dto\RootDtoFactory;
 use OnMoon\OpenApiServerBundle\CodeGenerator\Filesystem\FileWriter;
@@ -22,6 +23,7 @@ use OnMoon\OpenApiServerBundle\CodeGenerator\ServiceInterface\ServiceInterfaceFa
 use OnMoon\OpenApiServerBundle\CodeGenerator\ServiceSubscriber\ServiceSubscriberFactory;
 use OnMoon\OpenApiServerBundle\Exception\CannotGenerateCodeForOperation;
 use OnMoon\OpenApiServerBundle\Specification\SpecificationLoader;
+use Throwable;
 use function array_filter;
 use function array_key_exists;
 use function array_merge;
@@ -46,6 +48,7 @@ class ApiServerCodeGenerator
     private ServiceSubscriberFactory $serviceSubscriberFactory;
     private FileWriter $fileWriter;
     private SpecificationLoader $loader;
+    private Httpstatus $httpstatus;
     private string $rootNamespace;
     private string $rootPath;
 
@@ -57,6 +60,7 @@ class ApiServerCodeGenerator
         ServiceSubscriberFactory $serviceSubscriberFactory,
         FileWriter $fileWriter,
         SpecificationLoader $loader,
+        Httpstatus $httpstatus,
         string $rootNamespace,
         string $rootPath
     ) {
@@ -66,9 +70,10 @@ class ApiServerCodeGenerator
         $this->serviceInterfaceFactory  = $serviceInterfaceFactory;
         $this->serviceSubscriberFactory = $serviceSubscriberFactory;
         $this->fileWriter               = $fileWriter;
+        $this->loader                   = $loader;
+        $this->httpstatus               = $httpstatus;
         $this->rootNamespace            = $rootNamespace;
         $this->rootPath                 = $rootPath;
-        $this->loader                   = $loader;
     }
 
     public function generate() : void
@@ -186,20 +191,28 @@ class ApiServerCodeGenerator
 
                             $schema = $mediaType->schema;
 
+                            try {
+                                $statusNamespace = $this->httpstatus->getReasonPhrase((string) $responseCode);
+                            } catch (Throwable $e) {
+                                $statusNamespace = (string) $responseCode;
+                            }
+
+                            $statusNamespace = $this->namingStrategy->stringToNamespace($statusNamespace);
+
                             $dtoNamespace = $this->namingStrategy->buildNamespace(
                                 $operationNamespace,
                                 self::DTO_NAMESPACE,
                                 self::RESPONSE_SUFFIX,
-                                (string) '_' . $responseCode
+                                $statusNamespace
                             );
                             $dtoClassName = $this->namingStrategy->stringToNamespace(
-                                $operationName . self::RESPONSE_SUFFIX . '_' . $responseCode . self::DTO_SUFFIX
+                                $operationName . self::RESPONSE_SUFFIX . self::DTO_SUFFIX
                             );
                             $dtoPath      = $this->namingStrategy->buildPath(
                                 $operationPath,
                                 self::DTO_NAMESPACE,
                                 self::RESPONSE_SUFFIX,
-                                (string) '_' . $responseCode
+                                $statusNamespace
                             );
                             $dtoFileName  = $dtoClassName . '.php';
 
