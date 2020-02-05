@@ -1,28 +1,33 @@
 # Symfony OpenApi Server Bundle
 
+## About
+
+This bundle can generate most of the usual boilerplate code you write when implementing an API.
+The code is generated from OpenAPI specifications.
+
+The following concerns are handled by the bundle automatically:
+- Route generation and routing
+- Validation of incoming requests against the specification
+- Strictly-typed request and response objects and API call handlers interfaces
+- Calling your code containing the API call handling logic passing the request object
+- Serializing of the returned response object
+
+All you have to do is to implement the API call handler interfaces and return the provided response object.
+
 ## Installation
 
 The preferred way to install this extension is through [composer](http://getcomposer.org/download/).
 
-Either run
+Run
 
 ```
 composer require onmoon/openapi-server-bundle
 ```
 
-or add
-
-```
-"onmoon/openapi-server-bundle": "^0.0"
-```
-
-to the require section of your `composer.json` file.
-
-Then add 
+Then add the bundle class to your `config/bundles.php`:
 ```php
 OnMoon\OpenApiServerBundle\OpenApiServerBundle::class => ['all' => true],
 ```
-to array in `config/bundles.php`.
 
 ## Usage
 
@@ -30,18 +35,18 @@ You can configure the bundle by adding the following parameters to your `/config
 
 ```yaml
 open_api_server:
-  # root_name_space: App\Generated # NameSpace for DTOs and Api Interfaces
-  ## We will try to derive path for generated files from namespace. If you do not want them to be 
-  ## stored in App namespace or if you App namespace is not in %kernel.project_dir%/src/, then you
-  ## can specify path manually:
-  # root_path: %kernel.project_dir%/src/Generated 
-  # language_level: 7.4.0 # minimum PHP version the generated code should be compatible with
-  # generated_dir_permissions: 0755 # permissions for the generated directories
+  root_name_space: App\Generated # Namespace for DTOs and Api Interfaces
+  ## The bundle will try to derive the paths for the generated files from the namespace. If you do not want them to be 
+  ## stored in \App namespace or if you \App namespace is not in %kernel.project_dir%/src/, then you
+  ## can specify this path manually:
+  root_path: %kernel.project_dir%/src/Generated 
+  language_level: 7.4.0 # minimum PHP version the generated code should be compatible with
+  generated_dir_permissions: 0755 # permissions for the generated directories
   specs:
     petstore:
       path: '../spec/petstore.yaml' # path to OpenApi specification
-      # type: yaml  # Specification format, either yaml or json. Extension is used if omitted
-      name_space: PetStore # NameSpace for generated DTOs and Interfaces
+      type: yaml  # Specification format, either yaml or json. If omitted, the specification file extension will be used.
+      name_space: PetStore # Namespace for generated DTOs and Interfaces
       media_type: 'application/json' # media type from the specification files to use for generating request and response DTOs
 ```
 
@@ -50,25 +55,98 @@ with `open_api` type:
 
 ```yaml
 petstore-api:
-  resource: 'petstore' # This should be same as in specs section of bundle config
+  resource: 'petstore' # This should be same as in specs section of /config/packages/open_api_server.yaml
   type: open_api
-  # prefix: '/api' # Add this standard parameter to add base path to all paths in api
-  # name_prefix: 'petstore_' # This will add prefix to route names 
+  prefix: '/api' # Add this standard parameter to add base path to all paths in api
+  name_prefix: 'petstore_' # This will add a prefix to route names 
 ```
 
-After configuring the bundle you can generate the API server code and implement the generated service interfaces 
-with code that should handle the api calls.
+## Requirements for your OpenAPI schemas
 
-## Commands
+For the bundle to work properly with your specifications, they should be written in OpenAPI 3.0 format and each 
+operation must have an unique `operationId`.
 
-- Generate the server code: `php bin/console open-api:generate`
-- Refresh the server code: `php bin/console open-api:refresh`
-- Delete the server code: `php bin/console open-api:delete`
-
-## Limitations:
-
+Currently, there are also the following limitations:
 - `number` without `format` is treated as float
 - Only scalar types are allowed in path parameters
 - Partial match pattern are ignored in path parameter patterns, only `^...$` patterns are used
 - If pattern is specified in path parameter then type- and format-generated requirements are ignored
 - Only one media-type can be used for request and response body schemas. See: https://swagger.io/docs/specification/media-types/
+
+## Generating the API Server code
+
+There are three console commands that work with the generated API server code:
+
+- Generate the server code: `php bin/console open-api:generate`
+- Refresh the server code: `php bin/console open-api:refresh`
+- Delete the server code: `php bin/console open-api:delete`
+
+Most of the time you should use the `refresh` command.
+It will clear the bundle cache, delete the old generated server code if it exists and generate the new code.
+
+Be careful with the refresh and delete commands, they will delete the entire contents of the directory you have specified 
+in `root_name_space` in the `/config/packages/open_api_server.yaml` file. That directory should contain no files except 
+the code generated by this bundle, as it will be deleted every time you generate the API server code.
+
+For each operation described in the specification, a API call handler interface will be generated that you should implement
+to handle the API calls.
+
+## Implementing the API call handlers interfaces
+
+Given the following generated API handler interface:
+```php
+<?php
+
+declare (strict_types=1);
+
+namespace App\Generated\Apis\PetStore\ShowPetById;
+
+use OnMoon\OpenApiServerBundle\Interfaces\Service;
+use App\Generated\Apis\PetStore\ShowPetById\Dto\Request\ShowPetByIdRequestDto;
+use App\Generated\Apis\PetStore\ShowPetById\Dto\Response\ShowPetByIdResponse;
+
+/**
+ * This interface was automatically generated
+ * You should not change it manually as it will be overwritten
+ */
+interface ShowPetById extends Service
+{
+    /** Info for a specific pet */
+    public function showPetById(ShowPetByIdRequestDto $request) : ShowPetByIdResponse;
+}
+```
+
+Your API call handler could look like this:
+```php
+<?php
+
+namespace App\Api;
+
+use App\Repository\PetRepository;
+use App\Generated\Apis\PetStore\ShowPetById\Dto\Request\ShowPetByIdRequestDto;
+use App\Generated\Apis\PetStore\ShowPetById\Dto\Response\OK\ShowPetByIdResponseDto;
+use App\Generated\Apis\PetStore\ShowPetById\Dto\Response\ShowPetByIdResponse;
+use App\Generated\Apis\PetStore\ShowPetById\ShowPetById;
+
+class ShowPetByIdHandler implements ShowPetById
+{
+    private PetRepository $pets;
+
+    public function __construct(PetRepository $pets)
+    {
+        $this->pets = $pets;
+    }
+
+    public function showPetById(ShowPetByIdRequestDto $request) : ShowPetByIdResponse
+    {
+        $petId = $request->getPathParameters()->getPetId();
+        $pet   = $this->pets->getById($petId);
+
+        return new ShowPetByIdResponseDto($pet->id(), $pet->name());
+    }
+}
+```
+
+Additionally, your API call handler can implement the following interfaces:
+- `\OnMoon\OpenApiServerBundle\Interfaces\SetClientIp` - if it needs the client IP address
+- `\OnMoon\OpenApiServerBundle\Interfaces\SetRequest` - if it needs the Symfony request object
