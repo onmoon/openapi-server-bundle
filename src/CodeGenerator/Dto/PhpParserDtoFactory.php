@@ -47,7 +47,6 @@ final class PhpParserDtoFactory implements DtoFactory
     private BuilderFactory $factory;
     private NamingStrategy $namingStrategy;
     private ScalarTypesResolver $typeResolver;
-
     private string $languageLevel;
 
     public function __construct(
@@ -85,10 +84,6 @@ final class PhpParserDtoFactory implements DtoFactory
         foreach ($parameters as $parameter) {
             if (! $this->namingStrategy->isAllowedPhpPropertyName($parameter->name)) {
                 throw CannotCreatePropertyName::becauseIsNotValidPhpPropertyName($parameter->name);
-            }
-
-            if ($this->namingStrategy->isPhpReservedWord($parameter->name)) {
-                throw CannotCreatePropertyName::becauseIsPhpReservedWord($parameter->name);
             }
 
             $type         = null;
@@ -230,10 +225,6 @@ final class PhpParserDtoFactory implements DtoFactory
         foreach ($schema->properties as $propertyName => $property) {
             if (! $this->namingStrategy->isAllowedPhpPropertyName($propertyName)) {
                 throw CannotCreatePropertyName::becauseIsNotValidPhpPropertyName($propertyName);
-            }
-
-            if ($this->namingStrategy->isPhpReservedWord($propertyName)) {
-                throw CannotCreatePropertyName::becauseIsPhpReservedWord($propertyName);
             }
 
             $type         = null;

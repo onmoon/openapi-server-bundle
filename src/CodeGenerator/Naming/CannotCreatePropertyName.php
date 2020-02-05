@@ -28,14 +28,4 @@ final class CannotCreatePropertyName extends OpenApiError
             )
         );
     }
-
-    public static function becauseIsPhpReservedWord(string $text) : self
-    {
-        return new self(
-            sprintf(
-                'Cannot create property name from: %s. String is a reserved word in PHP.',
-                $text
-            )
-        );
-    }
 }

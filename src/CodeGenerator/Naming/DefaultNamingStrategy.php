@@ -5,9 +5,9 @@ declare(strict_types=1);
 namespace OnMoon\OpenApiServerBundle\CodeGenerator\Naming;
 
 use OnMoon\OpenApiServerBundle\CodeGenerator\ApiServerCodeGenerator;
+use sspat\ReservedWords\ReservedWords;
 use function array_map;
 use function implode;
-use function in_array;
 use function lcfirst;
 use function rtrim;
 use function Safe\preg_match;
@@ -20,11 +20,18 @@ use const DIRECTORY_SEPARATOR;
 
 class DefaultNamingStrategy implements NamingStrategy
 {
+    private ReservedWords $reservedWords;
     private string $rootNamespace;
+    private string $languageLevel;
 
-    public function __construct(string $rootNamespace)
-    {
+    public function __construct(
+        ReservedWords $reservedWords,
+        string $rootNamespace,
+        string $languageLevel
+    ) {
+        $this->reservedWords = $reservedWords;
         $this->rootNamespace = $rootNamespace;
+        $this->languageLevel = $languageLevel;
     }
 
     public function isAllowedPhpPropertyName(string $name) : bool
@@ -48,7 +55,7 @@ class DefaultNamingStrategy implements NamingStrategy
 
     public function stringToNamespace(string $text) : string
     {
-        $namespace = $this->padStringThatIsReservedWord(
+        $namespace = $this->padStringThatIsReservedNamespaceName(
             $this->padStringStartingWithNumber(
                 ucfirst(
                     $this->prepareTextForPhp($text)
@@ -65,7 +72,7 @@ class DefaultNamingStrategy implements NamingStrategy
 
     public function stringToMethodName(string $text) : string
     {
-        $propertyName = $this->padStringThatIsReservedWord(
+        $propertyName = $this->padStringThatIsReservedMethodName(
             $this->padStringStartingWithNumber(
                 lcfirst(
                     $this->prepareTextForPhp($text)
@@ -78,19 +85,6 @@ class DefaultNamingStrategy implements NamingStrategy
         }
 
         return $propertyName;
-    }
-
-    private function prepareTextForPhp(string $text) : string
-    {
-        /** @var string $filteredText */
-        $filteredText = preg_replace('/[^\w]/', ' ', $text);
-
-        return str_replace(' ', '', ucwords($filteredText));
-    }
-
-    public function isPhpReservedWord(string $text) : bool
-    {
-        return in_array($text, PhpReservedWords::LIST);
     }
 
     public function buildNamespace(string ...$parts) : string
@@ -106,9 +100,22 @@ class DefaultNamingStrategy implements NamingStrategy
         );
     }
 
-    private function padStringThatIsReservedWord(string $string) : string
+    private function prepareTextForPhp(string $text) : string
     {
-        return $this->isPhpReservedWord($string) ? '_' . $string : $string;
+        /** @var string $filteredText */
+        $filteredText = preg_replace('/[^\w]/', ' ', $text);
+
+        return str_replace(' ', '', ucwords($filteredText));
+    }
+
+    private function padStringThatIsReservedNamespaceName(string $string) : string
+    {
+        return $this->reservedWords->isReservedNamespaceName($string, $this->languageLevel) ? '_' . $string : $string;
+    }
+
+    private function padStringThatIsReservedMethodName(string $string) : string
+    {
+        return $this->reservedWords->isReservedMethodName($string, $this->languageLevel) ? '_' . $string : $string;
     }
 
     private function padStringStartingWithNumber(string $string) : string

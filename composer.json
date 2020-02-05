@@ -30,6 +30,7 @@
         "nikic/php-parser": "^4.3",
         "nyholm/psr7": "^1.2",
         "phpdocumentor/reflection-docblock": "^4.3",
+        "sspat/reserved-words": "^1.0",
         "symfony/config": "4.4.*",
         "symfony/console": "4.4.*",
         "symfony/dependency-injection": "4.4.*",
