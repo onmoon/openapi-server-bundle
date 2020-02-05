@@ -28,6 +28,7 @@ use PhpParser\Node\Stmt\Return_;
 use PhpParser\PrettyPrinter\Standard;
 use function array_map;
 use function array_merge;
+use function class_exists;
 use function count;
 use function implode;
 use function in_array;
@@ -89,10 +90,18 @@ final class PhpParserDtoFactory implements DtoFactory
             $type         = null;
             $iterableType = null;
             $required     = $parameter->required;
+            $default      = null;
 
             if (! $parameter->schema instanceof Schema) {
                 continue;
             }
+
+            /** @var string|int|float|bool|null $schemaDefaultValue */
+            $schemaDefaultValue = $parameter->schema->default;
+
+            $defaultValue = $schemaDefaultValue !== null && class_exists(
+                $this->typeResolver->getPhpType($this->typeResolver->findScalarType($parameter->schema))
+            ) ? null : $schemaDefaultValue;
 
             if (Type::isScalar($parameter->schema->type)) {
                 $typeId = $this->typeResolver->findScalarType($parameter->schema);
@@ -138,6 +147,7 @@ final class PhpParserDtoFactory implements DtoFactory
                         $parameter->name,
                         $type,
                         ! $required,
+                        $defaultValue,
                         $iterableType,
                         $parameter->description
                     )
@@ -147,6 +157,7 @@ final class PhpParserDtoFactory implements DtoFactory
                         $parameter->name,
                         $type,
                         ! $required,
+                        $defaultValue,
                         $iterableType
                     )
                 );
@@ -229,6 +240,7 @@ final class PhpParserDtoFactory implements DtoFactory
 
             $type         = null;
             $iterableType = null;
+            $defaultValue = null;
             /**
              * @psalm-suppress RedundantConditionGivenDocblockType
              */
@@ -237,6 +249,13 @@ final class PhpParserDtoFactory implements DtoFactory
             if ($property instanceof Reference) {
                 throw new Exception('Cannot work with References');
             }
+
+            /** @var string|int|float|bool|null $schemaDefaultValue */
+            $schemaDefaultValue = $property->default;
+
+            $defaultValue = $schemaDefaultValue !== null && class_exists(
+                $this->typeResolver->getPhpType($this->typeResolver->findScalarType($property))
+            ) ? null : $schemaDefaultValue;
 
             if (Type::isScalar($property->type)) {
                 $typeId = $this->typeResolver->findScalarType($property);
@@ -307,6 +326,7 @@ final class PhpParserDtoFactory implements DtoFactory
                     $propertyName,
                     $type,
                     ! $required,
+                    $defaultValue,
                     $iterableType,
                     $property->description
                 )
@@ -328,7 +348,13 @@ final class PhpParserDtoFactory implements DtoFactory
                 }
             }
 
-            $getterBuilders[] = $this->getGetterDefinition($propertyName, $type, ! $required, $iterableType);
+            $getterBuilders[] = $this->getGetterDefinition(
+                $propertyName,
+                $type,
+                ! $required,
+                $defaultValue,
+                $iterableType
+            );
         }
 
         if ($constructorRequired) {
@@ -469,10 +495,14 @@ final class PhpParserDtoFactory implements DtoFactory
         return implode(PHP_EOL, ['/**', ...$lines, ' */']);
     }
 
+    /**
+     * @param string|int|float|bool|null $defaultValue
+     */
     private function getPropertyDefinition(
         string $name,
         string $type,
         bool $nullable = false,
+        $defaultValue = null,
         ?string $iterableType = null,
         ?string $description = null
     ) : Property {
@@ -480,7 +510,9 @@ final class PhpParserDtoFactory implements DtoFactory
             ->property($name)
             ->makePrivate();
 
-        if ($nullable) {
+        if ($defaultValue !== null) {
+            $property->setDefault($defaultValue);
+        } elseif ($nullable) {
             $property->setDefault(null);
         }
 
@@ -490,10 +522,10 @@ final class PhpParserDtoFactory implements DtoFactory
             $docCommentLines[] = sprintf(' %s', $description);
         }
 
-        $nullableDocblock = $nullable ? '|null' : '';
+        $nullableDocblock = $nullable && $defaultValue === null ? '|null' : '';
 
         if (version_compare($this->languageLevel, '7.4.0') >= 0) {
-            $property->setType(($nullable ? '?' : '') . ($iterableType ? 'array' : $type));
+            $property->setType(($nullable && $defaultValue === null ? '?' : '') . ($iterableType ? 'array' : $type));
         }
 
         if (count($docCommentLines) > 0) {
@@ -542,16 +574,20 @@ final class PhpParserDtoFactory implements DtoFactory
         return new Assign(new Variable('this->' . $name), new Variable($name));
     }
 
+    /**
+     * @param string|int|float|bool|null $defaultValue
+     */
     private function getGetterDefinition(
         string $name,
         string $type,
         bool $nullable = false,
+        $defaultValue = null,
         ?string $iterableType = null
     ) : Method {
         $method = $this->factory
             ->method('get' . ucfirst($name))
             ->makePublic()
-            ->setReturnType(($nullable ? '?' : '') . ($iterableType ? 'array' : $type))
+            ->setReturnType(($nullable && $defaultValue === null ? '?' : '') . ($iterableType ? 'array' : $type))
             ->addStmt(new Return_(new Variable('this->' . $name)));
 
         if ($iterableType !== null) {
@@ -559,7 +595,7 @@ final class PhpParserDtoFactory implements DtoFactory
                 sprintf(
                     '/** @return %s[]%s */',
                     $iterableType,
-                    $nullable ? '|null' : ''
+                    $nullable && $defaultValue === null ? '|null' : ''
                 )
             );
         }
