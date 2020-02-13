@@ -6,5 +6,5 @@ namespace OnMoon\OpenApiServerBundle\Interfaces;
 
 interface ApiLoader
 {
-    public function get(string $interfaceName);
+    public function get(string $interfaceName) : ?Service;
 }

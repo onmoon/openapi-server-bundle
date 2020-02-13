@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace OnMoon\OpenApiServerBundle\CodeGenerator\Filesystem;
 
+use function is_dir;
 use function Safe\file_put_contents;
 use function Safe\mkdir;
-use function is_dir;
 use const DIRECTORY_SEPARATOR;
 
 class FilePutContentsFileWriter implements FileWriter

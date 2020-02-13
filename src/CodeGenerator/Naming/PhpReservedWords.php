@@ -77,6 +77,6 @@ final class PhpReservedWords
         'object',
         'resource',
         'mixed',
-        'numeric'
+        'numeric',
     ];
 }

@@ -17,15 +17,11 @@
         <service id="OnMoon\OpenApiServerBundle\CodeGenerator\Naming\NamingStrategy" class="OnMoon\OpenApiServerBundle\CodeGenerator\Naming\DefaultNamingStrategy">
             <argument key="$rootNamespace">%openapi.generated.code.root.namespace%</argument>
         </service>
-        <service id="OnMoon\OpenApiServerBundle\CodeGenerator\Dto\RootDtoFactory" class="\OnMoon\OpenApiServerBundle\CodeGenerator\Dto\PhpParserRootDtoFactory">
-            <argument key="$languageLevel">%openapi.generated.code.language.level%</argument>
-        </service>
+        <service id="OnMoon\OpenApiServerBundle\CodeGenerator\Dto\RootDtoFactory" class="\OnMoon\OpenApiServerBundle\CodeGenerator\Dto\PhpParserRootDtoFactory" />
         <service id="OnMoon\OpenApiServerBundle\CodeGenerator\Dto\DtoFactory" class="OnMoon\OpenApiServerBundle\CodeGenerator\Dto\PhpParserDtoFactory">
             <argument key="$languageLevel">%openapi.generated.code.language.level%</argument>
         </service>
-        <service id="OnMoon\OpenApiServerBundle\CodeGenerator\ServiceInterface\ServiceInterfaceFactory" class="OnMoon\OpenApiServerBundle\CodeGenerator\ServiceInterface\PhpParserServiceInterfaceFactory">
-            <argument key="$languageLevel">%openapi.generated.code.language.level%</argument>
-        </service>
+        <service id="OnMoon\OpenApiServerBundle\CodeGenerator\ServiceInterface\ServiceInterfaceFactory" class="OnMoon\OpenApiServerBundle\CodeGenerator\ServiceInterface\PhpParserServiceInterfaceFactory" />
         <service id="OnMoon\OpenApiServerBundle\CodeGenerator\ServiceSubscriber\ServiceSubscriberFactory" class="OnMoon\OpenApiServerBundle\CodeGenerator\ServiceSubscriber\PhpParserServiceSubscriberFactory" />
         <service id="OnMoon\OpenApiServerBundle\CodeGenerator\Filesystem\FileWriter" class="OnMoon\OpenApiServerBundle\CodeGenerator\Filesystem\FilePutContentsFileWriter">
             <argument key="$dirPemissions">%openapi.generated.code.dir.permissions%</argument>

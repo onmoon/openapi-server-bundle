@@ -6,27 +6,23 @@ namespace OnMoon\OpenApiServerBundle\CodeGenerator\ServiceInterface;
 
 use OnMoon\OpenApiServerBundle\CodeGenerator\GeneratedClass;
 use OnMoon\OpenApiServerBundle\CodeGenerator\Naming\NamingStrategy;
+use OnMoon\OpenApiServerBundle\Interfaces\Service;
 use PhpParser\BuilderFactory;
 use PhpParser\Node\Scalar\LNumber;
 use PhpParser\Node\Stmt\Declare_;
 use PhpParser\Node\Stmt\DeclareDeclare;
 use PhpParser\PrettyPrinter\Standard;
-use function sprintf;
+use function Safe\sprintf;
 
 final class PhpParserServiceInterfaceFactory implements ServiceInterfaceFactory
 {
     private BuilderFactory $factory;
     private NamingStrategy $namingStrategy;
-    private string $languageLevel;
 
-    public function __construct(
-        BuilderFactory $builderFactory,
-        NamingStrategy $namingStrategy,
-        string $languageLevel
-    ) {
-        $this->factory = $builderFactory;
+    public function __construct(BuilderFactory $builderFactory, NamingStrategy $namingStrategy)
+    {
+        $this->factory        = $builderFactory;
         $this->namingStrategy = $namingStrategy;
-        $this->languageLevel = $languageLevel;
     }
 
     public function generateServiceInterface(
@@ -41,10 +37,15 @@ final class PhpParserServiceInterfaceFactory implements ServiceInterfaceFactory
         ?string $outputDtoNamespace = null,
         ?string $outputDtoClassName = null
     ) : GeneratedClass {
-        $fileBuilder      = $this->factory->namespace($namespace);
+        $fileBuilder = $this
+            ->factory
+            ->namespace($namespace)
+            ->addStmt($this->factory->use(Service::class));
+
         $interfaceBuilder = $this
             ->factory
             ->interface($className)
+            ->extend('Service')
             ->setDocComment('/**
                               * This interface was automatically generated
                               * You should not change it manually as it will be overwritten
@@ -87,7 +88,7 @@ final class PhpParserServiceInterfaceFactory implements ServiceInterfaceFactory
             $className,
             (new Standard())->prettyPrintFile([
                 new Declare_([new DeclareDeclare('strict_types', new LNumber(1))]),
-                $fileBuilder->getNode()
+                $fileBuilder->getNode(),
             ])
         );
     }

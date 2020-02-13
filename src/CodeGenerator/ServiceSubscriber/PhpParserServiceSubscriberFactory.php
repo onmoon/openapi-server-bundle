@@ -5,7 +5,8 @@ declare(strict_types=1);
 namespace OnMoon\OpenApiServerBundle\CodeGenerator\ServiceSubscriber;
 
 use OnMoon\OpenApiServerBundle\CodeGenerator\GeneratedClass;
-use OnMoon\OpenApiServerBundle\CodeGenerator\Naming\NamingStrategy;
+use OnMoon\OpenApiServerBundle\Interfaces\ApiLoader;
+use OnMoon\OpenApiServerBundle\Interfaces\Service;
 use PhpParser\Builder\Use_;
 use PhpParser\BuilderFactory;
 use PhpParser\Node\Arg;
@@ -25,17 +26,18 @@ use PhpParser\Node\Stmt\DeclareDeclare;
 use PhpParser\Node\Stmt\If_;
 use PhpParser\Node\Stmt\Return_;
 use PhpParser\PrettyPrinter\Standard;
+use Psr\Container\ContainerInterface;
+use Symfony\Contracts\Service\ServiceSubscriberInterface;
+use function array_map;
 use function array_merge;
 
 final class PhpParserServiceSubscriberFactory implements ServiceSubscriberFactory
 {
     private BuilderFactory $factory;
-    private NamingStrategy $namingStrategy;
 
-    public function __construct(BuilderFactory $builderFactory, NamingStrategy $namingStrategy)
+    public function __construct(BuilderFactory $builderFactory)
     {
         $this->factory = $builderFactory;
-        $this->namingStrategy = $namingStrategy;
     }
 
     /**
@@ -53,9 +55,10 @@ final class PhpParserServiceSubscriberFactory implements ServiceSubscriberFactor
         $fileBuilder->addStmts(
             array_merge(
                 [
-                    $this->factory->use('Psr\Container\ContainerInterface'),
-                    $this->factory->use('Symfony\Contracts\Service\ServiceSubscriberInterface'),
-                    $this->factory->use('OnMoon\OpenApiServerBundle\Interfaces\ApiLoader'),
+                    $this->factory->use(ContainerInterface::class),
+                    $this->factory->use(ServiceSubscriberInterface::class),
+                    $this->factory->use(ApiLoader::class),
+                    $this->factory->use(Service::class),
                 ],
                 array_map(
                     fn (GeneratedClass $generatedClass) : Use_ => $this->factory->use($generatedClass->getFQCN()),
@@ -102,7 +105,7 @@ final class PhpParserServiceSubscriberFactory implements ServiceSubscriberFactor
                             new Return_(
                                 new Array_(
                                     array_map(
-                                        fn (GeneratedClass $generatedClass) : ArrayItem =>
+                                        static fn (GeneratedClass $generatedClass) : ArrayItem =>
                                             new ArrayItem(
                                                 new Concat(
                                                     new String_('?'),
@@ -121,6 +124,7 @@ final class PhpParserServiceSubscriberFactory implements ServiceSubscriberFactor
                         ->factory
                         ->method('get')
                         ->makePublic()
+                        ->setReturnType('?Service')
                         ->addParam(
                             $this->factory->param('interface')->setType('string')
                         )
@@ -131,7 +135,7 @@ final class PhpParserServiceSubscriberFactory implements ServiceSubscriberFactor
                                 [
                                     new Arg(
                                         new Variable('interface')
-                                    )
+                                    ),
                                 ]
                             )), ['stmts' => [new Return_($this->factory->val(null))]])
                         )
@@ -143,11 +147,11 @@ final class PhpParserServiceSubscriberFactory implements ServiceSubscriberFactor
                                     [
                                         new Arg(
                                             new Variable('interface')
-                                        )
+                                        ),
                                     ]
                                 )
                             )
-                        )
+                        ),
                 ]
             );
 
@@ -160,7 +164,7 @@ final class PhpParserServiceSubscriberFactory implements ServiceSubscriberFactor
             $className,
             (new Standard())->prettyPrintFile([
                 new Declare_([new DeclareDeclare('strict_types', new LNumber(1))]),
-                $fileBuilder->getNode()
+                $fileBuilder->getNode(),
             ])
         );
     }

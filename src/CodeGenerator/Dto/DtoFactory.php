@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace OnMoon\OpenApiServerBundle\CodeGenerator\Dto;
 
 use cebe\openapi\spec\Parameter;
-use OnMoon\OpenApiServerBundle\CodeGenerator\GeneratedClass;
 use cebe\openapi\spec\Schema;
+use OnMoon\OpenApiServerBundle\CodeGenerator\GeneratedClass;
 
 interface DtoFactory
 {

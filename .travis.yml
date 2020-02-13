@@ -1,0 +1,42 @@
+dist: trusty
+sudo: false
+language: php
+
+cache:
+  directories:
+    - $HOME/.composer/cache
+
+php:
+  - 7.4
+  - nightly
+
+install:
+  - travis_retry composer self-update
+  - travis_retry composer install --prefer-dist
+
+script: ./vendor/bin/phpunit
+
+jobs:
+  allow_failures:
+    - php: nightly
+    - stage: Security
+  include:
+    - stage: Psalm
+      php: 7.4
+      script: ./vendor/bin/psalm
+
+    - stage: Stan
+      php: 7.4
+      script: ./vendor/bin/phpstan analyze src -l 8 --memory-limit=512m
+
+    - stage: Security
+      php: 7.4
+      script: ./vendor/bin/security-checker security:check
+
+    - stage: Code Style
+      php: 7.4
+      script:
+        - composer show squizlabs/php_codesniffer
+        - composer show doctrine/coding-standard
+        - composer show slevomat/coding-standard
+        - ./vendor/bin/phpcs

@@ -4,8 +4,12 @@ declare(strict_types=1);
 
 namespace OnMoon\OpenApiServerBundle\Command;
 
-use cebe\openapi\spec\OpenApi;
+use cebe\openapi\spec\MediaType;
 use cebe\openapi\spec\Parameter;
+use cebe\openapi\spec\Reference;
+use cebe\openapi\spec\RequestBody;
+use cebe\openapi\spec\Response;
+use cebe\openapi\spec\Responses;
 use cebe\openapi\spec\Schema;
 use cebe\openapi\spec\Type;
 use OnMoon\OpenApiServerBundle\CodeGenerator\Dto\DtoFactory;
@@ -16,16 +20,14 @@ use OnMoon\OpenApiServerBundle\CodeGenerator\Naming\NamingStrategy;
 use OnMoon\OpenApiServerBundle\CodeGenerator\ServiceInterface\ServiceInterfaceFactory;
 use OnMoon\OpenApiServerBundle\CodeGenerator\ServiceSubscriber\ServiceSubscriberFactory;
 use OnMoon\OpenApiServerBundle\Exception\CannotGenerateCodeForOperation;
-use OnMoon\OpenApiServerBundle\Router\RouteLoader;
-use OnMoon\OpenApiServerBundle\Specification\Specification;
 use OnMoon\OpenApiServerBundle\Specification\SpecificationLoader;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
-use Symfony\Component\Routing\RouterInterface;
 use function array_filter;
 use function array_key_exists;
 use function array_merge;
+use function count;
 
 class GenerateApiCodeCommand extends Command
 {
@@ -45,24 +47,10 @@ class GenerateApiCodeCommand extends Command
     private ServiceInterfaceFactory $serviceInterfaceFactory;
     private ServiceSubscriberFactory $serviceSubscriberFactory;
     private FileWriter $fileWriter;
-    private RouterInterface $router;
     private SpecificationLoader $loader;
     private string $rootNamespace;
     private string $rootPath;
 
-    /**
-     * @param NamingStrategy $namingStrategy
-     * @param RootDtoFactory $rootDtoFactory
-     * @param DtoFactory $dtoFactory
-     * @param ServiceInterfaceFactory $serviceInterfaceFactory
-     * @param ServiceSubscriberFactory $serviceSubscriberFactory
-     * @param FileWriter $fileWriter
-     * @param RouterInterface $router
-     * @param SpecificationLoader $loader
-     * @param string $rootNamespace
-     * @param string $rootPath
-     * @param string|null $name
-     */
     public function __construct(
         NamingStrategy $namingStrategy,
         RootDtoFactory $rootDtoFactory,
@@ -70,7 +58,6 @@ class GenerateApiCodeCommand extends Command
         ServiceInterfaceFactory $serviceInterfaceFactory,
         ServiceSubscriberFactory $serviceSubscriberFactory,
         FileWriter $fileWriter,
-        RouterInterface $router,
         SpecificationLoader $loader,
         string $rootNamespace,
         string $rootPath,
@@ -82,7 +69,6 @@ class GenerateApiCodeCommand extends Command
         $this->serviceInterfaceFactory  = $serviceInterfaceFactory;
         $this->serviceSubscriberFactory = $serviceSubscriberFactory;
         $this->fileWriter               = $fileWriter;
-        $this->router                   = $router;
         $this->rootNamespace            = $rootNamespace;
         $this->rootPath                 = $rootPath;
         $this->loader                   = $loader;
@@ -90,7 +76,10 @@ class GenerateApiCodeCommand extends Command
         parent::__construct($name);
     }
 
-    /** @var string */
+    /**
+     * phpcs:disable SlevomatCodingStandard.TypeHints.PropertyTypeHint.MissingNativeTypeHint
+     * @var string
+     */
     protected static $defaultName = 'open-api:generate-code';
 
     protected function execute(InputInterface $input, OutputInterface $output) : ?int
@@ -100,19 +89,21 @@ class GenerateApiCodeCommand extends Command
         /** @var GeneratedClass[] $serviceInterfaces */
         $serviceInterfaces = [];
 
-        foreach ($this->loader->list() as $specificationName=>$specification) {
+        foreach ($this->loader->list() as $specificationName => $specification) {
             $parsedSpecification = $this->loader->load($specificationName);
 
-            if ($parsedSpecification->paths === null) {
-                continue;
-            }
+            $apiName       = $specification->getNameSpace();
+            $specMediaType = $specification->getMediaType();
+            $apiNamespace  = $this->namingStrategy->buildNamespace($this->rootNamespace, self::APIS_NAMESPACE, $apiName);
+            $apiPath       = $this->namingStrategy->buildPath($this->rootPath, self::APIS_NAMESPACE, $apiName);
 
-            $apiName      = $specification->getNameSpace();
-            $specMediaType    = $specification->getMediaType();
-            $apiNamespace = $this->namingStrategy->buildNamespace($this->rootNamespace, self::APIS_NAMESPACE, $apiName);
-            $apiPath      = $this->namingStrategy->buildPath($this->rootPath, self::APIS_NAMESPACE, $apiName);
-
+            /**
+             * @var string $url
+             */
             foreach ($parsedSpecification->paths as $url => $pathItem) {
+                /**
+                 * @var string $method
+                 */
                 foreach ($pathItem->getOperations() as $method => $operation) {
                     $operationId = $operation->operationId;
                     $summary     = $operation->summary;
@@ -121,7 +112,7 @@ class GenerateApiCodeCommand extends Command
                     $operationNamespace = $this->namingStrategy->buildNamespace($apiNamespace, $operationName);
                     $operationPath      = $this->namingStrategy->buildPath($apiPath, $operationName);
 
-                    if ($operationId === null) {
+                    if ($operationId === '') {
                         throw CannotGenerateCodeForOperation::becauseNoOperationIdSpecified(
                             $url,
                             $method,
@@ -139,8 +130,7 @@ class GenerateApiCodeCommand extends Command
                     $requestBody = $operation->requestBody;
                     $responses   = $operation->responses;
 
-                    if ($requestBody !== null &&
-                        $requestBody->content !== null &&
+                    if ($requestBody instanceof RequestBody &&
                         array_key_exists($specMediaType, $requestBody->content)
                     ) {
                         $mediaType = $requestBody->content[$specMediaType];
@@ -157,7 +147,9 @@ class GenerateApiCodeCommand extends Command
                                 $operationName . self::REQUEST_BODY_SUFFIX . self::DTO_SUFFIX
                             );
                             $dtoPath      = $this->namingStrategy->buildPath(
-                                $operationPath, self::DTO_NAMESPACE, self::REQUEST_SUFFIX
+                                $operationPath,
+                                self::DTO_NAMESPACE,
+                                self::REQUEST_SUFFIX
                             );
                             $dtoFileName  = $dtoClassName . '.php';
 
@@ -179,44 +171,52 @@ class GenerateApiCodeCommand extends Command
                         }
                     }
 
-                    if ($responses !== null &&
-                        $responses[200] !== null &&
-                        $responses[200]->content !== null &&
-                        array_key_exists($specMediaType, $responses[200]->content)
+                    if ($responses instanceof Responses &&
+                        $responses->hasResponse('200') &&
+                        $responses->getResponse('200') instanceof Response
                     ) {
-                        $mediaType = $responses[200]->content[$specMediaType];
+                        /** @var Response $response */
+                        $response = $responses->getResponse('200');
 
-                        if ($mediaType->schema instanceof Schema) {
-                            $schema = $mediaType->schema;
+                        if (array_key_exists($specMediaType, $response->content) &&
+                            $response->content[$specMediaType] instanceof MediaType
+                        ) {
+                            $mediaType = $response->content[$specMediaType];
 
-                            $dtoNamespace = $this->namingStrategy->buildNamespace(
-                                $operationNamespace,
-                                self::DTO_NAMESPACE,
-                                self::RESPONSE_SUFFIX
-                            );
-                            $dtoClassName = $this->namingStrategy->stringToNamespace(
-                                $operationName . self::RESPONSE_SUFFIX . self::DTO_SUFFIX
-                            );
-                            $dtoPath      = $this->namingStrategy->buildPath(
-                                $operationPath, self::DTO_NAMESPACE, self::RESPONSE_SUFFIX
-                            );
-                            $dtoFileName  = $dtoClassName . '.php';
+                            if ($mediaType->schema instanceof Schema) {
+                                $schema = $mediaType->schema;
 
-                            $outputDtoNamespace = $dtoNamespace;
-                            $outputDtoClassName = $dtoClassName;
+                                $dtoNamespace = $this->namingStrategy->buildNamespace(
+                                    $operationNamespace,
+                                    self::DTO_NAMESPACE,
+                                    self::RESPONSE_SUFFIX
+                                );
+                                $dtoClassName = $this->namingStrategy->stringToNamespace(
+                                    $operationName . self::RESPONSE_SUFFIX . self::DTO_SUFFIX
+                                );
+                                $dtoPath      = $this->namingStrategy->buildPath(
+                                    $operationPath,
+                                    self::DTO_NAMESPACE,
+                                    self::RESPONSE_SUFFIX
+                                );
+                                $dtoFileName  = $dtoClassName . '.php';
 
-                            /** @var GeneratedClass[] $filesToGenerate */
-                            $filesToGenerate = array_merge(
-                                $filesToGenerate,
-                                $this->generateDtoGraph(
-                                    $schema,
-                                    $dtoPath,
-                                    $dtoFileName,
-                                    $dtoNamespace,
-                                    $dtoClassName,
-                                    false
-                                )
-                            );
+                                $outputDtoNamespace = $dtoNamespace;
+                                $outputDtoClassName = $dtoClassName;
+
+                                /** @var GeneratedClass[] $filesToGenerate */
+                                $filesToGenerate = array_merge(
+                                    $filesToGenerate,
+                                    $this->generateDtoGraph(
+                                        $schema,
+                                        $dtoPath,
+                                        $dtoFileName,
+                                        $dtoNamespace,
+                                        $dtoClassName,
+                                        false
+                                    )
+                                );
+                            }
                         }
                     }
 
@@ -224,8 +224,7 @@ class GenerateApiCodeCommand extends Command
 
                     $parameters = array_merge($pathItem->parameters, $operation->parameters);
 
-                    if(count($parameters) or !is_null($inputDtoClassName)) {
-
+                    if (count($parameters) || $inputDtoClassName !== null) {
                         $dtoNamespace = $this->namingStrategy->buildNamespace(
                             $operationNamespace,
                             self::DTO_NAMESPACE,
@@ -234,10 +233,12 @@ class GenerateApiCodeCommand extends Command
                         $dtoClassName = $this->namingStrategy->stringToNamespace(
                             $operationName . self::REQUEST_SUFFIX . self::DTO_SUFFIX
                         );
-                        $dtoPath = $this->namingStrategy->buildPath(
-                            $operationPath, self::DTO_NAMESPACE, self::REQUEST_SUFFIX
+                        $dtoPath      = $this->namingStrategy->buildPath(
+                            $operationPath,
+                            self::DTO_NAMESPACE,
+                            self::REQUEST_SUFFIX
                         );
-                        $dtoFileName = $dtoClassName . '.php';
+                        $dtoFileName  = $dtoClassName . '.php';
 
                         $rootDtoNamespace = $dtoNamespace;
                         $rootDtoClassName = $dtoClassName;
@@ -255,7 +256,6 @@ class GenerateApiCodeCommand extends Command
                                 $this->filterAllowedParameters($parameters, 'query')
                             )
                         );
-
                     }
 
                     // Service interface generation
@@ -309,15 +309,24 @@ class GenerateApiCodeCommand extends Command
     }
 
     /**
-     * @param Parameter[] $parameters
-     * @param string $in
+     * @param Parameter[]|Reference[] $parameters
+     *
      * @return Parameter[]
      */
     private function filterAllowedParameters(array $parameters, string $in) : array
     {
-        return array_filter($parameters, fn (Parameter $parameter) : bool => $parameter->in === $in);
+        /** @var Parameter[] $parameters */
+        $parameters = array_filter(
+            $parameters,
+            static fn ($parameter) : bool =>$parameter instanceof Parameter && $parameter->in === $in
+        );
+
+        return $parameters;
     }
 
+    /**
+     * @return GeneratedClass[]
+     */
     private function generateDtoGraph(
         Schema $schema,
         string $dtoPath,
@@ -330,7 +339,6 @@ class GenerateApiCodeCommand extends Command
             return [];
         }
 
-        /** @var GeneratedClass[] $filesToGenerate */
         return $this->dtoFactory->generateDtoClassGraph(
             $dtoPath,
             $dtoFileName,
@@ -340,5 +348,4 @@ class GenerateApiCodeCommand extends Command
             $schema
         );
     }
-
 }
