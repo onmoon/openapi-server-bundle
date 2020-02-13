@@ -13,12 +13,12 @@ use Symfony\Component\Routing\Route;
 interface DtoSerializer
 {
     /**
-     * @psalm-param class-string<Service> $serviceInterface
+     * @psalm-param class-string<Service> $requestHandlerInterface
      */
     public function createRequestDto(
         Request $request,
         Route $route,
-        string $serviceInterface,
+        string $requestHandlerInterface,
         string $methodName
     ) : ?Dto;
 

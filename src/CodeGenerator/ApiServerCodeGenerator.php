@@ -15,15 +15,26 @@ use cebe\openapi\spec\Responses;
 use cebe\openapi\spec\Schema;
 use cebe\openapi\spec\Type;
 use Lukasoppermann\Httpstatus\Httpstatus;
+use OnMoon\OpenApiServerBundle\CodeGenerator\Dto\Definitions\Factory\RequestBodyDtoDefinitionFactory;
+use OnMoon\OpenApiServerBundle\CodeGenerator\Dto\Definitions\Factory\RequestDtoDefinitionFactory;
+use OnMoon\OpenApiServerBundle\CodeGenerator\Dto\Definitions\Factory\ResponseDtoDefinitionFactory;
+use OnMoon\OpenApiServerBundle\CodeGenerator\Dto\Definitions\Factory\ResponseDtoMarkerInterfaceDefinitionFactory;
+use OnMoon\OpenApiServerBundle\CodeGenerator\Dto\Definitions\SchemaBasedDtoDefinition;
 use OnMoon\OpenApiServerBundle\CodeGenerator\Dto\DtoFactory;
-use OnMoon\OpenApiServerBundle\CodeGenerator\Dto\RootDtoFactory;
+use OnMoon\OpenApiServerBundle\CodeGenerator\Dto\RequestDtoFactory;
 use OnMoon\OpenApiServerBundle\CodeGenerator\Filesystem\FileWriter;
 use OnMoon\OpenApiServerBundle\CodeGenerator\Naming\NamingStrategy;
-use OnMoon\OpenApiServerBundle\CodeGenerator\ServiceInterface\ServiceInterfaceFactory;
+use OnMoon\OpenApiServerBundle\CodeGenerator\RequestHandlerInterface\Definitions\Factory\RequestHandlerInterfaceDefinitionFactory;
+use OnMoon\OpenApiServerBundle\CodeGenerator\RequestHandlerInterface\Definitions\RequestHandlerInterfaceDefinition;
+use OnMoon\OpenApiServerBundle\CodeGenerator\RequestHandlerInterface\RequestHandlerInterfaceFactory;
+use OnMoon\OpenApiServerBundle\CodeGenerator\ServiceSubscriber\Definitions\Factory\ServiceSubscriberDefinitionFactory;
 use OnMoon\OpenApiServerBundle\CodeGenerator\ServiceSubscriber\ServiceSubscriberFactory;
+use OnMoon\OpenApiServerBundle\Event\RequestDtoGenerationEvent;
+use OnMoon\OpenApiServerBundle\Event\ResponseDtoMarkerInterfaceGenerationEvent;
+use OnMoon\OpenApiServerBundle\Event\ServiceSubscriberGenerationEvent;
 use OnMoon\OpenApiServerBundle\Exception\CannotGenerateCodeForOperation;
 use OnMoon\OpenApiServerBundle\Specification\SpecificationLoader;
-use Throwable;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use function array_filter;
 use function array_key_exists;
 use function array_merge;
@@ -31,19 +42,11 @@ use function count;
 
 class ApiServerCodeGenerator
 {
-    public const APIS_NAMESPACE                = 'Apis';
-    private const DTO_NAMESPACE                = 'Dto';
-    private const SERVICE_SUBSCRIBER_NAMESPACE = 'ServiceSubscriber';
-    private const SERVICE_SUBSCRIBER_CLASSNAME = 'ApiServiceLoaderServiceSubscriber';
-    private const REQUEST_SUFFIX               = 'Request';
-    private const REQUEST_BODY_SUFFIX          = 'RequestBody';
-    private const RESPONSE_SUFFIX              = 'Response';
-    private const DTO_SUFFIX                   = 'Dto';
-
+    private EventDispatcherInterface $eventDispatcher;
     private NamingStrategy $namingStrategy;
-    private RootDtoFactory $rootDtoFactory;
+    private RequestDtoFactory $requestDtoFactory;
     private DtoFactory $dtoFactory;
-    private ServiceInterfaceFactory $serviceInterfaceFactory;
+    private RequestHandlerInterfaceFactory $requestHandlerInterfaceFactory;
     private ServiceSubscriberFactory $serviceSubscriberFactory;
     private FileWriter $fileWriter;
     private SpecificationLoader $loader;
@@ -52,10 +55,11 @@ class ApiServerCodeGenerator
     private string $rootPath;
 
     public function __construct(
+        EventDispatcherInterface $eventDispatcher,
         NamingStrategy $namingStrategy,
-        RootDtoFactory $rootDtoFactory,
+        RequestDtoFactory $requestDtoFactory,
         DtoFactory $dtoFactory,
-        ServiceInterfaceFactory $serviceInterfaceFactory,
+        RequestHandlerInterfaceFactory $requestHandlerInterfaceFactory,
         ServiceSubscriberFactory $serviceSubscriberFactory,
         FileWriter $fileWriter,
         SpecificationLoader $loader,
@@ -63,32 +67,28 @@ class ApiServerCodeGenerator
         string $rootNamespace,
         string $rootPath
     ) {
-        $this->namingStrategy           = $namingStrategy;
-        $this->rootDtoFactory           = $rootDtoFactory;
-        $this->dtoFactory               = $dtoFactory;
-        $this->serviceInterfaceFactory  = $serviceInterfaceFactory;
-        $this->serviceSubscriberFactory = $serviceSubscriberFactory;
-        $this->fileWriter               = $fileWriter;
-        $this->loader                   = $loader;
-        $this->httpstatus               = $httpstatus;
-        $this->rootNamespace            = $rootNamespace;
-        $this->rootPath                 = $rootPath;
+        $this->eventDispatcher                = $eventDispatcher;
+        $this->namingStrategy                 = $namingStrategy;
+        $this->requestDtoFactory              = $requestDtoFactory;
+        $this->dtoFactory                     = $dtoFactory;
+        $this->requestHandlerInterfaceFactory = $requestHandlerInterfaceFactory;
+        $this->serviceSubscriberFactory       = $serviceSubscriberFactory;
+        $this->fileWriter                     = $fileWriter;
+        $this->loader                         = $loader;
+        $this->httpstatus                     = $httpstatus;
+        $this->rootNamespace                  = $rootNamespace;
+        $this->rootPath                       = $rootPath;
     }
 
     public function generate() : void
     {
         /** @var GeneratedClass[] $filesToGenerate */
         $filesToGenerate = [];
-        /** @var GeneratedClass[] $serviceInterfaces */
-        $serviceInterfaces = [];
+        /** @var RequestHandlerInterfaceDefinition[] $requestHandlerInterfaces */
+        $requestHandlerInterfaces = [];
 
         foreach ($this->loader->list() as $specificationName => $specification) {
             $parsedSpecification = $this->loader->load($specificationName);
-
-            $apiName       = $this->namingStrategy->stringToNamespace($specification->getNameSpace());
-            $specMediaType = $specification->getMediaType();
-            $apiNamespace  = $this->namingStrategy->buildNamespace($this->rootNamespace, self::APIS_NAMESPACE, $apiName);
-            $apiPath       = $this->namingStrategy->buildPath($this->rootPath, self::APIS_NAMESPACE, $apiName);
 
             /**
              * @var string $url
@@ -101,10 +101,6 @@ class ApiServerCodeGenerator
                     $operationId = $operation->operationId;
                     $summary     = $operation->summary;
 
-                    $operationName      = $this->namingStrategy->stringToNamespace($operationId);
-                    $operationNamespace = $this->namingStrategy->buildNamespace($apiNamespace, $operationName);
-                    $operationPath      = $this->namingStrategy->buildPath($apiPath, $operationName);
-
                     if ($operationId === '') {
                         throw CannotGenerateCodeForOperation::becauseNoOperationIdSpecified(
                             $url,
@@ -113,240 +109,167 @@ class ApiServerCodeGenerator
                         );
                     }
 
-                    $rootDtoNamespace  = null;
-                    $rootDtoClassName  = null;
-                    $inputDtoNamespace = null;
-                    $inputDtoClassName = null;
-                    /** @psalm-var list<array{namespace: string, className: string, code: int}> $outputDtos */
-                    $outputDtos                        = [];
-                    $outputDtoMarkerInterfaceNamespace = null;
-                    $outputDtoMarkerInterfaceClassName = null;
+                    $requestDtoDefinition                 = null;
+                    $requestBodyDtoDefinition             = null;
+                    $responseDtoDefinitions               = [];
+                    $responseDtoMarkerInterfaceDefinition = null;
 
                     $requestBody = $operation->requestBody;
                     $responses   = $operation->responses;
 
+                    // Request body dto generation
+
                     if ($requestBody instanceof RequestBody &&
-                        array_key_exists($specMediaType, $requestBody->content)
+                        array_key_exists($specification->getMediaType(), $requestBody->content)
                     ) {
-                        $mediaType = $requestBody->content[$specMediaType];
+                        $mediaType = $requestBody->content[$specification->getMediaType()];
 
                         if ($mediaType->schema instanceof Schema) {
-                            $schema = $mediaType->schema;
-
-                            $dtoNamespace = $this->namingStrategy->buildNamespace(
-                                $operationNamespace,
-                                self::DTO_NAMESPACE,
-                                self::REQUEST_SUFFIX
-                            );
-                            $dtoClassName = $this->namingStrategy->stringToNamespace(
-                                $operationName . self::REQUEST_BODY_SUFFIX . self::DTO_SUFFIX
-                            );
-                            $dtoPath      = $this->namingStrategy->buildPath(
-                                $operationPath,
-                                self::DTO_NAMESPACE,
-                                self::REQUEST_SUFFIX
-                            );
-                            $dtoFileName  = $dtoClassName . '.php';
-
-                            $inputDtoNamespace = $dtoNamespace;
-                            $inputDtoClassName = $dtoClassName;
+                            $requestBodyDtoDefinition = (new RequestBodyDtoDefinitionFactory(
+                                $specification,
+                                $operation,
+                                $this->namingStrategy,
+                                $this->rootNamespace,
+                                $this->rootPath
+                            ))->create($mediaType->schema);
 
                             /** @var GeneratedClass[] $filesToGenerate */
                             $filesToGenerate = array_merge(
                                 $filesToGenerate,
-                                $this->generateDtoGraph(
-                                    $schema,
-                                    $dtoPath,
-                                    $dtoFileName,
-                                    $dtoNamespace,
-                                    $dtoClassName,
-                                    true
-                                )
+                                $this->generateDtoGraph($requestBodyDtoDefinition)
                             );
                         }
                     }
 
+                    // Response dtos generation
+
                     if ($responses instanceof Responses) {
-                        $outputDtosToGenerate = [];
                         /**
-                         * @var int $responseCode
+                         * @var string $responseCode
                          */
                         foreach ($responses->getResponses() as $responseCode => $response) {
                             if (! ($response instanceof Response)) {
                                 continue;
                             }
 
-                            if (! array_key_exists($specMediaType, $response->content) ||
-                                ! $response->content[$specMediaType] instanceof MediaType
+                            if (! array_key_exists($specification->getMediaType(), $response->content) ||
+                                ! $response->content[$specification->getMediaType()] instanceof MediaType
                             ) {
                                 continue;
                             }
 
-                            $mediaType = $response->content[$specMediaType];
+                            /** @var MediaType $mediaType */
+                            $mediaType = $response->content[$specification->getMediaType()];
 
                             if (! ($mediaType->schema instanceof Schema)) {
                                 continue;
                             }
 
-                            $schema = $mediaType->schema;
+                            $responseDtoDefinition = (new ResponseDtoDefinitionFactory(
+                                $specification,
+                                $operation,
+                                $this->namingStrategy,
+                                $this->httpstatus,
+                                $this->rootNamespace,
+                                $this->rootPath
+                            ))->create($mediaType->schema, (string) $responseCode);
 
-                            try {
-                                $statusNamespace = $this->httpstatus->getReasonPhrase((string) $responseCode);
-                            } catch (Throwable $e) {
-                                $statusNamespace = (string) $responseCode;
+                            $responseDtoDefinitions[] = $responseDtoDefinition;
+                        }
+
+                        if (count($responseDtoDefinitions) > 1) {
+                            $responseDtoMarkerInterfaceDefinition = (new ResponseDtoMarkerInterfaceDefinitionFactory(
+                                $specification,
+                                $operation,
+                                $this->namingStrategy,
+                                $this->rootNamespace,
+                                $this->rootPath
+                            ))->create();
+
+                            $this->eventDispatcher->dispatch(
+                                new ResponseDtoMarkerInterfaceGenerationEvent($responseDtoMarkerInterfaceDefinition)
+                            );
+
+                            $filesToGenerate[] = $this->dtoFactory->generateResponseMarkerInterface(
+                                $responseDtoMarkerInterfaceDefinition
+                            );
+
+                            foreach ($responseDtoDefinitions as $responseDtoDefinition) {
+                                $responseDtoDefinition->setMarkerInterfaceDefinition(
+                                    $responseDtoMarkerInterfaceDefinition
+                                );
                             }
-
-                            $statusNamespace = $this->namingStrategy->stringToNamespace($statusNamespace);
-
-                            $dtoNamespace = $this->namingStrategy->buildNamespace(
-                                $operationNamespace,
-                                self::DTO_NAMESPACE,
-                                self::RESPONSE_SUFFIX,
-                                $statusNamespace
-                            );
-                            $dtoClassName = $this->namingStrategy->stringToNamespace(
-                                $operationName . self::RESPONSE_SUFFIX . self::DTO_SUFFIX
-                            );
-                            $dtoPath      = $this->namingStrategy->buildPath(
-                                $operationPath,
-                                self::DTO_NAMESPACE,
-                                self::RESPONSE_SUFFIX,
-                                $statusNamespace
-                            );
-                            $dtoFileName  = $dtoClassName . '.php';
-
-                            $outputDtos[]           = [
-                                'namespace' => $dtoNamespace,
-                                'className' => $dtoClassName,
-                                'code' => $responseCode,
-                            ];
-                            $outputDtosToGenerate[] = [
-                                'schema' => $schema,
-                                'dtoPath' => $dtoPath,
-                                'dtoFileName' => $dtoFileName,
-                                'dtoNameSpace' => $dtoNamespace,
-                                'dtoClassName' => $dtoClassName,
-                                'responseCode' => (int) $responseCode === 0 ? 200 : (int) $responseCode,
-                            ];
                         }
 
-                        if (count($outputDtos) > 1) {
-                            $outputDtoMarkerInterfaceNamespace = $this->namingStrategy->buildNamespace(
-                                $operationNamespace,
-                                self::DTO_NAMESPACE,
-                                self::RESPONSE_SUFFIX
-                            );
-                            $outputDtoMarkerInterfaceClassName = $this->namingStrategy->stringToNamespace(
-                                $operationName . self::RESPONSE_SUFFIX
-                            );
-                            $interfacePath                     = $this->namingStrategy->buildPath(
-                                $operationPath,
-                                self::DTO_NAMESPACE,
-                                self::RESPONSE_SUFFIX
-                            );
-                            $interfaceFileName                 = $outputDtoMarkerInterfaceClassName . '.php';
-
-                            $filesToGenerate[] = $this->dtoFactory->generateOutputMarkerInterface(
-                                $interfacePath,
-                                $interfaceFileName,
-                                $outputDtoMarkerInterfaceNamespace,
-                                $outputDtoMarkerInterfaceClassName
-                            );
-                        }
-
-                        foreach ($outputDtosToGenerate as $outputDtoToGenerate) {
+                        foreach ($responseDtoDefinitions as $responseDtoDefinition) {
                             /** @var GeneratedClass[] $filesToGenerate */
                             $filesToGenerate = array_merge(
                                 $filesToGenerate,
-                                $this->generateDtoGraph(
-                                    $outputDtoToGenerate['schema'],
-                                    $outputDtoToGenerate['dtoPath'],
-                                    $outputDtoToGenerate['dtoFileName'],
-                                    $outputDtoToGenerate['dtoNameSpace'],
-                                    $outputDtoToGenerate['dtoClassName'],
-                                    false,
-                                    $outputDtoToGenerate['responseCode'],
-                                    $outputDtoMarkerInterfaceNamespace,
-                                    $outputDtoMarkerInterfaceClassName
-                                )
+                                $this->generateDtoGraph($responseDtoDefinition)
                             );
                         }
                     }
 
-                    // Root dto generation
+                    // Request dto generation
 
                     $parameters = $this->mergeParameters($pathItem, $operation);
 
-                    if (count($parameters) || $inputDtoClassName !== null) {
-                        $dtoNamespace = $this->namingStrategy->buildNamespace(
-                            $operationNamespace,
-                            self::DTO_NAMESPACE,
-                            self::REQUEST_SUFFIX
-                        );
-                        $dtoClassName = $this->namingStrategy->stringToNamespace(
-                            $operationName . self::REQUEST_SUFFIX . self::DTO_SUFFIX
-                        );
-                        $dtoPath      = $this->namingStrategy->buildPath(
-                            $operationPath,
-                            self::DTO_NAMESPACE,
-                            self::REQUEST_SUFFIX
-                        );
-                        $dtoFileName  = $dtoClassName . '.php';
+                    if (count($parameters) || $requestBodyDtoDefinition !== null) {
+                        $requestDtoDefinition = (new RequestDtoDefinitionFactory(
+                            $specification,
+                            $operation,
+                            $this->namingStrategy,
+                            $this->rootNamespace,
+                            $this->rootPath
+                        ))->create($requestBodyDtoDefinition);
 
-                        $rootDtoNamespace = $dtoNamespace;
-                        $rootDtoClassName = $dtoClassName;
+                        $this->eventDispatcher->dispatch(new RequestDtoGenerationEvent($requestDtoDefinition));
 
                         $filesToGenerate = array_merge(
                             $filesToGenerate,
-                            $this->rootDtoFactory->generateRootDto(
-                                $dtoPath,
-                                $dtoFileName,
-                                $dtoNamespace,
-                                $dtoClassName,
-                                $inputDtoNamespace,
-                                $inputDtoClassName,
-                                $this->filterSupportedParameters($parameters, 'path'),
-                                $this->filterSupportedParameters($parameters, 'query')
-                            )
+                            $this->requestDtoFactory->generateDto($requestDtoDefinition)
                         );
                     }
 
-                    // Service interface generation
+                    // Request handler interface generation
 
-                    $operationName             = $this->namingStrategy->stringToNamespace($operationId);
-                    $serviceInterfaceNamesapce = $this->namingStrategy->buildNamespace($apiNamespace, $operationName);
-                    $serviceInterfacePath      = $this->namingStrategy->buildPath($apiPath, $operationName);
-
-                    $serviceInterfaceClassName = $this->namingStrategy->stringToNamespace($operationName);
-                    $serviceInterfaceMethod    = $this->namingStrategy->stringToMethodName($operationId);
-                    $serviceInterfaceFileName  = $serviceInterfaceClassName . '.php';
-
-                    $serviceInterface = $this->serviceInterfaceFactory->generateServiceInterface(
-                        $serviceInterfacePath,
-                        $serviceInterfaceFileName,
-                        $serviceInterfaceNamesapce,
-                        $serviceInterfaceClassName,
-                        $serviceInterfaceMethod,
+                    $requestHandlerInterfaceDefinition = (new RequestHandlerInterfaceDefinitionFactory(
+                        $specification,
+                        $operation,
+                        $this->namingStrategy,
+                        $this->rootNamespace,
+                        $this->rootPath
+                    ))->create(
+                        $requestDtoDefinition,
                         $summary,
-                        $rootDtoNamespace,
-                        $rootDtoClassName,
-                        $outputDtos,
-                        $outputDtoMarkerInterfaceNamespace,
-                        $outputDtoMarkerInterfaceClassName
+                        $responseDtoMarkerInterfaceDefinition,
+                        ...$responseDtoDefinitions
                     );
 
-                    $filesToGenerate[]   = $serviceInterface;
-                    $serviceInterfaces[] = $serviceInterface;
+                    $requestHandlerInterface = $this->requestHandlerInterfaceFactory->generateInterface(
+                        $requestHandlerInterfaceDefinition
+                    );
+
+                    $filesToGenerate[]          = $requestHandlerInterface;
+                    $requestHandlerInterfaces[] = $requestHandlerInterfaceDefinition;
                 }
             }
         }
 
+        // Service subscriber generation
+
+        $serviceSubscriberDefinition = (new ServiceSubscriberDefinitionFactory(
+            $this->namingStrategy,
+            $this->rootNamespace,
+            $this->rootPath
+        ))->create(
+            ...$requestHandlerInterfaces
+        );
+
+        $this->eventDispatcher->dispatch(new ServiceSubscriberGenerationEvent($serviceSubscriberDefinition));
+
         $filesToGenerate[] = $this->serviceSubscriberFactory->generateServiceSubscriber(
-            $this->namingStrategy->buildPath($this->rootPath, self::SERVICE_SUBSCRIBER_NAMESPACE),
-            self::SERVICE_SUBSCRIBER_CLASSNAME . '.php',
-            $this->namingStrategy->buildNamespace($this->rootNamespace, self::SERVICE_SUBSCRIBER_NAMESPACE),
-            self::SERVICE_SUBSCRIBER_CLASSNAME,
-            $serviceInterfaces
+            $serviceSubscriberDefinition
         );
 
         foreach ($filesToGenerate as $fileToGenerate) {
@@ -356,16 +279,6 @@ class ApiServerCodeGenerator
                 $fileToGenerate->getFileContents()
             );
         }
-    }
-
-    /**
-     * @param Parameter[] $parameters
-     *
-     * @return Parameter[]
-     */
-    private function filterSupportedParameters(array $parameters, string $in) : array
-    {
-        return array_filter($parameters, static fn ($parameter) : bool => $parameter->in === $in);
     }
 
     /**
@@ -410,31 +323,12 @@ class ApiServerCodeGenerator
     /**
      * @return GeneratedClass[]
      */
-    private function generateDtoGraph(
-        Schema $schema,
-        string $dtoPath,
-        string $dtoFileName,
-        string $dtoNamespace,
-        string $dtoClassName,
-        bool $immutable,
-        ?int $outputResponseCode = null,
-        ?string $outputMarkerInterfaceNamespace = null,
-        ?string $outputMarkerInterfaceClassName = null
-    ) : array {
-        if ($schema->type !== Type::OBJECT) {
+    private function generateDtoGraph(SchemaBasedDtoDefinition $definition) : array
+    {
+        if ($definition->schema()->type !== Type::OBJECT) {
             return [];
         }
 
-        return $this->dtoFactory->generateDtoClassGraph(
-            $dtoPath,
-            $dtoFileName,
-            $dtoNamespace,
-            $dtoClassName,
-            $immutable,
-            $schema,
-            $outputResponseCode,
-            $outputMarkerInterfaceNamespace,
-            $outputMarkerInterfaceClassName
-        );
+        return $this->dtoFactory->generateDtoClassGraph($definition);
     }
 }

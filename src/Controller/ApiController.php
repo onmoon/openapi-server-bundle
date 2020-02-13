@@ -4,26 +4,32 @@ declare(strict_types=1);
 
 namespace OnMoon\OpenApiServerBundle\Controller;
 
+use cebe\openapi\spec\OpenApi;
 use cebe\openapi\spec\Operation;
 use cebe\openapi\spec\PathItem;
-use Exception;
-use League\OpenAPIValidation\PSR7\OperationAddress;
-use League\OpenAPIValidation\PSR7\ValidatorBuilder;
-use Nyholm\Psr7\Factory\Psr17Factory;
 use OnMoon\OpenApiServerBundle\CodeGenerator\Naming\NamingStrategy;
+use OnMoon\OpenApiServerBundle\Event\RequestDtoEvent;
+use OnMoon\OpenApiServerBundle\Event\RequestEvent;
+use OnMoon\OpenApiServerBundle\Event\ResponseDtoEvent;
+use OnMoon\OpenApiServerBundle\Event\ResponseEvent;
 use OnMoon\OpenApiServerBundle\Exception\ApiCallFailed;
 use OnMoon\OpenApiServerBundle\Interfaces\ApiLoader;
+use OnMoon\OpenApiServerBundle\Interfaces\Dto;
 use OnMoon\OpenApiServerBundle\Interfaces\ResponseDto;
+use OnMoon\OpenApiServerBundle\Interfaces\Service;
 use OnMoon\OpenApiServerBundle\Interfaces\SetClientIp;
 use OnMoon\OpenApiServerBundle\Interfaces\SetRequest;
 use OnMoon\OpenApiServerBundle\Router\RouteLoader;
 use OnMoon\OpenApiServerBundle\Serializer\DtoSerializer;
 use OnMoon\OpenApiServerBundle\Specification\SpecificationLoader;
-use Symfony\Bridge\PsrHttpMessage\Factory\PsrHttpFactory;
+use OnMoon\OpenApiServerBundle\Validator\RequestSchemaValidator;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+use Symfony\Component\Routing\Route;
 use Symfony\Component\Routing\RouterInterface;
+use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 use const JSON_PRETTY_PRINT;
 use const JSON_THROW_ON_ERROR;
 use const JSON_UNESCAPED_UNICODE;
@@ -31,88 +37,166 @@ use const JSON_UNESCAPED_UNICODE;
 class ApiController
 {
     private ?ApiLoader $apiLoader = null;
+    private SpecificationLoader $specificationLoader;
+    private RouterInterface $router;
+    private DtoSerializer $serializer;
+    private NamingStrategy $namingStrategy;
+    private EventDispatcherInterface $eventDispatcher;
+    private RequestSchemaValidator $requestValidator;
+
+    public function __construct(
+        SpecificationLoader $specificationLoader,
+        RouterInterface $router,
+        DtoSerializer $serializer,
+        NamingStrategy $namingStrategy,
+        EventDispatcherInterface $eventDispatcher,
+        RequestSchemaValidator $requestValidator
+    ) {
+        $this->specificationLoader = $specificationLoader;
+        $this->router              = $router;
+        $this->serializer          = $serializer;
+        $this->namingStrategy      = $namingStrategy;
+        $this->eventDispatcher     = $eventDispatcher;
+        $this->requestValidator    = $requestValidator;
+    }
 
     public function setApiLoader(ApiLoader $loader) : void
     {
         $this->apiLoader = $loader;
     }
 
-    public function handle(
+    public function handle(Request $request) : Response
+    {
+        $route         = $this->getRoute($request);
+        $path          = (string) $route->getOption(RouteLoader::OPENAPI_PATH);
+        $method        = (string) $route->getOption(RouteLoader::OPENAPI_METHOD);
+        $specification = $this->getSpecification($route);
+        $operation     = $this->getOperation($specification, $path, $method);
+
+        $this->eventDispatcher->dispatch(new RequestEvent($request, $operation, $path, $method));
+        $this->requestValidator->validate($request, $specification, $path, $method);
+
+        $requestDto = $this->createRequestDto($request, $route, $operation);
+        $this->eventDispatcher->dispatch(new RequestDtoEvent($requestDto, $operation, $path, $method));
+
+        $responseDto = $this->executeRequestHandler($request, $route, $operation, $requestDto);
+        $this->eventDispatcher->dispatch(new ResponseDtoEvent($responseDto, $operation, $path, $method));
+
+        $response = $this->createResponse($responseDto);
+        $this->eventDispatcher->dispatch(new ResponseEvent($response, $operation, $path, $method));
+
+        return $response;
+    }
+
+    private function getSpecificationName(Route $route) : string
+    {
+        return (string) $route->getOption(RouteLoader::OPENAPI_SPEC);
+    }
+
+    private function getSpecification(Route $route) : OpenApi
+    {
+        return $this->specificationLoader->load($this->getSpecificationName($route));
+    }
+
+    /**
+     * @psalm-return class-string<Service>
+     */
+    private function getRequestHandlerInterface(Route $route, Operation $operation) : string
+    {
+        $specificationName      = $this->getSpecificationName($route);
+        $specificationNamespace = $this->specificationLoader->get($specificationName)->getNameSpace();
+
+        return $this->namingStrategy->getInterfaceFQCN($specificationNamespace, $operation->operationId);
+    }
+
+    private function createRequestDto(
         Request $request,
-        RouterInterface $router,
-        NamingStrategy $namingStrategy,
-        DtoSerializer $serializer,
-        SpecificationLoader $loader
-    ) : Response {
-        $routeName = (string) $request->attributes->get('_route', '');
-        $route     = $router->getRouteCollection()->get($routeName);
+        Route $route,
+        Operation $operation
+    ) : ?Dto {
+        return $this->serializer->createRequestDto(
+            $request,
+            $route,
+            $this->getRequestHandlerInterface($route, $operation),
+            $this->namingStrategy->stringToMethodName($operation->operationId)
+        );
+    }
 
-        if ($route === null) {
-            throw new Exception('Route not found');
-        }
+    private function executeRequestHandler(
+        Request $request,
+        Route $route,
+        Operation $operation,
+        ?Dto $requestDto
+    ) : ?ResponseDto {
+        $requestHandlerMethodName = $this->namingStrategy->stringToMethodName($operation->operationId);
 
-        $path      = (string) $route->getOption(RouteLoader::OPENAPI_PATH);
-        $method    = (string) $route->getOption(RouteLoader::OPENAPI_METHOD);
-        $specName  = (string) $route->getOption(RouteLoader::OPENAPI_SPEC);
-        $nameSpace = $loader->get($specName)->getNameSpace();
-        $spec      = $loader->load($specName);
+        $requestHandler = $this->getRequestHandler($request, $this->getRequestHandlerInterface($route, $operation));
 
-        /** @var PathItem $pathItem */
-        $pathItem = $spec->paths[$path];
-        /** @var Operation $operation */
-        $operation = $pathItem->{$method};
+        /** @var ResponseDto|null $responseDto */
+        $responseDto = $requestDto !== null ?
+            $requestHandler->{$requestHandlerMethodName}($requestDto) :
+            $requestHandler->{$requestHandlerMethodName}();
 
-        $operationId = $operation->operationId;
+        return $responseDto;
+    }
 
-        $psr17Factory = new Psr17Factory();
-
-        (new ValidatorBuilder())
-            ->fromSchema($spec)
-            ->getRoutedRequestValidator()
-            ->validate(
-                new OperationAddress(
-                    $path,
-                    $method
-                ),
-                (new PsrHttpFactory($psr17Factory, $psr17Factory, $psr17Factory, $psr17Factory))
-                    ->createRequest($request)
-            );
-
+    private function getRequestHandler(Request $request, string $requestHandlerInterface) : Service
+    {
         if ($this->apiLoader === null) {
             throw ApiCallFailed::becauseApiLoaderNotFound();
         }
 
-        $apiInterface = $namingStrategy->getInterfaceFQCN($nameSpace, $operationId);
-        $methodName   = $namingStrategy->stringToMethodName($operationId);
+        $requestHandler = $this->apiLoader->get($requestHandlerInterface);
 
-        $service = $this->apiLoader->get($apiInterface);
-
-        if ($service === null) {
-            throw ApiCallFailed::becauseNotImplemented($apiInterface);
+        if ($requestHandler === null) {
+            throw ApiCallFailed::becauseNotImplemented($requestHandlerInterface);
         }
 
-        if ($service instanceof SetRequest) {
-            $service->setRequest($request);
+        if ($requestHandler instanceof SetRequest) {
+            $requestHandler->setRequest($request);
         }
 
-        if ($service instanceof SetClientIp) {
-            $service->setClientIp((string) $request->getClientIp());
+        if ($requestHandler instanceof SetClientIp) {
+            $requestHandler->setClientIp((string) $request->getClientIp());
         }
 
-        $requestDto = $serializer->createRequestDto($request, $route, $apiInterface, $methodName);
-        /** @var ResponseDto|null $responseDto */
-        $responseDto = $requestDto ? $service->{$methodName}($requestDto) : $service->{$methodName}();
+        return $requestHandler;
+    }
 
+    private function getOperation(OpenApi $specification, string $path, string $method) : Operation
+    {
+        /** @var PathItem $pathItem */
+        $pathItem = $specification->paths[$path];
+        /** @var Operation $operation */
+        $operation = $pathItem->{$method};
+
+        return $operation;
+    }
+
+    private function createResponse(?ResponseDto $responseDto = null) : Response
+    {
         $response = new JsonResponse();
         $response->setEncodingOptions(JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_THROW_ON_ERROR);
 
         if ($responseDto instanceof ResponseDto) {
-            $response->setContent($serializer->createResponse($responseDto));
+            $response->setContent($this->serializer->createResponse($responseDto));
             $response->setStatusCode($responseDto::_getResponseCode());
         } else {
             $response->setStatusCode(200);
         }
 
         return $response;
+    }
+
+    private function getRoute(Request $request) : Route
+    {
+        $routeName = (string) $request->attributes->get('_route', '');
+        $route     = $this->router->getRouteCollection()->get($routeName);
+
+        if ($route === null) {
+            throw new NotFoundHttpException('Route not found');
+        }
+
+        return $route;
     }
 }

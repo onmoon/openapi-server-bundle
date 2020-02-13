@@ -4,8 +4,11 @@ declare(strict_types=1);
 
 namespace OnMoon\OpenApiServerBundle\CodeGenerator\Dto;
 
-use cebe\openapi\spec\Parameter;
+use OnMoon\OpenApiServerBundle\CodeGenerator\Dto\Definitions\RequestBodyDtoDefinition;
+use OnMoon\OpenApiServerBundle\CodeGenerator\Dto\Definitions\RequestDtoDefinition;
+use OnMoon\OpenApiServerBundle\CodeGenerator\Dto\Definitions\RequestParametersDtoDefinition;
 use OnMoon\OpenApiServerBundle\CodeGenerator\GeneratedClass;
+use OnMoon\OpenApiServerBundle\Event\RequestParameterDtoGenerationEvent;
 use OnMoon\OpenApiServerBundle\Interfaces\Dto;
 use PhpParser\BuilderFactory;
 use PhpParser\Node\Expr\Variable;
@@ -14,49 +17,46 @@ use PhpParser\Node\Stmt\Declare_;
 use PhpParser\Node\Stmt\DeclareDeclare;
 use PhpParser\Node\Stmt\Return_;
 use PhpParser\PrettyPrinter\Standard;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use function count;
 use function Safe\preg_replace;
 
-final class PhpParserRootDtoFactory implements RootDtoFactory
+final class PhpParserRequestDtoFactory implements RequestDtoFactory
 {
     private const PATH_PARAMETERS_PREFIX  = 'PathParametersDto';
     private const QUERY_PARAMETERS_PREFIX = 'QueryParametersDto';
 
+    private EventDispatcherInterface $eventDispatcher;
     private BuilderFactory $factory;
     private DtoFactory $dtoFactory;
 
-    public function __construct(BuilderFactory $builderFactory, DtoFactory $dtoFactory)
-    {
-        $this->factory    = $builderFactory;
-        $this->dtoFactory = $dtoFactory;
+    public function __construct(
+        EventDispatcherInterface $eventDispatcher,
+        BuilderFactory $builderFactory,
+        DtoFactory $dtoFactory
+    ) {
+        $this->eventDispatcher = $eventDispatcher;
+        $this->factory         = $builderFactory;
+        $this->dtoFactory      = $dtoFactory;
     }
 
     /**
-     * @param Parameter[] $pathParameters
-     * @param Parameter[] $queryParameters
-     *
      * @return GeneratedClass[]
+     *
+     * @psalm-return list<GeneratedClass>
      */
-    public function generateRootDto(
-        string $fileDirectoryPath,
-        string $fileName,
-        string $namespace,
-        string $className,
-        ?string $requestBodyDtoNamespace = null,
-        ?string $requestBodyDtoClassName = null,
-        array $pathParameters = [],
-        array $queryParameters = []
-    ) : array {
+    public function generateDto(RequestDtoDefinition $definition) : array
+    {
         $generatedClasses = [];
 
         $fileBuilder = $this
             ->factory
-            ->namespace($namespace)
+            ->namespace($definition->namespace())
             ->addStmt($this->factory->use(Dto::class));
 
         $classBuilder = $this
             ->factory
-            ->class($className)
+            ->class($definition->className())
             ->implement('Dto')
             ->makeFinal()
             ->setDocComment('/**
@@ -64,19 +64,21 @@ final class PhpParserRootDtoFactory implements RootDtoFactory
                               * You should not change it manually as it will be overwritten
                               */');
 
-        if (count($pathParameters)) {
+        if (count($definition->pathParameters())) {
             /** @var string $baseClassName */
-            $baseClassName              = preg_replace('/Dto$/', '', $className);
+            $baseClassName              = preg_replace('/Dto$/', '', $definition->className());
             $pathParametersDtoClassName = $baseClassName . self::PATH_PARAMETERS_PREFIX;
             $pathParametersDtoFileName  = $pathParametersDtoClassName . '.php';
 
-            $generatedClasses[] = $this->dtoFactory->generateParamDto(
-                $fileDirectoryPath,
+            $pathParametersDtoDefinition = new RequestParametersDtoDefinition(
+                $definition->directoryPath(),
                 $pathParametersDtoFileName,
-                $namespace,
+                $definition->namespace(),
                 $pathParametersDtoClassName,
-                $pathParameters
+                ...$definition->pathParameters()
             );
+            $this->eventDispatcher->dispatch(new RequestParameterDtoGenerationEvent($pathParametersDtoDefinition, 'path'));
+            $generatedClasses[] = $this->dtoFactory->generateRequestParametersDto($pathParametersDtoDefinition);
 
             $classBuilder
                 ->addStmt(
@@ -96,19 +98,21 @@ final class PhpParserRootDtoFactory implements RootDtoFactory
                 );
         }
 
-        if (count($queryParameters)) {
+        if (count($definition->queryParameters())) {
             /** @var string $baseClassName */
-            $baseClassName               = preg_replace('/Dto$/', '', $className);
+            $baseClassName               = preg_replace('/Dto$/', '', $definition->className());
             $queryParametersDtoClassName = $baseClassName . self::QUERY_PARAMETERS_PREFIX;
             $queryParametersDtoFileName  = $queryParametersDtoClassName . '.php';
 
-            $generatedClasses[] = $this->dtoFactory->generateParamDto(
-                $fileDirectoryPath,
+            $pathParametersDtoDefinition = new RequestParametersDtoDefinition(
+                $definition->directoryPath(),
                 $queryParametersDtoFileName,
-                $namespace,
+                $definition->namespace(),
                 $queryParametersDtoClassName,
-                $queryParameters
+                ...$definition->queryParameters()
             );
+            $this->eventDispatcher->dispatch(new RequestParameterDtoGenerationEvent($pathParametersDtoDefinition, 'query'));
+            $generatedClasses[] = $this->dtoFactory->generateRequestParametersDto($pathParametersDtoDefinition);
 
             $classBuilder
                 ->addStmt(
@@ -128,21 +132,23 @@ final class PhpParserRootDtoFactory implements RootDtoFactory
                 );
         }
 
-        if ($requestBodyDtoNamespace && $requestBodyDtoClassName) {
+        if ($definition->requestBodyDtoDefiniton() !== null) {
+            /** @psalm-var RequestBodyDtoDefinition $requestBodyDefinition */
+            $requestBodyDefinition = $definition->requestBodyDtoDefiniton();
             $classBuilder
                 ->addStmt(
                     $this
                         ->factory
                         ->property('body')
                         ->makePrivate()
-                        ->setType($requestBodyDtoClassName)
+                        ->setType($requestBodyDefinition->className())
                 )
                 ->addStmt(
                     $this
                         ->factory
                         ->method('getBody')
                         ->makePublic()
-                        ->setReturnType($requestBodyDtoClassName)
+                        ->setReturnType($requestBodyDefinition->className())
                         ->addStmt(new Return_(new Variable('this->body')))
                 );
         }
@@ -150,10 +156,10 @@ final class PhpParserRootDtoFactory implements RootDtoFactory
         $fileBuilder = $fileBuilder->addStmt($classBuilder);
 
         $generatedClasses[] = new GeneratedClass(
-            $fileDirectoryPath,
-            $fileName,
-            $namespace,
-            $className,
+            $definition->directoryPath(),
+            $definition->fileName(),
+            $definition->namespace(),
+            $definition->className(),
             (new Standard())->prettyPrintFile([
                 new Declare_([new DeclareDeclare('strict_types', new LNumber(1))]),
                 $fileBuilder->getNode(),

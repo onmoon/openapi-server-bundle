@@ -151,3 +151,36 @@ class ShowPetByIdHandler implements ShowPetById
 Additionally, your API call handler can implement the following interfaces:
 - `\OnMoon\OpenApiServerBundle\Interfaces\SetClientIp` - if it needs the client IP address
 - `\OnMoon\OpenApiServerBundle\Interfaces\SetRequest` - if it needs the Symfony request object
+
+## Customizing the API server behavior
+
+During the request handling lyfecycle the API server emits several events that can be used instead
+of the built-in Symfony Kernel events as the former provide more context. Theese events allow
+hooking into the API server functionality and modify it's behavior.
+
+The following events are available:
+
+- `OnMoon\OpenApiServerBundle\Event\RequestEvent`
+
+    The RequestEvent event occurs right before the request is validated against the OpenAPI Schema.
+    This event allows you to modify the Operation and Request objects prior to performing the 
+    validation and processing the request.
+- `OnMoon\OpenApiServerBundle\Event\RequestDtoEvent`
+
+    The RequestDtoEvent event occurs after the Request contents are deserialized in a Dto object representing
+    the API request and before this object is passed to your RequestHandler implementation.
+    This event allows you to modify the Operation and Request DTO (only via reflection) before it will be passed to your 
+    RequestHandler implementation.
+    Note that the ResponseDTO is not created if the API endpoint expects no request body, path or query parameters.
+- `OnMoon\OpenApiServerBundle\Event\ResponseDtoEvent`
+
+    The ResponseDtoEvent event occurs after the request handler class was executed returning a ResponseDto and
+    before this ResponseDto is serialized to a Response.
+    This event allows you to modify the ResponseDto contents before it will be serialized. This can be used as an
+    alternative to modyfing the Response object in a Symfony ResponseEvent, avoiding unnecessary decoding/encoding
+    of the Response body json.
+    Note that the ResponseDTO is not created if the API endpoint has no response body.
+- `OnMoon\OpenApiServerBundle\Event\ResponseEvent`
+
+    The ResponseEvent event occurs right before the response is sent by the API server.
+    This event allows you to modify the Response object before the server will emit it to the client.

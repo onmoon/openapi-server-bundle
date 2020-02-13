@@ -25,19 +25,19 @@ class ReflectionDtoSerializer implements DtoSerializer
     }
 
     /**
-     * @psalm-param class-string<Service> $serviceInterface
+     * @psalm-param class-string<Service> $requestHandlerInterface
      */
     public function createRequestDto(
         Request $request,
         Route $route,
-        string $serviceInterface,
+        string $requestHandlerInterface,
         string $methodName
     ) : ?Dto {
         /**
          * phpcs:disable SlevomatCodingStandard.PHP.RequireExplicitAssertion.RequiredExplicitAssertion
          * @var class-string<Dto>|null $inputDtoFQCN
          */
-        $inputDtoFQCN = $this->getInputDtoFQCN($serviceInterface, $methodName);
+        $inputDtoFQCN = $this->getInputDtoFQCN($requestHandlerInterface, $methodName);
 
         if ($inputDtoFQCN === null) {
             return null;

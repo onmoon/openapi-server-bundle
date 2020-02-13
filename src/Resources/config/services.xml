@@ -10,6 +10,15 @@
         <service id="OnMoon\OpenApiServerBundle\Router\RouteLoader">
             <tag name="routing.loader" />
         </service>
+        <service id="League\OpenAPIValidation\PSR7\ValidatorBuilder" />
+        <service id="Nyholm\Psr7\Factory\Psr17Factory" />
+        <service id="Symfony\Bridge\PsrHttpMessage\Factory\PsrHttpFactory">
+            <argument key="$serverRequestFactory" type="service" id="Nyholm\Psr7\Factory\Psr17Factory" />
+            <argument key="$streamFactory" type="service" id="Nyholm\Psr7\Factory\Psr17Factory" />
+            <argument key="$uploadedFileFactory" type="service" id="Nyholm\Psr7\Factory\Psr17Factory" />
+            <argument key="$responseFactory" type="service" id="Nyholm\Psr7\Factory\Psr17Factory" />
+        </service>
+        <service id="OnMoon\OpenApiServerBundle\Validator\RequestSchemaValidator" class="OnMoon\OpenApiServerBundle\Validator\LeaguePSR7RequestSchemaValidator" />
         <service id="OnMoon\OpenApiServerBundle\Controller\ApiController">
             <tag name="controller.service_arguments" />
         </service>
@@ -20,11 +29,11 @@
             <argument key="$rootNamespace">%openapi.generated.code.root.namespace%</argument>
             <argument key="$languageLevel">%openapi.generated.code.language.level%</argument>
         </service>
-        <service id="OnMoon\OpenApiServerBundle\CodeGenerator\Dto\RootDtoFactory" class="\OnMoon\OpenApiServerBundle\CodeGenerator\Dto\PhpParserRootDtoFactory" />
+        <service id="OnMoon\OpenApiServerBundle\CodeGenerator\Dto\RequestDtoFactory" class="OnMoon\OpenApiServerBundle\CodeGenerator\Dto\PhpParserRequestDtoFactory" />
         <service id="OnMoon\OpenApiServerBundle\CodeGenerator\Dto\DtoFactory" class="OnMoon\OpenApiServerBundle\CodeGenerator\Dto\PhpParserDtoFactory">
             <argument key="$languageLevel">%openapi.generated.code.language.level%</argument>
         </service>
-        <service id="OnMoon\OpenApiServerBundle\CodeGenerator\ServiceInterface\ServiceInterfaceFactory" class="OnMoon\OpenApiServerBundle\CodeGenerator\ServiceInterface\PhpParserServiceInterfaceFactory" />
+        <service id="OnMoon\OpenApiServerBundle\CodeGenerator\RequestHandlerInterface\RequestHandlerInterfaceFactory" class="OnMoon\OpenApiServerBundle\CodeGenerator\RequestHandlerInterface\PhpParserRequestHandlerInterfaceFactory" />
         <service id="OnMoon\OpenApiServerBundle\CodeGenerator\ServiceSubscriber\ServiceSubscriberFactory" class="OnMoon\OpenApiServerBundle\CodeGenerator\ServiceSubscriber\PhpParserServiceSubscriberFactory" />
         <service id="OnMoon\OpenApiServerBundle\CodeGenerator\Filesystem\FileWriter" class="OnMoon\OpenApiServerBundle\CodeGenerator\Filesystem\FilePutContentsFileWriter">
             <argument key="$dirPemissions">%openapi.generated.code.dir.permissions%</argument>

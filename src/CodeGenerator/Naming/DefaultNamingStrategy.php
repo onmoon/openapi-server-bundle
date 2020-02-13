@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace OnMoon\OpenApiServerBundle\CodeGenerator\Naming;
 
-use OnMoon\OpenApiServerBundle\CodeGenerator\ApiServerCodeGenerator;
+use OnMoon\OpenApiServerBundle\CodeGenerator\Factory\SpecificationDefinitionFactory;
 use sspat\ReservedWords\ReservedWords;
 use function array_map;
 use function implode;
@@ -44,7 +44,7 @@ class DefaultNamingStrategy implements NamingStrategy
         /** @psalm-var class-string<\OnMoon\OpenApiServerBundle\Interfaces\Service> $interfaceNamespace */
         $interfaceNamespace = $this->buildNamespace(
             $this->rootNamespace,
-            ApiServerCodeGenerator::APIS_NAMESPACE,
+            SpecificationDefinitionFactory::APIS_NAMESPACE,
             $apiNameSpace,
             $this->stringToNamespace($operationId),
             $this->stringToNamespace($operationId),

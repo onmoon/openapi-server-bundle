@@ -4,11 +4,15 @@ declare(strict_types=1);
 
 namespace OnMoon\OpenApiServerBundle\CodeGenerator\Dto;
 
-use cebe\openapi\spec\Parameter;
 use cebe\openapi\spec\Reference;
 use cebe\openapi\spec\Schema;
 use cebe\openapi\spec\Type;
 use Exception;
+use OnMoon\OpenApiServerBundle\CodeGenerator\Dto\Definitions\PropertyDtoDefinition;
+use OnMoon\OpenApiServerBundle\CodeGenerator\Dto\Definitions\RequestParametersDtoDefinition;
+use OnMoon\OpenApiServerBundle\CodeGenerator\Dto\Definitions\ResponseDtoDefinition;
+use OnMoon\OpenApiServerBundle\CodeGenerator\Dto\Definitions\ResponseDtoMarkerInterfaceDefinition;
+use OnMoon\OpenApiServerBundle\CodeGenerator\Dto\Definitions\SchemaBasedDtoDefinition;
 use OnMoon\OpenApiServerBundle\CodeGenerator\GeneratedClass;
 use OnMoon\OpenApiServerBundle\CodeGenerator\Naming\CannotCreatePropertyName;
 use OnMoon\OpenApiServerBundle\CodeGenerator\Naming\NamingStrategy;
@@ -62,19 +66,11 @@ final class PhpParserDtoFactory implements DtoFactory
         $this->typeResolver   = $typeResolver;
     }
 
-    /**
-     * @param Parameter[] $parameters
-     */
-    public function generateParamDto(
-        string $fileDirectoryPath,
-        string $fileName,
-        string $namespace,
-        string $className,
-        array $parameters
-    ) : GeneratedClass {
+    public function generateRequestParametersDto(RequestParametersDtoDefinition $definition) : GeneratedClass
+    {
         $classBuilder = $this
             ->factory
-            ->class($className)
+            ->class($definition->className())
             ->implement('Dto')
             ->makeFinal()
             ->setDocComment('/**
@@ -82,7 +78,7 @@ final class PhpParserDtoFactory implements DtoFactory
                               * You should not change it manually as it will be overwritten
                               */');
 
-        foreach ($parameters as $parameter) {
+        foreach ($definition->parameters() as $parameter) {
             if (! $this->namingStrategy->isAllowedPhpPropertyName($parameter->name)) {
                 throw CannotCreatePropertyName::becauseIsNotValidPhpPropertyName($parameter->name);
             }
@@ -165,16 +161,16 @@ final class PhpParserDtoFactory implements DtoFactory
 
         $fileBuilder = $this
             ->factory
-            ->namespace($namespace)
+            ->namespace($definition->namespace())
             ->addStmt($this->factory->use(Dto::class));
 
         $fileBuilder = $fileBuilder->addStmt($classBuilder);
 
         return new GeneratedClass(
-            $fileDirectoryPath,
-            $fileName,
-            $namespace,
-            $className,
+            $definition->directoryPath(),
+            $definition->fileName(),
+            $definition->namespace(),
+            $definition->className(),
             (new Standard())->prettyPrintFile([
                 new Declare_([new DeclareDeclare('strict_types', new LNumber(1))]),
                 $fileBuilder->getNode(),
@@ -184,56 +180,59 @@ final class PhpParserDtoFactory implements DtoFactory
 
     /**
      * @return GeneratedClass[]
+     *
+     * @psalm-return array<array-key, GeneratedClass>
      */
-    public function generateDtoClassGraph(
-        string $fileDirectoryPath,
-        string $fileName,
-        string $namespace,
-        string $className,
-        bool $immutable,
-        Schema $schema,
-        ?int $outputResponseCode = null,
-        ?string $outputMarkerInterfaceNamespace = null,
-        ?string $outputMarkerInterfaceClassName = null
-    ) : array {
+    public function generateDtoClassGraph(SchemaBasedDtoDefinition $definition) : array
+    {
+        /**
+         * @var GeneratedClass[] $generatedClasses
+         */
         $generatedClasses = [];
 
         $classBuilder = $this
             ->factory
-            ->class($className)
+            ->class($definition->className())
             ->makeFinal()
             ->setDocComment('/**
                               * This class was automatically generated
                               * You should not change it manually as it will be overwritten
                               */');
 
-        $constructorBuilder  = $this->factory->method('__construct')->makePublic();
-        $constructorRequired = false;
-        $getterBuilders      = [];
-        $setterBuilders      = [];
-        $constructorDocBlock = [];
-        $imports             = [];
+        $constructorBuilder   = $this->factory->method('__construct')->makePublic();
+        $constructorRequired  = false;
+        $getterBuilders       = [];
+        $setterBuilders       = [];
+        $constructorDocBlock  = [];
+        $imports              = [];
+        $baseInterfaceDefined = false;
 
-        if ($outputResponseCode === null) {
+        if ($definition instanceof ResponseDtoDefinition) {
+            if ($definition->markerInterfaceDefintion() instanceof ResponseDtoMarkerInterfaceDefinition) {
+                /** @psalm-var ResponseDtoMarkerInterfaceDefinition $markerInterfaceDefintion */
+                $markerInterfaceDefintion = $definition->markerInterfaceDefintion();
+                $classBuilder             = $classBuilder->implement($markerInterfaceDefintion->namespace());
+                $imports[]                = $this->namingStrategy->buildNamespace(
+                    $markerInterfaceDefintion->namespace(),
+                    $markerInterfaceDefintion->className()
+                );
+                $baseInterfaceDefined     = true;
+            } elseif ($definition->responseCode() !== null) {
+                $classBuilder         = $classBuilder->implement('ResponseDto');
+                $imports[]            = ResponseDto::class;
+                $baseInterfaceDefined = true;
+            }
+        }
+
+        if (! $baseInterfaceDefined) {
             $classBuilder = $classBuilder->implement('Dto');
             $imports[]    = Dto::class;
-        } else {
-            if ($outputMarkerInterfaceNamespace !== null && $outputMarkerInterfaceClassName !== null) {
-                $classBuilder = $classBuilder->implement($outputMarkerInterfaceClassName);
-                $imports[]    = $this->namingStrategy->buildNamespace(
-                    $outputMarkerInterfaceNamespace,
-                    $outputMarkerInterfaceClassName
-                );
-            } else {
-                $classBuilder = $classBuilder->implement('ResponseDto');
-                $imports[]    = ResponseDto::class;
-            }
         }
 
         /**
          * @var string $propertyName
          */
-        foreach ($schema->properties as $propertyName => $property) {
+        foreach ($definition->schema()->properties as $propertyName => $property) {
             if (! $this->namingStrategy->isAllowedPhpPropertyName($propertyName)) {
                 throw CannotCreatePropertyName::becauseIsNotValidPhpPropertyName($propertyName);
             }
@@ -244,7 +243,8 @@ final class PhpParserDtoFactory implements DtoFactory
             /**
              * @psalm-suppress RedundantConditionGivenDocblockType
              */
-            $required = is_array($schema->required) && in_array($propertyName, $schema->required);
+            $required = is_array($definition->schema()->required) &&
+                        in_array($propertyName, $definition->schema()->required);
 
             if ($property instanceof Reference) {
                 throw new Exception('Cannot work with References');
@@ -265,14 +265,19 @@ final class PhpParserDtoFactory implements DtoFactory
                     case Type::ANY:
                         throw new Exception('\'any\' type is not supported');
                     case Type::OBJECT:
-                        $generatedClassGraph = $this->generatePropertyDto(
-                            $propertyName,
-                            $namespace,
-                            $className,
-                            $fileDirectoryPath,
-                            $immutable,
-                            $property
+                        $propertyDtoDefinition = new PropertyDtoDefinition(
+                            $definition->directoryPath(),
+                            $definition->fileName(),
+                            $definition->namespace(),
+                            $definition->className(),
+                            $property,
+                            $propertyName
                         );
+                        $definition->isImmutable() ?
+                            $propertyDtoDefinition->makeImmutable() :
+                            $propertyDtoDefinition->makeMutable();
+
+                        $generatedClassGraph = $this->generatePropertyDto($propertyDtoDefinition);
 
                         $generatedClasses = array_merge($generatedClasses, $generatedClassGraph->getClassGraph());
                         $imports[]        = $generatedClassGraph->getImport();
@@ -291,14 +296,19 @@ final class PhpParserDtoFactory implements DtoFactory
                         $iterableType = $property->items->type;
 
                         if ($iterableType === Type::OBJECT) {
-                            $generatedClassGraph = $this->generatePropertyDto(
-                                $propertyName,
-                                $namespace,
-                                $className,
-                                $fileDirectoryPath,
-                                $immutable,
-                                $property->items
+                            $propertyDtoDefinition = new PropertyDtoDefinition(
+                                $definition->directoryPath(),
+                                $definition->fileName(),
+                                $definition->namespace(),
+                                $definition->className(),
+                                $property->items,
+                                $propertyName
                             );
+                            $definition->isImmutable() ?
+                                $propertyDtoDefinition->makeImmutable() :
+                                $propertyDtoDefinition->makeMutable();
+
+                            $generatedClassGraph = $this->generatePropertyDto($propertyDtoDefinition);
 
                             $generatedClasses = array_merge($generatedClasses, $generatedClassGraph->getClassGraph());
                             $imports[]        = $generatedClassGraph->getImport();
@@ -332,7 +342,7 @@ final class PhpParserDtoFactory implements DtoFactory
                 )
             );
 
-            if (! $immutable) {
+            if (! $definition->isImmutable()) {
                 if ($required) {
                     $constructorRequired = true;
 
@@ -375,13 +385,13 @@ final class PhpParserDtoFactory implements DtoFactory
             $classBuilder->addStmt($setterBuilder);
         }
 
-        $fileBuilder = $this->factory->namespace($namespace);
+        $fileBuilder = $this->factory->namespace($definition->namespace());
 
         foreach ($imports as $import) {
             $fileBuilder->addStmt($this->factory->use(ltrim($import, '\\')));
         }
 
-        if ($outputResponseCode !== null) {
+        if ($definition instanceof ResponseDtoDefinition && $definition->responseCode() !== null) {
             $classBuilder
                 ->addStmt(
                     $this
@@ -392,7 +402,7 @@ final class PhpParserDtoFactory implements DtoFactory
                         ->setReturnType('int')
                         ->addStmt(
                             new Return_(
-                                $this->factory->val($outputResponseCode)
+                                $this->factory->val($definition->responseCode())
                             )
                         )
                 );
@@ -401,10 +411,10 @@ final class PhpParserDtoFactory implements DtoFactory
         $fileBuilder = $fileBuilder->addStmt($classBuilder);
 
         $generatedClasses[] = new GeneratedClass(
-            $fileDirectoryPath,
-            $fileName,
-            $namespace,
-            $className,
+            $definition->directoryPath(),
+            $definition->fileName(),
+            $definition->namespace(),
+            $definition->className(),
             (new Standard())->prettyPrintFile([
                 new Declare_([new DeclareDeclare('strict_types', new LNumber(1))]),
                 $fileBuilder->getNode(),
@@ -414,20 +424,16 @@ final class PhpParserDtoFactory implements DtoFactory
         return $generatedClasses;
     }
 
-    public function generateOutputMarkerInterface(
-        string $fileDirectoryPath,
-        string $fileName,
-        string $namespace,
-        string $className
-    ) : GeneratedClass {
+    public function generateResponseMarkerInterface(ResponseDtoMarkerInterfaceDefinition $definition) : GeneratedClass
+    {
         $fileBuilder = $this
             ->factory
-            ->namespace($namespace)
+            ->namespace($definition->namespace())
             ->addStmt($this->factory->use(ResponseDto::class));
 
         $interfaceBuilder = $this
             ->factory
-            ->interface($className)
+            ->interface($definition->className())
             ->extend('ResponseDto')
             ->setDocComment('/**
                               * This interface was automatically generated
@@ -437,10 +443,10 @@ final class PhpParserDtoFactory implements DtoFactory
         $fileBuilder = $fileBuilder->addStmt($interfaceBuilder);
 
         return new GeneratedClass(
-            $fileDirectoryPath,
-            $fileName,
-            $namespace,
-            $className,
+            $definition->directoryPath(),
+            $definition->fileName(),
+            $definition->namespace(),
+            $definition->className(),
             (new Standard())->prettyPrintFile([
                 new Declare_([new DeclareDeclare('strict_types', new LNumber(1))]),
                 $fileBuilder->getNode(),
@@ -448,22 +454,16 @@ final class PhpParserDtoFactory implements DtoFactory
         );
     }
 
-    private function generatePropertyDto(
-        string $propertyName,
-        string $parentClassNamespace,
-        string $parentClassName,
-        string $parentClassFileDirectoryPath,
-        bool $immutable,
-        Schema $schema
-    ) : GeneratedPropertyDtoClassGraph {
-        $propertyNamespace = $this->namingStrategy->stringToNamespace($propertyName);
+    private function generatePropertyDto(PropertyDtoDefinition $definition) : GeneratedPropertyDtoClassGraph
+    {
+        $propertyNamespace = $this->namingStrategy->stringToNamespace($definition->propertyName());
 
-        $dtoNamespace = $this->namingStrategy->buildNamespace($parentClassNamespace, $propertyNamespace);
+        $dtoNamespace = $this->namingStrategy->buildNamespace($definition->namespace(), $propertyNamespace);
         $dtoClassName = $this->namingStrategy->stringToNamespace($propertyNamespace . 'Dto');
-        $dtoPath      = $this->namingStrategy->buildPath($parentClassFileDirectoryPath, $propertyNamespace);
+        $dtoPath      = $this->namingStrategy->buildPath($definition->directoryPath(), $propertyNamespace);
         $dtoFileName  = $dtoClassName . '.php';
 
-        if ($dtoClassName === $parentClassName) {
+        if ($dtoClassName === $definition->className()) {
             $dtoClassName = self::DUPLICATE_NAME_CLASS_PREFIX . $dtoClassName;
             $dtoFileName  = self::DUPLICATE_NAME_CLASS_PREFIX . $dtoFileName;
         }
@@ -471,18 +471,16 @@ final class PhpParserDtoFactory implements DtoFactory
         $import = '\\' . $dtoNamespace . '\\' . $dtoClassName;
         $type   = $dtoClassName;
 
-        return new GeneratedPropertyDtoClassGraph(
-            $import,
-            $type,
-            $this->generateDtoClassGraph(
-                $dtoPath,
-                $dtoFileName,
-                $dtoNamespace,
-                $dtoClassName,
-                $immutable,
-                $schema
-            )
+        $propertyDtoDefinition = new SchemaBasedDtoDefinition(
+            $dtoPath,
+            $dtoFileName,
+            $dtoNamespace,
+            $dtoClassName,
+            $definition->schema()
         );
+        $definition->isImmutable() ? $propertyDtoDefinition->makeImmutable() : $propertyDtoDefinition->makeMutable();
+
+        return new GeneratedPropertyDtoClassGraph($import, $type, $this->generateDtoClassGraph($propertyDtoDefinition));
     }
 
     /**
