@@ -15,8 +15,6 @@ interface NamingStrategy
 
     public function stringToMethodName(string $text) : string;
 
-    public function isPhpReservedWord(string $text) : bool;
-
     public function buildNamespace(string ...$parts) : string;
 
     public function buildPath(string ...$parts) : string;

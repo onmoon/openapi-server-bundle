@@ -6,6 +6,7 @@
     <services>
         <defaults autoconfigure="true" autowire="true" public="false" />
         <service id="Lukasoppermann\Httpstatus\Httpstatus" />
+        <service id="sspat\ReservedWords\ReservedWords" />
         <service id="OnMoon\OpenApiServerBundle\Router\RouteLoader">
             <tag name="routing.loader" />
         </service>
@@ -17,6 +18,7 @@
         <service id="PhpParser\BuilderFactory" />
         <service id="OnMoon\OpenApiServerBundle\CodeGenerator\Naming\NamingStrategy" class="OnMoon\OpenApiServerBundle\CodeGenerator\Naming\DefaultNamingStrategy">
             <argument key="$rootNamespace">%openapi.generated.code.root.namespace%</argument>
+            <argument key="$languageLevel">%openapi.generated.code.language.level%</argument>
         </service>
         <service id="OnMoon\OpenApiServerBundle\CodeGenerator\Dto\RootDtoFactory" class="\OnMoon\OpenApiServerBundle\CodeGenerator\Dto\PhpParserRootDtoFactory" />
         <service id="OnMoon\OpenApiServerBundle\CodeGenerator\Dto\DtoFactory" class="OnMoon\OpenApiServerBundle\CodeGenerator\Dto\PhpParserDtoFactory">
