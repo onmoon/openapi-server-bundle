@@ -31,6 +31,7 @@
         </service>
         <service id="OnMoon\OpenApiServerBundle\Command\GenerateApiCodeCommand">
             <argument key="$rootPath">%openapi.generated.code.root.path%</argument>
+            <argument key="$cache" type="service" id="cache.app.taggable" />
         </service>
         <service id="OnMoon\OpenApiServerBundle\CodeGenerator\ApiServerCodeGenerator">
             <argument key="$rootNamespace">%openapi.generated.code.root.namespace%</argument>
@@ -64,6 +65,7 @@
         </service>
         <service id="OnMoon\OpenApiServerBundle\Specification\SpecificationLoader">
             <argument key="$locator" type="service" id="file_locator" />
+            <argument key="$cache" type="service" id="cache.app.taggable" />
         </service>
     </services>
 </container>

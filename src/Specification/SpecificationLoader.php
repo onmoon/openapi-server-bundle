@@ -8,6 +8,8 @@ use cebe\openapi\Reader;
 use cebe\openapi\spec\OpenApi;
 use Exception;
 use Symfony\Component\Config\FileLocatorInterface;
+use Symfony\Contracts\Cache\ItemInterface;
+use Symfony\Contracts\Cache\TagAwareCacheInterface;
 use function array_keys;
 use function file_exists;
 use function implode;
@@ -19,16 +21,21 @@ use const PATHINFO_EXTENSION;
 
 class SpecificationLoader
 {
+    public const CACHE_TAG         = 'openapi.server.bundle.specifications';
+    private const CACHE_KEY_PREFIX = 'openapi-server-bundle-specification-';
+
     /**
      * @var Specification[]
      * @psalm-var array<string, Specification>
      */
     private array $specs = [];
     private FileLocatorInterface $locator;
+    private TagAwareCacheInterface $cache;
 
-    public function __construct(FileLocatorInterface $locator)
+    public function __construct(FileLocatorInterface $locator, TagAwareCacheInterface $cache)
     {
         $this->locator = $locator;
+        $this->cache   = $cache;
     }
 
     /**
@@ -66,7 +73,21 @@ class SpecificationLoader
 
     public function load(string $name) : OpenApi
     {
-        $spec     = $this->get($name);
+        /** @var OpenApi $parsedSpecification */
+        $parsedSpecification = $this->cache->get(
+            self::CACHE_KEY_PREFIX . $name,
+            function (ItemInterface $cacheItem) use ($name) : OpenApi {
+                $cacheItem->tag(self::CACHE_TAG);
+
+                return $this->parseSpecification($this->get($name));
+            }
+        );
+
+        return $parsedSpecification;
+    }
+
+    private function parseSpecification(Specification $spec) : OpenApi
+    {
         $specPath = $this->locator->locate($spec->getPath());
 
         if (! is_string($specPath)) {
