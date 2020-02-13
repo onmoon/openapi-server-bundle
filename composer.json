@@ -54,7 +54,6 @@
         "thecodingmachine/phpstan-safe-rule": "^1.0",
         "vimeo/psalm": "^3.8"
     },
-    "minimum-stability": "stable",
     "config": {
         "preferred-install": {
             "*": "dist"
