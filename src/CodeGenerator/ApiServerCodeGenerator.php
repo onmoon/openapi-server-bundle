@@ -32,7 +32,6 @@ use function count;
 class ApiServerCodeGenerator
 {
     public const APIS_NAMESPACE                = 'Apis';
-    public const SERVICE_SUFFIX                = 'ServiceInterface';
     private const DTO_NAMESPACE                = 'Dto';
     private const SERVICE_SUBSCRIBER_NAMESPACE = 'ServiceSubscriber';
     private const SERVICE_SUBSCRIBER_CLASSNAME = 'ApiServiceLoaderServiceSubscriber';
@@ -318,9 +317,7 @@ class ApiServerCodeGenerator
                     $serviceInterfaceNamesapce = $this->namingStrategy->buildNamespace($apiNamespace, $operationName);
                     $serviceInterfacePath      = $this->namingStrategy->buildPath($apiPath, $operationName);
 
-                    $serviceInterfaceClassName = $this->namingStrategy->stringToNamespace(
-                        $operationName . self::SERVICE_SUFFIX
-                    );
+                    $serviceInterfaceClassName = $this->namingStrategy->stringToNamespace($operationName);
                     $serviceInterfaceMethod    = $this->namingStrategy->stringToMethodName($operationId);
                     $serviceInterfaceFileName  = $serviceInterfaceClassName . '.php';
 

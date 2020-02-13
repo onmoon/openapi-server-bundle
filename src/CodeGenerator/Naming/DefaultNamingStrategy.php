@@ -47,7 +47,7 @@ class DefaultNamingStrategy implements NamingStrategy
             ApiServerCodeGenerator::APIS_NAMESPACE,
             $apiNameSpace,
             $this->stringToNamespace($operationId),
-            $this->stringToNamespace($operationId) . ApiServerCodeGenerator::SERVICE_SUFFIX,
+            $this->stringToNamespace($operationId),
         );
 
         return $interfaceNamespace;
