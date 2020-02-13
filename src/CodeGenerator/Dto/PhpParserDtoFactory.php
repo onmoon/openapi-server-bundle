@@ -13,6 +13,7 @@ use OnMoon\OpenApiServerBundle\CodeGenerator\GeneratedClass;
 use OnMoon\OpenApiServerBundle\CodeGenerator\Naming\CannotCreatePropertyName;
 use OnMoon\OpenApiServerBundle\CodeGenerator\Naming\NamingStrategy;
 use OnMoon\OpenApiServerBundle\Interfaces\Dto;
+use OnMoon\OpenApiServerBundle\Interfaces\ResponseDto;
 use OnMoon\OpenApiServerBundle\OpenApi\ScalarTypesResolver;
 use PhpParser\Builder\Method;
 use PhpParser\Builder\Param;
@@ -184,14 +185,16 @@ final class PhpParserDtoFactory implements DtoFactory
         string $namespace,
         string $className,
         bool $immutable,
-        Schema $schema
+        Schema $schema,
+        ?int $outputResponseCode = null,
+        ?string $outputMarkerInterfaceNamespace = null,
+        ?string $outputMarkerInterfaceClassName = null
     ) : array {
         $generatedClasses = [];
 
         $classBuilder = $this
             ->factory
             ->class($className)
-            ->implement('Dto')
             ->makeFinal()
             ->setDocComment('/**
                               * This class was automatically generated
@@ -203,7 +206,23 @@ final class PhpParserDtoFactory implements DtoFactory
         $getterBuilders      = [];
         $setterBuilders      = [];
         $constructorDocBlock = [];
-        $imports             = [Dto::class];
+        $imports             = [];
+
+        if ($outputResponseCode === null) {
+            $classBuilder = $classBuilder->implement('Dto');
+            $imports[]    = Dto::class;
+        } else {
+            if ($outputMarkerInterfaceNamespace !== null && $outputMarkerInterfaceClassName !== null) {
+                $classBuilder = $classBuilder->implement($outputMarkerInterfaceClassName);
+                $imports[]    = $this->namingStrategy->buildNamespace(
+                    $outputMarkerInterfaceNamespace,
+                    $outputMarkerInterfaceClassName
+                );
+            } else {
+                $classBuilder = $classBuilder->implement('ResponseDto');
+                $imports[]    = ResponseDto::class;
+            }
+        }
 
         /**
          * @var string $propertyName
@@ -345,6 +364,23 @@ final class PhpParserDtoFactory implements DtoFactory
             $fileBuilder->addStmt($this->factory->use(ltrim($import, '\\')));
         }
 
+        if ($outputResponseCode !== null) {
+            $classBuilder
+                ->addStmt(
+                    $this
+                        ->factory
+                        ->method('_getResponseCode')
+                        ->makePublic()
+                        ->makeStatic()
+                        ->setReturnType('int')
+                        ->addStmt(
+                            new Return_(
+                                $this->factory->val($outputResponseCode)
+                            )
+                        )
+                );
+        }
+
         $fileBuilder = $fileBuilder->addStmt($classBuilder);
 
         $generatedClasses[] = new GeneratedClass(
@@ -359,6 +395,40 @@ final class PhpParserDtoFactory implements DtoFactory
         );
 
         return $generatedClasses;
+    }
+
+    public function generateOutputMarkerInterface(
+        string $fileDirectoryPath,
+        string $fileName,
+        string $namespace,
+        string $className
+    ) : GeneratedClass {
+        $fileBuilder = $this
+            ->factory
+            ->namespace($namespace)
+            ->addStmt($this->factory->use(ResponseDto::class));
+
+        $interfaceBuilder = $this
+            ->factory
+            ->interface($className)
+            ->extend('ResponseDto')
+            ->setDocComment('/**
+                              * This interface was automatically generated
+                              * You should not change it manually as it will be overwritten
+                              */');
+
+        $fileBuilder = $fileBuilder->addStmt($interfaceBuilder);
+
+        return new GeneratedClass(
+            $fileDirectoryPath,
+            $fileName,
+            $namespace,
+            $className,
+            (new Standard())->prettyPrintFile([
+                new Declare_([new DeclareDeclare('strict_types', new LNumber(1))]),
+                $fileBuilder->getNode(),
+            ])
+        );
     }
 
     private function generatePropertyDto(

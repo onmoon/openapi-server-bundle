@@ -19,7 +19,10 @@ interface DtoFactory
         string $namespace,
         string $className,
         bool $immutable,
-        Schema $schema
+        Schema $schema,
+        ?int $outputResponseCode = null,
+        ?string $outputMarkerInterfaceNamespace = null,
+        ?string $outputMarkerInterfaceClassName = null
     ) : array;
 
     /**
@@ -31,5 +34,12 @@ interface DtoFactory
         string $namespace,
         string $className,
         array $parameters
+    ) : GeneratedClass;
+
+    public function generateOutputMarkerInterface(
+        string $fileDirectoryPath,
+        string $fileName,
+        string $namespace,
+        string $className
     ) : GeneratedClass;
 }

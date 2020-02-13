@@ -8,6 +8,11 @@ use OnMoon\OpenApiServerBundle\CodeGenerator\GeneratedClass;
 
 interface ServiceInterfaceFactory
 {
+    /**
+     * @param string[][] $outputDtos
+     *
+     * @psalm-param list<array{namespace: string, className: string, code: int}> $outputDtos
+     */
     public function generateServiceInterface(
         string $fileDirectoryPath,
         string $fileName,
@@ -17,7 +22,8 @@ interface ServiceInterfaceFactory
         ?string $summary = null,
         ?string $inputDtoNamespace = null,
         ?string $inputDtoClassName = null,
-        ?string $outputDtoNamespace = null,
-        ?string $outputDtoClassName = null
+        array $outputDtos = [],
+        ?string $outputDtoMarkerInterfaceNamespace = null,
+        ?string $outputDtoMarkerInterfaceClassName = null
     ) : GeneratedClass;
 }
