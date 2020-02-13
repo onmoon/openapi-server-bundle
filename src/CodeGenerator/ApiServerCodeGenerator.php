@@ -85,7 +85,7 @@ class ApiServerCodeGenerator
         foreach ($this->loader->list() as $specificationName => $specification) {
             $parsedSpecification = $this->loader->load($specificationName);
 
-            $apiName       = $specification->getNameSpace();
+            $apiName       = $this->namingStrategy->stringToNamespace($specification->getNameSpace());
             $specMediaType = $specification->getMediaType();
             $apiNamespace  = $this->namingStrategy->buildNamespace($this->rootNamespace, self::APIS_NAMESPACE, $apiName);
             $apiPath       = $this->namingStrategy->buildPath($this->rootPath, self::APIS_NAMESPACE, $apiName);
