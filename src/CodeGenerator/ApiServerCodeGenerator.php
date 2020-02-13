@@ -5,7 +5,9 @@ declare(strict_types=1);
 namespace OnMoon\OpenApiServerBundle\CodeGenerator;
 
 use cebe\openapi\spec\MediaType;
+use cebe\openapi\spec\Operation;
 use cebe\openapi\spec\Parameter;
+use cebe\openapi\spec\PathItem;
 use cebe\openapi\spec\Reference;
 use cebe\openapi\spec\RequestBody;
 use cebe\openapi\spec\Response;
@@ -209,7 +211,7 @@ class ApiServerCodeGenerator
 
                     // Root dto generation
 
-                    $parameters = array_merge($pathItem->parameters, $operation->parameters);
+                    $parameters = $this->mergeParameters($pathItem, $operation);
 
                     if (count($parameters) || $inputDtoClassName !== null) {
                         $dtoNamespace = $this->namingStrategy->buildNamespace(
@@ -239,8 +241,8 @@ class ApiServerCodeGenerator
                                 $dtoClassName,
                                 $inputDtoNamespace,
                                 $inputDtoClassName,
-                                $this->filterAllowedParameters($parameters, 'path'),
-                                $this->filterAllowedParameters($parameters, 'query')
+                                $this->filterSupportedParameters($parameters, 'path'),
+                                $this->filterSupportedParameters($parameters, 'query')
                             )
                         );
                     }
@@ -294,19 +296,52 @@ class ApiServerCodeGenerator
     }
 
     /**
+     * @param Parameter[] $parameters
+     *
+     * @return Parameter[]
+     */
+    private function filterSupportedParameters(array $parameters, string $in) : array
+    {
+        return array_filter($parameters, static fn ($parameter) : bool => $parameter->in === $in);
+    }
+
+    /**
      * @param Parameter[]|Reference[] $parameters
      *
      * @return Parameter[]
      */
-    private function filterAllowedParameters(array $parameters, string $in) : array
+    private function filterParameters(array $parameters) : array
     {
         /** @var Parameter[] $parameters */
-        $parameters = array_filter(
-            $parameters,
-            static fn ($parameter) : bool =>$parameter instanceof Parameter && $parameter->in === $in
-        );
+        $parameters = array_filter($parameters, static fn ($parameter) : bool => $parameter instanceof Parameter);
 
         return $parameters;
+    }
+
+    /**
+     * @return Parameter[]
+     */
+    private function mergeParameters(PathItem $pathItem, Operation $operation) : array
+    {
+        $operationParameters = $this->filterParameters($operation->parameters);
+
+        return array_merge(
+            array_filter(
+                $this->filterParameters($pathItem->parameters),
+                static function (Parameter $pathParameter) use ($operationParameters) : bool {
+                    return count(
+                        array_filter(
+                            $operationParameters,
+                            static function (Parameter $operationParameter) use ($pathParameter) : bool {
+                                return $operationParameter->name === $pathParameter->name &&
+                                       $operationParameter->in === $pathParameter->in;
+                            }
+                        )
+                    ) === 0;
+                }
+            ),
+            $operationParameters
+        );
     }
 
     /**
