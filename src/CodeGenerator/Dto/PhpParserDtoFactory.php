@@ -588,19 +588,22 @@ final class PhpParserDtoFactory implements DtoFactory
     {
         return $this
             ->factory
-            ->param($definition->name())
+            ->param($this->namingStrategy->stringToMethodName($definition->name()))
             ->setType($definition->iterableType() !== null ? 'array' : $definition->type());
     }
 
     private function getAssignmentDefinition(string $name) : Assign
     {
-        return new Assign(new Variable('this->' . $name), new Variable($name));
+        return new Assign(
+            new Variable('this->' . $name),
+            new Variable($this->namingStrategy->stringToMethodName($name))
+        );
     }
 
     private function generateGetter(GetterMethodDefinition $definition) : Method
     {
         $method = $this->factory
-            ->method('get' . ucfirst($definition->name()))
+            ->method('get' . ucfirst($this->namingStrategy->stringToMethodName($definition->name())))
             ->makePublic()
             ->setReturnType(
                 ($definition->isNullable() && $definition->defaultValue() === null ? '?' : '') .
@@ -626,7 +629,7 @@ final class PhpParserDtoFactory implements DtoFactory
         $methodParameterDefinition = new MethodParameterDefinition($definition->name(), $definition->type());
         $methodParameterDefinition->setIterableType($definition->iterableType());
         $method = $this->factory
-            ->method('set' . ucfirst($definition->name()))
+            ->method('set' . ucfirst($this->namingStrategy->stringToMethodName($definition->name())))
             ->makePublic()
             ->setReturnType('self')
             ->addParam($this->generateMethodParameter($methodParameterDefinition))

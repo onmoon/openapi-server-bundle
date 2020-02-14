@@ -103,7 +103,7 @@ class DefaultNamingStrategy implements NamingStrategy
     private function prepareTextForPhp(string $text) : string
     {
         /** @var string $filteredText */
-        $filteredText = preg_replace('/[^\w]/', ' ', $text);
+        $filteredText = preg_replace('/[^A-Z0-9]/i', ' ', $text);
 
         return str_replace(' ', '', ucwords($filteredText));
     }
