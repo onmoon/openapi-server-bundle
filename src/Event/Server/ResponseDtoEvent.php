@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace OnMoon\OpenApiServerBundle\Event;
+namespace OnMoon\OpenApiServerBundle\Event\Server;
 
 use cebe\openapi\spec\Operation;
 use OnMoon\OpenApiServerBundle\Interfaces\ResponseDto;

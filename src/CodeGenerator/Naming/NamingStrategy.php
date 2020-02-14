@@ -7,7 +7,7 @@ namespace OnMoon\OpenApiServerBundle\CodeGenerator\Naming;
 interface NamingStrategy
 {
     /**
-     * @psalm-return class-string<\OnMoon\OpenApiServerBundle\Interfaces\Service>
+     * @psalm-return class-string<\OnMoon\OpenApiServerBundle\Interfaces\RequestHandler>
      */
     public function getInterfaceFQCN(string $apiNameSpace, string $operationId) : string;
 

@@ -9,7 +9,7 @@ use OnMoon\OpenApiServerBundle\CodeGenerator\Naming\NamingStrategy;
 use OnMoon\OpenApiServerBundle\CodeGenerator\RequestHandlerInterface\Definitions\RequestHandlerInterfaceDefinition;
 use OnMoon\OpenApiServerBundle\CodeGenerator\ServiceSubscriber\Definitions\ServiceSubscriberDefinition;
 use OnMoon\OpenApiServerBundle\Interfaces\ApiLoader;
-use OnMoon\OpenApiServerBundle\Interfaces\Service;
+use OnMoon\OpenApiServerBundle\Interfaces\RequestHandler;
 use PhpParser\Builder\Use_;
 use PhpParser\BuilderFactory;
 use PhpParser\Node\Arg;
@@ -55,7 +55,7 @@ final class PhpParserServiceSubscriberFactory implements ServiceSubscriberFactor
                     $this->factory->use(ContainerInterface::class),
                     $this->factory->use(ServiceSubscriberInterface::class),
                     $this->factory->use(ApiLoader::class),
-                    $this->factory->use(Service::class),
+                    $this->factory->use(RequestHandler::class),
                 ],
                 array_map(
                     fn (RequestHandlerInterfaceDefinition $interfaceDefinition) : Use_
@@ -127,7 +127,7 @@ final class PhpParserServiceSubscriberFactory implements ServiceSubscriberFactor
                         ->factory
                         ->method('get')
                         ->makePublic()
-                        ->setReturnType('?Service')
+                        ->setReturnType('?RequestHandler')
                         ->addParam(
                             $this->factory->param('interface')->setType('string')
                         )

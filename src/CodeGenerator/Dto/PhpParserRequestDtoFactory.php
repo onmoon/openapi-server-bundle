@@ -8,7 +8,7 @@ use OnMoon\OpenApiServerBundle\CodeGenerator\Dto\Definitions\RequestBodyDtoDefin
 use OnMoon\OpenApiServerBundle\CodeGenerator\Dto\Definitions\RequestDtoDefinition;
 use OnMoon\OpenApiServerBundle\CodeGenerator\Dto\Definitions\RequestParametersDtoDefinition;
 use OnMoon\OpenApiServerBundle\CodeGenerator\GeneratedClass;
-use OnMoon\OpenApiServerBundle\Event\RequestParameterDtoGenerationEvent;
+use OnMoon\OpenApiServerBundle\Event\CodeGenerator\RequestParameterDtoGenerationEvent;
 use OnMoon\OpenApiServerBundle\Interfaces\Dto;
 use PhpParser\BuilderFactory;
 use PhpParser\Node\Expr\Variable;
@@ -111,7 +111,7 @@ final class PhpParserRequestDtoFactory implements RequestDtoFactory
                 $queryParametersDtoClassName,
                 ...$definition->queryParameters()
             );
-            $this->eventDispatcher->dispatch(new RequestParameterDtoGenerationEvent($pathParametersDtoDefinition, 'query'));
+
             $generatedClasses[] = $this->dtoFactory->generateRequestParametersDto($pathParametersDtoDefinition);
 
             $classBuilder

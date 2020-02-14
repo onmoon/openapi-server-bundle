@@ -8,14 +8,22 @@ use cebe\openapi\spec\Reference;
 use cebe\openapi\spec\Schema;
 use cebe\openapi\spec\Type;
 use Exception;
+use OnMoon\OpenApiServerBundle\CodeGenerator\Dto\Definitions\ClassPropertyDefinition;
+use OnMoon\OpenApiServerBundle\CodeGenerator\Dto\Definitions\GetterMethodDefinition;
+use OnMoon\OpenApiServerBundle\CodeGenerator\Dto\Definitions\MethodParameterDefinition;
 use OnMoon\OpenApiServerBundle\CodeGenerator\Dto\Definitions\PropertyDtoDefinition;
 use OnMoon\OpenApiServerBundle\CodeGenerator\Dto\Definitions\RequestParametersDtoDefinition;
 use OnMoon\OpenApiServerBundle\CodeGenerator\Dto\Definitions\ResponseDtoDefinition;
 use OnMoon\OpenApiServerBundle\CodeGenerator\Dto\Definitions\ResponseDtoMarkerInterfaceDefinition;
 use OnMoon\OpenApiServerBundle\CodeGenerator\Dto\Definitions\SchemaBasedDtoDefinition;
+use OnMoon\OpenApiServerBundle\CodeGenerator\Dto\Definitions\SetterMethodDefinition;
 use OnMoon\OpenApiServerBundle\CodeGenerator\GeneratedClass;
 use OnMoon\OpenApiServerBundle\CodeGenerator\Naming\CannotCreatePropertyName;
 use OnMoon\OpenApiServerBundle\CodeGenerator\Naming\NamingStrategy;
+use OnMoon\OpenApiServerBundle\Event\CodeGenerator\ClassPropertyGenerationEvent;
+use OnMoon\OpenApiServerBundle\Event\CodeGenerator\ConstructorParameterGenerationEvent;
+use OnMoon\OpenApiServerBundle\Event\CodeGenerator\GetterMethodGenerationEvent;
+use OnMoon\OpenApiServerBundle\Event\CodeGenerator\SetterMethodGenerationEvent;
 use OnMoon\OpenApiServerBundle\Interfaces\Dto;
 use OnMoon\OpenApiServerBundle\Interfaces\ResponseDto;
 use OnMoon\OpenApiServerBundle\OpenApi\ScalarTypesResolver;
@@ -30,6 +38,7 @@ use PhpParser\Node\Stmt\Declare_;
 use PhpParser\Node\Stmt\DeclareDeclare;
 use PhpParser\Node\Stmt\Return_;
 use PhpParser\PrettyPrinter\Standard;
+use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 use function array_map;
 use function array_merge;
 use function class_exists;
@@ -52,18 +61,21 @@ final class PhpParserDtoFactory implements DtoFactory
     private BuilderFactory $factory;
     private NamingStrategy $namingStrategy;
     private ScalarTypesResolver $typeResolver;
+    private EventDispatcherInterface $eventDispatcher;
     private string $languageLevel;
 
     public function __construct(
         BuilderFactory $builderFactory,
         NamingStrategy $namingStrategy,
         ScalarTypesResolver $typeResolver,
+        EventDispatcherInterface $eventDispatcher,
         string $languageLevel
     ) {
-        $this->factory        = $builderFactory;
-        $this->namingStrategy = $namingStrategy;
-        $this->languageLevel  = $languageLevel;
-        $this->typeResolver   = $typeResolver;
+        $this->factory         = $builderFactory;
+        $this->namingStrategy  = $namingStrategy;
+        $this->typeResolver    = $typeResolver;
+        $this->eventDispatcher = $eventDispatcher;
+        $this->languageLevel   = $languageLevel;
     }
 
     public function generateRequestParametersDto(RequestParametersDtoDefinition $definition) : GeneratedClass
@@ -137,26 +149,24 @@ final class PhpParserDtoFactory implements DtoFactory
                 throw new Exception('Could not determine property type');
             }
 
+            $propertyDefinition = new ClassPropertyDefinition($parameter->name, $type);
+            $required ? $propertyDefinition->makeNotNullable() : $propertyDefinition->makeNullable();
+            $propertyDefinition->setDefaultValue($defaultValue);
+            $propertyDefinition->setIterableType($iterableType);
+            $propertyDefinition->setDescription($parameter->description);
+
+            $this->eventDispatcher->dispatch(new ClassPropertyGenerationEvent($definition, $propertyDefinition));
+
+            $getterDefinition = new GetterMethodDefinition($parameter->name, $type);
+            $required ? $getterDefinition->makeNotNullable() : $getterDefinition->makeNullable();
+            $getterDefinition->setDefaultValue($defaultValue);
+            $getterDefinition->setIterableType($iterableType);
+
+            $this->eventDispatcher->dispatch(new GetterMethodGenerationEvent($definition, $getterDefinition));
+
             $classBuilder
-                ->addStmt(
-                    $this->getPropertyDefinition(
-                        $parameter->name,
-                        $type,
-                        ! $required,
-                        $defaultValue,
-                        $iterableType,
-                        $parameter->description
-                    )
-                )
-                ->addStmt(
-                    $this->getGetterDefinition(
-                        $parameter->name,
-                        $type,
-                        ! $required,
-                        $defaultValue,
-                        $iterableType
-                    )
-                );
+                ->addStmt($this->generateClassProperty($propertyDefinition))
+                ->addStmt($this->generateGetter($getterDefinition));
         }
 
         $fileBuilder = $this
@@ -331,16 +341,14 @@ final class PhpParserDtoFactory implements DtoFactory
                 continue;
             }
 
-            $classBuilder->addStmt(
-                $this->getPropertyDefinition(
-                    $propertyName,
-                    $type,
-                    ! $required,
-                    $defaultValue,
-                    $iterableType,
-                    $property->description
-                )
-            );
+            $propertyDefinition = new ClassPropertyDefinition($propertyName, $type);
+            $required ? $propertyDefinition->makeNotNullable() : $propertyDefinition->makeNullable();
+            $propertyDefinition->setDefaultValue($defaultValue);
+            $propertyDefinition->setIterableType($iterableType);
+            $propertyDefinition->setDescription($property->description);
+
+            $this->eventDispatcher->dispatch(new ClassPropertyGenerationEvent($definition, $propertyDefinition));
+            $classBuilder->addStmt($this->generateClassProperty($propertyDefinition));
 
             if (! $definition->isImmutable()) {
                 if ($required) {
@@ -350,21 +358,34 @@ final class PhpParserDtoFactory implements DtoFactory
                         $constructorDocBlock[] = sprintf(' * @param %s[] $%s', $iterableType, $propertyName);
                     }
 
+                    $constructorParameterDefinition = new MethodParameterDefinition($propertyName, $type);
+                    $constructorParameterDefinition->setIterableType($iterableType);
+
+                    $this->eventDispatcher->dispatch(
+                        new ConstructorParameterGenerationEvent($definition, $constructorParameterDefinition)
+                    );
+
                     $constructorBuilder
-                        ->addParam($this->getParamDefinition($propertyName, $type, $iterableType))
+                        ->addParam($this->generateMethodParameter($constructorParameterDefinition))
                         ->addStmt($this->getAssignmentDefinition($propertyName));
                 } else {
-                    $setterBuilders[] = $this->getSetterDefinition($propertyName, $type, $iterableType);
+                    $setterDefinition = new SetterMethodDefinition($propertyName, $type);
+                    $setterDefinition->setIterableType($iterableType);
+
+                    $this->eventDispatcher->dispatch(new SetterMethodGenerationEvent($definition, $setterDefinition));
+
+                    $setterBuilders[] = $this->generateSetter($setterDefinition);
                 }
             }
 
-            $getterBuilders[] = $this->getGetterDefinition(
-                $propertyName,
-                $type,
-                ! $required,
-                $defaultValue,
-                $iterableType
-            );
+            $getterDefinition = new GetterMethodDefinition($propertyName, $type);
+            $required ? $getterDefinition->makeNotNullable() : $getterDefinition->makeNullable();
+            $getterDefinition->setDefaultValue($defaultValue);
+            $getterDefinition->setIterableType($iterableType);
+
+            $this->eventDispatcher->dispatch(new GetterMethodGenerationEvent($definition, $getterDefinition));
+
+            $getterBuilders[] = $this->generateGetter($getterDefinition);
         }
 
         if ($constructorRequired) {
@@ -493,47 +514,51 @@ final class PhpParserDtoFactory implements DtoFactory
         return implode(PHP_EOL, ['/**', ...$lines, ' */']);
     }
 
-    /**
-     * @param string|int|float|bool|null $defaultValue
-     */
-    private function getPropertyDefinition(
-        string $name,
-        string $type,
-        bool $nullable = false,
-        $defaultValue = null,
-        ?string $iterableType = null,
-        ?string $description = null
-    ) : Property {
+    private function generateClassProperty(ClassPropertyDefinition $definition) : Property
+    {
         $property = $this->factory
-            ->property($name)
+            ->property($definition->name())
             ->makePrivate();
 
-        if ($defaultValue !== null) {
-            $property->setDefault($defaultValue);
-        } elseif ($nullable) {
+        if ($definition->defaultValue() !== null) {
+            $property->setDefault($definition->defaultValue());
+        } elseif ($definition->isNullable()) {
             $property->setDefault(null);
         }
 
         $docCommentLines = [];
 
-        if ($description) {
-            $docCommentLines[] = sprintf(' %s', $description);
+        if ($definition->description() !== null) {
+            $docCommentLines[] = sprintf(' %s', $definition->description());
         }
 
-        $nullableDocblock = $nullable && $defaultValue === null ? '|null' : '';
+        $nullableDocblock = $definition->isNullable() && $definition->defaultValue() === null ? '|null' : '';
 
         if (version_compare($this->languageLevel, '7.4.0') >= 0) {
-            $property->setType(($nullable && $defaultValue === null ? '?' : '') . ($iterableType ? 'array' : $type));
+            $property->setType(
+                ($definition->isNullable() && $definition->defaultValue() === null ? '?' : '') .
+                ($definition->iterableType() !== null ? 'array' : $definition->type())
+            );
         }
 
         if (count($docCommentLines) > 0) {
             $docCommentLines[] = '';
         }
 
-        if ($iterableType === null) {
-            $docCommentLines[] = sprintf(' @var %s%s $%s ', $type, $nullableDocblock, $name);
+        if ($definition->iterableType() === null) {
+            $docCommentLines[] = sprintf(
+                ' @var %s%s $%s ',
+                $definition->type(),
+                $nullableDocblock,
+                $definition->name()
+            );
         } else {
-            $docCommentLines[] = sprintf(' @var %s[]%s $%s ', $iterableType, $nullableDocblock, $name);
+            $docCommentLines[] = sprintf(
+                ' @var %s[]%s $%s ',
+                $definition->iterableType(),
+                $nullableDocblock,
+                $definition->name()
+            );
         }
 
         if (count($docCommentLines) === 1) {
@@ -559,12 +584,12 @@ final class PhpParserDtoFactory implements DtoFactory
         return $property;
     }
 
-    private function getParamDefinition(string $name, string $type, ?string $iterableType = null) : Param
+    private function generateMethodParameter(MethodParameterDefinition $definition) : Param
     {
         return $this
             ->factory
-            ->param($name)
-            ->setType($iterableType ? 'array' : $type);
+            ->param($definition->name())
+            ->setType($definition->iterableType() !== null ? 'array' : $definition->type());
     }
 
     private function getAssignmentDefinition(string $name) : Assign
@@ -572,28 +597,23 @@ final class PhpParserDtoFactory implements DtoFactory
         return new Assign(new Variable('this->' . $name), new Variable($name));
     }
 
-    /**
-     * @param string|int|float|bool|null $defaultValue
-     */
-    private function getGetterDefinition(
-        string $name,
-        string $type,
-        bool $nullable = false,
-        $defaultValue = null,
-        ?string $iterableType = null
-    ) : Method {
+    private function generateGetter(GetterMethodDefinition $definition) : Method
+    {
         $method = $this->factory
-            ->method('get' . ucfirst($name))
+            ->method('get' . ucfirst($definition->name()))
             ->makePublic()
-            ->setReturnType(($nullable && $defaultValue === null ? '?' : '') . ($iterableType ? 'array' : $type))
-            ->addStmt(new Return_(new Variable('this->' . $name)));
+            ->setReturnType(
+                ($definition->isNullable() && $definition->defaultValue() === null ? '?' : '') .
+                ($definition->iterableType() !== null ? 'array' : $definition->type())
+            )
+            ->addStmt(new Return_(new Variable('this->' . $definition->name())));
 
-        if ($iterableType !== null) {
+        if ($definition->iterableType() !== null) {
             $method->setDocComment(
                 sprintf(
                     '/** @return %s[]%s */',
-                    $iterableType,
-                    $nullable && $defaultValue === null ? '|null' : ''
+                    $definition->iterableType(),
+                    $definition->isNullable() && $definition->defaultValue() === null ? '|null' : ''
                 )
             );
         }
@@ -601,22 +621,21 @@ final class PhpParserDtoFactory implements DtoFactory
         return $method;
     }
 
-    private function getSetterDefinition(
-        string $name,
-        string $type,
-        ?string $iterableType = null
-    ) : Method {
+    private function generateSetter(SetterMethodDefinition $definition) : Method
+    {
+        $methodParameterDefinition = new MethodParameterDefinition($definition->name(), $definition->type());
+        $methodParameterDefinition->setIterableType($definition->iterableType());
         $method = $this->factory
-            ->method('set' . ucfirst($name))
+            ->method('set' . ucfirst($definition->name()))
             ->makePublic()
             ->setReturnType('self')
-            ->addParam($this->getParamDefinition($name, $type, $iterableType))
-            ->addStmt($this->getAssignmentDefinition($name))
+            ->addParam($this->generateMethodParameter($methodParameterDefinition))
+            ->addStmt($this->getAssignmentDefinition($definition->name()))
             ->addStmt(new Return_(new Variable('this')));
 
-        if ($iterableType !== null) {
+        if ($definition->iterableType() !== null) {
             $method->setDocComment(
-                sprintf('/** @param %s[] $%s */', $iterableType, $name)
+                sprintf('/** @param %s[] $%s */', $definition->iterableType(), $definition->name())
             );
         }
 

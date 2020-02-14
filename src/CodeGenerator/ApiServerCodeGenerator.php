@@ -29,9 +29,12 @@ use OnMoon\OpenApiServerBundle\CodeGenerator\RequestHandlerInterface\Definitions
 use OnMoon\OpenApiServerBundle\CodeGenerator\RequestHandlerInterface\RequestHandlerInterfaceFactory;
 use OnMoon\OpenApiServerBundle\CodeGenerator\ServiceSubscriber\Definitions\Factory\ServiceSubscriberDefinitionFactory;
 use OnMoon\OpenApiServerBundle\CodeGenerator\ServiceSubscriber\ServiceSubscriberFactory;
-use OnMoon\OpenApiServerBundle\Event\RequestDtoGenerationEvent;
-use OnMoon\OpenApiServerBundle\Event\ResponseDtoMarkerInterfaceGenerationEvent;
-use OnMoon\OpenApiServerBundle\Event\ServiceSubscriberGenerationEvent;
+use OnMoon\OpenApiServerBundle\Event\CodeGenerator\RequestBodyDtoGenerationEvent;
+use OnMoon\OpenApiServerBundle\Event\CodeGenerator\RequestDtoGenerationEvent;
+use OnMoon\OpenApiServerBundle\Event\CodeGenerator\RequestHandlerInterfaceGenerationEvent;
+use OnMoon\OpenApiServerBundle\Event\CodeGenerator\ResponseDtoGenerationEvent;
+use OnMoon\OpenApiServerBundle\Event\CodeGenerator\ResponseDtoMarkerInterfaceGenerationEvent;
+use OnMoon\OpenApiServerBundle\Event\CodeGenerator\ServiceSubscriberGenerationEvent;
 use OnMoon\OpenApiServerBundle\Exception\CannotGenerateCodeForOperation;
 use OnMoon\OpenApiServerBundle\Specification\SpecificationLoader;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
@@ -133,6 +136,10 @@ class ApiServerCodeGenerator
                                 $this->rootPath
                             ))->create($mediaType->schema);
 
+                            $this->eventDispatcher->dispatch(
+                                new RequestBodyDtoGenerationEvent($requestBodyDtoDefinition)
+                            );
+
                             /** @var GeneratedClass[] $filesToGenerate */
                             $filesToGenerate = array_merge(
                                 $filesToGenerate,
@@ -173,6 +180,8 @@ class ApiServerCodeGenerator
                                 $this->rootNamespace,
                                 $this->rootPath
                             ))->create($mediaType->schema, (string) $responseCode);
+
+                            $this->eventDispatcher->dispatch(new ResponseDtoGenerationEvent($responseDtoDefinition));
 
                             $responseDtoDefinitions[] = $responseDtoDefinition;
                         }
@@ -221,7 +230,7 @@ class ApiServerCodeGenerator
                             $this->namingStrategy,
                             $this->rootNamespace,
                             $this->rootPath
-                        ))->create($requestBodyDtoDefinition);
+                        ))->create($requestBodyDtoDefinition, ...$parameters);
 
                         $this->eventDispatcher->dispatch(new RequestDtoGenerationEvent($requestDtoDefinition));
 
@@ -246,6 +255,10 @@ class ApiServerCodeGenerator
                         ...$responseDtoDefinitions
                     );
 
+                    $this->eventDispatcher->dispatch(
+                        new RequestHandlerInterfaceGenerationEvent($requestHandlerInterfaceDefinition)
+                    );
+
                     $requestHandlerInterface = $this->requestHandlerInterfaceFactory->generateInterface(
                         $requestHandlerInterfaceDefinition
                     );
@@ -256,7 +269,7 @@ class ApiServerCodeGenerator
             }
         }
 
-        // Service subscriber generation
+        // RequestHandler subscriber generation
 
         $serviceSubscriberDefinition = (new ServiceSubscriberDefinitionFactory(
             $this->namingStrategy,

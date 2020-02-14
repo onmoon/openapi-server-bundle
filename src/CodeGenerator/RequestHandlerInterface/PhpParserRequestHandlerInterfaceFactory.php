@@ -9,7 +9,7 @@ use OnMoon\OpenApiServerBundle\CodeGenerator\Dto\Definitions\ResponseDtoMarkerIn
 use OnMoon\OpenApiServerBundle\CodeGenerator\GeneratedClass;
 use OnMoon\OpenApiServerBundle\CodeGenerator\Naming\NamingStrategy;
 use OnMoon\OpenApiServerBundle\CodeGenerator\RequestHandlerInterface\Definitions\RequestHandlerInterfaceDefinition;
-use OnMoon\OpenApiServerBundle\Interfaces\Service;
+use OnMoon\OpenApiServerBundle\Interfaces\RequestHandler;
 use PhpParser\BuilderFactory;
 use PhpParser\Node\Scalar\LNumber;
 use PhpParser\Node\Stmt\Declare_;
@@ -34,12 +34,12 @@ final class PhpParserRequestHandlerInterfaceFactory implements RequestHandlerInt
         $fileBuilder = $this
             ->factory
             ->namespace($definition->namespace())
-            ->addStmt($this->factory->use(Service::class));
+            ->addStmt($this->factory->use(RequestHandler::class));
 
         $interfaceBuilder = $this
             ->factory
             ->interface($definition->className())
-            ->extend('Service')
+            ->extend('RequestHandler')
             ->setDocComment('/**
                               * This interface was automatically generated
                               * You should not change it manually as it will be overwritten

@@ -41,7 +41,7 @@ class DefaultNamingStrategy implements NamingStrategy
 
     public function getInterfaceFQCN(string $apiNameSpace, string $operationId) : string
     {
-        /** @psalm-var class-string<\OnMoon\OpenApiServerBundle\Interfaces\Service> $interfaceNamespace */
+        /** @psalm-var class-string<\OnMoon\OpenApiServerBundle\Interfaces\RequestHandler> $interfaceNamespace */
         $interfaceNamespace = $this->buildNamespace(
             $this->rootNamespace,
             SpecificationDefinitionFactory::APIS_NAMESPACE,

@@ -8,15 +8,15 @@ use cebe\openapi\spec\OpenApi;
 use cebe\openapi\spec\Operation;
 use cebe\openapi\spec\PathItem;
 use OnMoon\OpenApiServerBundle\CodeGenerator\Naming\NamingStrategy;
-use OnMoon\OpenApiServerBundle\Event\RequestDtoEvent;
-use OnMoon\OpenApiServerBundle\Event\RequestEvent;
-use OnMoon\OpenApiServerBundle\Event\ResponseDtoEvent;
-use OnMoon\OpenApiServerBundle\Event\ResponseEvent;
+use OnMoon\OpenApiServerBundle\Event\Server\RequestDtoEvent;
+use OnMoon\OpenApiServerBundle\Event\Server\RequestEvent;
+use OnMoon\OpenApiServerBundle\Event\Server\ResponseDtoEvent;
+use OnMoon\OpenApiServerBundle\Event\Server\ResponseEvent;
 use OnMoon\OpenApiServerBundle\Exception\ApiCallFailed;
 use OnMoon\OpenApiServerBundle\Interfaces\ApiLoader;
 use OnMoon\OpenApiServerBundle\Interfaces\Dto;
+use OnMoon\OpenApiServerBundle\Interfaces\RequestHandler;
 use OnMoon\OpenApiServerBundle\Interfaces\ResponseDto;
-use OnMoon\OpenApiServerBundle\Interfaces\Service;
 use OnMoon\OpenApiServerBundle\Interfaces\SetClientIp;
 use OnMoon\OpenApiServerBundle\Interfaces\SetRequest;
 use OnMoon\OpenApiServerBundle\Router\RouteLoader;
@@ -99,7 +99,7 @@ class ApiController
     }
 
     /**
-     * @psalm-return class-string<Service>
+     * @psalm-return class-string<RequestHandler>
      */
     private function getRequestHandlerInterface(Route $route, Operation $operation) : string
     {
@@ -140,7 +140,7 @@ class ApiController
         return $responseDto;
     }
 
-    private function getRequestHandler(Request $request, string $requestHandlerInterface) : Service
+    private function getRequestHandler(Request $request, string $requestHandlerInterface) : RequestHandler
     {
         if ($this->apiLoader === null) {
             throw ApiCallFailed::becauseApiLoaderNotFound();
