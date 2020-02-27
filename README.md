@@ -208,6 +208,11 @@ The following events are available:
     This event allows you to modify the definitions of the generated Parameters DTO's customizing the generated code.
     The parametersType() method returns either "path" or "query" and indicates what part of the RequestDTO is the
     ParameterDTO generated for.
+- `OnMoon\OpenApiServerBundle\Event\CodeGenerator\PropertyDtoGenerationEvent`
+
+    The PropertyDtoGenerationEvent event occurs before any of the DTOs nested in the Request Body or Response are generated.
+    This event allows you to modify the definitions of the generated nested DTOs that are used in the Request Body 
+    and Response DTOs, customizing the generated code.
 - `OnMoon\OpenApiServerBundle\Event\CodeGenerator\RequestBodyDtoGenerationEvent`
 
     The RequestBodyDtoGenerationEvent event occurs before the request body dto is generated.
