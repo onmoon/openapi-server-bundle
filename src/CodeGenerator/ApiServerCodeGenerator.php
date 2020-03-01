@@ -140,10 +140,17 @@ class ApiServerCodeGenerator
                                 new RequestBodyDtoGenerationEvent($requestBodyDtoDefinition)
                             );
 
+
                             /** @var GeneratedClass[] $filesToGenerate */
                             $filesToGenerate = array_merge(
                                 $filesToGenerate,
-                                $this->generateDtoGraph($requestBodyDtoDefinition)
+                                $this->generateDtoGraph(
+                                    $url,
+                                    $method,
+                                    'request',
+                                    $specification->getPath(),
+                                    $requestBodyDtoDefinition
+                                )
                             );
                         }
                     }
@@ -214,7 +221,13 @@ class ApiServerCodeGenerator
                             /** @var GeneratedClass[] $filesToGenerate */
                             $filesToGenerate = array_merge(
                                 $filesToGenerate,
-                                $this->generateDtoGraph($responseDtoDefinition)
+                                $this->generateDtoGraph(
+                                    $url,
+                                    $method,
+                                    'response (code '.$responseCode.')',
+                                    $specification->getPath(),
+                                    $responseDtoDefinition
+                                )
                             );
                         }
                     }
@@ -336,10 +349,15 @@ class ApiServerCodeGenerator
     /**
      * @return GeneratedClass[]
      */
-    private function generateDtoGraph(SchemaBasedDtoDefinition $definition) : array
-    {
+    private function generateDtoGraph(
+        string $url,
+        string $method,
+        string $location,
+        string $specificationFilePath,
+        SchemaBasedDtoDefinition $definition
+    ) : array {
         if ($definition->schema()->type !== Type::OBJECT) {
-            return [];
+            throw CannotGenerateCodeForOperation::becauseRootIsNotObject($url, $method, $location, $specificationFilePath);
         }
 
         return $this->dtoFactory->generateDtoClassGraph($definition);
