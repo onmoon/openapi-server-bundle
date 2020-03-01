@@ -217,16 +217,13 @@ class ApiServerCodeGenerator
                         }
 
                         foreach ($responseDtoDefinitions as $responseDtoDefinition) {
-                            $responseCode = $responseDtoDefinition->responseCode();
-                            $location     = 'response' .
-                                ( $responseCode !== null ? ' (code ' . $responseCode . ')' : '' );
                             /** @var GeneratedClass[] $filesToGenerate */
                             $filesToGenerate = array_merge(
                                 $filesToGenerate,
                                 $this->generateDtoGraph(
                                     $url,
                                     $method,
-                                    $location,
+                                    'response (code "' . $responseDtoDefinition->responseCode() . '")',
                                     $specification->getPath(),
                                     $responseDtoDefinition
                                 )

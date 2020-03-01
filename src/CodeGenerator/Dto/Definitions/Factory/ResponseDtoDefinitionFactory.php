@@ -47,7 +47,7 @@ class ResponseDtoDefinitionFactory extends OperationDefinitionFactory
             $statusNamespace
         );
         $responseDtoClassName = $this->namingStrategy->stringToNamespace(
-            $this->operationName() . self::RESPONSE_SUFFIX . self::DTO_SUFFIX
+            $this->operationName() . $statusNamespace . self::DTO_SUFFIX
         );
         $responseDtoPath      = $this->namingStrategy->buildPath(
             $this->operationPath(),
@@ -62,11 +62,10 @@ class ResponseDtoDefinitionFactory extends OperationDefinitionFactory
             $responseDtoFileName,
             $responseDtoNamespace,
             $responseDtoClassName,
+            $responseCode,
             $schema
         );
-        $responseDtoDefinition->setResponseCode(
-            (int) $responseCode === 0 ? 200 : (int) $responseCode
-        );
+
         $responseDtoDefinition->makeMutable();
 
         return $responseDtoDefinition;
