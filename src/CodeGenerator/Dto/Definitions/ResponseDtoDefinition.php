@@ -8,7 +8,7 @@ use cebe\openapi\spec\Schema;
 
 class ResponseDtoDefinition extends SchemaBasedDtoDefinition
 {
-    private ?int $responseCode;
+    private string $responseCode;
     private ?ResponseDtoMarkerInterfaceDefinition $markerInterfaceDefinition;
 
     public function __construct(
@@ -16,22 +16,18 @@ class ResponseDtoDefinition extends SchemaBasedDtoDefinition
         string $fileName,
         string $namespace,
         string $className,
+        string $responseCode,
         Schema $schema
     ) {
         parent::__construct($directoryPath, $fileName, $namespace, $className, $schema);
 
-        $this->responseCode              = null;
+        $this->responseCode              = $responseCode;
         $this->markerInterfaceDefinition = null;
     }
 
-    public function responseCode() : ?int
+    public function responseCode() : string
     {
         return $this->responseCode;
-    }
-
-    public function setResponseCode(int $responseCode) : void
-    {
-        $this->responseCode = $responseCode;
     }
 
     public function markerInterfaceDefintion() : ?ResponseDtoMarkerInterfaceDefinition

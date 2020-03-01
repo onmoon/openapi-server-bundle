@@ -9,5 +9,5 @@ interface ResponseDto extends Dto
     /**
      * @internal
      */
-    public static function _getResponseCode() : int;
+    public function _getResponseCode() : int;
 }

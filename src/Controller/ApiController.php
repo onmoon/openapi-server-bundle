@@ -180,7 +180,7 @@ class ApiController
 
         if ($responseDto instanceof ResponseDto) {
             $response->setContent($this->serializer->createResponse($responseDto));
-            $response->setStatusCode($responseDto::_getResponseCode());
+            $response->setStatusCode($responseDto->_getResponseCode());
         } else {
             $response->setStatusCode(200);
         }

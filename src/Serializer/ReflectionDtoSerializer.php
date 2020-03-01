@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace OnMoon\OpenApiServerBundle\Serializer;
 
+use OnMoon\OpenApiServerBundle\CodeGenerator\Dto\PhpParserDtoFactory;
 use OnMoon\OpenApiServerBundle\Interfaces\Dto;
 /** phpcs:disable SlevomatCodingStandard.Namespaces.UnusedUses.UnusedUse */
 use OnMoon\OpenApiServerBundle\Interfaces\RequestHandler;
@@ -11,6 +12,7 @@ use ReflectionClass;
 use ReflectionNamedType;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Route;
+use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
 use Symfony\Component\Serializer\SerializerInterface;
 use function assert;
 use function count;
@@ -56,7 +58,11 @@ class ReflectionDtoSerializer implements DtoSerializer
 
     public function createResponse(object $dto) : string
     {
-        return $this->serializer->serialize($dto, 'json');
+        return $this->serializer->serialize(
+            $dto,
+            'json',
+            [AbstractNormalizer::IGNORED_ATTRIBUTES => [PhpParserDtoFactory::RESPONSE_CODE_VARIABLE_NAME]]
+        );
     }
 
     /**
