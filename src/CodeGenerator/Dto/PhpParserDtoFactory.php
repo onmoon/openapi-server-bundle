@@ -235,7 +235,8 @@ final class PhpParserDtoFactory implements DtoFactory
                 $baseInterfaceDefined = true;
             }
 
-            if ((int) $definition->responseCode() === 0) {
+            $responseCode = (int) $definition->responseCode();
+            if ($responseCode === 0) {
                 $propertyDefinition = new ClassPropertyDefinition(self::RESPONSE_CODE_VARIABLE_NAME, 'int');
                 $propertyDefinition->makeNotNullable();
                 $propertyDefinition->setDescription('Response HTTP code');
@@ -251,7 +252,24 @@ final class PhpParserDtoFactory implements DtoFactory
                         new Variable('this->' . self::RESPONSE_CODE_VARIABLE_NAME),
                         new Variable('httpCode')
                     ));
+                $responseCodeStmt = new Variable('this->' . self::RESPONSE_CODE_VARIABLE_NAME);
+            } else {
+                $responseCodeStmt = $this->factory->val($responseCode);
             }
+
+            $classBuilder
+                ->addStmt(
+                    $this
+                        ->factory
+                        ->method('_getResponseCode')
+                        ->makePublic()
+                        ->setReturnType('int')
+                        ->addStmt(
+                            new Return_(
+                                $responseCodeStmt
+                            )
+                        )
+                );
         }
 
         if (! $baseInterfaceDefined) {
@@ -432,27 +450,6 @@ final class PhpParserDtoFactory implements DtoFactory
 
         foreach ($imports as $import) {
             $fileBuilder->addStmt($this->factory->use(ltrim($import, '\\')));
-        }
-
-        if ($definition instanceof ResponseDtoDefinition) {
-            $responseCode     = (int) $definition->responseCode();
-            $responseCodeStmt = ($responseCode === 0 ?
-                new Variable('this->' . self::RESPONSE_CODE_VARIABLE_NAME) :
-                $this->factory->val($responseCode)
-            );
-            $classBuilder
-                ->addStmt(
-                    $this
-                        ->factory
-                        ->method('_getResponseCode')
-                        ->makePublic()
-                        ->setReturnType('int')
-                        ->addStmt(
-                            new Return_(
-                                $responseCodeStmt
-                            )
-                        )
-                );
         }
 
         $fileBuilder = $fileBuilder->addStmt($classBuilder);
