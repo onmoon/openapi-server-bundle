@@ -23,6 +23,7 @@ use OnMoon\OpenApiServerBundle\CodeGenerator\Naming\NamingStrategy;
 use OnMoon\OpenApiServerBundle\Event\CodeGenerator\ClassPropertyGenerationEvent;
 use OnMoon\OpenApiServerBundle\Event\CodeGenerator\ConstructorParameterGenerationEvent;
 use OnMoon\OpenApiServerBundle\Event\CodeGenerator\GetterMethodGenerationEvent;
+use OnMoon\OpenApiServerBundle\Event\CodeGenerator\PropertyDtoGenerationEvent;
 use OnMoon\OpenApiServerBundle\Event\CodeGenerator\SetterMethodGenerationEvent;
 use OnMoon\OpenApiServerBundle\Interfaces\Dto;
 use OnMoon\OpenApiServerBundle\Interfaces\ResponseDto;
@@ -287,6 +288,7 @@ final class PhpParserDtoFactory implements DtoFactory
                             $propertyDtoDefinition->makeImmutable() :
                             $propertyDtoDefinition->makeMutable();
 
+                        $this->eventDispatcher->dispatch(new PropertyDtoGenerationEvent($propertyDtoDefinition));
                         $generatedClassGraph = $this->generatePropertyDto($propertyDtoDefinition);
 
                         $generatedClasses = array_merge($generatedClasses, $generatedClassGraph->getClassGraph());
@@ -318,6 +320,7 @@ final class PhpParserDtoFactory implements DtoFactory
                                 $propertyDtoDefinition->makeImmutable() :
                                 $propertyDtoDefinition->makeMutable();
 
+                            $this->eventDispatcher->dispatch(new PropertyDtoGenerationEvent($propertyDtoDefinition));
                             $generatedClassGraph = $this->generatePropertyDto($propertyDtoDefinition);
 
                             $generatedClasses = array_merge($generatedClasses, $generatedClassGraph->getClassGraph());
