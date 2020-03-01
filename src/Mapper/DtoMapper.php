@@ -4,10 +4,17 @@ declare(strict_types=1);
 
 namespace OnMoon\OpenApiServerBundle\Mapper;
 
+use ArrayAccess;
+use ArrayObject;
+use BadMethodCallException;
 use OnMoon\OpenApiServerBundle\CodeGenerator\Dto\PhpParserDtoFactory;
 use OnMoon\OpenApiServerBundle\CodeGenerator\Factory\OperationDefinitionFactory;
 use OnMoon\OpenApiServerBundle\CodeGenerator\Naming\NamingStrategy;
 use OnMoon\OpenApiServerBundle\Exception\CannotMapToDto;
+use ReflectionClass;
+use ReflectionException;
+use ReflectionType;
+use Safe\Exceptions\StringsException;
 use function array_key_exists;
 use function array_map;
 use function class_exists;
@@ -17,14 +24,17 @@ use function get_class_methods;
 use function in_array;
 use function is_array;
 use function is_object;
+use function method_exists;
 use function preg_quote;
+use function Safe\preg_match;
 use function Safe\settype;
 use function Safe\sort;
+use function Safe\substr;
 use function strlen;
 use function strpos;
-use function Safe\substr;
-use function Safe\preg_match;
+use function strtr;
 
+/** phpcs:disable SlevomatCodingStandard.TypeHints.ParameterTypeHint.MissingTraversableTypeHintSpecification */
 class DtoMapper
 {
     private NamingStrategy $namingStrategy;
@@ -36,19 +46,21 @@ class DtoMapper
 
     /**
      * @param array|object $from
-     * @param class-string $toDTO
-     * @param int $httpCode
-     * @return object
+     *
      * @throws CannotMapToDto
      * @throws NotAnArrayValue
      * @throws UnexpectedNullValue
      * @throws UnexpectedScalarValue
-     * @throws \ReflectionException
-     * @throws \Safe\Exceptions\StringsException
+     * @throws ReflectionException
+     * @throws StringsException
      */
-    public function map($from, $toDTO, int $httpCode = 0) : object
+    public function map($from, string $toDTO, int $httpCode = 0) : object
     {
-        $reflectionClass = new \ReflectionClass($toDTO);
+        if (! class_exists($toDTO)) {
+            throw CannotMapToDto::becauseRootClassDoesNotExist($toDTO);
+        }
+
+        $reflectionClass = new ReflectionClass($toDTO);
         $instance        = $reflectionClass->newInstanceWithoutConstructor();
 
         $properties = $reflectionClass->getProperties();
@@ -61,8 +73,8 @@ class DtoMapper
 
             /** @var mixed|null $rawValue */
             $rawValue = $this->getValue($from, $property->getName());
-            /** @var \ReflectionType $type */
-            $type     = $property->getType();
+            /** @var ReflectionType $type */
+            $type = $property->getType();
 
             if ($rawValue === null) {
                 if ($type->allowsNull()) {
@@ -74,7 +86,7 @@ class DtoMapper
 
             $typeName = (string) $type;
             if ($typeName === 'array') {
-                if (! (is_array($rawValue) || $rawValue instanceof \ArrayObject)) {
+                if (! (is_array($rawValue) || $rawValue instanceof ArrayObject)) {
                     throw new NotAnArrayValue($property->getName(), $toDTO, $rawValue);
                 }
 
@@ -82,18 +94,19 @@ class DtoMapper
                 $value = [];
                 if (count($rawValue) !== 0) {
                     $phpDoc = $property->getDocComment();
-                    if(!$phpDoc) {
+                    if (! $phpDoc) {
                         throw CannotMapToDto::becausePhpDocIsCorrupt($property->getName(), $toDTO);
                     }
+
                     $regExp = '#@var\s+([^[\s]+)\\[\\](|\\|null)\s+\\$' . preg_quote($property->getName(), '#') . '#';
-                    if (!preg_match($regExp, $phpDoc, $match) || $match === null) {
+                    if (! preg_match($regExp, $phpDoc, $match) || $match === null) {
                         throw CannotMapToDto::becausePhpDocIsCorrupt($property->getName(), $toDTO);
                     }
 
                     /** @var string $shortClassName */
-                    $shortClassName  = $match[1];
+                    $shortClassName = $match[1];
 
-                    if(preg_match('#'.preg_quote(OperationDefinitionFactory::DTO_SUFFIX).'$#', $shortClassName)) {
+                    if (preg_match('#' . preg_quote(OperationDefinitionFactory::DTO_SUFFIX) . '$#', $shortClassName)) {
                         $parentNamespace = $reflectionClass->getNamespaceName();
 
                         $fullClass = $this->namingStrategy->buildNamespace(
@@ -104,16 +117,21 @@ class DtoMapper
 
                         /** @var mixed $item */
                         foreach ($rawValue as $item) {
-                            if(!is_array($item) and !is_object($item)) {
+                            if (! is_array($item) && ! is_object($item)) {
                                 throw new UnexpectedScalarValue($property->getName(), $toDTO, $item);
                             }
-                            if(!class_exists($fullClass)) {
+
+                            if (! class_exists($fullClass)) {
                                 throw CannotMapToDto::becauseClassDoesNotExist(
-                                    $fullClass, $property->getName(), $toDTO);
+                                    $fullClass,
+                                    $property->getName(),
+                                    $toDTO
+                                );
                             }
+
                             $value[] = $this->map($item, $fullClass);
                         }
-                    }  else {
+                    } else {
                         /** @var mixed $item */
                         foreach ($rawValue as $item) {
                             /** phpcs:disable Generic.PHP.ForbiddenFunctions.Found */
@@ -129,9 +147,10 @@ class DtoMapper
                 /** @var mixed $value */
                 $value = $rawValue;
             } elseif (class_exists($typeName)) {
-                if(!is_array($rawValue) and !is_object($rawValue)) {
+                if (! is_array($rawValue) && ! is_object($rawValue)) {
                     throw new UnexpectedScalarValue($property->getName(), $toDTO, $rawValue);
                 }
+
                 /** @var mixed $value */
                 $value = $this->map($rawValue, $typeName);
             } else {
@@ -147,15 +166,16 @@ class DtoMapper
 
     /**
      * @param array|object $object
-     * @param string $item
+     *
      * @return mixed|null
-     * @throws \Safe\Exceptions\StringsException
+     *
+     * @throws StringsException
      */
     private function getValue($object, string $item)
     {
-        if (((is_array($object) || $object instanceof \ArrayObject) &&
+        if (((is_array($object) || $object instanceof ArrayObject) &&
                 (isset($object[$item]) || array_key_exists($item, (array) $object)))
-            || ($object instanceof \ArrayAccess && isset($object[$item]))
+            || ($object instanceof ArrayAccess && isset($object[$item]))
         ) {
             return $object[$item];
         }
@@ -178,7 +198,7 @@ class DtoMapper
         if (! isset($cache[$class])) {
             $methods = get_class_methods($object);
             sort($methods);
-            $lcMethods  = array_map(
+            $lcMethods = array_map(
                 static function (string $value) {
                     return self::strToLowerEn($value);
                 },
@@ -229,10 +249,11 @@ class DtoMapper
         }
 
         $magicCall = false;
+        $lcItem    = $this->strToLowerEn($item);
         if (isset($cache[$class][$item])) {
             /** @var string $method */
             $method = $cache[$class][$item];
-        } elseif (isset($cache[$class][$lcItem = $this->strToLowerEn($item)])) {
+        } elseif (isset($cache[$class][$lcItem])) {
             /** @var string $method */
             $method = $cache[$class][$lcItem];
         } elseif (isset($cache[$class]['__call'])) {
@@ -243,14 +264,14 @@ class DtoMapper
             return null;
         }
 
-        if(!method_exists($object, $method)) {
+        if (! method_exists($object, $method)) {
             return null;
         }
 
         try {
             /** @var mixed $ret */
             $ret = $object->$method();
-        } catch (\BadMethodCallException $e) {
+        } catch (BadMethodCallException $e) {
             if ($magicCall) {
                 return null;
             }
@@ -261,7 +282,8 @@ class DtoMapper
         return $ret;
     }
 
-    private static function strToLowerEn(string $str): string {
+    private static function strToLowerEn(string $str) : string
+    {
         return strtr($str, 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz');
     }
 }

@@ -42,4 +42,14 @@ class CannotMapToDto extends OpenApiError
             )
         );
     }
+
+    public static function becauseRootClassDoesNotExist(string $class) : self
+    {
+        return new self(
+            sprintf(
+                'Class "%s" does not exist',
+                $class
+            )
+        );
+    }
 }

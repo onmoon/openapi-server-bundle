@@ -5,21 +5,18 @@ declare(strict_types=1);
 namespace OnMoon\OpenApiServerBundle\Mapper;
 
 use OnMoon\OpenApiServerBundle\Exception\OpenApiError;
+use Safe\Exceptions\StringsException;
 use function Safe\sprintf;
 
 class NotAnArrayValue extends OpenApiError
 {
-    /**
-     * @var mixed $value
-     */
+    /** @var mixed $value */
     private $value;
 
     /**
-     * NotAnArrayValue constructor.
-     * @param string $name
-     * @param string $class
      * @param mixed $value
-     * @throws \Safe\Exceptions\StringsException
+     *
+     * @throws StringsException
      */
     public function __construct(string $name, string $class, $value)
     {
