@@ -222,7 +222,7 @@ final class PhpParserDtoFactory implements DtoFactory
             if ($definition->markerInterfaceDefintion() instanceof ResponseDtoMarkerInterfaceDefinition) {
                 /** @psalm-var ResponseDtoMarkerInterfaceDefinition $markerInterfaceDefintion */
                 $markerInterfaceDefintion = $definition->markerInterfaceDefintion();
-                $classBuilder             = $classBuilder->implement($markerInterfaceDefintion->namespace());
+                $classBuilder             = $classBuilder->implement($markerInterfaceDefintion->className());
                 $imports[]                = $this->namingStrategy->buildNamespace(
                     $markerInterfaceDefintion->namespace(),
                     $markerInterfaceDefintion->className()
