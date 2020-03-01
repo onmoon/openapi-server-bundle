@@ -140,7 +140,6 @@ class ApiServerCodeGenerator
                                 new RequestBodyDtoGenerationEvent($requestBodyDtoDefinition)
                             );
 
-
                             /** @var GeneratedClass[] $filesToGenerate */
                             $filesToGenerate = array_merge(
                                 $filesToGenerate,
@@ -218,13 +217,16 @@ class ApiServerCodeGenerator
                         }
 
                         foreach ($responseDtoDefinitions as $responseDtoDefinition) {
+                            $responseCode = $responseDtoDefinition->responseCode();
+                            $location     = 'response' .
+                                ( $responseCode !== null ? ' (code ' . $responseCode . ')' : '' );
                             /** @var GeneratedClass[] $filesToGenerate */
                             $filesToGenerate = array_merge(
                                 $filesToGenerate,
                                 $this->generateDtoGraph(
                                     $url,
                                     $method,
-                                    'response (code '.$responseCode.')',
+                                    $location,
                                     $specification->getPath(),
                                     $responseDtoDefinition
                                 )
@@ -357,7 +359,15 @@ class ApiServerCodeGenerator
         SchemaBasedDtoDefinition $definition
     ) : array {
         if ($definition->schema()->type !== Type::OBJECT) {
-            throw CannotGenerateCodeForOperation::becauseRootIsNotObject($url, $method, $location, $specificationFilePath);
+            $isArray = ($definition->schema()->type === Type::ARRAY);
+
+            throw CannotGenerateCodeForOperation::becauseRootIsNotObject(
+                $url,
+                $method,
+                $location,
+                $specificationFilePath,
+                $isArray
+            );
         }
 
         return $this->dtoFactory->generateDtoClassGraph($definition);
