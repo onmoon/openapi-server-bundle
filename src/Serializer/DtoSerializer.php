@@ -6,19 +6,19 @@ namespace OnMoon\OpenApiServerBundle\Serializer;
 
 use OnMoon\OpenApiServerBundle\Interfaces\Dto;
 /** phpcs:disable SlevomatCodingStandard.Namespaces.UnusedUses.UnusedUse */
-use OnMoon\OpenApiServerBundle\Interfaces\Service;
+use OnMoon\OpenApiServerBundle\Interfaces\RequestHandler;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Route;
 
 interface DtoSerializer
 {
     /**
-     * @psalm-param class-string<Service> $serviceInterface
+     * @psalm-param class-string<RequestHandler> $requestHandlerInterface
      */
     public function createRequestDto(
         Request $request,
         Route $route,
-        string $serviceInterface,
+        string $requestHandlerInterface,
         string $methodName
     ) : ?Dto;
 
