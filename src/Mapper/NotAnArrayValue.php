@@ -1,0 +1,42 @@
+<?php
+
+declare(strict_types=1);
+
+namespace OnMoon\OpenApiServerBundle\Mapper;
+
+use OnMoon\OpenApiServerBundle\Exception\OpenApiError;
+use function Safe\sprintf;
+
+class NotAnArrayValue extends OpenApiError
+{
+    /**
+     * @var mixed $value
+     */
+    private $value;
+
+    /**
+     * NotAnArrayValue constructor.
+     * @param string $name
+     * @param string $class
+     * @param mixed $value
+     * @throws \Safe\Exceptions\StringsException
+     */
+    public function __construct(string $name, string $class, $value)
+    {
+        $message     = sprintf(
+            'Value is not an array for "%s" in "%s"',
+            $name,
+            $class
+        );
+        $this->value = $value;
+        parent::__construct($message);
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getValue()
+    {
+        return $this->value;
+    }
+}
