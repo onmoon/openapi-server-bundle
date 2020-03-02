@@ -15,6 +15,7 @@ use OnMoon\OpenApiServerBundle\Event\Server\ResponseEvent;
 use OnMoon\OpenApiServerBundle\Exception\ApiCallFailed;
 use OnMoon\OpenApiServerBundle\Interfaces\ApiLoader;
 use OnMoon\OpenApiServerBundle\Interfaces\Dto;
+use OnMoon\OpenApiServerBundle\Interfaces\GetResponseCode;
 use OnMoon\OpenApiServerBundle\Interfaces\RequestHandler;
 use OnMoon\OpenApiServerBundle\Interfaces\ResponseDto;
 use OnMoon\OpenApiServerBundle\Interfaces\SetClientIp;
@@ -79,10 +80,12 @@ class ApiController
         $requestDto = $this->createRequestDto($request, $route, $operation);
         $this->eventDispatcher->dispatch(new RequestDtoEvent($requestDto, $operation, $path, $method));
 
-        $responseDto = $this->executeRequestHandler($request, $route, $operation, $requestDto);
+        $requestHandler = $this->getRequestHandler($request, $this->getRequestHandlerInterface($route, $operation));
+
+        $responseDto = $this->executeRequestHandler($requestHandler, $operation, $requestDto);
         $this->eventDispatcher->dispatch(new ResponseDtoEvent($responseDto, $operation, $path, $method));
 
-        $response = $this->createResponse($responseDto);
+        $response = $this->createResponse($requestHandler, $responseDto);
         $this->eventDispatcher->dispatch(new ResponseEvent($response, $operation, $path, $method));
 
         return $response;
@@ -123,14 +126,11 @@ class ApiController
     }
 
     private function executeRequestHandler(
-        Request $request,
-        Route $route,
+        RequestHandler $requestHandler,
         Operation $operation,
         ?Dto $requestDto
     ) : ?ResponseDto {
         $requestHandlerMethodName = $this->namingStrategy->stringToMethodName($operation->operationId);
-
-        $requestHandler = $this->getRequestHandler($request, $this->getRequestHandlerInterface($route, $operation));
 
         /** @var ResponseDto|null $responseDto */
         $responseDto = $requestDto !== null ?
@@ -173,17 +173,25 @@ class ApiController
         return $operation;
     }
 
-    private function createResponse(?ResponseDto $responseDto = null) : Response
+    private function createResponse(RequestHandler $requestHandler, ?ResponseDto $responseDto = null) : Response
     {
         $response = new JsonResponse();
         $response->setEncodingOptions(JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_THROW_ON_ERROR);
 
+        $statusCode = null;
+
         if ($responseDto instanceof ResponseDto) {
             $response->setContent($this->serializer->createResponse($responseDto));
-            $response->setStatusCode($responseDto->_getResponseCode());
-        } else {
-            $response->setStatusCode(200);
+            $statusCode = $responseDto::_getResponseCode() ?? $statusCode;
         }
+
+        if ($requestHandler instanceof GetResponseCode) {
+            $statusCode = $requestHandler->getResponseCode($statusCode) ?? $statusCode;
+        }
+
+        $statusCode ??= Response::HTTP_OK;
+
+        $response->setStatusCode($statusCode);
 
         return $response;
     }
