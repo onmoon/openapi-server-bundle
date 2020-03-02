@@ -58,7 +58,6 @@ use const PHP_EOL;
 final class PhpParserDtoFactory implements DtoFactory
 {
     private const DUPLICATE_NAME_CLASS_PREFIX = 'Property';
-    public const RESPONSE_CODE_VARIABLE_NAME  = '_openApiResponseCode';
 
     private BuilderFactory $factory;
     private NamingStrategy $namingStrategy;
@@ -236,37 +235,17 @@ final class PhpParserDtoFactory implements DtoFactory
             }
 
             $responseCode = (int) $definition->responseCode();
-            if ($responseCode === 0) {
-                $propertyDefinition = new ClassPropertyDefinition(self::RESPONSE_CODE_VARIABLE_NAME, 'int');
-                $propertyDefinition->makeNotNullable();
-                $propertyDefinition->setDescription('Response HTTP code');
-                $classBuilder->addStmt($this->generateClassProperty($propertyDefinition));
-
-                $constructorRequired = true;
-                $constructorBuilder
-                    ->addParam($this
-                        ->factory
-                        ->param('httpCode')
-                        ->setType('int'))
-                    ->addStmt(new Assign(
-                        new Variable('this->' . self::RESPONSE_CODE_VARIABLE_NAME),
-                        new Variable('httpCode')
-                    ));
-                $responseCodeStmt = new Variable('this->' . self::RESPONSE_CODE_VARIABLE_NAME);
-            } else {
-                $responseCodeStmt = $this->factory->val($responseCode);
-            }
-
             $classBuilder
                 ->addStmt(
                     $this
                         ->factory
                         ->method('_getResponseCode')
                         ->makePublic()
-                        ->setReturnType('int')
+                        ->makeStatic()
+                        ->setReturnType('?int')
                         ->addStmt(
                             new Return_(
-                                $responseCodeStmt
+                                $this->factory->val($responseCode !== 0 ? $responseCode : null)
                             )
                         )
                 );

@@ -7,7 +7,6 @@ namespace OnMoon\OpenApiServerBundle\Mapper;
 use ArrayAccess;
 use ArrayObject;
 use BadMethodCallException;
-use OnMoon\OpenApiServerBundle\CodeGenerator\Dto\PhpParserDtoFactory;
 use OnMoon\OpenApiServerBundle\CodeGenerator\Factory\OperationDefinitionFactory;
 use OnMoon\OpenApiServerBundle\CodeGenerator\Naming\NamingStrategy;
 use OnMoon\OpenApiServerBundle\Exception\CannotMapToDto;
@@ -55,7 +54,7 @@ class DtoMapper
      * @throws ReflectionException
      * @throws StringsException
      */
-    public function map($from, string $toDTO, int $httpCode = 0, ?callable $propertyMapper = null) : object
+    public function map($from, string $toDTO, ?callable $propertyMapper = null) : object
     {
         if (! class_exists($toDTO)) {
             throw CannotMapToDto::becauseRootClassDoesNotExist($toDTO);
@@ -66,12 +65,6 @@ class DtoMapper
 
         $properties = $reflectionClass->getProperties();
         foreach ($properties as $property) {
-            if ($property->getName() === PhpParserDtoFactory::RESPONSE_CODE_VARIABLE_NAME) {
-                $property->setAccessible(true);
-                $property->setValue($instance, $httpCode);
-                continue;
-            }
-
             $nextMapper = null;
             if ($propertyMapper !== null) {
                 /** @var mixed $mappedProperty */
@@ -148,7 +141,7 @@ class DtoMapper
                                 );
                             }
 
-                            $value[] = $this->map($item, $fullClass, 0, $nextMapper);
+                            $value[] = $this->map($item, $fullClass, $nextMapper);
                         }
                     } else {
                         /** @var mixed $item */
@@ -171,7 +164,7 @@ class DtoMapper
                 }
 
                 /** @var mixed $value */
-                $value = $this->map($rawValue, $typeName, 0, $nextMapper);
+                $value = $this->map($rawValue, $typeName, $nextMapper);
             } else {
                 throw CannotMapToDto::becauseUnknownType($typeName, $property->getName(), $toDTO);
             }
