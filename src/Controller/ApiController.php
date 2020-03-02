@@ -182,14 +182,14 @@ class ApiController
 
         if ($responseDto instanceof ResponseDto) {
             $response->setContent($this->serializer->createResponse($responseDto));
-            $statusCode = $responseDto->_getResponseCode() ?? $statusCode;
+            $statusCode = $responseDto::_getResponseCode() ?? $statusCode;
         }
 
         if ($requestHandler instanceof GetResponseCode) {
             $statusCode = $requestHandler->getResponseCode($statusCode) ?? $statusCode;
         }
 
-        $statusCode = $statusCode ?? Response::HTTP_OK;
+        $statusCode ??= Response::HTTP_OK;
 
         $response->setStatusCode($statusCode);
 
