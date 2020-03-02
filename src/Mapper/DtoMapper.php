@@ -24,6 +24,7 @@ use function get_class_methods;
 use function in_array;
 use function is_array;
 use function is_object;
+use function is_string;
 use function method_exists;
 use function preg_quote;
 use function Safe\preg_match;
@@ -54,7 +55,7 @@ class DtoMapper
      * @throws ReflectionException
      * @throws StringsException
      */
-    public function map($from, string $toDTO, int $httpCode = 0) : object
+    public function map($from, string $toDTO, int $httpCode = 0, ?callable $propertyMapper = null) : object
     {
         if (! class_exists($toDTO)) {
             throw CannotMapToDto::becauseRootClassDoesNotExist($toDTO);
@@ -71,8 +72,26 @@ class DtoMapper
                 continue;
             }
 
+            $nextMapper = null;
+            if ($propertyMapper !== null) {
+                /** @var mixed $mappedProperty */
+                $mappedProperty = $propertyMapper($property->getName(), []);
+                if (! is_string($mappedProperty) || empty($mappedProperty)) {
+                    throw new MapperReturnedNotAString($property->getName(), $toDTO, $mappedProperty);
+                }
+
+                /** @psalm-suppress MissingClosureReturnType */
+                $nextMapper = static function (string $name, array $context) use ($mappedProperty, $propertyMapper) {
+                    $context[] = $mappedProperty;
+
+                    return $propertyMapper($name, $context);
+                };
+            } else {
+                $mappedProperty = $property->getName();
+            }
+
             /** @var mixed|null $rawValue */
-            $rawValue = $this->getValue($from, $property->getName());
+            $rawValue = $this->getValue($from, $mappedProperty);
             /** @var ReflectionType $type */
             $type = $property->getType();
 
@@ -129,7 +148,7 @@ class DtoMapper
                                 );
                             }
 
-                            $value[] = $this->map($item, $fullClass);
+                            $value[] = $this->map($item, $fullClass, 0, $nextMapper);
                         }
                     } else {
                         /** @var mixed $item */
@@ -152,7 +171,7 @@ class DtoMapper
                 }
 
                 /** @var mixed $value */
-                $value = $this->map($rawValue, $typeName);
+                $value = $this->map($rawValue, $typeName, 0, $nextMapper);
             } else {
                 throw CannotMapToDto::becauseUnknownType($typeName, $property->getName(), $toDTO);
             }
