@@ -76,5 +76,6 @@
             <argument key="$locator" type="service" id="file_locator" />
             <argument key="$cache" type="service" id="cache.app.taggable" />
         </service>
+        <service id="OnMoon\OpenApiServerBundle\Mapper\DtoMapper" />
     </services>
 </container>
