@@ -590,7 +590,7 @@ final class PhpParserDtoFactory implements DtoFactory
     {
         return $this
             ->factory
-            ->param($this->namingStrategy->stringToMethodName($definition->name()))
+            ->param($definition->name())
             ->setType($definition->iterableType() !== null ? 'array' : $definition->type());
     }
 
@@ -598,7 +598,7 @@ final class PhpParserDtoFactory implements DtoFactory
     {
         return new Assign(
             new Variable('this->' . $name),
-            new Variable($this->namingStrategy->stringToMethodName($name))
+            new Variable($name)
         );
     }
 
