@@ -7,6 +7,7 @@ namespace OnMoon\OpenApiServerBundle\Mapper;
 use ArrayAccess;
 use ArrayObject;
 use BadMethodCallException;
+use DateTime;
 use OnMoon\OpenApiServerBundle\CodeGenerator\Factory\OperationDefinitionFactory;
 use OnMoon\OpenApiServerBundle\CodeGenerator\Naming\NamingStrategy;
 use OnMoon\OpenApiServerBundle\Exception\CannotMapToDto;
@@ -55,6 +56,7 @@ class DtoMapper
      * @throws UnexpectedScalarValue
      * @throws ReflectionException
      * @throws StringsException
+     * @throws NotADateTimeValue
      */
     public function map($from, string $toDTO, ?callable $propertyMapper = null)
     {
@@ -146,6 +148,17 @@ class DtoMapper
                             /** @psalm-suppress MixedAssignment */
                             $value[] = $this->map($item, $fullClass, $nextMapper);
                         }
+                    } elseif ($shortClassName === 'DateTime') {
+                        /** @var mixed $item */
+                        foreach ($rawValue as $item) {
+                            if ($item instanceof DateTime) {
+                                $value[] = $item;
+                            } elseif (is_string($item)) {
+                                $value[] = new \Safe\DateTime($item);
+                            } else {
+                                throw new NotADateTimeValue($property->getName(), $toDTO, $item);
+                            }
+                        }
                     } else {
                         /** @var mixed $item */
                         foreach ($rawValue as $item) {
@@ -155,6 +168,14 @@ class DtoMapper
                             $value[] = $item;
                         }
                     }
+                }
+            } elseif ($typeName === 'DateTime') {
+                if ($rawValue instanceof DateTime) {
+                    $value = $rawValue;
+                } elseif (is_string($rawValue)) {
+                    $value = new \Safe\DateTime($rawValue);
+                } else {
+                    throw new NotADateTimeValue($property->getName(), $toDTO, $rawValue);
                 }
             } elseif ($type->isBuiltin()) {
                 /** phpcs:disable Generic.PHP.ForbiddenFunctions.Found */
