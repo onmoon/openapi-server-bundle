@@ -47,6 +47,8 @@ class DtoMapper
     /**
      * @param array|object $from
      *
+     * @return mixed
+     *
      * @throws CannotMapToDto
      * @throws NotAnArrayValue
      * @throws UnexpectedNullValue
@@ -54,7 +56,7 @@ class DtoMapper
      * @throws ReflectionException
      * @throws StringsException
      */
-    public function map($from, string $toDTO, ?callable $propertyMapper = null) : object
+    public function map($from, string $toDTO, ?callable $propertyMapper = null)
     {
         if (! class_exists($toDTO)) {
             throw CannotMapToDto::becauseRootClassDoesNotExist($toDTO);
@@ -141,6 +143,7 @@ class DtoMapper
                                 );
                             }
 
+                            /** @psalm-suppress MixedAssignment */
                             $value[] = $this->map($item, $fullClass, $nextMapper);
                         }
                     } else {
