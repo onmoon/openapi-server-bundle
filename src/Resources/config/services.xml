@@ -77,5 +77,6 @@
             <argument key="$cache" type="service" id="cache.app.taggable" />
         </service>
         <service id="OnMoon\OpenApiServerBundle\Mapper\DtoMapper" />
+        <service id="OnMoon\OpenApiServerBundle\CodeGenerator\GraphGenerator" />
     </services>
 </container>
