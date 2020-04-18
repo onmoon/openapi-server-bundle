@@ -15,7 +15,13 @@ use cebe\openapi\spec\Responses;
 use cebe\openapi\spec\Schema;
 use cebe\openapi\spec\Type;
 use Lukasoppermann\Httpstatus\Httpstatus;
+use OnMoon\OpenApiServerBundle\CodeGenerator\Dto\Definitions\DtoDefinition;
+use OnMoon\OpenApiServerBundle\CodeGenerator\Dto\Definitions\OperationDefinition;
 use OnMoon\OpenApiServerBundle\CodeGenerator\Dto\Definitions\PropertyDefinition;
+use OnMoon\OpenApiServerBundle\CodeGenerator\Dto\Definitions\RequestBodyDtoDefinition;
+use OnMoon\OpenApiServerBundle\CodeGenerator\Dto\Definitions\RequestDtoDefinition;
+use OnMoon\OpenApiServerBundle\CodeGenerator\Dto\Definitions\RequestParametersDtoDefinition;
+use OnMoon\OpenApiServerBundle\CodeGenerator\Dto\Definitions\ResponseDtoDefinition;
 use OnMoon\OpenApiServerBundle\CodeGenerator\Naming\CannotCreatePropertyName;
 use OnMoon\OpenApiServerBundle\CodeGenerator\Naming\NamingStrategy;
 use OnMoon\OpenApiServerBundle\Exception\CannotGenerateCodeForOperation;
@@ -62,13 +68,6 @@ class GraphGenerator
                     $operationId = $operation->operationId;
                     $summary     = $operation->summary;
 
-                    $op = [
-                        $url,
-                        $method,
-                        $operationId,
-                        $summary
-                    ];
-
                     if ($operationId === '') {
                         throw CannotGenerateCodeForOperation::becauseNoOperationIdSpecified(
                             $url,
@@ -77,26 +76,37 @@ class GraphGenerator
                         );
                     }
 
-                    $responses = $this->generateResponses($operation->responses, $specification, $url, $method);
-                    $op[] = $responses;
-                    $op[] = (count($responses) > 1);
-
+                    $responses = $this->getResponseDtoDefinitions($operation->responses, $specification, $url, $method);
 
                     $requestSchema = $this->findByMediaType($operation->requestBody, $specification->getMediaType());
+                    $requestBody = null;
                     if($requestSchema !== null) {
-                        $op[] = $this->getPropertyGraph($requestSchema);
+                        $requestBody = new RequestBodyDtoDefinition($this->getPropertyGraph($requestSchema));
                     }
                     $parameters = $this->mergeParameters($pathItem, $operation);
-                    $op[] = $this->parametersToPropertyDefinitions('path', $parameters);
-                    $op[] = $this->parametersToPropertyDefinitions('query', $parameters);
-                    $operations[] = $op;
+                    $requestDefinitions = new RequestDtoDefinition(
+                        $requestBody,
+                        $this->parametersToDto('query', $parameters),
+                        $this->parametersToDto('path', $parameters)
+                    );
+                    $operations[] = new OperationDefinition(
+                        $url,
+                        $method,
+                        $operationId,
+                        $summary,
+                        $requestDefinitions->isEmpty() ? null : $requestDefinitions,
+                        $responses
+                    );
                 }
             }
         }
         return $operations;
     }
 
-    private function generateResponses(?Responses $responses, Specification $specification, $url, $method) {
+    /**
+     * @return ResponseDtoDefinition[]
+     */
+    private function getResponseDtoDefinitions(?Responses $responses, Specification $specification, $url, $method) : array {
         $responseDtoDefinitions = [];
         if ($responses instanceof Responses) {
             /**
@@ -114,8 +124,10 @@ class GraphGenerator
                             ($responseSchema->type === Type::ARRAY)
                         );
                     }
-
-                    $responseDtoDefinitions[] = $this->getPropertyGraph($responseSchema);
+                    $propertyDefinitions = $this->getPropertyGraph($responseSchema);
+                    $responseDefinition = new ResponseDtoDefinition($propertyDefinitions);
+                    $responseDefinition->setStatusCode($responseCode);
+                    $responseDtoDefinitions[] = $responseDefinition;
                 }
             }
         }
@@ -192,16 +204,22 @@ class GraphGenerator
 
     /**
      * @param Parameter[] $parameters
-     * @return PropertyDefinition[]
+     * @return RequestParametersDtoDefinition|null
      */
-    private function parametersToPropertyDefinitions(string $in, array $parameters) : array {
-        return array_map(
+    private function parametersToDto(string $in, array $parameters) : ?RequestParametersDtoDefinition {
+        $properties = array_map(
             fn (Parameter $p) =>
                 $this
                     ->getProperty($p->name, $p->schema)
                     ->setRequired($p->required),
             $this->filterSupportedParameters($in, $parameters)
         );
+
+        if(count($properties) === 0) {
+            return null;
+        }
+
+        return new RequestParametersDtoDefinition($properties);
     }
 
     /**
@@ -249,7 +267,7 @@ class GraphGenerator
             $propertyDefinition->setScalarTypeId($typeId);
             $isScalar = true;
         } elseif ($property->type === Type::OBJECT) {
-            $type = $this->getPropertyGraph($property);
+            $type = new DtoDefinition($this->getPropertyGraph($property));
             $propertyDefinition->setObjectTypeDefinition($type);
         } else {
             throw new Exception('\''.$property->type.'\' type is not supported');

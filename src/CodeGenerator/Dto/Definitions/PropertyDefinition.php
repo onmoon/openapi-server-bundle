@@ -12,7 +12,7 @@ class PropertyDefinition
     private $defaultValue = null;
     private bool $required = false;
     private ?int $scalarTypeId = null;
-    private $objectTypeDefinition = null;
+    private ?DtoDefinition $objectTypeDefinition = null;
 
     /**
      * PropertyDtoDefinition constructor.
