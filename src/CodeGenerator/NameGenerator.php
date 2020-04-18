@@ -6,10 +6,12 @@ namespace OnMoon\OpenApiServerBundle\CodeGenerator;
 
 use Lukasoppermann\Httpstatus\Httpstatus;
 use OnMoon\OpenApiServerBundle\CodeGenerator\Dto\Definitions\DtoDefinition;
+use OnMoon\OpenApiServerBundle\CodeGenerator\Dto\Definitions\GeneratedInterfaceDefinition;
 use OnMoon\OpenApiServerBundle\CodeGenerator\Dto\Definitions\RequestDtoDefinition;
 use OnMoon\OpenApiServerBundle\CodeGenerator\Dto\Definitions\ResponseDtoDefinition;
 use OnMoon\OpenApiServerBundle\CodeGenerator\Dto\Definitions\SpecificationDefinition;
 use OnMoon\OpenApiServerBundle\CodeGenerator\Naming\NamingStrategy;
+use Throwable;
 
 class NameGenerator
 {
@@ -54,10 +56,32 @@ class NameGenerator
                 $operationNamespace = $this->naming->buildNamespace($apiNamespace, $operationName);
                 $operationPath      = $this->naming->buildPath($apiPath, $operationName);
 
-                foreach ($operation->getResponses() as $response) {
-                    $this->setResponseNames($response, $operationNamespace, $operationName, $operationPath);
-                }
                 $this->setRequestNames($operation->getRequest(), $operationNamespace, $operationName, $operationPath);
+
+                $responseNamespace = $this->naming->buildNamespace(
+                    $operationNamespace,
+                    self::DTO_NAMESPACE,
+                    self::RESPONSE_SUFFIX
+                );
+
+                $responsePath = $this->naming->buildPath(
+                    $operationPath,
+                    self::DTO_NAMESPACE,
+                    self::RESPONSE_SUFFIX
+                );
+
+                foreach ($operation->getResponses() as $response) {
+                    $this->setResponseNames($response, $responseNamespace, $operationName, $responsePath);
+                }
+
+                $markersInterface = $operation->getMarkersInterface();
+                if($markersInterface instanceof GeneratedInterfaceDefinition) {
+                   $interfaceName = $this->naming->stringToNamespace($operationName . self::RESPONSE_SUFFIX);
+                   $markersInterface
+                       ->setClassName($interfaceName)
+                       ->setNamespace($responseNamespace)
+                       ->setFileName($this->getFileName($responsePath, $interfaceName));
+                }
             }
         }
     }
@@ -83,39 +107,27 @@ class NameGenerator
         $this->setTreeNames($request, $requestDtoNamespace, $requestDtoClassName, $requestDtoPath);
     }
 
-    private function setResponseNames(ResponseDtoDefinition $response, string $operationNamespace, string $operationName, string $operationPath) {
+    private function setResponseNames(ResponseDtoDefinition $response, string $responseNamespace, string $operationName, string $responsePath) {
         try {
             $statusNamespace = $this->httpstatus->getReasonPhrase($response->getStatusCode());
-        } catch (\Throwable $e) {
+        } catch (Throwable $e) {
             $statusNamespace = $response->getStatusCode();
         }
 
         $statusNamespace = $this->naming->stringToNamespace($statusNamespace);
 
-        $responseDtoNamespace = $this->naming->buildNamespace(
-            $operationNamespace,
-            self::DTO_NAMESPACE,
-            self::RESPONSE_SUFFIX,
-            $statusNamespace
-        );
+        $responseDtoNamespace = $this->naming->buildNamespace($responseNamespace, $statusNamespace);
         $responseDtoClassName = $this->naming->stringToNamespace(
             $operationName . $statusNamespace . self::DTO_SUFFIX
         );
-        $responseDtoPath      = $this->naming->buildPath(
-            $operationPath,
-            self::DTO_NAMESPACE,
-            self::RESPONSE_SUFFIX,
-            $statusNamespace
-        );
+        $responseDtoPath      = $this->naming->buildPath($responsePath, $statusNamespace);
 
         $this->setTreeNames($response, $responseDtoNamespace, $responseDtoClassName, $responseDtoPath);
     }
 
     private function setTreeNames(DtoDefinition $root, string $namespace, string $className, string $path) {
-        $fileName  = $className . '.php';
-
         $root->setClassName($className);
-        $root->setFileName($this->naming->buildPath($path, $fileName));
+        $root->setFileName($this->getFileName($path, $className));
         $root->setNamespace($namespace);
 
         foreach ($root->getProperties() as $property) {
@@ -128,5 +140,10 @@ class NameGenerator
                 $this->setTreeNames($objectDefinition, $subNamespace, $subClassName, $subPath);
             }
         }
+    }
+
+    private function getFileName($path, $className) {
+        $fileName  = $className . '.php';
+        return $this->naming->buildPath($path, $fileName);
     }
 }

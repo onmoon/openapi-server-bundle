@@ -13,6 +13,7 @@ class DtoDefinition
     private ?string $className = null;
     private ?string $fileName = null;
     private ?string $namespace = null;
+    private ?InterfaceDefinition $implements = null;
 
     /**
      * DtoDefinition constructor.
@@ -87,6 +88,24 @@ class DtoDefinition
     public function getProperties(): array
     {
         return $this->properties;
+    }
+
+    /**
+     * @return InterfaceDefinition|null
+     */
+    public function getImplements(): ?InterfaceDefinition
+    {
+        return $this->implements;
+    }
+
+    /**
+     * @param InterfaceDefinition|null $implements
+     * @return DtoDefinition
+     */
+    public function setImplements(?InterfaceDefinition $implements): DtoDefinition
+    {
+        $this->implements = $implements;
+        return $this;
     }
 
 }

@@ -23,4 +23,13 @@ class ResponseDtoDefinition extends DtoDefinition
     {
         return $this->statusCode;
     }
+
+    /**
+     * @return InterfaceDefinition|null
+     */
+    public function getMarkersInterface(): ?InterfaceDefinition
+    {
+        return $this->markersInterface;
+    }
+
 }

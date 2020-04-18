@@ -78,6 +78,7 @@
         </service>
         <service id="OnMoon\OpenApiServerBundle\Mapper\DtoMapper" />
         <service id="OnMoon\OpenApiServerBundle\CodeGenerator\GraphGenerator" />
+        <service id="OnMoon\OpenApiServerBundle\CodeGenerator\InterfaceGenerator" />
         <service id="OnMoon\OpenApiServerBundle\CodeGenerator\NameGenerator">
             <argument key="$rootNamespace">%openapi.generated.code.root.namespace%</argument>
             <argument key="$rootPath">%openapi.generated.code.root.path%</argument>

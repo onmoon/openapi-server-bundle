@@ -11,6 +11,8 @@ class OperationDefinition
     private string $operationId;
     private ?string $summary = null;
     private ?RequestDtoDefinition $request = null;
+    private ?InterfaceDefinition $markersInterface = null;
+
     /**
      * @var ResponseDtoDefinition[]
      */
@@ -81,6 +83,24 @@ class OperationDefinition
     public function getResponses(): array
     {
         return $this->responses;
+    }
+
+    /**
+     * @return InterfaceDefinition|null
+     */
+    public function getMarkersInterface(): ?InterfaceDefinition
+    {
+        return $this->markersInterface;
+    }
+
+    /**
+     * @param InterfaceDefinition|null $markersInterface
+     * @return OperationDefinition
+     */
+    public function setMarkersInterface(?InterfaceDefinition $markersInterface): OperationDefinition
+    {
+        $this->markersInterface = $markersInterface;
+        return $this;
     }
 
 
