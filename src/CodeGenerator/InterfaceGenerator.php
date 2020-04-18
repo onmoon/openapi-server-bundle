@@ -30,9 +30,10 @@ class InterfaceGenerator
                 $makersInterface = null;
                 if (count($operation->getResponses()) > 1) {
                     $makersInterface = new GeneratedInterfaceDefinition();
+                    $makersInterface->setExtends($this->defaultResponseDto);
                     $operation->setMarkersInterface($makersInterface);
                 } else {
-                    $makersInterface = $this->getDefaultInterface(ResponseDto::class);
+                    $makersInterface = $this->defaultResponseDto;
                 }
 
                 foreach ($operation->getResponses() as $response) {
