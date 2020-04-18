@@ -6,6 +6,7 @@ namespace OnMoon\OpenApiServerBundle\CodeGenerator;
 
 use Lukasoppermann\Httpstatus\Httpstatus;
 use OnMoon\OpenApiServerBundle\CodeGenerator\Dto\Definitions\DtoDefinition;
+use OnMoon\OpenApiServerBundle\CodeGenerator\Dto\Definitions\RequestDtoDefinition;
 use OnMoon\OpenApiServerBundle\CodeGenerator\Dto\Definitions\ResponseDtoDefinition;
 use OnMoon\OpenApiServerBundle\CodeGenerator\Dto\Definitions\SpecificationDefinition;
 use OnMoon\OpenApiServerBundle\CodeGenerator\Naming\NamingStrategy;
@@ -56,8 +57,30 @@ class NameGenerator
                 foreach ($operation->getResponses() as $response) {
                     $this->setResponseNames($response, $operationNamespace, $operationName, $operationPath);
                 }
+                $this->setRequestNames($operation->getRequest(), $operationNamespace, $operationName, $operationPath);
             }
         }
+    }
+
+    private function setRequestNames(?RequestDtoDefinition $request, string $operationNamespace, string $operationName, string $operationPath) {
+        if ($request === null)
+            return;
+
+        $requestDtoNamespace = $this->naming->buildNamespace(
+            $operationNamespace,
+            self::DTO_NAMESPACE,
+            self::REQUEST_SUFFIX
+        );
+        $requestDtoClassName = $this->naming->stringToNamespace(
+            $operationName . self::REQUEST_SUFFIX . self::DTO_SUFFIX
+        );
+        $requestDtoPath      = $this->naming->buildPath(
+            $operationPath,
+            self::DTO_NAMESPACE,
+            self::REQUEST_SUFFIX
+        );
+
+        $this->setTreeNames($request, $requestDtoNamespace, $requestDtoClassName, $requestDtoPath);
     }
 
     private function setResponseNames(ResponseDtoDefinition $response, string $operationNamespace, string $operationName, string $operationPath) {
@@ -85,10 +108,10 @@ class NameGenerator
             $statusNamespace
         );
 
-        $this->setTreeNames($response, $responseDtoClassName, $responseDtoNamespace, $responseDtoPath);
+        $this->setTreeNames($response, $responseDtoNamespace, $responseDtoClassName, $responseDtoPath);
     }
 
-    private function setTreeNames(DtoDefinition $root, string $className, string $namespace, string $path) {
+    private function setTreeNames(DtoDefinition $root, string $namespace, string $className, string $path) {
         $fileName  = $className . '.php';
 
         $root->setClassName($className);
@@ -102,7 +125,7 @@ class NameGenerator
                 $subClassName = $this->naming->stringToNamespace($part . self::DTO_SUFFIX);
                 $subNamespace = $this->naming->buildNamespace($namespace, $part);
                 $subPath = $this->naming->buildPath($path, $part);
-                $this->setTreeNames($objectDefinition, $subClassName, $subNamespace, $subPath);
+                $this->setTreeNames($objectDefinition, $subNamespace, $subClassName, $subPath);
             }
         }
     }
