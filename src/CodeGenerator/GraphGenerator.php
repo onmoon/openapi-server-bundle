@@ -15,6 +15,7 @@ use cebe\openapi\spec\Responses;
 use cebe\openapi\spec\Schema;
 use cebe\openapi\spec\Type;
 use Lukasoppermann\Httpstatus\Httpstatus;
+use OnMoon\OpenApiServerBundle\CodeGenerator\Dto\Definitions\PropertyDefinition;
 use OnMoon\OpenApiServerBundle\CodeGenerator\Naming\CannotCreatePropertyName;
 use OnMoon\OpenApiServerBundle\CodeGenerator\Naming\NamingStrategy;
 use OnMoon\OpenApiServerBundle\Exception\CannotGenerateCodeForOperation;
@@ -86,8 +87,8 @@ class GraphGenerator
                         $op[] = $this->getPropertyGraph($requestSchema);
                     }
                     $parameters = $this->mergeParameters($pathItem, $operation);
-                    $op[] = array_map(fn (Parameter $p) => $this->getProperty($p->name, $p->schema), $this->filterSupportedParameters('path', ...$parameters));
-                    $op[] = array_map(fn (Parameter $p) => $this->getProperty($p->name, $p->schema), $this->filterSupportedParameters('query', ...$parameters));
+                    $op[] = $this->parametersToPropertyDefinitions('path', $parameters);
+                    $op[] = $this->parametersToPropertyDefinitions('query', $parameters);
                     $operations[] = $op;
                 }
             }
@@ -181,66 +182,85 @@ class GraphGenerator
     }
 
     /**
+     * @param Parameter[] $parameters
      * @return Parameter[]
      */
-    private function filterSupportedParameters(string $in, Parameter ...$parameters) : array
+    private function filterSupportedParameters(string $in, array $parameters) : array
     {
         return array_filter($parameters, static fn ($parameter) : bool => $parameter->in === $in);
     }
 
+    /**
+     * @param Parameter[] $parameters
+     * @return PropertyDefinition[]
+     */
+    private function parametersToPropertyDefinitions(string $in, array $parameters) : array {
+        return array_map(
+            fn (Parameter $p) =>
+                $this
+                    ->getProperty($p->name, $p->schema)
+                    ->setRequired($p->required),
+            $this->filterSupportedParameters($in, $parameters)
+        );
+    }
+
+    /**
+     * @return PropertyDefinition[]
+     */
     private function getPropertyGraph(Schema $schema) : array {
-        $parameters = [];
+        $propertyDefinitions = [];
         /**
          * @var string $propertyName
          */
         foreach ($schema->properties as $propertyName => $property) {
-            $parameter= $this->getProperty($propertyName, $property);
+            $propertyDefinition= $this->getProperty($propertyName, $property);
             /**
              * @psalm-suppress RedundantConditionGivenDocblockType
              */
             $required = is_array($schema->required) && in_array($propertyName, $schema->required);
+            $propertyDefinition->setRequired($required);
 
-            $parameters[] = [$parameter, $required];
+            $propertyDefinitions[] = $propertyDefinition;
         }
 
-        return $parameters;
+        return $propertyDefinitions;
     }
 
-    private function getProperty(string $propertyName, Schema $property) {
+    private function getProperty(string $propertyName, Schema $property) : PropertyDefinition {
         if (! ($property instanceof Schema)) {
             throw new Exception('Property is not scheme');
         }
 
-        if (! $this->namingStrategy->isAllowedPhpPropertyName($propertyName)) {
-            throw CannotCreatePropertyName::becauseIsNotValidPhpPropertyName($propertyName);
-        }
+        $propertyDefinition = new PropertyDefinition($propertyName);
 
         $type         = null;
-        $isArray      = false;
         $isScalar     = false;
 
         if ($property->type === Type::ARRAY) {
             if (! ($property->items instanceof Schema)) {
                 throw new Exception('Array items must be described');
             }
-            $isArray = true;
+            $propertyDefinition->setIsArray(true);
             $property = $property->items;
         }
 
         if (Type::isScalar($property->type)) {
             $typeId = $this->typeResolver->findScalarType($property);
-            $type   = $this->typeResolver->getPhpType($typeId);
+            $propertyDefinition->setScalarTypeId($typeId);
             $isScalar = true;
         } elseif ($property->type === Type::OBJECT) {
             $type = $this->getPropertyGraph($property);
+            $propertyDefinition->setObjectTypeDefinition($type);
         } else {
             throw new Exception('\''.$property->type.'\' type is not supported');
         }
 
         /** @var string|int|float|bool|null $schemaDefaultValue */
         $schemaDefaultValue = $property->default;
-        $defaultValue = ($schemaDefaultValue !== null && $isScalar) ? $schemaDefaultValue : null;
+        if ($schemaDefaultValue !== null && $isScalar) {
+            $propertyDefinition->setDefaultValue($schemaDefaultValue);
+        }
 
-        return [$type, $isArray, $defaultValue, $propertyName];
+        return $propertyDefinition;
     }
 }
