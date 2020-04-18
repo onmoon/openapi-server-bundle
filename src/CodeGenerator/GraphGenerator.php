@@ -14,7 +14,7 @@ use cebe\openapi\spec\Response;
 use cebe\openapi\spec\Responses;
 use cebe\openapi\spec\Schema;
 use cebe\openapi\spec\Type;
-use Lukasoppermann\Httpstatus\Httpstatus;
+use Exception;
 use OnMoon\OpenApiServerBundle\CodeGenerator\Dto\Definitions\DtoDefinition;
 use OnMoon\OpenApiServerBundle\CodeGenerator\Dto\Definitions\OperationDefinition;
 use OnMoon\OpenApiServerBundle\CodeGenerator\Dto\Definitions\PropertyDefinition;
@@ -22,8 +22,7 @@ use OnMoon\OpenApiServerBundle\CodeGenerator\Dto\Definitions\RequestBodyDtoDefin
 use OnMoon\OpenApiServerBundle\CodeGenerator\Dto\Definitions\RequestDtoDefinition;
 use OnMoon\OpenApiServerBundle\CodeGenerator\Dto\Definitions\RequestParametersDtoDefinition;
 use OnMoon\OpenApiServerBundle\CodeGenerator\Dto\Definitions\ResponseDtoDefinition;
-use OnMoon\OpenApiServerBundle\CodeGenerator\Naming\CannotCreatePropertyName;
-use OnMoon\OpenApiServerBundle\CodeGenerator\Naming\NamingStrategy;
+use OnMoon\OpenApiServerBundle\CodeGenerator\Dto\Definitions\SpecificationDefinition;
 use OnMoon\OpenApiServerBundle\Exception\CannotGenerateCodeForOperation;
 use OnMoon\OpenApiServerBundle\OpenApi\ScalarTypesResolver;
 use OnMoon\OpenApiServerBundle\Specification\Specification;
@@ -32,31 +31,23 @@ use OnMoon\OpenApiServerBundle\Specification\SpecificationLoader;
 class GraphGenerator
 {
     private SpecificationLoader $loader;
-    private Httpstatus $httpstatus;
-    private NamingStrategy $namingStrategy;
     private ScalarTypesResolver $typeResolver;
-    private string $rootNamespace;
-    private string $rootPath;
 
-    /**
-     * GraphGenerator constructor.
-     * @param SpecificationLoader $loader
-     * @param NamingStrategy $namingStrategy
-     * @param ScalarTypesResolver $typeResolver
-     */
-    public function __construct(SpecificationLoader $loader, NamingStrategy $namingStrategy, ScalarTypesResolver $typeResolver)
+    public function __construct(SpecificationLoader $loader, ScalarTypesResolver $typeResolver)
     {
         $this->loader = $loader;
-        $this->namingStrategy = $namingStrategy;
         $this->typeResolver = $typeResolver;
     }
 
-
-    public function generate() {
-        $operations = [];
+    /**
+     * @return SpecificationDefinition[]
+     */
+    public function generate() : array {
+        $specificationDefinitions = [];
         foreach ($this->loader->list() as $specificationName => $specification) {
             $parsedSpecification = $this->loader->load($specificationName);
 
+            $operationDefinitions = [];
             /**
              * @var string $url
              */
@@ -89,7 +80,7 @@ class GraphGenerator
                         $this->parametersToDto('query', $parameters),
                         $this->parametersToDto('path', $parameters)
                     );
-                    $operations[] = new OperationDefinition(
+                    $operationDefinitions[] = new OperationDefinition(
                         $url,
                         $method,
                         $operationId,
@@ -99,14 +90,21 @@ class GraphGenerator
                     );
                 }
             }
+            $specificationDefinitions[] = new SpecificationDefinition($specification, $operationDefinitions);
         }
-        return $operations;
+        return $specificationDefinitions;
     }
 
     /**
      * @return ResponseDtoDefinition[]
      */
-    private function getResponseDtoDefinitions(?Responses $responses, Specification $specification, $url, $method) : array {
+    private function getResponseDtoDefinitions(
+        ?Responses $responses,
+        Specification $specification,
+        string $url,
+        string $method
+    ) : array
+    {
         $responseDtoDefinitions = [];
         if ($responses instanceof Responses) {
             /**
@@ -125,8 +123,7 @@ class GraphGenerator
                         );
                     }
                     $propertyDefinitions = $this->getPropertyGraph($responseSchema);
-                    $responseDefinition = new ResponseDtoDefinition($propertyDefinitions);
-                    $responseDefinition->setStatusCode($responseCode);
+                    $responseDefinition = new ResponseDtoDefinition($responseCode, $propertyDefinitions);
                     $responseDtoDefinitions[] = $responseDefinition;
                 }
             }
@@ -210,7 +207,7 @@ class GraphGenerator
         $properties = array_map(
             fn (Parameter $p) =>
                 $this
-                    ->getProperty($p->name, $p->schema)
+                    ->getProperty($p->name, $p->schema, false)
                     ->setRequired($p->required),
             $this->filterSupportedParameters($in, $parameters)
         );
@@ -244,7 +241,7 @@ class GraphGenerator
         return $propertyDefinitions;
     }
 
-    private function getProperty(string $propertyName, Schema $property) : PropertyDefinition {
+    private function getProperty(string $propertyName, Schema $property, bool $allowNonScalar = true) : PropertyDefinition {
         if (! ($property instanceof Schema)) {
             throw new Exception('Property is not scheme');
         }
@@ -278,6 +275,12 @@ class GraphGenerator
         if ($schemaDefaultValue !== null && $isScalar) {
             $propertyDefinition->setDefaultValue($schemaDefaultValue);
         }
+
+        if (!$isScalar && !$allowNonScalar) {
+            throw new Exception('Non scalar types are not allowed');
+        }
+
+        $propertyDefinition->setDescription($property->description);
 
         return $propertyDefinition;
     }

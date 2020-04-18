@@ -13,6 +13,25 @@ class PropertyDefinition
     private bool $required = false;
     private ?int $scalarTypeId = null;
     private ?DtoDefinition $objectTypeDefinition = null;
+    private ?string $description = null;
+
+    /**
+     * @return string|null
+     */
+    public function getDescription(): ?string
+    {
+        return $this->description;
+    }
+
+    /**
+     * @param string|null $description
+     * @return PropertyDefinition
+     */
+    public function setDescription(?string $description): PropertyDefinition
+    {
+        $this->description = $description;
+        return $this;
+    }
 
     /**
      * PropertyDtoDefinition constructor.
@@ -122,19 +141,12 @@ class PropertyDefinition
         return $this;
     }
 
-    /**
-     * @return mixed
-     */
-    public function getObjectTypeDefinition()
+    public function getObjectTypeDefinition(): ?DtoDefinition
     {
         return $this->objectTypeDefinition;
     }
 
-    /**
-     * @param mixed $objectTypeDefinition
-     * @return PropertyDefinition
-     */
-    public function setObjectTypeDefinition($objectTypeDefinition)
+    public function setObjectTypeDefinition(DtoDefinition $objectTypeDefinition): PropertyDefinition
     {
         $this->objectTypeDefinition = $objectTypeDefinition;
         return $this;

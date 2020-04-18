@@ -6,23 +6,21 @@ namespace OnMoon\OpenApiServerBundle\CodeGenerator\Dto\Definitions;
 
 class ResponseDtoDefinition extends DtoDefinition
 {
-    private ?string $statusCode;
+    private string $statusCode;
 
     /**
-     * @return string|null
+     * DtoDefinition constructor.
+     * @param array|PropertyDtoDefinition[] $properties
      */
-    public function getStatusCode(): ?string
-    {
-        return $this->statusCode;
-    }
-
-    /**
-     * @param string|null $statusCode
-     * @return ResponseDtoDefinition
-     */
-    public function setStatusCode(?string $statusCode): ResponseDtoDefinition
+    public function __construct(string $statusCode, array $properties)
     {
         $this->statusCode = $statusCode;
-        return $this;
+        parent::__construct($properties);
+    }
+
+
+    public function getStatusCode(): string
+    {
+        return $this->statusCode;
     }
 }
