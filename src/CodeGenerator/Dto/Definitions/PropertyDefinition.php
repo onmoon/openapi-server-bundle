@@ -15,6 +15,8 @@ class PropertyDefinition
     private ?int $scalarTypeId = null;
     private ?DtoDefinition $objectTypeDefinition = null;
     private ?string $description = null;
+    private ?string $getterName = null;
+    private ?string $setterName = null;
 
     /**
      * @return string|null
@@ -168,6 +170,42 @@ class PropertyDefinition
     public function setNullable(bool $nullable): PropertyDefinition
     {
         $this->nullable = $nullable;
+        return $this;
+    }
+
+    /**
+     * @return string|null
+     */
+    public function getGetterName(): ?string
+    {
+        return $this->getterName;
+    }
+
+    /**
+     * @param string|null $getterName
+     * @return PropertyDefinition
+     */
+    public function setGetterName(?string $getterName): PropertyDefinition
+    {
+        $this->getterName = $getterName;
+        return $this;
+    }
+
+    /**
+     * @return string|null
+     */
+    public function getSetterName(): ?string
+    {
+        return $this->setterName;
+    }
+
+    /**
+     * @param string|null $setterName
+     * @return PropertyDefinition
+     */
+    public function setSetterName(?string $setterName): PropertyDefinition
+    {
+        $this->setterName = $setterName;
         return $this;
     }
 

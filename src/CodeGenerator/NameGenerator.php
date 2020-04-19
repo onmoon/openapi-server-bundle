@@ -65,7 +65,10 @@ class NameGenerator
                     ->setMethodName($methodName)
                     ->setMethodDescription($operation->getSummary());
 
-                $this->setRequestNames($operation->getRequest(), $operationNamespace, $operationName, $operationPath);
+                if($operation->getRequest() !== null) {
+                    $this->setRequestNames($operation->getRequest(), $operationNamespace, $operationName, $operationPath);
+                    $this->setTreeGettersSetters($operation->getRequest());
+                }
 
                 $responseNamespace = $this->naming->buildNamespace(
                     $operationNamespace,
@@ -81,6 +84,7 @@ class NameGenerator
 
                 foreach ($operation->getResponses() as $response) {
                     $this->setResponseNames($response, $responseNamespace, $operationName, $responsePath);
+                    $this->setTreeGettersSetters($response);
                 }
 
                 $markersInterface = $operation->getMarkersInterface();
@@ -96,10 +100,7 @@ class NameGenerator
         }
     }
 
-    private function setRequestNames(?RequestDtoDefinition $request, string $operationNamespace, string $operationName, string $operationPath) {
-        if ($request === null)
-            return;
-
+    private function setRequestNames(RequestDtoDefinition $request, string $operationNamespace, string $operationName, string $operationPath) {
         $requestDtoNamespace = $this->naming->buildNamespace(
             $operationNamespace,
             self::DTO_NAMESPACE,
@@ -155,5 +156,18 @@ class NameGenerator
 
     private function getFileName($className) {
         return $className . '.php';
+    }
+
+    private function setTreeGettersSetters(DtoDefinition $root) {
+        foreach ($root->getProperties() as $property) {
+            $baseName = ucfirst($this->naming->stringToMethodName($property->getClassPropertyName()));
+            $property->setGetterName('get' . $baseName);
+            $property->setSetterName('set' . $baseName);
+
+            $objectDefinition = $property->getObjectTypeDefinition();
+            if($objectDefinition !== null) {
+                $this->setTreeGettersSetters($objectDefinition);
+            }
+        }
     }
 }

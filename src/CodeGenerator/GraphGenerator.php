@@ -207,11 +207,7 @@ class GraphGenerator
      */
     private function parametersToDto(string $in, array $parameters) : ?RequestParametersDtoDefinition {
         $properties = array_map(
-            fn (Parameter $p) =>
-                $this
-                    ->getProperty($p->name, $p->schema, false)
-                    ->setRequired($p->required)
-                    ->setNullable(!$p->required),
+            fn (Parameter $p) => $this->getProperty($p->name, $p->schema, $p->required, false),
             $this->filterSupportedParameters($in, $parameters)
         );
 
@@ -231,22 +227,14 @@ class GraphGenerator
          * @var string $propertyName
          */
         foreach ($schema->properties as $propertyName => $property) {
-            $propertyDefinition= $this->getProperty($propertyName, $property);
-            /**
-             * @psalm-suppress RedundantConditionGivenDocblockType
-             */
             $required = is_array($schema->required) && in_array($propertyName, $schema->required);
-            $propertyDefinition
-                ->setRequired($required)
-                ->setNullable(!$required);
-
-            $propertyDefinitions[] = $propertyDefinition;
+            $propertyDefinitions[] = $this->getProperty($propertyName, $property, $required);
         }
 
         return $propertyDefinitions;
     }
 
-    private function getProperty(string $propertyName, Schema $property, bool $allowNonScalar = true) : PropertyDefinition {
+    private function getProperty(string $propertyName, Schema $property, bool $required, bool $allowNonScalar = true) : PropertyDefinition {
         if (! ($property instanceof Schema)) {
             throw new Exception('Property is not scheme');
         }
@@ -275,10 +263,14 @@ class GraphGenerator
             throw new Exception('\''.$property->type.'\' type is not supported');
         }
 
+        $propertyDefinition->setRequired($required);
+        $propertyDefinition->setNullable(!$required);
+
         /** @var string|int|float|bool|null $schemaDefaultValue */
         $schemaDefaultValue = $property->default;
         if ($schemaDefaultValue !== null && $isScalar) {
             $propertyDefinition->setDefaultValue($schemaDefaultValue);
+            $propertyDefinition->setNullable(false);
         }
 
         if (!$isScalar && !$allowNonScalar) {
