@@ -11,6 +11,7 @@ class DtoDefinition extends ClassDefinition
      */
     private array $properties;
     private ?string $fileName = null;
+    private ?string $filePath = null;
     private ?InterfaceDefinition $implements = null;
 
     /**
@@ -41,6 +42,24 @@ class DtoDefinition extends ClassDefinition
     public function setFileName(?string $fileName): self
     {
         $this->fileName = $fileName;
+        return $this;
+    }
+
+    /**
+     * @return string|null
+     */
+    public function getFilePath(): ?string
+    {
+        return $this->filePath;
+    }
+
+    /**
+     * @param string|null $filePath
+     * @return DtoDefinition
+     */
+    public function setFilePath(?string $filePath): DtoDefinition
+    {
+        $this->filePath = $filePath;
         return $this;
     }
 

@@ -11,15 +11,21 @@ class RequestDtoDefinition extends DtoDefinition
         ?RequestParametersDtoDefinition $queryParameters,
         ?RequestParametersDtoDefinition $pathParameters
     ) {
+        $fields = [
+            'body' => $bodyDtoDefinition,
+            'queryParameters' => $queryParameters,
+            'pathParameters' => $pathParameters
+        ];
+
         $properties = [];
-        if($bodyDtoDefinition !== null) {
-            $properties[] = (new PropertyDefinition('body'))->setObjectTypeDefinition($bodyDtoDefinition);
-        }
-        if($queryParameters !== null) {
-            $properties[] = (new PropertyDefinition('queryParameters'))->setObjectTypeDefinition($queryParameters);
-        }
-        if($pathParameters !== null) {
-            $properties[] = (new PropertyDefinition('pathParameters'))->setObjectTypeDefinition($pathParameters);
+
+        foreach ($fields as $name => $definition) {
+            if($definition !== null) {
+                $properties[] = (new PropertyDefinition($name))
+                    ->setObjectTypeDefinition($definition)
+                    ->setRequired(true)
+                    ->setNullable(false);
+            }
         }
 
         parent::__construct($properties);

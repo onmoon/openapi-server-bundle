@@ -45,4 +45,12 @@ class ClassDefinition
         return $this;
     }
 
+    public function getFQCN(): ?string {
+        if($this->className === null) {
+            return null;
+        }
+
+        return ($this->namespace ?? '') . '\\' . $this->className;
+    }
+
 }

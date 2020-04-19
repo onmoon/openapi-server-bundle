@@ -8,9 +8,10 @@ class PropertyDefinition
 {
     private string $specPropertyName;
     private string $classPropertyName;
-    private bool $isArray = false;
+    private bool $array = false;
     private $defaultValue = null;
     private bool $required = false;
+    private bool $nullable = true;
     private ?int $scalarTypeId = null;
     private ?DtoDefinition $objectTypeDefinition = null;
     private ?string $description = null;
@@ -74,16 +75,16 @@ class PropertyDefinition
      */
     public function isArray(): bool
     {
-        return $this->isArray;
+        return $this->array;
     }
 
     /**
-     * @param bool $isArray
+     * @param bool $array
      * @return PropertyDefinition
      */
-    public function setIsArray(bool $isArray): PropertyDefinition
+    public function setArray(bool $array): PropertyDefinition
     {
-        $this->isArray = $isArray;
+        $this->array = $array;
         return $this;
     }
 
@@ -151,4 +152,23 @@ class PropertyDefinition
         $this->objectTypeDefinition = $objectTypeDefinition;
         return $this;
     }
+
+    /**
+     * @return bool
+     */
+    public function isNullable(): bool
+    {
+        return $this->nullable;
+    }
+
+    /**
+     * @param bool $nullable
+     * @return PropertyDefinition
+     */
+    public function setNullable(bool $nullable): PropertyDefinition
+    {
+        $this->nullable = $nullable;
+        return $this;
+    }
+
 }

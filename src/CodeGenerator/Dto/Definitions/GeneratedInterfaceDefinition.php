@@ -7,6 +7,7 @@ namespace OnMoon\OpenApiServerBundle\CodeGenerator\Dto\Definitions;
 class GeneratedInterfaceDefinition extends InterfaceDefinition
 {
     private ?string $fileName = null;
+    private ?string $filePath = null;
     private ?InterfaceDefinition $extends = null;
 
     /**
@@ -24,6 +25,24 @@ class GeneratedInterfaceDefinition extends InterfaceDefinition
     public function setFileName(?string $fileName): self
     {
         $this->fileName = $fileName;
+        return $this;
+    }
+
+    /**
+     * @return string|null
+     */
+    public function getFilePath(): ?string
+    {
+        return $this->filePath;
+    }
+
+    /**
+     * @param string|null $filePath
+     * @return GeneratedInterfaceDefinition
+     */
+    public function setFilePath(?string $filePath): self
+    {
+        $this->filePath = $filePath;
         return $this;
     }
 

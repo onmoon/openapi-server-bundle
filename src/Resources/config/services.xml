@@ -33,6 +33,9 @@
         <service id="OnMoon\OpenApiServerBundle\CodeGenerator\Dto\DtoFactory" class="OnMoon\OpenApiServerBundle\CodeGenerator\Dto\PhpParserDtoFactory">
             <argument key="$languageLevel">%openapi.generated.code.language.level%</argument>
         </service>
+        <service id="OnMoon\OpenApiServerBundle\CodeGenerator\DtoGenerator">
+            <argument key="$languageLevel">%openapi.generated.code.language.level%</argument>
+        </service>
         <service id="OnMoon\OpenApiServerBundle\CodeGenerator\RequestHandlerInterface\RequestHandlerInterfaceFactory" class="OnMoon\OpenApiServerBundle\CodeGenerator\RequestHandlerInterface\PhpParserRequestHandlerInterfaceFactory" />
         <service id="OnMoon\OpenApiServerBundle\CodeGenerator\ServiceSubscriber\ServiceSubscriberFactory" class="OnMoon\OpenApiServerBundle\CodeGenerator\ServiceSubscriber\PhpParserServiceSubscriberFactory" />
         <service id="OnMoon\OpenApiServerBundle\CodeGenerator\Filesystem\FileWriter" class="OnMoon\OpenApiServerBundle\CodeGenerator\Filesystem\FilePutContentsFileWriter">
@@ -79,6 +82,7 @@
         <service id="OnMoon\OpenApiServerBundle\Mapper\DtoMapper" />
         <service id="OnMoon\OpenApiServerBundle\CodeGenerator\GraphGenerator" />
         <service id="OnMoon\OpenApiServerBundle\CodeGenerator\InterfaceGenerator" />
+        <service id="OnMoon\OpenApiServerBundle\CodeGenerator\FilesGenerator" />
         <service id="OnMoon\OpenApiServerBundle\CodeGenerator\NameGenerator">
             <argument key="$rootNamespace">%openapi.generated.code.root.namespace%</argument>
             <argument key="$rootPath">%openapi.generated.code.root.path%</argument>

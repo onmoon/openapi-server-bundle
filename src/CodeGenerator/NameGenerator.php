@@ -60,7 +60,8 @@ class NameGenerator
                 $operation->getServiceInterface()
                     ->setNamespace($operationNamespace)
                     ->setClassName($operationName)
-                    ->setFileName($this->getFileName($operationPath, $operationName))
+                    ->setFileName($this->getFileName($operationName))
+                    ->setFilePath($operationPath)
                     ->setMethodName($methodName)
                     ->setMethodDescription($operation->getSummary());
 
@@ -88,7 +89,8 @@ class NameGenerator
                    $markersInterface
                        ->setClassName($interfaceName)
                        ->setNamespace($responseNamespace)
-                       ->setFileName($this->getFileName($responsePath, $interfaceName));
+                       ->setFileName($this->getFileName($interfaceName))
+                       ->setFilePath($interfaceName);
                 }
             }
         }
@@ -135,7 +137,8 @@ class NameGenerator
 
     private function setTreeNames(DtoDefinition $root, string $namespace, string $className, string $path) {
         $root->setClassName($className);
-        $root->setFileName($this->getFileName($path, $className));
+        $root->setFileName($this->getFileName($className));
+        $root->setFilePath($path);
         $root->setNamespace($namespace);
 
         foreach ($root->getProperties() as $property) {
@@ -150,8 +153,7 @@ class NameGenerator
         }
     }
 
-    private function getFileName($path, $className) {
-        $fileName  = $className . '.php';
-        return $this->naming->buildPath($path, $fileName);
+    private function getFileName($className) {
+        return $className . '.php';
     }
 }

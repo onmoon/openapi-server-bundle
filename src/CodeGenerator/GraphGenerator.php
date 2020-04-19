@@ -210,7 +210,8 @@ class GraphGenerator
             fn (Parameter $p) =>
                 $this
                     ->getProperty($p->name, $p->schema, false)
-                    ->setRequired($p->required),
+                    ->setRequired($p->required)
+                    ->setNullable(!$p->required),
             $this->filterSupportedParameters($in, $parameters)
         );
 
@@ -235,7 +236,9 @@ class GraphGenerator
              * @psalm-suppress RedundantConditionGivenDocblockType
              */
             $required = is_array($schema->required) && in_array($propertyName, $schema->required);
-            $propertyDefinition->setRequired($required);
+            $propertyDefinition
+                ->setRequired($required)
+                ->setNullable(!$required);
 
             $propertyDefinitions[] = $propertyDefinition;
         }
@@ -257,7 +260,7 @@ class GraphGenerator
             if (! ($property->items instanceof Schema)) {
                 throw new Exception('Array items must be described');
             }
-            $propertyDefinition->setIsArray(true);
+            $propertyDefinition->setArray(true);
             $property = $property->items;
         }
 
