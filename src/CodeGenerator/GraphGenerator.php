@@ -205,7 +205,11 @@ class GraphGenerator
      */
     private function parametersToDto(string $in, array $parameters) : ?RequestParametersDtoDefinition {
         $properties = array_map(
-            fn (Parameter $p) => $this->getProperty($p->name, $p->schema, $p->required, false),
+            fn (Parameter $p) =>
+                $this
+                    ->getProperty($p->name, $p->schema, false)
+                    ->setRequired($p->required)
+                    ->setDescription($p->description),
             $this->filterSupportedParameters($in, $parameters)
         );
 
@@ -226,18 +230,19 @@ class GraphGenerator
          */
         foreach ($schema->properties as $propertyName => $property) {
             $required = is_array($schema->required) && in_array($propertyName, $schema->required);
-            $propertyDefinitions[] = $this->getProperty($propertyName, $property, $required);
+            $propertyDefinitions[] = $this->getProperty($propertyName, $property)->setRequired($required);
         }
 
         return $propertyDefinitions;
     }
 
-    private function getProperty(string $propertyName, Schema $property, bool $required, bool $allowNonScalar = true) : PropertyDefinition {
+    private function getProperty(string $propertyName, Schema $property, bool $allowNonScalar = true) : PropertyDefinition {
         if (! ($property instanceof Schema)) {
             throw new Exception('Property is not scheme');
         }
 
         $propertyDefinition = new PropertyDefinition($propertyName);
+        $propertyDefinition->setDescription($property->description);
 
         $type         = null;
         $isScalar     = false;
@@ -261,8 +266,6 @@ class GraphGenerator
             throw new Exception('\''.$property->type.'\' type is not supported');
         }
 
-        $propertyDefinition->setRequired($required);
-
         /** @var string|int|float|bool|null $schemaDefaultValue */
         $schemaDefaultValue = $property->default;
         if ($schemaDefaultValue !== null && $isScalar) {
@@ -272,8 +275,6 @@ class GraphGenerator
         if (!$isScalar && !$allowNonScalar) {
             throw new Exception('Non scalar types are not allowed here');
         }
-
-        $propertyDefinition->setDescription($property->description);
 
         return $propertyDefinition;
     }

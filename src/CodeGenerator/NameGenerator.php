@@ -94,7 +94,7 @@ class NameGenerator
                        ->setClassName($interfaceName)
                        ->setNamespace($responseNamespace)
                        ->setFileName($this->getFileName($interfaceName))
-                       ->setFilePath($interfaceName);
+                       ->setFilePath($responsePath);
                 }
             }
         }
@@ -135,8 +135,8 @@ class NameGenerator
 
         $this->setTreeNames($response, $responseDtoNamespace, $responseDtoClassName, $responseDtoPath);
     }
-
-    private function setTreeNames(DtoDefinition $root, string $namespace, string $className, string $path) {
+//ToDo: back to private
+    public function setTreeNames(DtoDefinition $root, string $namespace, string $className, string $path) {
         $root->setClassName($className);
         $root->setFileName($this->getFileName($className));
         $root->setFilePath($path);

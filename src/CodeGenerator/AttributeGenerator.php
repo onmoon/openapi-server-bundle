@@ -31,7 +31,7 @@ class AttributeGenerator
             $property
                 ->setHasGetter(true)
                 ->setHasSetter(false)
-                ->setNullable(!$property->isRequired())
+                ->setNullable(!$property->isRequired() && $property->getDefaultValue() === null)
                 ->setInConstructor(false);
             if($property->getObjectTypeDefinition() !== null) {
                 $this->requestPass($property->getObjectTypeDefinition());
@@ -44,7 +44,7 @@ class AttributeGenerator
             $property
                 ->setHasGetter(true)
                 ->setHasSetter(!$property->isRequired())
-                ->setNullable(!$property->isRequired())
+                ->setNullable(!$property->isRequired() && $property->getDefaultValue() === null)
                 ->setInConstructor($property->isRequired());
             if($property->getObjectTypeDefinition() !== null) {
                 $this->responsePass($property->getObjectTypeDefinition());

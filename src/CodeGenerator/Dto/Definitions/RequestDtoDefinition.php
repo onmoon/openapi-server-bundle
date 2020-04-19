@@ -10,17 +10,18 @@ class RequestDtoDefinition extends DtoDefinition
         ?RequestBodyDtoDefinition $bodyDtoDefinition,
         ?RequestParametersDtoDefinition $queryParameters,
         ?RequestParametersDtoDefinition $pathParameters
-    ) {
+    )
+    {
         $fields = [
-            'body' => $bodyDtoDefinition,
+            'pathParameters' => $pathParameters,
             'queryParameters' => $queryParameters,
-            'pathParameters' => $pathParameters
+            'body' => $bodyDtoDefinition,
         ];
 
         $properties = [];
 
         foreach ($fields as $name => $definition) {
-            if($definition !== null) {
+            if ($definition !== null) {
                 $properties[] = (new PropertyDefinition($name))
                     ->setObjectTypeDefinition($definition)
                     ->setRequired(true)

@@ -33,7 +33,10 @@
         <service id="OnMoon\OpenApiServerBundle\CodeGenerator\Dto\DtoFactory" class="OnMoon\OpenApiServerBundle\CodeGenerator\Dto\PhpParserDtoFactory">
             <argument key="$languageLevel">%openapi.generated.code.language.level%</argument>
         </service>
-        <service id="OnMoon\OpenApiServerBundle\CodeGenerator\DtoGenerator">
+        <service id="OnMoon\OpenApiServerBundle\CodeGenerator\DtoCodeGenerator">
+            <argument key="$languageLevel">%openapi.generated.code.language.level%</argument>
+        </service>
+        <service id="OnMoon\OpenApiServerBundle\CodeGenerator\InterfaceCodeGenerator">
             <argument key="$languageLevel">%openapi.generated.code.language.level%</argument>
         </service>
         <service id="OnMoon\OpenApiServerBundle\CodeGenerator\RequestHandlerInterface\RequestHandlerInterfaceFactory" class="OnMoon\OpenApiServerBundle\CodeGenerator\RequestHandlerInterface\PhpParserRequestHandlerInterfaceFactory" />
