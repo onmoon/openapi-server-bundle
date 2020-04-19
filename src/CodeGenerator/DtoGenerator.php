@@ -114,7 +114,9 @@ class DtoGenerator
     private function generateGetters(DtoDefinition $definition): array {
         $properties = [];
         foreach ($definition->getProperties() as $property) {
-            $properties[] = $this->generateGetter($property);
+            if($property->hasGetter()) {
+                $properties[] = $this->generateGetter($property);
+            }
         }
         return $properties;
     }
@@ -125,7 +127,9 @@ class DtoGenerator
     private function generateSetters(DtoDefinition $definition): array {
         $properties = [];
         foreach ($definition->getProperties() as $property) {
-            $properties[] = $this->generateSetter($property);
+            if($property->hasSetter()) {
+                $properties[] = $this->generateSetter($property);
+            }
         }
         return $properties;
     }
@@ -136,8 +140,13 @@ class DtoGenerator
     private function generateConstructor(DtoDefinition $definition): array {
         $constructorBuilder   = $this->factory->method('__construct')->makePublic();
         $constructorDocs = [];
+        $constructorEmpty = true;
 
         foreach ($definition->getProperties() as $property) {
+            if(!$property->isInConstructor()) {
+                continue;
+            }
+            $constructorEmpty = false;
             $constructorBuilder
                 ->addParam($this->generateMethodParameter($property))
                 ->addStmt($this->getAssignmentDefinition($property->getClassPropertyName()));
@@ -147,6 +156,10 @@ class DtoGenerator
                 $property->getClassPropertyName()
             );
         }
+        if($constructorEmpty) {
+            return [];
+        }
+
         $constructorBuilder->setDocComment($this->getDocComment($constructorDocs));
         return [$constructorBuilder];
     }

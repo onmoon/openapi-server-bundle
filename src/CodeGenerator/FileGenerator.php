@@ -7,7 +7,7 @@ namespace OnMoon\OpenApiServerBundle\CodeGenerator;
 use OnMoon\OpenApiServerBundle\CodeGenerator\Dto\Definitions\DtoDefinition;
 use OnMoon\OpenApiServerBundle\CodeGenerator\Dto\Definitions\SpecificationDefinition;
 
-class FilesGenerator
+class FileGenerator
 {
     private DtoGenerator $dtoGenerator;
 

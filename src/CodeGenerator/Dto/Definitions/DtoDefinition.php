@@ -57,7 +57,7 @@ class DtoDefinition extends ClassDefinition
      * @param string|null $filePath
      * @return DtoDefinition
      */
-    public function setFilePath(?string $filePath): DtoDefinition
+    public function setFilePath(?string $filePath): self
     {
         $this->filePath = $filePath;
         return $this;

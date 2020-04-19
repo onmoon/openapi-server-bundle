@@ -16,7 +16,6 @@ use cebe\openapi\spec\Schema;
 use cebe\openapi\spec\Type;
 use Exception;
 use OnMoon\OpenApiServerBundle\CodeGenerator\Dto\Definitions\DtoDefinition;
-use OnMoon\OpenApiServerBundle\CodeGenerator\Dto\Definitions\InterfaceDefinition;
 use OnMoon\OpenApiServerBundle\CodeGenerator\Dto\Definitions\OperationDefinition;
 use OnMoon\OpenApiServerBundle\CodeGenerator\Dto\Definitions\PropertyDefinition;
 use OnMoon\OpenApiServerBundle\CodeGenerator\Dto\Definitions\RequestBodyDtoDefinition;
@@ -25,7 +24,6 @@ use OnMoon\OpenApiServerBundle\CodeGenerator\Dto\Definitions\RequestParametersDt
 use OnMoon\OpenApiServerBundle\CodeGenerator\Dto\Definitions\ResponseDtoDefinition;
 use OnMoon\OpenApiServerBundle\CodeGenerator\Dto\Definitions\SpecificationDefinition;
 use OnMoon\OpenApiServerBundle\Exception\CannotGenerateCodeForOperation;
-use OnMoon\OpenApiServerBundle\Interfaces\ResponseDto;
 use OnMoon\OpenApiServerBundle\OpenApi\ScalarTypesResolver;
 use OnMoon\OpenApiServerBundle\Specification\Specification;
 use OnMoon\OpenApiServerBundle\Specification\SpecificationLoader;
@@ -264,17 +262,15 @@ class GraphGenerator
         }
 
         $propertyDefinition->setRequired($required);
-        $propertyDefinition->setNullable(!$required);
 
         /** @var string|int|float|bool|null $schemaDefaultValue */
         $schemaDefaultValue = $property->default;
         if ($schemaDefaultValue !== null && $isScalar) {
             $propertyDefinition->setDefaultValue($schemaDefaultValue);
-            $propertyDefinition->setNullable(false);
         }
 
         if (!$isScalar && !$allowNonScalar) {
-            throw new Exception('Non scalar types are not allowed');
+            throw new Exception('Non scalar types are not allowed here');
         }
 
         $propertyDefinition->setDescription($property->description);

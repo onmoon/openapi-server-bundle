@@ -17,6 +17,10 @@ class PropertyDefinition
     private ?string $description = null;
     private ?string $getterName = null;
     private ?string $setterName = null;
+    private bool $hasGetter = false;
+    private bool $hasSetter = false;
+    private bool $inConstructor = false;
+
 
     /**
      * @return string|null
@@ -208,5 +212,60 @@ class PropertyDefinition
         $this->setterName = $setterName;
         return $this;
     }
+
+    /**
+     * @return bool
+     */
+    public function hasGetter(): bool
+    {
+        return $this->hasGetter;
+    }
+
+    /**
+     * @param bool $hasGetter
+     * @return PropertyDefinition
+     */
+    public function setHasGetter(bool $hasGetter): PropertyDefinition
+    {
+        $this->hasGetter = $hasGetter;
+        return $this;
+    }
+
+    /**
+     * @return bool
+     */
+    public function hasSetter(): bool
+    {
+        return $this->hasSetter;
+    }
+
+    /**
+     * @param bool $hasSetter
+     * @return PropertyDefinition
+     */
+    public function setHasSetter(bool $hasSetter): PropertyDefinition
+    {
+        $this->hasSetter = $hasSetter;
+        return $this;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isInConstructor(): bool
+    {
+        return $this->inConstructor;
+    }
+
+    /**
+     * @param bool $inConstructor
+     * @return PropertyDefinition
+     */
+    public function setInConstructor(bool $inConstructor): PropertyDefinition
+    {
+        $this->inConstructor = $inConstructor;
+        return $this;
+    }
+
 
 }
