@@ -56,6 +56,14 @@ class NameGenerator
                 $operationNamespace = $this->naming->buildNamespace($apiNamespace, $operationName);
                 $operationPath      = $this->naming->buildPath($apiPath, $operationName);
 
+                $methodName = $this->naming->stringToMethodName($operation->getOperationId());
+                $operation->getServiceInterface()
+                    ->setNamespace($operationNamespace)
+                    ->setClassName($operationName)
+                    ->setFileName($this->getFileName($operationPath, $operationName))
+                    ->setMethodName($methodName)
+                    ->setMethodDescription($operation->getSummary());
+
                 $this->setRequestNames($operation->getRequest(), $operationNamespace, $operationName, $operationPath);
 
                 $responseNamespace = $this->naming->buildNamespace(

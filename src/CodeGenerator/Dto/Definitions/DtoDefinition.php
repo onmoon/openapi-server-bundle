@@ -4,15 +4,13 @@
 namespace OnMoon\OpenApiServerBundle\CodeGenerator\Dto\Definitions;
 
 
-class DtoDefinition
+class DtoDefinition extends ClassDefinition
 {
     /**
      * @var PropertyDtoDefinition[] $properties;
      */
     private array $properties;
-    private ?string $className = null;
     private ?string $fileName = null;
-    private ?string $namespace = null;
     private ?InterfaceDefinition $implements = null;
 
     /**
@@ -31,24 +29,6 @@ class DtoDefinition
     /**
      * @return string|null
      */
-    public function getClassName(): ?string
-    {
-        return $this->className;
-    }
-
-    /**
-     * @param string|null $className
-     * @return DtoDefinition
-     */
-    public function setClassName(?string $className): DtoDefinition
-    {
-        $this->className = $className;
-        return $this;
-    }
-
-    /**
-     * @return string|null
-     */
     public function getFileName(): ?string
     {
         return $this->fileName;
@@ -58,27 +38,9 @@ class DtoDefinition
      * @param string|null $fileName
      * @return DtoDefinition
      */
-    public function setFileName(?string $fileName): DtoDefinition
+    public function setFileName(?string $fileName): self
     {
         $this->fileName = $fileName;
-        return $this;
-    }
-
-    /**
-     * @return string|null
-     */
-    public function getNamespace(): ?string
-    {
-        return $this->namespace;
-    }
-
-    /**
-     * @param string|null $namespace
-     * @return DtoDefinition
-     */
-    public function setNamespace(?string $namespace): DtoDefinition
-    {
-        $this->namespace = $namespace;
         return $this;
     }
 
@@ -102,7 +64,7 @@ class DtoDefinition
      * @param InterfaceDefinition|null $implements
      * @return DtoDefinition
      */
-    public function setImplements(?InterfaceDefinition $implements): DtoDefinition
+    public function setImplements(?InterfaceDefinition $implements): self
     {
         $this->implements = $implements;
         return $this;

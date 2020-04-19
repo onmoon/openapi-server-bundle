@@ -21,7 +21,7 @@ class GeneratedInterfaceDefinition extends InterfaceDefinition
      * @param string|null $fileName
      * @return GeneratedInterfaceDefinition
      */
-    public function setFileName(?string $fileName): GeneratedInterfaceDefinition
+    public function setFileName(?string $fileName): self
     {
         $this->fileName = $fileName;
         return $this;
@@ -39,7 +39,7 @@ class GeneratedInterfaceDefinition extends InterfaceDefinition
      * @param InterfaceDefinition|null $extends
      * @return GeneratedInterfaceDefinition
      */
-    public function setExtends(?InterfaceDefinition $extends): GeneratedInterfaceDefinition
+    public function setExtends(?InterfaceDefinition $extends): self
     {
         $this->extends = $extends;
         return $this;

@@ -3,7 +3,6 @@
 
 namespace OnMoon\OpenApiServerBundle\CodeGenerator\Dto\Definitions;
 
-
 class OperationDefinition
 {
     private string $url;
@@ -12,6 +11,7 @@ class OperationDefinition
     private ?string $summary = null;
     private ?RequestDtoDefinition $request = null;
     private ?InterfaceDefinition $markersInterface = null;
+    private ?ServiceInterfaceDefinition $serviceInterface = null;
 
     /**
      * @var ResponseDtoDefinition[]
@@ -20,11 +20,6 @@ class OperationDefinition
 
     /**
      * OperationDefinition constructor.
-     * @param string $url
-     * @param string $method
-     * @param string $operationId
-     * @param string|null $summary
-     * @param RequestDtoDefinition|null $request
      * @param ResponseDtoDefinition[] $responses
      */
     public function __construct(string $url, string $method, string $operationId, ?string $summary, ?RequestDtoDefinition $request, array $responses)
@@ -102,6 +97,26 @@ class OperationDefinition
         $this->markersInterface = $markersInterface;
         return $this;
     }
+
+    /**
+     * @return ServiceInterfaceDefinition|null
+     */
+    public function getServiceInterface(): ?ServiceInterfaceDefinition
+    {
+        return $this->serviceInterface;
+    }
+
+    /**
+     * @param ServiceInterfaceDefinition|null $serviceInterface
+     * @return OperationDefinition
+     */
+    public function setServiceInterface(?ServiceInterfaceDefinition $serviceInterface): OperationDefinition
+    {
+        $this->serviceInterface = $serviceInterface;
+        return $this;
+    }
+
+
 
 
 }
