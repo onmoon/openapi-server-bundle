@@ -29,6 +29,8 @@ use OnMoon\OpenApiServerBundle\CodeGenerator\RequestHandlerInterface\Definitions
 use OnMoon\OpenApiServerBundle\CodeGenerator\RequestHandlerInterface\RequestHandlerInterfaceFactory;
 use OnMoon\OpenApiServerBundle\CodeGenerator\ServiceSubscriber\Definitions\Factory\ServiceSubscriberDefinitionFactory;
 use OnMoon\OpenApiServerBundle\CodeGenerator\ServiceSubscriber\ServiceSubscriberFactory;
+use OnMoon\OpenApiServerBundle\Event\CodeGenerator\ClassGraphReadyEvent;
+use OnMoon\OpenApiServerBundle\Event\CodeGenerator\FilesReadyEvent;
 use OnMoon\OpenApiServerBundle\Event\CodeGenerator\RequestBodyDtoGenerationEvent;
 use OnMoon\OpenApiServerBundle\Event\CodeGenerator\RequestDtoGenerationEvent;
 use OnMoon\OpenApiServerBundle\Event\CodeGenerator\RequestHandlerInterfaceGenerationEvent;
@@ -52,6 +54,7 @@ class ApiServerCodeGenerator
     private FileGenerator $filesGenerator;
     private AttributeGenerator $attributeGenerator;
     private FileWriter $writer;
+    private EventDispatcherInterface $eventDispatcher;
 
     /**
      * ApiServerCodeGenerator constructor.
@@ -61,8 +64,9 @@ class ApiServerCodeGenerator
      * @param FileGenerator $filesGenerator
      * @param AttributeGenerator $attributeGenerator
      * @param FileWriter $writer
+     * @param EventDispatcherInterface $eventDispatcher
      */
-    public function __construct(GraphGenerator $graphGenerator, NameGenerator $nameGenerator, InterfaceGenerator $interfaceGenerator, FileGenerator $filesGenerator, AttributeGenerator $attributeGenerator, FileWriter $writer)
+    public function __construct(GraphGenerator $graphGenerator, NameGenerator $nameGenerator, InterfaceGenerator $interfaceGenerator, FileGenerator $filesGenerator, AttributeGenerator $attributeGenerator, FileWriter $writer, EventDispatcherInterface $eventDispatcher)
     {
         $this->graphGenerator = $graphGenerator;
         $this->nameGenerator = $nameGenerator;
@@ -70,8 +74,8 @@ class ApiServerCodeGenerator
         $this->filesGenerator = $filesGenerator;
         $this->attributeGenerator = $attributeGenerator;
         $this->writer = $writer;
+        $this->eventDispatcher = $eventDispatcher;
     }
-
 
     public function generate() : void
     {
@@ -95,7 +99,12 @@ class ApiServerCodeGenerator
                 }
             }
         }
+
+        $this->eventDispatcher->dispatch(new ClassGraphReadyEvent($graph));
+
         $files = $this->filesGenerator->generateAllFiles($graph);
+
+        $this->eventDispatcher->dispatch(new FilesReadyEvent($files));
 
         foreach ($files as $item) {
             $this->writer->write($item->getClass()->getFilePath(), $item->getClass()->getFileName(), $item->getFileContents());
