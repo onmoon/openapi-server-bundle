@@ -9,7 +9,7 @@ use function Safe\sprintf;
 
 final class CannotCreatePropertyName extends OpenApiError
 {
-    public static function becauseTextContaintsNoValidSymbols(string $text) : self
+    public static function becauseTextContainsNoValidSymbols(string $text) : self
     {
         return new self(
             sprintf(

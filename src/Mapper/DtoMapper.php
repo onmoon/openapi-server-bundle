@@ -8,7 +8,7 @@ use ArrayAccess;
 use ArrayObject;
 use BadMethodCallException;
 use DateTime;
-use OnMoon\OpenApiServerBundle\CodeGenerator\Factory\OperationDefinitionFactory;
+use OnMoon\OpenApiServerBundle\CodeGenerator\NameGenerator;
 use OnMoon\OpenApiServerBundle\CodeGenerator\Naming\NamingStrategy;
 use OnMoon\OpenApiServerBundle\Exception\CannotMapToDto;
 use ReflectionClass;
@@ -122,12 +122,12 @@ class DtoMapper
                     /** @var string $shortClassName */
                     $shortClassName = $match[1];
 
-                    if (preg_match('#' . preg_quote(OperationDefinitionFactory::DTO_SUFFIX) . '$#', $shortClassName)) {
+                    if (preg_match('#' . preg_quote(NameGenerator::DTO_SUFFIX) . '$#', $shortClassName)) {
                         $parentNamespace = $reflectionClass->getNamespaceName();
 
                         $fullClass = $this->namingStrategy->buildNamespace(
                             $parentNamespace,
-                            substr($shortClassName, 0, -strlen(OperationDefinitionFactory::DTO_SUFFIX)),
+                            substr($shortClassName, 0, -strlen(NameGenerator::DTO_SUFFIX)),
                             $shortClassName
                         );
 

@@ -197,66 +197,21 @@ by changing the objects representing the various code definitions like classes, 
 
 The following events are available:
 
-- `OnMoon\OpenApiServerBundle\Event\CodeGenerator\RequestDtoGenerationEvent`
+- `OnMoon\OpenApiServerBundle\Event\CodeGenerator\ClassGraphReadyEvent`
 
-    The RequestDtoGenerationEvent event occurs before the request dto is generated.
-    This event allows you to modify the definitions of the generated request DTO customizing the generated code.
-- `OnMoon\OpenApiServerBundle\Event\CodeGenerator\RequestParameterDtoGenerationEvent`
+    The ClassGraphReadyEvent event occurs after all specifications
+    has been parsed and graph of classes to be generated has been
+    constructed.
+    
+    This event allows you to modify:
+    * Class names, namespaces and paths,
+    * Property attributes, getters and setters,
+    * Base interfaces and classes.
 
-    The RequestParameterDtoGenerationEvent event occurs before the path and query parameters DTO's are generated for the
-    Request Dto.
-    This event allows you to modify the definitions of the generated Parameters DTO's customizing the generated code.
-    The parametersType() method returns either "path" or "query" and indicates what part of the RequestDTO is the
-    ParameterDTO generated for.
-- `OnMoon\OpenApiServerBundle\Event\CodeGenerator\PropertyDtoGenerationEvent`
+- `OnMoon\OpenApiServerBundle\Event\CodeGenerator\FilesReadyEvent`
 
-    The PropertyDtoGenerationEvent event occurs before any of the DTOs nested in the Request Body or Response are generated.
-    This event allows you to modify the definitions of the generated nested DTOs that are used in the Request Body 
-    and Response DTOs, customizing the generated code.
-- `OnMoon\OpenApiServerBundle\Event\CodeGenerator\RequestBodyDtoGenerationEvent`
-
-    The RequestBodyDtoGenerationEvent event occurs before the request body dto is generated.
-    This event allows you to modify the definitions of the generated request body DTO customizing the generated code.
-- `OnMoon\OpenApiServerBundle\Event\CodeGenerator\ResponseDtoGenerationEvent`
-
-    The ResponseDtoGenerationEvent event occurs before the response dto is generated.
-    This event allows you to modify the definitions of the generated response DTOs customizing the generated code.
-- `OnMoon\OpenApiServerBundle\Event\CodeGenerator\ResponseDtoMarkerInterfaceGenerationEvent`
-
-    The ResponseDtoMarkerInterfaceGenerationEvent event occurs before the response DTO marker interface is generated.
-    This marker interface is used for typehinting if a Request Handler returns multiple possible Response DTO's.
-    This event allows you to modify the definition of the generated response DTO marker interface customizing the
-    generated code.
-- `OnMoon\OpenApiServerBundle\Event\CodeGenerator\RequestHandlerInterfaceGenerationEvent`
-
-    The RequestHandlerInterfaceGenerationEvent event occurs before the request handler interface is generated.
-    This event allows you to modify the definitions of the generated request handler interfaces customizing the
-    generated code.
-- `OnMoon\OpenApiServerBundle\Event\CodeGenerator\ServiceSubscriberGenerationEvent`
-
-    The ServiceSubscriberGenerationEvent event occurs before the service subscriber is generated.
-    This event allows you to modify the definition of the generated service subscriber customizing the generated code.
-- `OnMoon\OpenApiServerBundle\Event\CodeGenerator\ClassPropertyGenerationEvent`
-
-    The ClassPropertyGenerationEvent event occurs before a class property is generated in 
-    RequestBody/RequestParameters/Resposne DTO's.
-    This event allows you to modify the definitions of the generated class properties in 
-    RequestBody/RequestParameters/Resposne DTO's customizing the generated code.
-- `OnMoon\OpenApiServerBundle\Event\CodeGenerator\ConstructorParameterGenerationEvent`
-
-    The ConstructorParameterGenerationEvent event occurs before a constructors parameter is generated in 
-    RequestBody/RequestParameters/Resposne DTO's.
-    This event allows you to modify the definitions of the generated constructors parameters in 
-    RequestBody/RequestParameters/Resposne DTO's customizing the generated code.
-- `OnMoon\OpenApiServerBundle\Event\CodeGenerator\GetterMethodGenerationEvent`
-
-    The GetterMethodGenerationEvent event occurs before a getter method is generated in 
-    RequestBody/RequestParameters/Resposne DTO's
-    This event allows you to modify the definitions of the generated getter methods in 
-    RequestBody/RequestParameters/Resposne DTO's customizing the generated code
-- `OnMoon\OpenApiServerBundle\Event\CodeGenerator\SetterMethodGenerationEvent`
-
-    The SetterMethodGenerationEvent event occurs before a setter method is generated in 
-    RequestBody/RequestParameters/Resposne DTO's
-    This event allows you to modify the definitions of the generated setter methods in 
-    RequestBody/RequestParameters/Resposne DTO's customizing the generated code
+    The FilesReadyEvent event occurs after all class files
+    are generated before they are written to files.
+    
+    This event allows you to modify generated files content,
+    e.g. change code style.
