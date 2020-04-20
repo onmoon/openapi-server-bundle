@@ -64,7 +64,7 @@ class DefaultNamingStrategy implements NamingStrategy
         );
 
         if ($namespace === '') {
-            throw CannotCreateNamespace::becauseTextContaintsNoValidSymbols($text);
+            throw CannotCreateNamespace::becauseTextContainsNoValidSymbols($text);
         }
 
         return $namespace;
