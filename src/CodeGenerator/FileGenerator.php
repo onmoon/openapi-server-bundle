@@ -14,18 +14,22 @@ class FileGenerator
 {
     private DtoCodeGenerator $dtoGenerator;
     private InterfaceCodeGenerator $interfaceGenerator;
+    private ServiceSubscriberCodeGenerator $serviceSubscriberGenerator;
     private FileWriter $writer;
 
     /**
      * FileGenerator constructor.
      * @param DtoCodeGenerator $dtoGenerator
      * @param InterfaceCodeGenerator $interfaceGenerator
+     * @param ServiceSubscriberCodeGenerator $serviceSubscriberGenerator
      * @param FileWriter $writer
      */
-    public function __construct(DtoCodeGenerator $dtoGenerator, InterfaceCodeGenerator $interfaceGenerator, FileWriter $writer)
+    public function __construct(DtoCodeGenerator $dtoGenerator, InterfaceCodeGenerator $interfaceGenerator,
+                                ServiceSubscriberCodeGenerator $serviceSubscriberGenerator, FileWriter $writer)
     {
         $this->dtoGenerator = $dtoGenerator;
         $this->interfaceGenerator = $interfaceGenerator;
+        $this->serviceSubscriberGenerator = $serviceSubscriberGenerator;
         $this->writer = $writer;
     }
 
@@ -58,6 +62,8 @@ class FileGenerator
                 }
             }
         }
+
+        $result[] = $this->serviceSubscriberGenerator->generate($graph);
 
         foreach ($result as $item) {
             $this->writer->write($item->getFileDirectoryPath(), $item->getFileName(), $item->getFileContents());

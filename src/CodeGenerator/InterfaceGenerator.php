@@ -10,10 +10,11 @@ use OnMoon\OpenApiServerBundle\CodeGenerator\Dto\Definitions\GeneratedInterfaceD
 use OnMoon\OpenApiServerBundle\CodeGenerator\Dto\Definitions\GraphDefinition;
 use OnMoon\OpenApiServerBundle\CodeGenerator\Dto\Definitions\InterfaceDefinition;
 use OnMoon\OpenApiServerBundle\CodeGenerator\Dto\Definitions\ServiceInterfaceDefinition;
-use OnMoon\OpenApiServerBundle\CodeGenerator\Dto\Definitions\SpecificationDefinition;
+use OnMoon\OpenApiServerBundle\Interfaces\ApiLoader;
 use OnMoon\OpenApiServerBundle\Interfaces\Dto;
 use OnMoon\OpenApiServerBundle\Interfaces\RequestHandler;
 use OnMoon\OpenApiServerBundle\Interfaces\ResponseDto;
+use Symfony\Contracts\Service\ServiceSubscriberInterface;
 
 class InterfaceGenerator
 {
@@ -28,6 +29,11 @@ class InterfaceGenerator
     }
 
     public function generate(GraphDefinition $graph) {
+        $graph->getServiceSubscriber()->setImplements([
+            $this->getDefaultInterface(ServiceSubscriberInterface::class),
+            $this->getDefaultInterface(ApiLoader::class),
+        ]);
+
         foreach ($graph->getSpecifications() as $specificationDefinition) {
             foreach ($specificationDefinition->getOperations() as $operation) {
                 $makersInterface = null;

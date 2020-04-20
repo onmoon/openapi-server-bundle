@@ -45,6 +45,12 @@ class NameGenerator
     }
 
     public function generate(GraphDefinition $graph) {
+        $graph->getServiceSubscriber()
+            ->setClassName('ApiServiceLoaderServiceSubscriber')
+            ->setNamespace($this->naming->buildNamespace($this->rootNamespace, 'ServiceSubscriber'))
+            ->setFileName('ApiServiceLoaderServiceSubscriber.php')
+            ->setFilePath($this->naming->buildPath($this->rootPath, 'ServiceSubscriber'));
+
         foreach ($graph->getSpecifications() as $specificationDefinition) {
             $specification = $specificationDefinition->getSpecification();
             $apiName       = $this->naming->stringToNamespace($specification->getNameSpace());
