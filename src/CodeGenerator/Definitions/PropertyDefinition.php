@@ -8,93 +8,68 @@ class PropertyDefinition
 {
     private string $specPropertyName;
     private ?string $classPropertyName = null;
-    private bool $array = false;
-    private $defaultValue = null;
-    private bool $required = false;
-    private bool $nullable = true;
-    private ?int $scalarTypeId = null;
+    private bool $array                = false;
+    /** @var string|int|float|bool|null  */
+    private $defaultValue                        = null;
+    private bool $required                       = false;
+    private bool $nullable                       = true;
+    private ?int $scalarTypeId                   = null;
     private ?DtoDefinition $objectTypeDefinition = null;
-    private ?string $description = null;
-    private ?string $getterName = null;
-    private ?string $setterName = null;
-    private bool $hasGetter = false;
-    private bool $hasSetter = false;
-    private bool $inConstructor = false;
+    private ?string $description                 = null;
+    private ?string $getterName                  = null;
+    private ?string $setterName                  = null;
+    private bool $hasGetter                      = false;
+    private bool $hasSetter                      = false;
+    private bool $inConstructor                  = false;
 
-
-    /**
-     * @return string|null
-     */
-    public function getDescription(): ?string
+    public function getDescription() : ?string
     {
         return $this->description;
     }
 
-    /**
-     * @param string|null $description
-     * @return PropertyDefinition
-     */
-    public function setDescription(?string $description): PropertyDefinition
+    public function setDescription(?string $description) : PropertyDefinition
     {
         $this->description = $description;
+
         return $this;
     }
 
-    /**
-     * PropertyDtoDefinition constructor.
-     * @param string $specPropertyName
-     */
     public function __construct(string $specPropertyName)
     {
         $this->specPropertyName = $specPropertyName;
     }
 
-    /**
-     * @return string
-     */
-    public function getSpecPropertyName(): string
+    public function getSpecPropertyName() : string
     {
         return $this->specPropertyName;
     }
 
-    /**
-     * @return string|null
-     */
-    public function getClassPropertyName(): ?string
+    public function getClassPropertyName() : ?string
     {
         return $this->classPropertyName;
     }
 
-    /**
-     * @param string|null $classPropertyName
-     * @return PropertyDefinition
-     */
-    public function setClassPropertyName(?string $classPropertyName): PropertyDefinition
+    public function setClassPropertyName(?string $classPropertyName) : PropertyDefinition
     {
         $this->classPropertyName = $classPropertyName;
+
         return $this;
     }
 
-    /**
-     * @return bool
-     */
-    public function isArray(): bool
+    public function isArray() : bool
     {
         return $this->array;
     }
 
-    /**
-     * @param bool $array
-     * @return PropertyDefinition
-     */
-    public function setArray(bool $array): PropertyDefinition
+    public function setArray(bool $array) : PropertyDefinition
     {
         $this->array = $array;
+
         return $this;
     }
 
     /**
-     * @return mixed
+     * @return string|int|float|bool|null
      */
     public function getDefaultValue()
     {
@@ -102,169 +77,120 @@ class PropertyDefinition
     }
 
     /**
-     * @param mixed $defaultValue
-     * @return PropertyDefinition
+     * @param string|int|float|bool|null $defaultValue
      */
-    public function setDefaultValue($defaultValue)
+    public function setDefaultValue($defaultValue) : PropertyDefinition
     {
         $this->defaultValue = $defaultValue;
+
         return $this;
     }
 
-    /**
-     * @return bool
-     */
-    public function isRequired(): bool
+    public function isRequired() : bool
     {
         return $this->required;
     }
 
-    /**
-     * @param bool $required
-     * @return PropertyDefinition
-     */
-    public function setRequired(bool $required): PropertyDefinition
+    public function setRequired(bool $required) : PropertyDefinition
     {
         $this->required = $required;
+
         return $this;
     }
 
-    /**
-     * @return int|null
-     */
-    public function getScalarTypeId(): ?int
+    public function getScalarTypeId() : ?int
     {
         return $this->scalarTypeId;
     }
 
-    /**
-     * @param int|null $scalarTypeId
-     * @return PropertyDefinition
-     */
-    public function setScalarTypeId(?int $scalarTypeId): PropertyDefinition
+    public function setScalarTypeId(?int $scalarTypeId) : PropertyDefinition
     {
         $this->scalarTypeId = $scalarTypeId;
+
         return $this;
     }
 
-    public function getObjectTypeDefinition(): ?DtoDefinition
+    public function getObjectTypeDefinition() : ?DtoDefinition
     {
         return $this->objectTypeDefinition;
     }
 
-    public function setObjectTypeDefinition(DtoDefinition $objectTypeDefinition): PropertyDefinition
+    public function setObjectTypeDefinition(DtoDefinition $objectTypeDefinition) : PropertyDefinition
     {
         $this->objectTypeDefinition = $objectTypeDefinition;
+
         return $this;
     }
 
-    /**
-     * @return bool
-     */
-    public function isNullable(): bool
+    public function isNullable() : bool
     {
         return $this->nullable;
     }
 
-    /**
-     * @param bool $nullable
-     * @return PropertyDefinition
-     */
-    public function setNullable(bool $nullable): PropertyDefinition
+    public function setNullable(bool $nullable) : PropertyDefinition
     {
         $this->nullable = $nullable;
+
         return $this;
     }
 
-    /**
-     * @return string|null
-     */
-    public function getGetterName(): ?string
+    public function getGetterName() : ?string
     {
         return $this->getterName;
     }
 
-    /**
-     * @param string|null $getterName
-     * @return PropertyDefinition
-     */
-    public function setGetterName(?string $getterName): PropertyDefinition
+    public function setGetterName(?string $getterName) : PropertyDefinition
     {
         $this->getterName = $getterName;
+
         return $this;
     }
 
-    /**
-     * @return string|null
-     */
-    public function getSetterName(): ?string
+    public function getSetterName() : ?string
     {
         return $this->setterName;
     }
 
-    /**
-     * @param string|null $setterName
-     * @return PropertyDefinition
-     */
-    public function setSetterName(?string $setterName): PropertyDefinition
+    public function setSetterName(?string $setterName) : PropertyDefinition
     {
         $this->setterName = $setterName;
+
         return $this;
     }
 
-    /**
-     * @return bool
-     */
-    public function hasGetter(): bool
+    public function hasGetter() : bool
     {
         return $this->hasGetter;
     }
 
-    /**
-     * @param bool $hasGetter
-     * @return PropertyDefinition
-     */
-    public function setHasGetter(bool $hasGetter): PropertyDefinition
+    public function setHasGetter(bool $hasGetter) : PropertyDefinition
     {
         $this->hasGetter = $hasGetter;
+
         return $this;
     }
 
-    /**
-     * @return bool
-     */
-    public function hasSetter(): bool
+    public function hasSetter() : bool
     {
         return $this->hasSetter;
     }
 
-    /**
-     * @param bool $hasSetter
-     * @return PropertyDefinition
-     */
-    public function setHasSetter(bool $hasSetter): PropertyDefinition
+    public function setHasSetter(bool $hasSetter) : PropertyDefinition
     {
         $this->hasSetter = $hasSetter;
+
         return $this;
     }
 
-    /**
-     * @return bool
-     */
-    public function isInConstructor(): bool
+    public function isInConstructor() : bool
     {
         return $this->inConstructor;
     }
 
-    /**
-     * @param bool $inConstructor
-     * @return PropertyDefinition
-     */
-    public function setInConstructor(bool $inConstructor): PropertyDefinition
+    public function setInConstructor(bool $inConstructor) : PropertyDefinition
     {
         $this->inConstructor = $inConstructor;
+
         return $this;
     }
-
-
 }

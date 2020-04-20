@@ -8,7 +8,9 @@ use function Safe\sprintf;
 
 final class CannotGenerateCodeForOperation extends OpenApiError
 {
-    public static function becauseNoOperationIdSpecified(array $context) : self {
+    /** @param string[] $context */
+    public static function becauseNoOperationIdSpecified(array $context) : self
+    {
         return new self(
             sprintf(
                 'No operationId specified for operation: "%s" of path: "%s" in specification file: "%s".',
@@ -19,6 +21,7 @@ final class CannotGenerateCodeForOperation extends OpenApiError
         );
     }
 
+    /** @param string[] $context */
     public static function becauseRootIsNotObject(
         array $context,
         bool $isArray
@@ -50,6 +53,7 @@ final class CannotGenerateCodeForOperation extends OpenApiError
         );
     }
 
+    /** @param string[] $context */
     public static function becauseOnlyScalarAreAllowed(string $propertyName, array $context) : self
     {
         return new self(
@@ -64,6 +68,7 @@ final class CannotGenerateCodeForOperation extends OpenApiError
         );
     }
 
+    /** @param string[] $context */
     public static function becauseArrayIsNotDescribed(string $propertyName, array $context) : self
     {
         return new self(
@@ -78,7 +83,7 @@ final class CannotGenerateCodeForOperation extends OpenApiError
         );
     }
 
-
+    /** @param string[] $context */
     public static function becauseTypeNotSupported(string $propertyName, string $type, array $context) : self
     {
         return new self(

@@ -1,8 +1,8 @@
 <?php
 
+declare(strict_types=1);
 
 namespace OnMoon\OpenApiServerBundle\CodeGenerator\Definitions;
-
 
 class GraphDefinition
 {
@@ -11,30 +11,24 @@ class GraphDefinition
     private ServiceSubscriberDefinition $serviceSubscriber;
 
     /**
-     * GraphDefinition constructor.
      * @param array|SpecificationDefinition[] $specifications
-     * @param ServiceSubscriberDefinition $serviceSubscriber
      */
-    public function __construct($specifications, ServiceSubscriberDefinition $serviceSubscriber)
+    public function __construct(array $specifications, ServiceSubscriberDefinition $serviceSubscriber)
     {
-        $this->specifications = $specifications;
+        $this->specifications    = $specifications;
         $this->serviceSubscriber = $serviceSubscriber;
     }
 
     /**
      * @return SpecificationDefinition[]
      */
-    public function getSpecifications(): array
+    public function getSpecifications() : array
     {
         return $this->specifications;
     }
 
-    /**
-     * @return ServiceSubscriberDefinition
-     */
-    public function getServiceSubscriber(): ServiceSubscriberDefinition
+    public function getServiceSubscriber() : ServiceSubscriberDefinition
     {
         return $this->serviceSubscriber;
     }
-
 }

@@ -1,5 +1,6 @@
 <?php
 
+declare(strict_types=1);
 
 namespace OnMoon\OpenApiServerBundle\Event\CodeGenerator;
 
@@ -20,21 +21,13 @@ class ClassGraphReadyEvent extends Event
 {
     private GraphDefinition $graph;
 
-    /**
-     * ClassGraphReadyEvent constructor.
-     * @param GraphDefinition $graph
-     */
     public function __construct(GraphDefinition $graph)
     {
         $this->graph = $graph;
     }
 
-    /**
-     * @return GraphDefinition
-     */
-    public function graph(): GraphDefinition
+    public function graph() : GraphDefinition
     {
         return $this->graph;
     }
-
 }

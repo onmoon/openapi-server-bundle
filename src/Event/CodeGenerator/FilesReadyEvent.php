@@ -1,8 +1,8 @@
 <?php
 
+declare(strict_types=1);
 
 namespace OnMoon\OpenApiServerBundle\Event\CodeGenerator;
-
 
 use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\GeneratedFileDefinition;
 use Symfony\Contracts\EventDispatcher\Event;
@@ -20,10 +20,9 @@ class FilesReadyEvent extends Event
     private array $files;
 
     /**
-     * FilesReadyEvent constructor.
      * @param array|GeneratedFileDefinition[] $files
      */
-    public function __construct($files)
+    public function __construct(array $files)
     {
         $this->files = $files;
     }
@@ -31,9 +30,8 @@ class FilesReadyEvent extends Event
     /**
      * @return GeneratedFileDefinition[]
      */
-    public function files(): array
+    public function files() : array
     {
         return $this->files;
     }
-
 }

@@ -9,7 +9,6 @@ class ResponseDtoDefinition extends DtoDefinition
     private string $statusCode;
 
     /**
-     * DtoDefinition constructor.
      * @param array|PropertyDefinition[] $properties
      */
     public function __construct(string $statusCode, array $properties)
@@ -18,10 +17,8 @@ class ResponseDtoDefinition extends DtoDefinition
         parent::__construct($properties);
     }
 
-
-    public function getStatusCode(): string
+    public function getStatusCode() : string
     {
         return $this->statusCode;
     }
-
 }

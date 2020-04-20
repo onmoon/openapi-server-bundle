@@ -1,46 +1,36 @@
 <?php
 
+declare(strict_types=1);
 
 namespace OnMoon\OpenApiServerBundle\CodeGenerator\Definitions;
-
 
 use OnMoon\OpenApiServerBundle\Specification\Specification;
 
 class SpecificationDefinition
 {
     private Specification $specification;
-    /**
-     * @var OperationDefinition[]
-     */
+    /** @var OperationDefinition[] */
     private array $operations;
 
     /**
-     * SpecificationDefinition constructor.
-     * @param Specification $specification
      * @param array|OperationDefinition[] $operations
      */
-    public function __construct(Specification $specification, $operations)
+    public function __construct(Specification $specification, array $operations)
     {
         $this->specification = $specification;
-        $this->operations = $operations;
+        $this->operations    = $operations;
     }
 
     /**
      * @return OperationDefinition[]
      */
-    public function getOperations(): array
+    public function getOperations() : array
     {
         return $this->operations;
     }
 
-    /**
-     * @return Specification
-     */
-    public function getSpecification(): Specification
+    public function getSpecification() : Specification
     {
         return $this->specification;
     }
-
-
-
 }

@@ -1,54 +1,50 @@
 <?php
 
+declare(strict_types=1);
 
 namespace OnMoon\OpenApiServerBundle\CodeGenerator\Definitions;
 
+use function count;
 
 class DtoDefinition extends GeneratedClassDefinition
 {
-    /**
-     * @var PropertyDefinition[] $properties;
-     */
+    /** @var PropertyDefinition[] $properties; */
     private array $properties;
     private ?ClassDefinition $implements = null;
 
     /**
-     * DtoDefinition constructor.
      * @param PropertyDefinition[] $properties
      */
-    public function __construct($properties)
+    public function __construct(array $properties)
     {
         $this->properties = $properties;
     }
 
-    public function isEmpty(): bool {
-        return (count($this->properties) === 0);
+    public function isEmpty() : bool
+    {
+        return count($this->properties) === 0;
     }
 
     /**
      * @return PropertyDefinition[]
      */
-    public function getProperties(): array
+    public function getProperties() : array
     {
         return $this->properties;
     }
 
-    /**
-     * @return ClassDefinition|null
-     */
-    public function getImplements(): ?ClassDefinition
+    public function getImplements() : ?ClassDefinition
     {
         return $this->implements;
     }
 
     /**
-     * @param ClassDefinition|null $implements
      * @return DtoDefinition
      */
-    public function setImplements(?ClassDefinition $implements): self
+    public function setImplements(?ClassDefinition $implements) : self
     {
         $this->implements = $implements;
+
         return $this;
     }
-
 }

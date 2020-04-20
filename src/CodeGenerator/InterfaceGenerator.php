@@ -1,8 +1,8 @@
 <?php
 
+declare(strict_types=1);
 
 namespace OnMoon\OpenApiServerBundle\CodeGenerator;
-
 
 use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\ClassDefinition;
 use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\DtoDefinition;
@@ -14,6 +14,9 @@ use OnMoon\OpenApiServerBundle\Interfaces\Dto;
 use OnMoon\OpenApiServerBundle\Interfaces\RequestHandler;
 use OnMoon\OpenApiServerBundle\Interfaces\ResponseDto;
 use Symfony\Contracts\Service\ServiceSubscriberInterface;
+use function count;
+use function strrpos;
+use function substr;
 
 class InterfaceGenerator
 {
@@ -21,13 +24,15 @@ class InterfaceGenerator
     private ClassDefinition $defaultResponseDto;
     private ClassDefinition $defaultService;
 
-    public function __construct() {
-        $this->defaultDto = $this->getDefaultInterface(Dto::class);
+    public function __construct()
+    {
+        $this->defaultDto         = $this->getDefaultInterface(Dto::class);
         $this->defaultResponseDto = $this->getDefaultInterface(ResponseDto::class);
-        $this->defaultService = $this->getDefaultInterface(RequestHandler::class);
+        $this->defaultService     = $this->getDefaultInterface(RequestHandler::class);
     }
 
-    public function setAllInterfaces(GraphDefinition $graph) {
+    public function setAllInterfaces(GraphDefinition $graph) : void
+    {
         $graph->getServiceSubscriber()->setImplements([
             $this->getDefaultInterface(ServiceSubscriberInterface::class),
             $this->getDefaultInterface(ApiLoader::class),
@@ -38,7 +43,7 @@ class InterfaceGenerator
                 $makersInterface = null;
                 /** @var ClassDefinition|null $responseClass */
                 $responseClass = null;
-                $responses = $operation->getResponses();
+                $responses     = $operation->getResponses();
                 if (count($responses) > 1) {
                     $makersInterface = new GeneratedInterfaceDefinition();
                     $makersInterface->setExtends($this->defaultResponseDto);
@@ -46,7 +51,7 @@ class InterfaceGenerator
                     $responseClass = $makersInterface;
                 } else {
                     $makersInterface = $this->defaultResponseDto;
-                    if(count($responses) === 1) {
+                    if (count($responses) === 1) {
                         $responseClass = $responses[0];
                     }
                 }
@@ -56,7 +61,7 @@ class InterfaceGenerator
                     $this->setChildrenRecursive($response, $this->defaultDto);
                 }
 
-                if($operation->getRequest() !== null) {
+                if ($operation->getRequest() !== null) {
                     $operation->getRequest()->setImplements($this->defaultDto);
                     $this->setChildrenRecursive($operation->getRequest(), $this->defaultDto);
                 }
@@ -71,23 +76,27 @@ class InterfaceGenerator
         }
     }
 
-    public function getDefaultInterface(string $className) {
-        $lastPart = strrpos($className, '\\');
+    public function getDefaultInterface(string $className) : ClassDefinition
+    {
+        $lastPart  = strrpos($className, '\\');
         $namespace = substr($className, 0, $lastPart);
-        $name = substr($className, $lastPart + 1);
+        $name      = substr($className, $lastPart + 1);
+
         return (new ClassDefinition())
             ->setNamespace($namespace)
             ->setClassName($name);
     }
 
-    public function setChildrenRecursive(DtoDefinition $root, ClassDefinition $implements) {
+    public function setChildrenRecursive(DtoDefinition $root, ClassDefinition $implements) : void
+    {
         foreach ($root->getProperties() as $property) {
             $objectDefinition = $property->getObjectTypeDefinition();
-            if ($objectDefinition !== null) {
-                $objectDefinition->setImplements($implements);
-                $this->setChildrenRecursive($objectDefinition, $implements);
+            if ($objectDefinition === null) {
+                continue;
             }
+
+            $objectDefinition->setImplements($implements);
+            $this->setChildrenRecursive($objectDefinition, $implements);
         }
     }
-
 }

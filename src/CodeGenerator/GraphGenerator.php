@@ -1,8 +1,8 @@
 <?php
 
+declare(strict_types=1);
 
 namespace OnMoon\OpenApiServerBundle\CodeGenerator;
-
 
 use cebe\openapi\spec\MediaType;
 use cebe\openapi\spec\Operation;
@@ -29,6 +29,13 @@ use OnMoon\OpenApiServerBundle\Exception\CannotGenerateCodeForOperation;
 use OnMoon\OpenApiServerBundle\OpenApi\ScalarTypesResolver;
 use OnMoon\OpenApiServerBundle\Specification\Specification;
 use OnMoon\OpenApiServerBundle\Specification\SpecificationLoader;
+use function array_filter;
+use function array_map;
+use function array_merge;
+use function class_exists;
+use function count;
+use function in_array;
+use function is_array;
 
 class GraphGenerator
 {
@@ -37,14 +44,12 @@ class GraphGenerator
 
     public function __construct(SpecificationLoader $loader, ScalarTypesResolver $typeResolver)
     {
-        $this->loader = $loader;
+        $this->loader       = $loader;
         $this->typeResolver = $typeResolver;
     }
 
-    /**
-     * @return GraphDefinition
-     */
-    public function generateClassGraph() : GraphDefinition {
+    public function generateClassGraph() : GraphDefinition
+    {
         $specificationDefinitions = [];
         foreach ($this->loader->list() as $specificationName => $specification) {
             $parsedSpecification = $this->loader->load($specificationName);
@@ -64,7 +69,7 @@ class GraphGenerator
                     $exceptionContext = [
                         'url' => $url,
                         'method' => $method,
-                        'path' => $specification->getPath()
+                        'path' => $specification->getPath(),
                     ];
 
                     if ($operationId === '') {
@@ -74,8 +79,8 @@ class GraphGenerator
                     $responses = $this->getResponseDtoDefinitions($operation->responses, $specification, $exceptionContext);
 
                     $requestSchema = $this->findByMediaType($operation->requestBody, $specification->getMediaType());
-                    $requestBody = null;
-                    if($requestSchema !== null) {
+                    $requestBody   = null;
+                    if ($requestSchema !== null) {
                         $requestBody = new RequestBodyDtoDefinition(
                             $this->getPropertyGraph(
                                 $requestSchema,
@@ -83,8 +88,9 @@ class GraphGenerator
                             )
                         );
                     }
-                    $parameters = $this->mergeParameters($pathItem, $operation);
-                    $requestDefinitions = new RequestDtoDefinition(
+
+                    $parameters             = $this->mergeParameters($pathItem, $operation);
+                    $requestDefinitions     = new RequestDtoDefinition(
                         $requestBody,
                         $this->parametersToDto('query', $parameters, array_merge($exceptionContext, ['location' => 'request query parameters'])),
                         $this->parametersToDto('path', $parameters, array_merge($exceptionContext, ['location' => 'request path parameters']))
@@ -99,22 +105,25 @@ class GraphGenerator
                     );
                 }
             }
+
             $specificationDefinitions[] = new SpecificationDefinition($specification, $operationDefinitions);
         }
 
         $serviceSubscriber = new ServiceSubscriberDefinition();
+
         return new GraphDefinition($specificationDefinitions, $serviceSubscriber);
     }
 
     /**
+     * @param string[] $exceptionContext
+     *
      * @return ResponseDtoDefinition[]
      */
     private function getResponseDtoDefinitions(
         ?Responses $responses,
         Specification $specification,
         array $exceptionContext
-    ) : array
-    {
+    ) : array {
         $responseDtoDefinitions = [];
         if ($responses instanceof Responses) {
             /**
@@ -122,37 +131,43 @@ class GraphGenerator
              */
             foreach ($responses->getResponses() as $responseCode => $response) {
                 $responseSchema = $this->findByMediaType($response, $specification->getMediaType());
-                if($responseSchema !== null) {
-                    $exceptionContext = array_merge($exceptionContext, ['location' => 'response (code "' . $responseCode . '")']);
-                    if ($responseSchema->type !== Type::OBJECT) {
-                        throw CannotGenerateCodeForOperation::becauseRootIsNotObject(
-                            $exceptionContext,
-                            ($responseSchema->type === Type::ARRAY)
-                        );
-                    }
-                    $propertyDefinitions = $this->getPropertyGraph($responseSchema, $exceptionContext);
-                    $responseDefinition = new ResponseDtoDefinition($responseCode, $propertyDefinitions);
-                    $responseDtoDefinitions[] = $responseDefinition;
+                if ($responseSchema === null) {
+                    continue;
                 }
+
+                $exceptionContext = array_merge($exceptionContext, ['location' => 'response (code "' . $responseCode . '")']);
+                if ($responseSchema->type !== Type::OBJECT) {
+                    throw CannotGenerateCodeForOperation::becauseRootIsNotObject(
+                        $exceptionContext,
+                        ($responseSchema->type === Type::ARRAY)
+                    );
+                }
+
+                $propertyDefinitions      = $this->getPropertyGraph($responseSchema, $exceptionContext);
+                $responseDefinition       = new ResponseDtoDefinition($responseCode, $propertyDefinitions);
+                $responseDtoDefinitions[] = $responseDefinition;
             }
         }
+
         return $responseDtoDefinitions;
     }
 
     /**
      * @param RequestBody|Response|Reference|null $body
-     * @param string $mediaType
-     * @return Schema|null
      */
-    private function findByMediaType($body, string $mediaType): ?Schema {
-        if (null === $body || $body instanceof Reference || null === $body->content) {
+    private function findByMediaType($body, string $mediaType) : ?Schema
+    {
+        if ($body === null || $body instanceof Reference || $body->content === null) {
             return null;
         }
 
         foreach ($body->content as $type => $data) {
-            if($type === $mediaType && $data instanceof MediaType) {
-                if($data->schema instanceof Schema)
-                    return $data->schema;
+            if ($type !== $mediaType || ! ($data instanceof MediaType)) {
+                continue;
+            }
+
+            if ($data->schema instanceof Schema) {
+                return $data->schema;
             }
         }
 
@@ -184,14 +199,14 @@ class GraphGenerator
                 $this->filterParameters($pathItem->parameters),
                 static function (Parameter $pathParameter) use ($operationParameters) : bool {
                     return count(
-                            array_filter(
-                                $operationParameters,
-                                static function (Parameter $operationParameter) use ($pathParameter) : bool {
+                        array_filter(
+                            $operationParameters,
+                            static function (Parameter $operationParameter) use ($pathParameter) : bool {
                                     return $operationParameter->name === $pathParameter->name &&
                                         $operationParameter->in === $pathParameter->in;
-                                }
-                            )
-                        ) === 0;
+                            }
+                        )
+                    ) === 0;
                 }
             ),
             $operationParameters
@@ -200,6 +215,7 @@ class GraphGenerator
 
     /**
      * @param Parameter[] $parameters
+     *
      * @return Parameter[]
      */
     private function filterSupportedParameters(string $in, array $parameters) : array
@@ -209,9 +225,10 @@ class GraphGenerator
 
     /**
      * @param Parameter[] $parameters
-     * @return RequestParametersDtoDefinition|null
+     * @param string[]    $exceptionContext
      */
-    private function parametersToDto(string $in, array $parameters, array $exceptionContext) : ?RequestParametersDtoDefinition {
+    private function parametersToDto(string $in, array $parameters, array $exceptionContext) : ?RequestParametersDtoDefinition
+    {
         $properties = array_map(
             fn (Parameter $p) =>
                 $this
@@ -221,7 +238,7 @@ class GraphGenerator
             $this->filterSupportedParameters($in, $parameters)
         );
 
-        if(count($properties) === 0) {
+        if (count($properties) === 0) {
             return null;
         }
 
@@ -229,22 +246,27 @@ class GraphGenerator
     }
 
     /**
+     * @param string[] $exceptionContext
+     *
      * @return PropertyDefinition[]
      */
-    private function getPropertyGraph(Schema $schema, array $exceptionContext) : array {
+    private function getPropertyGraph(Schema $schema, array $exceptionContext) : array
+    {
         $propertyDefinitions = [];
         /**
          * @var string $propertyName
          */
         foreach ($schema->properties as $propertyName => $property) {
-            $required = is_array($schema->required) && in_array($propertyName, $schema->required);
+            $required              = is_array($schema->required) && in_array($propertyName, $schema->required);
             $propertyDefinitions[] = $this->getProperty($propertyName, $property, $exceptionContext)->setRequired($required);
         }
 
         return $propertyDefinitions;
     }
 
-    private function getProperty(string $propertyName, Schema $property, array $exceptionContext, bool $allowNonScalar = true) : PropertyDefinition {
+    /** @param string[] $exceptionContext */
+    private function getProperty(string $propertyName, Schema $property, array $exceptionContext, bool $allowNonScalar = true) : PropertyDefinition
+    {
         if (! ($property instanceof Schema)) {
             throw new Exception('Property is not scheme');
         }
@@ -252,13 +274,14 @@ class GraphGenerator
         $propertyDefinition = new PropertyDefinition($propertyName);
         $propertyDefinition->setDescription($property->description);
 
-        $type         = null;
-        $isScalar     = false;
+        $type     = null;
+        $isScalar = false;
 
         if ($property->type === Type::ARRAY) {
             if (! ($property->items instanceof Schema)) {
                 throw CannotGenerateCodeForOperation::becauseArrayIsNotDescribed($propertyName, $exceptionContext);
             }
+
             $propertyDefinition->setArray(true);
             $property = $property->items;
         }
@@ -277,15 +300,14 @@ class GraphGenerator
         /** @var string|int|float|bool|null $schemaDefaultValue */
         $schemaDefaultValue = $property->default;
         //ToDo: Support DateTime assignments
-        if ($schemaDefaultValue !== null && $isScalar && !class_exists($this->typeResolver->getPhpType($propertyDefinition->getScalarTypeId()))) {
+        if ($schemaDefaultValue !== null && $isScalar && ! class_exists($this->typeResolver->getPhpType($propertyDefinition->getScalarTypeId()))) {
             $propertyDefinition->setDefaultValue($schemaDefaultValue);
         }
 
-        if (!$isScalar && !$allowNonScalar) {
+        if (! $isScalar && ! $allowNonScalar) {
             throw CannotGenerateCodeForOperation::becauseOnlyScalarAreAllowed($propertyName, $exceptionContext);
         }
 
         return $propertyDefinition;
     }
-
 }

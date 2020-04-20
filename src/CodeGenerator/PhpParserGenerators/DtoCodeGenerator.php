@@ -1,33 +1,28 @@
 <?php
 
+declare(strict_types=1);
 
 namespace OnMoon\OpenApiServerBundle\CodeGenerator\PhpParserGenerators;
 
-
-use OnMoon\OpenApiServerBundle\CodeGenerator\PhpParserGenerators\CodeGenerator;
-use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\ClassDefinition;
 use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\DtoDefinition;
 use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\GeneratedFileDefinition;
 use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\PropertyDefinition;
 use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\ResponseDtoDefinition;
-use OnMoon\OpenApiServerBundle\OpenApi\ScalarTypesResolver;
 use PhpParser\Builder\Method;
-use PhpParser\Builder\Namespace_;
 use PhpParser\Builder\Param;
 use PhpParser\Builder\Property;
-use PhpParser\BuilderFactory;
 use PhpParser\Node;
 use PhpParser\Node\Expr\Assign;
 use PhpParser\Node\Expr\Variable;
-use PhpParser\Node\Scalar\LNumber;
-use PhpParser\Node\Stmt\Declare_;
-use PhpParser\Node\Stmt\DeclareDeclare;
 use PhpParser\Node\Stmt\Return_;
-use PhpParser\PrettyPrinter\Standard;
+use function count;
+use function sprintf;
+use function str_replace;
+use function strpos;
 
 class DtoCodeGenerator extends CodeGenerator
 {
-    public function generate(DtoDefinition $definition): GeneratedFileDefinition
+    public function generate(DtoDefinition $definition) : GeneratedFileDefinition
     {
         $fileBuilder = $this
             ->factory
@@ -45,9 +40,11 @@ class DtoCodeGenerator extends CodeGenerator
         }
 
         foreach ($definition->getProperties() as $property) {
-            if ($property->getObjectTypeDefinition() !== null) {
-                $this->use($fileBuilder, $definition->getNamespace(), $property->getObjectTypeDefinition());
+            if ($property->getObjectTypeDefinition() === null) {
+                continue;
             }
+
+            $this->use($fileBuilder, $definition->getNamespace(), $property->getObjectTypeDefinition());
         }
 
         $classBuilder->addStmts($this->generateProperties($definition));
@@ -55,6 +52,7 @@ class DtoCodeGenerator extends CodeGenerator
         if ($definition instanceof ResponseDtoDefinition) {
             $classBuilder->addStmt($this->generateResponseCodeStaticMethod($definition));
         }
+
         $classBuilder->addStmts($this->generateConstructor($definition));
         $classBuilder->addStmts($this->generateGetters($definition));
         $classBuilder->addStmts($this->generateSetters($definition));
@@ -70,75 +68,91 @@ class DtoCodeGenerator extends CodeGenerator
     /**
      * @return Node[]
      */
-    private function generateProperties(DtoDefinition $definition): array {
+    private function generateProperties(DtoDefinition $definition) : array
+    {
         $properties = [];
         foreach ($definition->getProperties() as $property) {
             $properties[] = $this->generateClassProperty($property);
         }
+
         return $properties;
     }
 
     /**
      * @return Node[]
      */
-    private function generateGetters(DtoDefinition $definition): array {
+    private function generateGetters(DtoDefinition $definition) : array
+    {
         $properties = [];
         foreach ($definition->getProperties() as $property) {
-            if($property->hasGetter()) {
-                $properties[] = $this->generateGetter($property);
-            }
-        }
-        return $properties;
-    }
-
-    /**
-     * @return Node[]
-     */
-    private function generateSetters(DtoDefinition $definition): array {
-        $properties = [];
-        foreach ($definition->getProperties() as $property) {
-            if($property->hasSetter()) {
-                $properties[] = $this->generateSetter($property);
-            }
-        }
-        return $properties;
-    }
-
-    /**
-     * @return Node[]
-     */
-    private function generateConstructor(DtoDefinition $definition): array {
-        $constructorBuilder   = $this->factory->method('__construct')->makePublic();
-        $constructorDocs = [];
-        $constructorEmpty = true;
-
-        foreach ($definition->getProperties() as $property) {
-            if(!$property->isInConstructor()) {
+            if (! $property->hasGetter()) {
                 continue;
             }
+
+            $properties[] = $this->generateGetter($property);
+        }
+
+        return $properties;
+    }
+
+    /**
+     * @return Node[]
+     */
+    private function generateSetters(DtoDefinition $definition) : array
+    {
+        $properties = [];
+        foreach ($definition->getProperties() as $property) {
+            if (! $property->hasSetter()) {
+                continue;
+            }
+
+            $properties[] = $this->generateSetter($property);
+        }
+
+        return $properties;
+    }
+
+    /**
+     * @return Node[]
+     */
+    private function generateConstructor(DtoDefinition $definition) : array
+    {
+        $constructorBuilder = $this->factory->method('__construct')->makePublic();
+        $constructorDocs    = [];
+        $constructorEmpty   = true;
+
+        foreach ($definition->getProperties() as $property) {
+            if (! $property->isInConstructor()) {
+                continue;
+            }
+
             $constructorEmpty = false;
             $constructorBuilder
                 ->addParam($this->generateMethodParameter($property))
                 ->addStmt($this->getAssignmentDefinition($property->getClassPropertyName()));
-            if($this->fullDocs || $property->isArray()) {
-                $constructorDocs[] = sprintf(
-                    '@param %s $%s',
-                    $this->getTypeDocBlock($property),
-                    $property->getClassPropertyName()
-                );
+            if (! $this->fullDocs && ! $property->isArray()) {
+                continue;
             }
+
+            $constructorDocs[] = sprintf(
+                '@param %s $%s',
+                $this->getTypeDocBlock($property),
+                $property->getClassPropertyName()
+            );
         }
-        if($constructorEmpty) {
+
+        if ($constructorEmpty) {
             return [];
         }
 
-        if(count($constructorDocs) > 0) {
+        if (count($constructorDocs) > 0) {
             $constructorBuilder->setDocComment($this->getDocComment($constructorDocs));
         }
+
         return [$constructorBuilder];
     }
 
-    private function generateClassProperty(PropertyDefinition $definition): Property
+    private function generateClassProperty(PropertyDefinition $definition) : Property
     {
         $property = $this->factory
             ->property($definition->getClassPropertyName())
@@ -160,32 +174,36 @@ class DtoCodeGenerator extends CodeGenerator
         }
 
         //ToDo: remove this
-        if(
-            strpos($definition->getClassPropertyName(), 'queryParameters') === false
+        if (strpos($definition->getClassPropertyName(), 'queryParameters') === false
             &&
             strpos($definition->getClassPropertyName(), 'pathParameters') === false
             &&
             strpos($definition->getClassPropertyName(), 'body') === false
-        )
-        $docCommentLines[] = sprintf(
-            '@var %s $%s ',
-            $this->getTypeDocBlock($definition),
-            $definition->getClassPropertyName()
-        );
-if(count($docCommentLines))
-        $property->setDocComment($this->getDocComment($docCommentLines));
+        ) {
+            $docCommentLines[] = sprintf(
+                '@var %s $%s ',
+                $this->getTypeDocBlock($definition),
+                $definition->getClassPropertyName()
+            );
+        }
+
+        if (count($docCommentLines)) {
+            $property->setDocComment($this->getDocComment($docCommentLines));
+        }
+
         return $property;
     }
 
-    private function generateMethodParameter(PropertyDefinition $definition): Param
-    {//ToDo: Remove
+    private function generateMethodParameter(PropertyDefinition $definition) : Param
+    {
+//ToDo: Remove
         return $this
             ->factory
             ->param($definition->getClassPropertyName())
             ->setType(str_replace('?', '', $this->getTypePhp($definition)));
     }
 
-    private function getAssignmentDefinition(string $name): Assign
+    private function getAssignmentDefinition(string $name) : Assign
     {
         return new Assign(
             new Variable('this->' . $name),
@@ -193,7 +211,7 @@ if(count($docCommentLines))
         );
     }
 
-    private function generateGetter(PropertyDefinition $definition): Method
+    private function generateGetter(PropertyDefinition $definition) : Method
     {
         $method = $this->factory
             ->method($definition->getGetterName())
@@ -201,7 +219,7 @@ if(count($docCommentLines))
             ->setReturnType($this->getTypePhp($definition))
             ->addStmt(new Return_(new Variable('this->' . $definition->getClassPropertyName())));
 
-        if($this->fullDocs || $definition->isArray()) {
+        if ($this->fullDocs || $definition->isArray()) {
             $method->setDocComment(
                 $this->getDocComment(['@return ' . $this->getTypeDocBlock($definition)])
             );
@@ -210,7 +228,7 @@ if(count($docCommentLines))
         return $method;
     }
 
-    private function generateSetter(PropertyDefinition $definition): Method
+    private function generateSetter(PropertyDefinition $definition) : Method
     {
         $method = $this->factory
             ->method($definition->getSetterName())
@@ -220,27 +238,28 @@ if(count($docCommentLines))
             ->addStmt($this->getAssignmentDefinition($definition->getClassPropertyName()))
             ->addStmt(new Return_(new Variable('this')));
 //ToDo: remove
-        if($this->fullDocs || $definition->isArray()) {
+        if ($this->fullDocs || $definition->isArray()) {
             $blocks = [
                 sprintf(
                     '@param %s $%s',
                     str_replace('|null', '', $this->getTypeDocBlock($definition)),
                     $definition->getClassPropertyName()
-                )
+                ),
             ];
             if ($this->fullDocs) {
                 $blocks[] = '@return self';
             }
+
             $method->setDocComment($this->getDocComment($blocks));
         }
 
         return $method;
     }
 
-    private function generateResponseCodeStaticMethod(ResponseDtoDefinition $definition): Method
+    private function generateResponseCodeStaticMethod(ResponseDtoDefinition $definition) : Method
     {
-        $responseCode = (int)$definition->getStatusCode();
-        $method = $this
+        $responseCode = (int) $definition->getStatusCode();
+        $method       = $this
             ->factory
             ->method('_getResponseCode')
             ->makePublic()
@@ -251,12 +270,12 @@ if(count($docCommentLines))
                     $this->factory->val($responseCode !== 0 ? $responseCode : null)
                 )
             );
-        if($this->fullDocs) {
+        if ($this->fullDocs) {
             $method->setDocComment(
                 $this->getDocComment(['@return ?int'])
             );
         }
+
         return $method;
     }
-
 }

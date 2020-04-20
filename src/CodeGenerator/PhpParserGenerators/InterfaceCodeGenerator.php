@@ -1,22 +1,18 @@
 <?php
 
+declare(strict_types=1);
 
 namespace OnMoon\OpenApiServerBundle\CodeGenerator\PhpParserGenerators;
 
-
-use OnMoon\OpenApiServerBundle\CodeGenerator\PhpParserGenerators\CodeGenerator;
 use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\GeneratedFileDefinition;
 use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\GeneratedInterfaceDefinition;
 use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\ServiceInterfaceDefinition;
-use PhpParser\BuilderFactory;
-use PhpParser\Node\Scalar\LNumber;
-use PhpParser\Node\Stmt\Declare_;
-use PhpParser\Node\Stmt\DeclareDeclare;
-use PhpParser\PrettyPrinter\Standard;
+use function sprintf;
 
 class InterfaceCodeGenerator extends CodeGenerator
 {
-    public function generate(GeneratedInterfaceDefinition $definition): GeneratedFileDefinition {
+    public function generate(GeneratedInterfaceDefinition $definition) : GeneratedFileDefinition
+    {
         $fileBuilder = $this
             ->factory
             ->namespace($definition->getNamespace());
@@ -33,7 +29,7 @@ class InterfaceCodeGenerator extends CodeGenerator
 
         if ($definition instanceof ServiceInterfaceDefinition) {
             $methodBuilder = $this->factory->method($definition->getMethodName())->makePublic();
-            if($definition->getRequestType() !== null) {
+            if ($definition->getRequestType() !== null) {
                 $this->use($fileBuilder, $definition->getNamespace(), $definition->getRequestType());
 
                 $methodBuilder->addParam(
@@ -41,21 +37,22 @@ class InterfaceCodeGenerator extends CodeGenerator
                 );
                 //ToDo: Add full docblock support
             }
-            if($definition->getResponseType() !== null) {
+
+            if ($definition->getResponseType() !== null) {
                 $this->use($fileBuilder, $definition->getNamespace(), $definition->getResponseType());
                 $methodBuilder->setReturnType($definition->getResponseType()->getClassName());
             } else {
                 $methodBuilder->setReturnType('void');
             }
 
-            if($definition->getMethodDescription() !== null) {
+            if ($definition->getMethodDescription() !== null) {
                 $methodBuilder->setDocComment($this->getDocComment([$definition->getMethodDescription()]));
             }
 
             $interfaceBuilder->addStmt($methodBuilder);
         }
 
-        $fileBuilder      = $fileBuilder->addStmt($interfaceBuilder);
+        $fileBuilder = $fileBuilder->addStmt($interfaceBuilder);
 
         return new GeneratedFileDefinition(
             $definition,

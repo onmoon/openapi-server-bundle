@@ -6,5 +6,4 @@ namespace OnMoon\OpenApiServerBundle\CodeGenerator\Definitions;
 
 class RequestParametersDtoDefinition extends DtoDefinition
 {
-
 }

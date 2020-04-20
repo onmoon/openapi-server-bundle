@@ -1,19 +1,19 @@
 <?php
 
+declare(strict_types=1);
 
 namespace OnMoon\OpenApiServerBundle\CodeGenerator;
 
-
 use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\DtoDefinition;
 use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\GraphDefinition;
-use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\SpecificationDefinition;
 
 class AttributeGenerator
 {
-    public function setAllAttributes(GraphDefinition $graph) {
+    public function setAllAttributes(GraphDefinition $graph) : void
+    {
         foreach ($graph->getSpecifications() as $specificationDefinition) {
             foreach ($specificationDefinition->getOperations() as $operation) {
-                if($operation->getRequest() !== null) {
+                if ($operation->getRequest() !== null) {
                     $this->requestPass($operation->getRequest());
                 }
 
@@ -24,29 +24,35 @@ class AttributeGenerator
         }
     }
 
-    public function requestPass(DtoDefinition $root) {
+    public function requestPass(DtoDefinition $root) : void
+    {
         foreach ($root->getProperties() as $property) {
             $property
                 ->setHasGetter(true)
                 ->setHasSetter(false)
-                ->setNullable(!$property->isRequired() && $property->getDefaultValue() === null)
+                ->setNullable(! $property->isRequired() && $property->getDefaultValue() === null)
                 ->setInConstructor(false);
-            if($property->getObjectTypeDefinition() !== null) {
-                $this->requestPass($property->getObjectTypeDefinition());
+            if ($property->getObjectTypeDefinition() === null) {
+                continue;
             }
+
+            $this->requestPass($property->getObjectTypeDefinition());
         }
     }
 
-    public function responsePass(DtoDefinition $root) {
+    public function responsePass(DtoDefinition $root) : void
+    {
         foreach ($root->getProperties() as $property) {
             $property
                 ->setHasGetter(true)
-                ->setHasSetter(!$property->isRequired())
-                ->setNullable(!$property->isRequired() && $property->getDefaultValue() === null)
+                ->setHasSetter(! $property->isRequired())
+                ->setNullable(! $property->isRequired() && $property->getDefaultValue() === null)
                 ->setInConstructor($property->isRequired());
-            if($property->getObjectTypeDefinition() !== null) {
-                $this->responsePass($property->getObjectTypeDefinition());
+            if ($property->getObjectTypeDefinition() === null) {
+                continue;
             }
+
+            $this->responsePass($property->getObjectTypeDefinition());
         }
     }
 }

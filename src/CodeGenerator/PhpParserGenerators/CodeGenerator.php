@@ -1,8 +1,8 @@
 <?php
 
+declare(strict_types=1);
 
 namespace OnMoon\OpenApiServerBundle\CodeGenerator\PhpParserGenerators;
-
 
 use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\ClassDefinition;
 use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\PropertyDefinition;
@@ -13,6 +13,12 @@ use PhpParser\Node\Scalar\LNumber;
 use PhpParser\Node\Stmt\Declare_;
 use PhpParser\Node\Stmt\DeclareDeclare;
 use PhpParser\PrettyPrinter\Standard;
+use function array_map;
+use function count;
+use function implode;
+use function sprintf;
+use function trim;
+use const PHP_EOL;
 
 abstract class CodeGenerator
 {
@@ -26,71 +32,66 @@ abstract class CodeGenerator
     protected string $languageLevel;
     protected bool $fullDocs = false;
 
-    /**
-     * DtoGenerator constructor.
-     * @param BuilderFactory $factory
-     * @param ScalarTypesResolver $typeResolver
-     * @param string $languageLevel
-     */
     public function __construct(BuilderFactory $factory, ScalarTypesResolver $typeResolver, string $languageLevel)
     {
-        $this->factory = $factory;
-        $this->typeResolver = $typeResolver;
+        $this->factory       = $factory;
+        $this->typeResolver  = $typeResolver;
         $this->languageLevel = $languageLevel;
     }
 
-    public function use(Namespace_ $builder, string $parentNameSpace, ClassDefinition $class)
+    public function use(Namespace_ $builder, string $parentNameSpace, ClassDefinition $class) : void
     {
         if ($parentNameSpace === $class->getNamespace()) {
             return;
         }
+
         $builder->addStmt($this->factory->use($class->getFQCN()));
     }
 
-    public function getTypeDocBlock(PropertyDefinition $definition): string
+    public function getTypeDocBlock(PropertyDefinition $definition) : string
     {
         return $this->getTypeName($definition) .
             ($definition->isArray() ? '[]' : '') .
             ($definition->isNullable() ? '|null' : '');
     }
 
-    public function getTypePhp(PropertyDefinition $definition): string
+    public function getTypePhp(PropertyDefinition $definition) : string
     {
-        return
-            ($definition->isNullable() ? '?' : '') .
+        return ($definition->isNullable() ? '?' : '') .
             ($definition->isArray() ? 'array' : $this->getTypeName($definition));
     }
 
-    public function getTypeName(PropertyDefinition $definition): string
+    public function getTypeName(PropertyDefinition $definition) : string
     {
         if ($definition->getObjectTypeDefinition() !== null) {
             return $definition->getObjectTypeDefinition()->getClassName();
-        } else {
-            return $this->typeResolver->getPhpType($definition->getScalarTypeId());
         }
+
+        return $this->typeResolver->getPhpType($definition->getScalarTypeId());
     }
 
-    public function getDocComment(array $lines): string
+    /** @param string[] $lines */
+    public function getDocComment(array $lines) : string
     {
         if (count($lines) === 1) {
             return sprintf('/** %s */', trim($lines[0]));
-        } else {
-            return implode(
-                PHP_EOL,
-                [
-                    '/**',
-                    ...array_map(
-                    //ToDo: add space after * anyway after tests
-                        static fn(string $line): string => ' *' . (trim($line)?' ':'') . trim($line),
-                        $lines
-                    ),
-                    ' */',
-                ]
-            );
         }
+
+        return implode(
+            PHP_EOL,
+            [
+                '/**',
+                ...array_map(
+                //ToDo: add space after * anyway after tests
+                    static fn(string $line) : string => ' *' . (trim($line)?' ':'') . trim($line),
+                    $lines
+                ),
+                ' */',
+            ]
+        );
     }
 
-    public function printFile(Namespace_ $fileBuilder): string
+    public function printFile(Namespace_ $fileBuilder) : string
     {
         return (new Standard())->prettyPrintFile([
             new Declare_([new DeclareDeclare('strict_types', new LNumber(1))]),
