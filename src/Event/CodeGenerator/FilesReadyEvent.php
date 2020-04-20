@@ -20,7 +20,7 @@ class FilesReadyEvent extends Event
     private array $files;
 
     /**
-     * @param array|GeneratedFileDefinition[] $files
+     * @param GeneratedFileDefinition[] $files
      */
     public function __construct(array $files)
     {

@@ -115,38 +115,46 @@ class GraphGenerator
     }
 
     /**
-     * @param string[] $exceptionContext
+     * @param Response[]|Responses|null $responses
+     * @param string[]                  $exceptionContext
      *
      * @return ResponseDtoDefinition[]
      */
     private function getResponseDtoDefinitions(
-        ?Responses $responses,
+        $responses,
         Specification $specification,
         array $exceptionContext
     ) : array {
         $responseDtoDefinitions = [];
+
+        if ($responses === null) {
+            return [];
+        }
+
         if ($responses instanceof Responses) {
-            /**
-             * @var string $responseCode
-             */
-            foreach ($responses->getResponses() as $responseCode => $response) {
-                $responseSchema = $this->findByMediaType($response, $specification->getMediaType());
-                if ($responseSchema === null) {
-                    continue;
-                }
+            $responses = $responses->getResponses();
+        }
 
-                $exceptionContext = array_merge($exceptionContext, ['location' => 'response (code "' . $responseCode . '")']);
-                if ($responseSchema->type !== Type::OBJECT) {
-                    throw CannotGenerateCodeForOperation::becauseRootIsNotObject(
-                        $exceptionContext,
-                        ($responseSchema->type === Type::ARRAY)
-                    );
-                }
-
-                $propertyDefinitions      = $this->getPropertyGraph($responseSchema, $exceptionContext);
-                $responseDefinition       = new ResponseDtoDefinition($responseCode, $propertyDefinitions);
-                $responseDtoDefinitions[] = $responseDefinition;
+        /**
+         * @var string $responseCode
+         */
+        foreach ($responses as $responseCode => $response) {
+            $responseSchema = $this->findByMediaType($response, $specification->getMediaType());
+            if ($responseSchema === null) {
+                continue;
             }
+
+            $exceptionContext = array_merge($exceptionContext, ['location' => 'response (code "' . $responseCode . '")']);
+            if ($responseSchema->type !== Type::OBJECT) {
+                throw CannotGenerateCodeForOperation::becauseRootIsNotObject(
+                    $exceptionContext,
+                    ($responseSchema->type === Type::ARRAY)
+                );
+            }
+
+            $propertyDefinitions      = $this->getPropertyGraph($responseSchema, $exceptionContext);
+            $responseDefinition       = new ResponseDtoDefinition($responseCode, $propertyDefinitions);
+            $responseDtoDefinitions[] = $responseDefinition;
         }
 
         return $responseDtoDefinitions;
@@ -157,7 +165,7 @@ class GraphGenerator
      */
     private function findByMediaType($body, string $mediaType) : ?Schema
     {
-        if ($body === null || $body instanceof Reference || $body->content === null) {
+        if ($body === null || $body instanceof Reference) {
             return null;
         }
 
@@ -257,6 +265,9 @@ class GraphGenerator
          * @var string $propertyName
          */
         foreach ($schema->properties as $propertyName => $property) {
+            /**
+             * @psalm-suppress RedundantConditionGivenDocblockType
+             */
             $required              = is_array($schema->required) && in_array($propertyName, $schema->required);
             $propertyDefinitions[] = $this->getProperty($propertyName, $property, $exceptionContext)->setRequired($required);
         }

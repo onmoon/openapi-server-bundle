@@ -61,9 +61,10 @@ class InterfaceGenerator
                     $this->setChildrenRecursive($response, $this->defaultDto);
                 }
 
-                if ($operation->getRequest() !== null) {
-                    $operation->getRequest()->setImplements($this->defaultDto);
-                    $this->setChildrenRecursive($operation->getRequest(), $this->defaultDto);
+                $request = $operation->getRequest();
+                if ($request !== null) {
+                    $request->setImplements($this->defaultDto);
+                    $this->setChildrenRecursive($request, $this->defaultDto);
                 }
 
                 $service = new ServiceInterfaceDefinition();

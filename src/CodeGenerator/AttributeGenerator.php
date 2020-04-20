@@ -13,8 +13,9 @@ class AttributeGenerator
     {
         foreach ($graph->getSpecifications() as $specificationDefinition) {
             foreach ($specificationDefinition->getOperations() as $operation) {
-                if ($operation->getRequest() !== null) {
-                    $this->requestPass($operation->getRequest());
+                $request = $operation->getRequest();
+                if ($request !== null) {
+                    $this->requestPass($request);
                 }
 
                 foreach ($operation->getResponses() as $response) {
@@ -32,11 +33,13 @@ class AttributeGenerator
                 ->setHasSetter(false)
                 ->setNullable(! $property->isRequired() && $property->getDefaultValue() === null)
                 ->setInConstructor(false);
-            if ($property->getObjectTypeDefinition() === null) {
+
+            $object = $property->getObjectTypeDefinition();
+            if ($object === null) {
                 continue;
             }
 
-            $this->requestPass($property->getObjectTypeDefinition());
+            $this->requestPass($object);
         }
     }
 
@@ -48,11 +51,13 @@ class AttributeGenerator
                 ->setHasSetter(! $property->isRequired())
                 ->setNullable(! $property->isRequired() && $property->getDefaultValue() === null)
                 ->setInConstructor($property->isRequired());
-            if ($property->getObjectTypeDefinition() === null) {
+
+            $object = $property->getObjectTypeDefinition();
+            if ($object === null) {
                 continue;
             }
 
-            $this->responsePass($property->getObjectTypeDefinition());
+            $this->responsePass($object);
         }
     }
 }

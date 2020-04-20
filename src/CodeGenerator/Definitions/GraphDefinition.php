@@ -11,7 +11,7 @@ class GraphDefinition
     private ServiceSubscriberDefinition $serviceSubscriber;
 
     /**
-     * @param array|SpecificationDefinition[] $specifications
+     * @param SpecificationDefinition[] $specifications
      */
     public function __construct(array $specifications, ServiceSubscriberDefinition $serviceSubscriber)
     {

@@ -38,8 +38,9 @@ class FileGenerator
         $result = [];
         foreach ($graph->getSpecifications() as $specificationDefinition) {
             foreach ($specificationDefinition->getOperations() as $operation) {
-                if ($operation->getRequest() !== null) {
-                    $result = array_merge($result, $this->generateDtoTree($operation->getRequest()));
+                $request = $operation->getRequest();
+                if ($request !== null) {
+                    $result = array_merge($result, $this->generateDtoTree($request));
                 }
 
                 foreach ($operation->getResponses() as $response) {
@@ -47,7 +48,6 @@ class FileGenerator
                 }
 
                 $markersInterface = $operation->getMarkersInterface();
-
                 if ($markersInterface instanceof GeneratedInterfaceDefinition) {
                     $result[] = $this->interfaceGenerator->generate($markersInterface);
                 }
@@ -69,11 +69,12 @@ class FileGenerator
         $result   = [];
         $result[] = $this->dtoGenerator->generate($root);
         foreach ($root->getProperties() as $property) {
-            if ($property->getObjectTypeDefinition() === null) {
+            $object = $property->getObjectTypeDefinition();
+            if ($object === null) {
                 continue;
             }
 
-            $result = array_merge($result, $this->generateDtoTree($property->getObjectTypeDefinition()));
+            $result = array_merge($result, $this->generateDtoTree($object));
         }
 
         return $result;

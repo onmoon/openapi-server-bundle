@@ -40,11 +40,10 @@ class ApiServerCodeGenerator
         //ToDo: remove this loop
         foreach ($graph->getSpecifications() as $specificationDefinition) {
             foreach ($specificationDefinition->getOperations() as $operation) {
-                if ($operation->getRequest() === null) {
+                $request = $operation->getRequest();
+                if ($request === null) {
                     continue;
                 }
-
-                $request = $operation->getRequest();
 
                 foreach ($request->getProperties() as $property) {
                     $object = $property->getObjectTypeDefinition();

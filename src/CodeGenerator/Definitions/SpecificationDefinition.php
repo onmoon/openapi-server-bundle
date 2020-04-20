@@ -13,7 +13,7 @@ class SpecificationDefinition
     private array $operations;
 
     /**
-     * @param array|OperationDefinition[] $operations
+     * @param OperationDefinition[] $operations
      */
     public function __construct(Specification $specification, array $operations)
     {

@@ -82,21 +82,17 @@ abstract class CodeGenerator
     public function getDocComment(array $lines) : string
     {
         if (count($lines) === 1) {
-            return sprintf('/** %s */', trim($lines[0]));
+            $glued = ' ' . trim($lines[0]);
+        } else {
+            $asteriskLines = array_map(
+            //ToDo: add space after * anyway after tests
+                static fn(string $line) : string => ' *' . (trim($line)?' ':'') . trim($line),
+                $lines
+            );
+            $glued = PHP_EOL . implode(PHP_EOL, $asteriskLines) . PHP_EOL;
         }
 
-        return implode(
-            PHP_EOL,
-            [
-                '/**',
-                ...array_map(
-                //ToDo: add space after * anyway after tests
-                    static fn(string $line) : string => ' *' . (trim($line)?' ':'') . trim($line),
-                    $lines
-                ),
-                ' */',
-            ]
-        );
+        return sprintf('/**%s */', $glued);
     }
 
     public function printFile(Namespace_ $fileBuilder) : string
