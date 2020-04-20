@@ -9,6 +9,10 @@ use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\PropertyDefinition;
 use OnMoon\OpenApiServerBundle\OpenApi\ScalarTypesResolver;
 use PhpParser\Builder\Namespace_;
 use PhpParser\BuilderFactory;
+use PhpParser\Node\Scalar\LNumber;
+use PhpParser\Node\Stmt\Declare_;
+use PhpParser\Node\Stmt\DeclareDeclare;
+use PhpParser\PrettyPrinter\Standard;
 
 abstract class CodeGenerator
 {
@@ -84,5 +88,13 @@ abstract class CodeGenerator
                 ]
             );
         }
+    }
+
+    public function printFile(Namespace_ $fileBuilder): string
+    {
+        return (new Standard())->prettyPrintFile([
+            new Declare_([new DeclareDeclare('strict_types', new LNumber(1))]),
+            $fileBuilder->getNode(),
+        ]);
     }
 }

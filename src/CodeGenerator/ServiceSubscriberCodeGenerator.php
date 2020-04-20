@@ -3,6 +3,7 @@
 
 namespace OnMoon\OpenApiServerBundle\CodeGenerator;
 
+use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\GeneratedFileDefinition;
 use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\GraphDefinition;
 use OnMoon\OpenApiServerBundle\CodeGenerator\RequestHandlerInterface\Definitions\RequestHandlerInterfaceDefinition;
 use OnMoon\OpenApiServerBundle\Interfaces\ApiLoader;
@@ -30,7 +31,7 @@ use Symfony\Contracts\Service\ServiceSubscriberInterface;
 
 class ServiceSubscriberCodeGenerator extends CodeGenerator
 {
-    public function generate(GraphDefinition $graphDefinition): GeneratedClass
+    public function generate(GraphDefinition $graphDefinition): GeneratedFileDefinition
     {
         $subscriberDefinition = $graphDefinition->getServiceSubscriber();
 
@@ -139,15 +140,9 @@ class ServiceSubscriberCodeGenerator extends CodeGenerator
 
         $fileBuilder->addStmt($classBuilder);
 
-        return new GeneratedClass(
-            $subscriberDefinition->getFilePath(),
-            $subscriberDefinition->getFileName(),
-            $subscriberDefinition->getNamespace(),
-            $subscriberDefinition->getClassName(),
-            (new Standard())->prettyPrintFile([
-                new Declare_([new DeclareDeclare('strict_types', new LNumber(1))]),
-                $fileBuilder->getNode(),
-            ])
+        return new GeneratedFileDefinition(
+            $subscriberDefinition,
+            $this->printFile($fileBuilder)
         );
 
     }

@@ -98,7 +98,7 @@ class ApiServerCodeGenerator
         $files = $this->filesGenerator->generate($graph);
 
         foreach ($files as $item) {
-            $this->writer->write($item->getFileDirectoryPath(), $item->getFileName(), $item->getFileContents());
+            $this->writer->write($item->getClass()->getFilePath(), $item->getClass()->getFileName(), $item->getFileContents());
         }
     }
 }

@@ -4,6 +4,7 @@
 namespace OnMoon\OpenApiServerBundle\CodeGenerator;
 
 
+use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\GeneratedFileDefinition;
 use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\GeneratedInterfaceDefinition;
 use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\ServiceInterfaceDefinition;
 use PhpParser\BuilderFactory;
@@ -14,7 +15,7 @@ use PhpParser\PrettyPrinter\Standard;
 
 class InterfaceCodeGenerator extends CodeGenerator
 {
-    public function generate(GeneratedInterfaceDefinition $definition): GeneratedClass {
+    public function generate(GeneratedInterfaceDefinition $definition): GeneratedFileDefinition {
         $fileBuilder = $this
             ->factory
             ->namespace($definition->getNamespace());
@@ -55,15 +56,9 @@ class InterfaceCodeGenerator extends CodeGenerator
 
         $fileBuilder      = $fileBuilder->addStmt($interfaceBuilder);
 
-        return new GeneratedClass(
-            $definition->getFilePath(),
-            $definition->getFileName(),
-            $definition->getNamespace(),
-            $definition->getClassName(),
-            (new Standard())->prettyPrintFile([
-                new Declare_([new DeclareDeclare('strict_types', new LNumber(1))]),
-                $fileBuilder->getNode(),
-            ])
+        return new GeneratedFileDefinition(
+            $definition,
+            $this->printFile($fileBuilder)
         );
     }
 }

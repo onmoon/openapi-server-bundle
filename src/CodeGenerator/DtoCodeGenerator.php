@@ -6,6 +6,7 @@ namespace OnMoon\OpenApiServerBundle\CodeGenerator;
 
 use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\ClassDefinition;
 use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\DtoDefinition;
+use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\GeneratedFileDefinition;
 use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\PropertyDefinition;
 use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\ResponseDtoDefinition;
 use OnMoon\OpenApiServerBundle\OpenApi\ScalarTypesResolver;
@@ -25,7 +26,7 @@ use PhpParser\PrettyPrinter\Standard;
 
 class DtoCodeGenerator extends CodeGenerator
 {
-    public function generate(DtoDefinition $definition): GeneratedClass
+    public function generate(DtoDefinition $definition): GeneratedFileDefinition
     {
         $fileBuilder = $this
             ->factory
@@ -59,15 +60,9 @@ class DtoCodeGenerator extends CodeGenerator
 
         $fileBuilder = $fileBuilder->addStmt($classBuilder);
 
-        return new GeneratedClass(
-            $definition->getFilePath(),
-            $definition->getFileName(),
-            $definition->getNamespace(),
-            $definition->getClassName(),
-            (new Standard())->prettyPrintFile([
-                new Declare_([new DeclareDeclare('strict_types', new LNumber(1))]),
-                $fileBuilder->getNode(),
-            ])
+        return new GeneratedFileDefinition(
+            $definition,
+            $this->printFile($fileBuilder)
         );
     }
 
