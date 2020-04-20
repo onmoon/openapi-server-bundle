@@ -9,11 +9,12 @@ class ResponseDtoDefinition extends DtoDefinition
     private string $statusCode;
 
     /**
+     * @param string|int $statusCode
      * @param array|PropertyDefinition[] $properties
      */
-    public function __construct(string $statusCode, array $properties)
+    public function __construct($statusCode, array $properties)
     {
-        $this->statusCode = $statusCode;
+        $this->statusCode = $statusCode.'';
         parent::__construct($properties);
     }
 
