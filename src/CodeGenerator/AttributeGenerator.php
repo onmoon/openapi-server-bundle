@@ -26,7 +26,7 @@ class AttributeGenerator
         }
     }
 
-    private function requestPass(DtoDefinition $root) {
+    public function requestPass(DtoDefinition $root) {
         foreach ($root->getProperties() as $property) {
             $property
                 ->setHasGetter(true)
@@ -39,7 +39,7 @@ class AttributeGenerator
         }
     }
 
-    private function responsePass(DtoDefinition $root) {
+    public function responsePass(DtoDefinition $root) {
         foreach ($root->getProperties() as $property) {
             $property
                 ->setHasGetter(true)

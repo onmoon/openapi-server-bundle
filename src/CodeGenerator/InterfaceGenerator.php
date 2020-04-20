@@ -68,7 +68,7 @@ class InterfaceGenerator
         }
     }
 
-    private function getDefaultInterface(string $className) {
+    public function getDefaultInterface(string $className) {
         $lastPart = strrpos($className, '\\');
         $namespace = substr($className, 0, $lastPart);
         $name = substr($className, $lastPart + 1);
@@ -77,7 +77,7 @@ class InterfaceGenerator
             ->setClassName($name);
     }
 
-    private function setChildrenRecursive(DtoDefinition $root, InterfaceDefinition $implements) {
+    public function setChildrenRecursive(DtoDefinition $root, InterfaceDefinition $implements) {
         foreach ($root->getProperties() as $property) {
             $objectDefinition = $property->getObjectTypeDefinition();
             if ($objectDefinition !== null) {

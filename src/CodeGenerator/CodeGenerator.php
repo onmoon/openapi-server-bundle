@@ -35,7 +35,7 @@ abstract class CodeGenerator
         $this->languageLevel = $languageLevel;
     }
 
-    protected function use(Namespace_ $builder, string $parentNameSpace, ClassDefinition $class)
+    public function use(Namespace_ $builder, string $parentNameSpace, ClassDefinition $class)
     {
         if ($parentNameSpace === $class->getNamespace()) {
             return;
@@ -43,21 +43,21 @@ abstract class CodeGenerator
         $builder->addStmt($this->factory->use($class->getFQCN()));
     }
 
-    protected function getTypeDocBlock(PropertyDefinition $definition): string
+    public function getTypeDocBlock(PropertyDefinition $definition): string
     {
         return $this->getTypeName($definition) .
             ($definition->isArray() ? '[]' : '') .
             ($definition->isNullable() ? '|null' : '');
     }
 
-    protected function getTypePhp(PropertyDefinition $definition): string
+    public function getTypePhp(PropertyDefinition $definition): string
     {
         return
             ($definition->isNullable() ? '?' : '') .
             ($definition->isArray() ? 'array' : $this->getTypeName($definition));
     }
 
-    protected function getTypeName(PropertyDefinition $definition): string
+    public function getTypeName(PropertyDefinition $definition): string
     {
         if ($definition->getObjectTypeDefinition() !== null) {
             return $definition->getObjectTypeDefinition()->getClassName();
@@ -66,7 +66,7 @@ abstract class CodeGenerator
         }
     }
 
-    protected function getDocComment(array $lines): string
+    public function getDocComment(array $lines): string
     {
         if (count($lines) === 1) {
             return sprintf('/** %s */', trim($lines[0]));
