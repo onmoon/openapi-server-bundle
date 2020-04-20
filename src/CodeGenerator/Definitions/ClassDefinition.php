@@ -19,7 +19,7 @@ class ClassDefinition
 
     /**
      * @param string|null $className
-     * @return InterfaceDefinition
+     * @return self
      */
     public function setClassName(?string $className): self
     {
@@ -37,7 +37,7 @@ class ClassDefinition
 
     /**
      * @param string|null $namespace
-     * @return InterfaceDefinition
+     * @return self
      */
     public function setNamespace(?string $namespace): self
     {

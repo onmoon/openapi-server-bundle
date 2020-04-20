@@ -4,51 +4,13 @@
 namespace OnMoon\OpenApiServerBundle\CodeGenerator\Definitions;
 
 
-class ServiceSubscriberDefinition extends ClassDefinition
+class ServiceSubscriberDefinition extends GeneratedClassDefinition
 {
-    private ?string $fileName = null;
-    private ?string $filePath = null;
-    /** @var InterfaceDefinition[] */
+    /** @var ClassDefinition[] */
     private array $implements = [];
 
     /**
-     * @return string|null
-     */
-    public function getFileName(): ?string
-    {
-        return $this->fileName;
-    }
-
-    /**
-     * @param string|null $fileName
-     * @return ServiceSubscriberDefinition
-     */
-    public function setFileName(?string $fileName): ServiceSubscriberDefinition
-    {
-        $this->fileName = $fileName;
-        return $this;
-    }
-
-    /**
-     * @return string|null
-     */
-    public function getFilePath(): ?string
-    {
-        return $this->filePath;
-    }
-
-    /**
-     * @param string|null $filePath
-     * @return ServiceSubscriberDefinition
-     */
-    public function setFilePath(?string $filePath): ServiceSubscriberDefinition
-    {
-        $this->filePath = $filePath;
-        return $this;
-    }
-
-    /**
-     * @return InterfaceDefinition[]
+     * @return ClassDefinition[]
      */
     public function getImplements(): array
     {
@@ -56,7 +18,7 @@ class ServiceSubscriberDefinition extends ClassDefinition
     }
 
     /**
-     * @param InterfaceDefinition[] $implements
+     * @param ClassDefinition[] $implements
      * @return ServiceSubscriberDefinition
      */
     public function setImplements(array $implements): ServiceSubscriberDefinition

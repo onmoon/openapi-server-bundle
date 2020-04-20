@@ -8,7 +8,6 @@ use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\ClassDefinition;
 use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\DtoDefinition;
 use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\GeneratedInterfaceDefinition;
 use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\GraphDefinition;
-use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\InterfaceDefinition;
 use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\ServiceInterfaceDefinition;
 use OnMoon\OpenApiServerBundle\Interfaces\ApiLoader;
 use OnMoon\OpenApiServerBundle\Interfaces\Dto;
@@ -18,9 +17,9 @@ use Symfony\Contracts\Service\ServiceSubscriberInterface;
 
 class InterfaceGenerator
 {
-    private InterfaceDefinition $defaultDto;
-    private InterfaceDefinition $defaultResponseDto;
-    private InterfaceDefinition $defaultService;
+    private ClassDefinition $defaultDto;
+    private ClassDefinition $defaultResponseDto;
+    private ClassDefinition $defaultService;
 
     public function __construct() {
         $this->defaultDto = $this->getDefaultInterface(Dto::class);
@@ -76,12 +75,12 @@ class InterfaceGenerator
         $lastPart = strrpos($className, '\\');
         $namespace = substr($className, 0, $lastPart);
         $name = substr($className, $lastPart + 1);
-        return (new InterfaceDefinition())
+        return (new ClassDefinition())
             ->setNamespace($namespace)
             ->setClassName($name);
     }
 
-    public function setChildrenRecursive(DtoDefinition $root, InterfaceDefinition $implements) {
+    public function setChildrenRecursive(DtoDefinition $root, ClassDefinition $implements) {
         foreach ($root->getProperties() as $property) {
             $objectDefinition = $property->getObjectTypeDefinition();
             if ($objectDefinition !== null) {

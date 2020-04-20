@@ -4,15 +4,13 @@
 namespace OnMoon\OpenApiServerBundle\CodeGenerator\Definitions;
 
 
-class DtoDefinition extends ClassDefinition
+class DtoDefinition extends GeneratedClassDefinition
 {
     /**
      * @var PropertyDefinition[] $properties;
      */
     private array $properties;
-    private ?string $fileName = null;
-    private ?string $filePath = null;
-    private ?InterfaceDefinition $implements = null;
+    private ?ClassDefinition $implements = null;
 
     /**
      * DtoDefinition constructor.
@@ -28,42 +26,6 @@ class DtoDefinition extends ClassDefinition
     }
 
     /**
-     * @return string|null
-     */
-    public function getFileName(): ?string
-    {
-        return $this->fileName;
-    }
-
-    /**
-     * @param string|null $fileName
-     * @return DtoDefinition
-     */
-    public function setFileName(?string $fileName): self
-    {
-        $this->fileName = $fileName;
-        return $this;
-    }
-
-    /**
-     * @return string|null
-     */
-    public function getFilePath(): ?string
-    {
-        return $this->filePath;
-    }
-
-    /**
-     * @param string|null $filePath
-     * @return DtoDefinition
-     */
-    public function setFilePath(?string $filePath): self
-    {
-        $this->filePath = $filePath;
-        return $this;
-    }
-
-    /**
      * @return PropertyDefinition[]
      */
     public function getProperties(): array
@@ -72,18 +34,18 @@ class DtoDefinition extends ClassDefinition
     }
 
     /**
-     * @return InterfaceDefinition|null
+     * @return ClassDefinition|null
      */
-    public function getImplements(): ?InterfaceDefinition
+    public function getImplements(): ?ClassDefinition
     {
         return $this->implements;
     }
 
     /**
-     * @param InterfaceDefinition|null $implements
+     * @param ClassDefinition|null $implements
      * @return DtoDefinition
      */
-    public function setImplements(?InterfaceDefinition $implements): self
+    public function setImplements(?ClassDefinition $implements): self
     {
         $this->implements = $implements;
         return $this;

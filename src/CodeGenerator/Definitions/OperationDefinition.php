@@ -10,7 +10,7 @@ class OperationDefinition
     private string $operationId;
     private ?string $summary = null;
     private ?RequestDtoDefinition $request = null;
-    private ?InterfaceDefinition $markersInterface = null;
+    private ?ClassDefinition $markersInterface = null;
     private ?ServiceInterfaceDefinition $serviceInterface = null;
 
     /**
@@ -81,18 +81,18 @@ class OperationDefinition
     }
 
     /**
-     * @return InterfaceDefinition|null
+     * @return ClassDefinition|null
      */
-    public function getMarkersInterface(): ?InterfaceDefinition
+    public function getMarkersInterface(): ?ClassDefinition
     {
         return $this->markersInterface;
     }
 
     /**
-     * @param InterfaceDefinition|null $markersInterface
+     * @param ClassDefinition|null $markersInterface
      * @return OperationDefinition
      */
-    public function setMarkersInterface(?InterfaceDefinition $markersInterface): OperationDefinition
+    public function setMarkersInterface(?ClassDefinition $markersInterface): OperationDefinition
     {
         $this->markersInterface = $markersInterface;
         return $this;
