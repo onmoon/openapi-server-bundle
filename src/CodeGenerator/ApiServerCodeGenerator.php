@@ -8,7 +8,6 @@ use OnMoon\OpenApiServerBundle\CodeGenerator\Filesystem\FileWriter;
 use OnMoon\OpenApiServerBundle\Event\CodeGenerator\ClassGraphReadyEvent;
 use OnMoon\OpenApiServerBundle\Event\CodeGenerator\FilesReadyEvent;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
-use function Safe\substr;
 
 class ApiServerCodeGenerator
 {
@@ -37,24 +36,6 @@ class ApiServerCodeGenerator
         $this->interfaceGenerator->setAllInterfaces($graph);
         $this->attributeGenerator->setAllAttributes($graph);
         $this->nameGenerator->setAllNamesAndPaths($graph);
-        //ToDo: remove this loop
-        foreach ($graph->getSpecifications() as $specificationDefinition) {
-            foreach ($specificationDefinition->getOperations() as $operation) {
-                $request = $operation->getRequest();
-                if ($request === null) {
-                    continue;
-                }
-
-                foreach ($request->getProperties() as $property) {
-                    $object = $property->getObjectTypeDefinition();
-                    if ($object === null) {
-                        continue;
-                    }
-
-                    $this->nameGenerator->setTreePathsAndClassNames($object, $request->getNamespace(), substr($request->getClassName(), 0, -3) . $object->getClassName(), $request->getFilePath());
-                }
-            }
-        }
 
         $this->eventDispatcher->dispatch(new ClassGraphReadyEvent($graph));
 

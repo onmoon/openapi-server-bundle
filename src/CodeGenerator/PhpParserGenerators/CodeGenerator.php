@@ -31,13 +31,14 @@ abstract class CodeGenerator
     protected BuilderFactory $factory;
     protected ScalarTypesResolver $typeResolver;
     protected string $languageLevel;
-    protected bool $fullDocs = false;
+    protected bool $fullDocs;
 
-    public function __construct(BuilderFactory $factory, ScalarTypesResolver $typeResolver, string $languageLevel)
+    public function __construct(BuilderFactory $factory, ScalarTypesResolver $typeResolver, string $languageLevel, bool $fullDocs)
     {
         $this->factory       = $factory;
         $this->typeResolver  = $typeResolver;
         $this->languageLevel = $languageLevel;
+        $this->fullDocs      = $fullDocs;
     }
 
     public function use(Namespace_ $builder, string $parentNameSpace, ClassDefinition $class) : void
@@ -85,11 +86,10 @@ abstract class CodeGenerator
             $glued = ' ' . trim($lines[0]);
         } else {
             $asteriskLines = array_map(
-            //ToDo: add space after * anyway after tests
-                static fn(string $line) : string => ' *' . (trim($line)?' ':'') . trim($line),
+                static fn(string $line) : string => ' * ' . trim($line),
                 $lines
             );
-            $glued = PHP_EOL . implode(PHP_EOL, $asteriskLines) . PHP_EOL;
+            $glued         = PHP_EOL . implode(PHP_EOL, $asteriskLines) . PHP_EOL;
         }
 
         return sprintf('/**%s */', $glued);
