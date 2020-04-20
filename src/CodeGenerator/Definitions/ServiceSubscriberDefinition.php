@@ -20,7 +20,7 @@ class ServiceSubscriberDefinition extends GeneratedClassDefinition
     /**
      * @param ClassDefinition[] $implements
      */
-    public function setImplements(array $implements) : ServiceSubscriberDefinition
+    public function setImplements(array $implements) : self
     {
         $this->implements = $implements;
 

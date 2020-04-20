@@ -6,39 +6,35 @@ namespace OnMoon\OpenApiServerBundle\CodeGenerator\Definitions;
 
 class ClassDefinition
 {
-    private ?string $className = null;
-    private ?string $namespace = null;
+    private string $className;
+    private string $namespace;
 
-    public function getClassName() : ?string
+    public function getClassName() : string
     {
         return $this->className;
     }
 
-    public function setClassName(?string $className) : self
+    public function setClassName(string $className) : self
     {
         $this->className = $className;
 
         return $this;
     }
 
-    public function getNamespace() : ?string
+    public function getNamespace() : string
     {
         return $this->namespace;
     }
 
-    public function setNamespace(?string $namespace) : self
+    public function setNamespace(string $namespace) : self
     {
         $this->namespace = $namespace;
 
         return $this;
     }
 
-    public function getFQCN() : ?string
+    public function getFQCN() : string
     {
-        if ($this->className === null) {
-            return null;
-        }
-
-        return ($this->namespace ?? '') . '\\' . $this->className;
+        return $this->namespace . '\\' . $this->className;
     }
 }

@@ -264,8 +264,11 @@ class GraphGenerator
         return $propertyDefinitions;
     }
 
-    /** @param string[] $exceptionContext */
-    private function getProperty(string $propertyName, Schema $property, array $exceptionContext, bool $allowNonScalar = true) : PropertyDefinition
+    /**
+     * @param Schema|Reference|null $property
+     * @param string[]              $exceptionContext
+     */
+    private function getProperty(string $propertyName, $property, array $exceptionContext, bool $allowNonScalar = true) : PropertyDefinition
     {
         if (! ($property instanceof Schema)) {
             throw new Exception('Property is not scheme');
@@ -300,7 +303,7 @@ class GraphGenerator
         /** @var string|int|float|bool|null $schemaDefaultValue */
         $schemaDefaultValue = $property->default;
         //ToDo: Support DateTime assignments
-        if ($schemaDefaultValue !== null && $isScalar && ! class_exists($this->typeResolver->getPhpType($propertyDefinition->getScalarTypeId()))) {
+        if ($schemaDefaultValue !== null && $isScalar && ! class_exists($this->typeResolver->getPhpType($propertyDefinition->getScalarTypeId()??0))) {
             $propertyDefinition->setDefaultValue($schemaDefaultValue);
         }
 

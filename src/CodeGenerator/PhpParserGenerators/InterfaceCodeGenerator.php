@@ -7,7 +7,7 @@ namespace OnMoon\OpenApiServerBundle\CodeGenerator\PhpParserGenerators;
 use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\GeneratedFileDefinition;
 use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\GeneratedInterfaceDefinition;
 use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\ServiceInterfaceDefinition;
-use function sprintf;
+use function Safe\sprintf;
 
 class InterfaceCodeGenerator extends CodeGenerator
 {

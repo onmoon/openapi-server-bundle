@@ -25,7 +25,7 @@ final class GeneratedFileDefinition
         return $this->fileContents;
     }
 
-    public function setFileContents(string $fileContents) : GeneratedFileDefinition
+    public function setFileContents(string $fileContents) : self
     {
         $this->fileContents = $fileContents;
 

@@ -7,8 +7,8 @@ namespace OnMoon\OpenApiServerBundle\CodeGenerator\Definitions;
 class PropertyDefinition
 {
     private string $specPropertyName;
-    private ?string $classPropertyName = null;
-    private bool $array                = false;
+    private string $classPropertyName;
+    private bool $array = false;
     /** @var string|int|float|bool|null  */
     private $defaultValue                        = null;
     private bool $required                       = false;
@@ -27,7 +27,7 @@ class PropertyDefinition
         return $this->description;
     }
 
-    public function setDescription(?string $description) : PropertyDefinition
+    public function setDescription(?string $description) : self
     {
         $this->description = $description;
 
@@ -44,12 +44,12 @@ class PropertyDefinition
         return $this->specPropertyName;
     }
 
-    public function getClassPropertyName() : ?string
+    public function getClassPropertyName() : string
     {
         return $this->classPropertyName;
     }
 
-    public function setClassPropertyName(?string $classPropertyName) : PropertyDefinition
+    public function setClassPropertyName(string $classPropertyName) : self
     {
         $this->classPropertyName = $classPropertyName;
 
@@ -61,7 +61,7 @@ class PropertyDefinition
         return $this->array;
     }
 
-    public function setArray(bool $array) : PropertyDefinition
+    public function setArray(bool $array) : self
     {
         $this->array = $array;
 
@@ -79,7 +79,7 @@ class PropertyDefinition
     /**
      * @param string|int|float|bool|null $defaultValue
      */
-    public function setDefaultValue($defaultValue) : PropertyDefinition
+    public function setDefaultValue($defaultValue) : self
     {
         $this->defaultValue = $defaultValue;
 
@@ -91,7 +91,7 @@ class PropertyDefinition
         return $this->required;
     }
 
-    public function setRequired(bool $required) : PropertyDefinition
+    public function setRequired(bool $required) : self
     {
         $this->required = $required;
 
@@ -103,7 +103,7 @@ class PropertyDefinition
         return $this->scalarTypeId;
     }
 
-    public function setScalarTypeId(?int $scalarTypeId) : PropertyDefinition
+    public function setScalarTypeId(?int $scalarTypeId) : self
     {
         $this->scalarTypeId = $scalarTypeId;
 
@@ -115,7 +115,7 @@ class PropertyDefinition
         return $this->objectTypeDefinition;
     }
 
-    public function setObjectTypeDefinition(DtoDefinition $objectTypeDefinition) : PropertyDefinition
+    public function setObjectTypeDefinition(DtoDefinition $objectTypeDefinition) : self
     {
         $this->objectTypeDefinition = $objectTypeDefinition;
 
@@ -127,7 +127,7 @@ class PropertyDefinition
         return $this->nullable;
     }
 
-    public function setNullable(bool $nullable) : PropertyDefinition
+    public function setNullable(bool $nullable) : self
     {
         $this->nullable = $nullable;
 
@@ -139,7 +139,7 @@ class PropertyDefinition
         return $this->getterName;
     }
 
-    public function setGetterName(?string $getterName) : PropertyDefinition
+    public function setGetterName(?string $getterName) : self
     {
         $this->getterName = $getterName;
 
@@ -151,7 +151,7 @@ class PropertyDefinition
         return $this->setterName;
     }
 
-    public function setSetterName(?string $setterName) : PropertyDefinition
+    public function setSetterName(?string $setterName) : self
     {
         $this->setterName = $setterName;
 
@@ -163,7 +163,7 @@ class PropertyDefinition
         return $this->hasGetter;
     }
 
-    public function setHasGetter(bool $hasGetter) : PropertyDefinition
+    public function setHasGetter(bool $hasGetter) : self
     {
         $this->hasGetter = $hasGetter;
 
@@ -175,7 +175,7 @@ class PropertyDefinition
         return $this->hasSetter;
     }
 
-    public function setHasSetter(bool $hasSetter) : PropertyDefinition
+    public function setHasSetter(bool $hasSetter) : self
     {
         $this->hasSetter = $hasSetter;
 
@@ -187,7 +187,7 @@ class PropertyDefinition
         return $this->inConstructor;
     }
 
-    public function setInConstructor(bool $inConstructor) : PropertyDefinition
+    public function setInConstructor(bool $inConstructor) : self
     {
         $this->inConstructor = $inConstructor;
 

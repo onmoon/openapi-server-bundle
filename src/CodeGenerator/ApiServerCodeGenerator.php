@@ -8,7 +8,7 @@ use OnMoon\OpenApiServerBundle\CodeGenerator\Filesystem\FileWriter;
 use OnMoon\OpenApiServerBundle\Event\CodeGenerator\ClassGraphReadyEvent;
 use OnMoon\OpenApiServerBundle\Event\CodeGenerator\FilesReadyEvent;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
-use function substr;
+use function Safe\substr;
 
 class ApiServerCodeGenerator
 {

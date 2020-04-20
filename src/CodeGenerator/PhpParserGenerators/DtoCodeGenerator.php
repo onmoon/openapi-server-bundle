@@ -4,19 +4,20 @@ declare(strict_types=1);
 
 namespace OnMoon\OpenApiServerBundle\CodeGenerator\PhpParserGenerators;
 
+use Exception;
 use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\DtoDefinition;
 use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\GeneratedFileDefinition;
 use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\PropertyDefinition;
 use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\ResponseDtoDefinition;
+use PhpParser\Builder;
 use PhpParser\Builder\Method;
 use PhpParser\Builder\Param;
 use PhpParser\Builder\Property;
-use PhpParser\Node;
 use PhpParser\Node\Expr\Assign;
 use PhpParser\Node\Expr\Variable;
 use PhpParser\Node\Stmt\Return_;
 use function count;
-use function sprintf;
+use function Safe\sprintf;
 use function str_replace;
 use function strpos;
 
@@ -66,7 +67,7 @@ class DtoCodeGenerator extends CodeGenerator
     }
 
     /**
-     * @return Node[]
+     * @return Builder[]
      */
     private function generateProperties(DtoDefinition $definition) : array
     {
@@ -79,7 +80,7 @@ class DtoCodeGenerator extends CodeGenerator
     }
 
     /**
-     * @return Node[]
+     * @return Builder[]
      */
     private function generateGetters(DtoDefinition $definition) : array
     {
@@ -96,7 +97,7 @@ class DtoCodeGenerator extends CodeGenerator
     }
 
     /**
-     * @return Node[]
+     * @return Builder[]
      */
     private function generateSetters(DtoDefinition $definition) : array
     {
@@ -113,7 +114,7 @@ class DtoCodeGenerator extends CodeGenerator
     }
 
     /**
-     * @return Node[]
+     * @return Builder[]
      */
     private function generateConstructor(DtoDefinition $definition) : array
     {
@@ -213,6 +214,10 @@ class DtoCodeGenerator extends CodeGenerator
 
     private function generateGetter(PropertyDefinition $definition) : Method
     {
+        if ($definition->getGetterName() === null) {
+            throw new Exception('Getter name should be set it hasGetter is true');
+        }
+
         $method = $this->factory
             ->method($definition->getGetterName())
             ->makePublic()
@@ -230,6 +235,10 @@ class DtoCodeGenerator extends CodeGenerator
 
     private function generateSetter(PropertyDefinition $definition) : Method
     {
+        if ($definition->getSetterName() === null) {
+            throw new Exception('Setter name should be set it hasSetter is true');
+        }
+
         $method = $this->factory
             ->method($definition->getSetterName())
             ->makePublic()

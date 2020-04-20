@@ -52,12 +52,7 @@ class FileGenerator
                     $result[] = $this->interfaceGenerator->generate($markersInterface);
                 }
 
-                $servicesInterface = $operation->getServiceInterface();
-                if ($servicesInterface === null) {
-                    continue;
-                }
-
-                $result[] = $this->interfaceGenerator->generate($servicesInterface);
+                $result[] = $this->interfaceGenerator->generate($operation->getServiceInterface());
             }
         }
 

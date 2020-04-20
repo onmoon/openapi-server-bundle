@@ -22,7 +22,7 @@ use PhpParser\Node\Stmt\If_;
 use PhpParser\Node\Stmt\Return_;
 use Psr\Container\ContainerInterface;
 use function array_map;
-use function sprintf;
+use function Safe\sprintf;
 
 class ServiceSubscriberCodeGenerator extends CodeGenerator
 {

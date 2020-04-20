@@ -26,8 +26,7 @@ class RequestDtoDefinition extends DtoDefinition
 
             $properties[] = (new PropertyDefinition($name))
                 ->setObjectTypeDefinition($definition)
-                ->setRequired(true)
-                ->setNullable(false);
+                ->setRequired(true);
         }
 
         parent::__construct($properties);

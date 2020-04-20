@@ -21,7 +21,7 @@ class NameGenerator
     private const REQUEST_SUFFIX   = 'Request';
     private const RESPONSE_SUFFIX  = 'Response';
     public const DTO_SUFFIX        = 'Dto';
-    private const APIS_NAMESPACE   = 'Apis';
+    public const APIS_NAMESPACE    = 'Apis';
     private const DUPLICATE_PREFIX = 'Property';
 
     private NamingStrategy $naming;
@@ -40,10 +40,10 @@ class NameGenerator
     public function setAllNamesAndPaths(GraphDefinition $graph) : void
     {
         $graph->getServiceSubscriber()
-            ->setClassName('ApiServiceLoaderServiceSubscriber')
-            ->setNamespace($this->naming->buildNamespace($this->rootNamespace, 'ServiceSubscriber'))
             ->setFileName('ApiServiceLoaderServiceSubscriber.php')
-            ->setFilePath($this->naming->buildPath($this->rootPath, 'ServiceSubscriber'));
+            ->setFilePath($this->naming->buildPath($this->rootPath, 'ServiceSubscriber'))
+            ->setClassName('ApiServiceLoaderServiceSubscriber')
+            ->setNamespace($this->naming->buildNamespace($this->rootNamespace, 'ServiceSubscriber'));
 
         foreach ($graph->getSpecifications() as $specificationDefinition) {
             $specification = $specificationDefinition->getSpecification();
@@ -58,12 +58,12 @@ class NameGenerator
 
                 $methodName = $this->naming->stringToMethodName($operation->getOperationId());
                 $operation->getServiceInterface()
-                    ->setNamespace($operationNamespace)
-                    ->setClassName($operationName)
+                    ->setMethodName($methodName)
+                    ->setMethodDescription($operation->getSummary())
                     ->setFileName($this->getFileName($operationName))
                     ->setFilePath($operationPath)
-                    ->setMethodName($methodName)
-                    ->setMethodDescription($operation->getSummary());
+                    ->setNamespace($operationNamespace)
+                    ->setClassName($operationName);
 
                 $request = $operation->getRequest();
                 if ($request !== null) {
@@ -97,10 +97,10 @@ class NameGenerator
 
                 $interfaceName = $this->naming->stringToNamespace($operationName . self::RESPONSE_SUFFIX);
                 $markersInterface
-                   ->setClassName($interfaceName)
-                   ->setNamespace($responseNamespace)
-                   ->setFileName($this->getFileName($interfaceName))
-                   ->setFilePath($responsePath);
+                    ->setFileName($this->getFileName($interfaceName))
+                    ->setFilePath($responsePath)
+                    ->setClassName($interfaceName)
+                    ->setNamespace($responseNamespace);
             }
         }
     }

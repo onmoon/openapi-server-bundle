@@ -9,10 +9,10 @@ class OperationDefinition
     private string $url;
     private string $method;
     private string $operationId;
-    private ?string $summary                              = null;
-    private ?RequestDtoDefinition $request                = null;
-    private ?ClassDefinition $markersInterface            = null;
-    private ?ServiceInterfaceDefinition $serviceInterface = null;
+    private ?string $summary                   = null;
+    private ?RequestDtoDefinition $request     = null;
+    private ?ClassDefinition $markersInterface = null;
+    private ServiceInterfaceDefinition $serviceInterface;
 
     /** @var ResponseDtoDefinition[] */
     private array $responses;
@@ -68,19 +68,19 @@ class OperationDefinition
         return $this->markersInterface;
     }
 
-    public function setMarkersInterface(?ClassDefinition $markersInterface) : OperationDefinition
+    public function setMarkersInterface(?ClassDefinition $markersInterface) : self
     {
         $this->markersInterface = $markersInterface;
 
         return $this;
     }
 
-    public function getServiceInterface() : ?ServiceInterfaceDefinition
+    public function getServiceInterface() : ServiceInterfaceDefinition
     {
         return $this->serviceInterface;
     }
 
-    public function setServiceInterface(?ServiceInterfaceDefinition $serviceInterface) : OperationDefinition
+    public function setServiceInterface(ServiceInterfaceDefinition $serviceInterface) : self
     {
         $this->serviceInterface = $serviceInterface;
 

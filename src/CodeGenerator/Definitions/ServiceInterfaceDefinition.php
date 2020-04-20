@@ -8,15 +8,15 @@ class ServiceInterfaceDefinition extends GeneratedInterfaceDefinition
 {
     private ?ClassDefinition $requestType  = null;
     private ?ClassDefinition $responseType = null;
-    private ?string $methodName            = null;
-    private ?string $methodDescription     = null;
+    private string $methodName;
+    private ?string $methodDescription = null;
 
     public function getRequestType() : ?ClassDefinition
     {
         return $this->requestType;
     }
 
-    public function setRequestType(?ClassDefinition $requestType) : ServiceInterfaceDefinition
+    public function setRequestType(?ClassDefinition $requestType) : self
     {
         $this->requestType = $requestType;
 
@@ -28,19 +28,19 @@ class ServiceInterfaceDefinition extends GeneratedInterfaceDefinition
         return $this->responseType;
     }
 
-    public function setResponseType(?ClassDefinition $responseType) : ServiceInterfaceDefinition
+    public function setResponseType(?ClassDefinition $responseType) : self
     {
         $this->responseType = $responseType;
 
         return $this;
     }
 
-    public function getMethodName() : ?string
+    public function getMethodName() : string
     {
         return $this->methodName;
     }
 
-    public function setMethodName(?string $methodName) : ServiceInterfaceDefinition
+    public function setMethodName(string $methodName) : self
     {
         $this->methodName = $methodName;
 
@@ -52,7 +52,7 @@ class ServiceInterfaceDefinition extends GeneratedInterfaceDefinition
         return $this->methodDescription;
     }
 
-    public function setMethodDescription(?string $methodDescription) : ServiceInterfaceDefinition
+    public function setMethodDescription(?string $methodDescription) : self
     {
         $this->methodDescription = $methodDescription;
 

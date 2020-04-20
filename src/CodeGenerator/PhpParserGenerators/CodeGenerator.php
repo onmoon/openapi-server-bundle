@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace OnMoon\OpenApiServerBundle\CodeGenerator\PhpParserGenerators;
 
+use Exception;
 use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\ClassDefinition;
 use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\PropertyDefinition;
 use OnMoon\OpenApiServerBundle\OpenApi\ScalarTypesResolver;
@@ -16,7 +17,7 @@ use PhpParser\PrettyPrinter\Standard;
 use function array_map;
 use function count;
 use function implode;
-use function sprintf;
+use function Safe\sprintf;
 use function trim;
 use const PHP_EOL;
 
@@ -63,11 +64,18 @@ abstract class CodeGenerator
 
     public function getTypeName(PropertyDefinition $definition) : string
     {
-        if ($definition->getObjectTypeDefinition() !== null) {
-            return $definition->getObjectTypeDefinition()->getClassName();
+        $objectType = $definition->getObjectTypeDefinition();
+        $scalarType = $definition->getScalarTypeId();
+
+        if ($objectType !== null) {
+            return $objectType->getClassName();
         }
 
-        return $this->typeResolver->getPhpType($definition->getScalarTypeId());
+        if ($scalarType === null) {
+            throw new Exception('One of ObjectTypeDefinition and ScalarTypeId should not be null');
+        }
+
+        return $this->typeResolver->getPhpType($scalarType);
     }
 
     /** @param string[] $lines */

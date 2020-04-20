@@ -15,8 +15,8 @@ use OnMoon\OpenApiServerBundle\Interfaces\RequestHandler;
 use OnMoon\OpenApiServerBundle\Interfaces\ResponseDto;
 use Symfony\Contracts\Service\ServiceSubscriberInterface;
 use function count;
+use function Safe\substr;
 use function strrpos;
-use function substr;
 
 class InterfaceGenerator
 {
@@ -68,9 +68,9 @@ class InterfaceGenerator
 
                 $service = new ServiceInterfaceDefinition();
                 $service
-                    ->setExtends($this->defaultService)
                     ->setResponseType($responseClass)
-                    ->setRequestType($operation->getRequest());
+                    ->setRequestType($operation->getRequest())
+                    ->setExtends($this->defaultService);
                 $operation->setServiceInterface($service);
             }
         }
@@ -78,9 +78,14 @@ class InterfaceGenerator
 
     public function getDefaultInterface(string $className) : ClassDefinition
     {
-        $lastPart  = strrpos($className, '\\');
-        $namespace = substr($className, 0, $lastPart);
-        $name      = substr($className, $lastPart + 1);
+        $lastPart = strrpos($className, '\\');
+        if ($lastPart !== false) {
+            $namespace = substr($className, 0, $lastPart);
+            $name      = substr($className, $lastPart + 1);
+        } else {
+            $namespace = '';
+            $name      = $className;
+        }
 
         return (new ClassDefinition())
             ->setNamespace($namespace)
