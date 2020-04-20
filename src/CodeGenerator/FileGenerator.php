@@ -7,30 +7,25 @@ namespace OnMoon\OpenApiServerBundle\CodeGenerator;
 use OnMoon\OpenApiServerBundle\CodeGenerator\Dto\Definitions\DtoDefinition;
 use OnMoon\OpenApiServerBundle\CodeGenerator\Dto\Definitions\GeneratedInterfaceDefinition;
 use OnMoon\OpenApiServerBundle\CodeGenerator\Dto\Definitions\GraphDefinition;
-use OnMoon\OpenApiServerBundle\CodeGenerator\Dto\Definitions\SpecificationDefinition;
-use OnMoon\OpenApiServerBundle\CodeGenerator\Filesystem\FileWriter;
 
 class FileGenerator
 {
     private DtoCodeGenerator $dtoGenerator;
     private InterfaceCodeGenerator $interfaceGenerator;
     private ServiceSubscriberCodeGenerator $serviceSubscriberGenerator;
-    private FileWriter $writer;
 
     /**
      * FileGenerator constructor.
      * @param DtoCodeGenerator $dtoGenerator
      * @param InterfaceCodeGenerator $interfaceGenerator
      * @param ServiceSubscriberCodeGenerator $serviceSubscriberGenerator
-     * @param FileWriter $writer
      */
     public function __construct(DtoCodeGenerator $dtoGenerator, InterfaceCodeGenerator $interfaceGenerator,
-                                ServiceSubscriberCodeGenerator $serviceSubscriberGenerator, FileWriter $writer)
+                                ServiceSubscriberCodeGenerator $serviceSubscriberGenerator)
     {
         $this->dtoGenerator = $dtoGenerator;
         $this->interfaceGenerator = $interfaceGenerator;
         $this->serviceSubscriberGenerator = $serviceSubscriberGenerator;
-        $this->writer = $writer;
     }
 
 
@@ -64,11 +59,6 @@ class FileGenerator
         }
 
         $result[] = $this->serviceSubscriberGenerator->generate($graph);
-
-        foreach ($result as $item) {
-            $this->writer->write($item->getFileDirectoryPath(), $item->getFileName(), $item->getFileContents());
-        }
-
         return $result;
     }
 

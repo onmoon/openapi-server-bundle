@@ -57,7 +57,7 @@ class ServiceSubscriberCodeGenerator extends CodeGenerator
                 $this->use($fileBuilder, $subscriberDefinition->getNamespace(), $operation->getServiceInterface());
             }
         }
-
+        //ToDo: full DocBlock support
         $classBuilder ->addStmts(
                 [
                     $this

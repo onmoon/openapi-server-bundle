@@ -51,10 +51,7 @@
             <argument key="$rootPath">%openapi.generated.code.root.path%</argument>
             <argument key="$cache" type="service" id="cache.app.taggable" />
         </service>
-        <service id="OnMoon\OpenApiServerBundle\CodeGenerator\ApiServerCodeGenerator">
-            <argument key="$rootNamespace">%openapi.generated.code.root.namespace%</argument>
-            <argument key="$rootPath">%openapi.generated.code.root.path%</argument>
-        </service>
+        <service id="OnMoon\OpenApiServerBundle\CodeGenerator\ApiServerCodeGenerator" />
         <service id="OnMoon\OpenApiServerBundle\Command\DeleteGeneratedCodeCommand">
             <argument key="$rootPath">%openapi.generated.code.root.path%</argument>
         </service>
