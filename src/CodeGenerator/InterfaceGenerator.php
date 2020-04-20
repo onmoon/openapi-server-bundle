@@ -4,12 +4,12 @@
 namespace OnMoon\OpenApiServerBundle\CodeGenerator;
 
 
-use OnMoon\OpenApiServerBundle\CodeGenerator\Dto\Definitions\ClassDefinition;
-use OnMoon\OpenApiServerBundle\CodeGenerator\Dto\Definitions\DtoDefinition;
-use OnMoon\OpenApiServerBundle\CodeGenerator\Dto\Definitions\GeneratedInterfaceDefinition;
-use OnMoon\OpenApiServerBundle\CodeGenerator\Dto\Definitions\GraphDefinition;
-use OnMoon\OpenApiServerBundle\CodeGenerator\Dto\Definitions\InterfaceDefinition;
-use OnMoon\OpenApiServerBundle\CodeGenerator\Dto\Definitions\ServiceInterfaceDefinition;
+use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\ClassDefinition;
+use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\DtoDefinition;
+use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\GeneratedInterfaceDefinition;
+use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\GraphDefinition;
+use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\InterfaceDefinition;
+use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\ServiceInterfaceDefinition;
 use OnMoon\OpenApiServerBundle\Interfaces\ApiLoader;
 use OnMoon\OpenApiServerBundle\Interfaces\Dto;
 use OnMoon\OpenApiServerBundle\Interfaces\RequestHandler;

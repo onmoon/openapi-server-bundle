@@ -4,9 +4,9 @@
 namespace OnMoon\OpenApiServerBundle\CodeGenerator;
 
 
-use OnMoon\OpenApiServerBundle\CodeGenerator\Dto\Definitions\DtoDefinition;
-use OnMoon\OpenApiServerBundle\CodeGenerator\Dto\Definitions\GeneratedInterfaceDefinition;
-use OnMoon\OpenApiServerBundle\CodeGenerator\Dto\Definitions\GraphDefinition;
+use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\DtoDefinition;
+use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\GeneratedInterfaceDefinition;
+use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\GraphDefinition;
 
 class FileGenerator
 {

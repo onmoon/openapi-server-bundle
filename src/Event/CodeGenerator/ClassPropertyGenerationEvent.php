@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace OnMoon\OpenApiServerBundle\Event\CodeGenerator;
 
 use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\BaseDefinition;
-use OnMoon\OpenApiServerBundle\CodeGenerator\Dto\Definitions\ClassPropertyDefinition;
+use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\ClassPropertyDefinition;
 use Symfony\Contracts\EventDispatcher\Event;
 
 /**

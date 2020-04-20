@@ -1,7 +1,7 @@
 <?php
 
 
-namespace OnMoon\OpenApiServerBundle\CodeGenerator\Dto\Definitions;
+namespace OnMoon\OpenApiServerBundle\CodeGenerator\Definitions;
 
 
 class GeneratedInterfaceDefinition extends InterfaceDefinition

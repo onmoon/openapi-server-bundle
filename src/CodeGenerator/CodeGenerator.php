@@ -4,8 +4,8 @@
 namespace OnMoon\OpenApiServerBundle\CodeGenerator;
 
 
-use OnMoon\OpenApiServerBundle\CodeGenerator\Dto\Definitions\ClassDefinition;
-use OnMoon\OpenApiServerBundle\CodeGenerator\Dto\Definitions\PropertyDefinition;
+use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\ClassDefinition;
+use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\PropertyDefinition;
 use OnMoon\OpenApiServerBundle\OpenApi\ScalarTypesResolver;
 use PhpParser\Builder\Namespace_;
 use PhpParser\BuilderFactory;

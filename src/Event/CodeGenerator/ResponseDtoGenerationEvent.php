@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace OnMoon\OpenApiServerBundle\Event\CodeGenerator;
 
-use OnMoon\OpenApiServerBundle\CodeGenerator\Dto\Definitions\ResponseDtoDefinition;
+use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\ResponseDtoDefinition;
 use Symfony\Contracts\EventDispatcher\Event;
 
 /**

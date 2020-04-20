@@ -4,10 +4,10 @@
 namespace OnMoon\OpenApiServerBundle\CodeGenerator;
 
 
-use OnMoon\OpenApiServerBundle\CodeGenerator\Dto\Definitions\ClassDefinition;
-use OnMoon\OpenApiServerBundle\CodeGenerator\Dto\Definitions\DtoDefinition;
-use OnMoon\OpenApiServerBundle\CodeGenerator\Dto\Definitions\PropertyDefinition;
-use OnMoon\OpenApiServerBundle\CodeGenerator\Dto\Definitions\ResponseDtoDefinition;
+use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\ClassDefinition;
+use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\DtoDefinition;
+use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\PropertyDefinition;
+use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\ResponseDtoDefinition;
 use OnMoon\OpenApiServerBundle\OpenApi\ScalarTypesResolver;
 use PhpParser\Builder\Method;
 use PhpParser\Builder\Namespace_;

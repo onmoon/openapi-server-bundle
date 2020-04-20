@@ -3,7 +3,7 @@
 
 namespace OnMoon\OpenApiServerBundle\CodeGenerator;
 
-use OnMoon\OpenApiServerBundle\CodeGenerator\Dto\Definitions\GraphDefinition;
+use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\GraphDefinition;
 use OnMoon\OpenApiServerBundle\CodeGenerator\RequestHandlerInterface\Definitions\RequestHandlerInterfaceDefinition;
 use OnMoon\OpenApiServerBundle\Interfaces\ApiLoader;
 use OnMoon\OpenApiServerBundle\Interfaces\RequestHandler;

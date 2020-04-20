@@ -5,12 +5,12 @@ namespace OnMoon\OpenApiServerBundle\CodeGenerator;
 
 
 use Lukasoppermann\Httpstatus\Httpstatus;
-use OnMoon\OpenApiServerBundle\CodeGenerator\Dto\Definitions\DtoDefinition;
-use OnMoon\OpenApiServerBundle\CodeGenerator\Dto\Definitions\GeneratedInterfaceDefinition;
-use OnMoon\OpenApiServerBundle\CodeGenerator\Dto\Definitions\GraphDefinition;
-use OnMoon\OpenApiServerBundle\CodeGenerator\Dto\Definitions\RequestDtoDefinition;
-use OnMoon\OpenApiServerBundle\CodeGenerator\Dto\Definitions\ResponseDtoDefinition;
-use OnMoon\OpenApiServerBundle\CodeGenerator\Dto\Definitions\SpecificationDefinition;
+use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\DtoDefinition;
+use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\GeneratedInterfaceDefinition;
+use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\GraphDefinition;
+use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\RequestDtoDefinition;
+use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\ResponseDtoDefinition;
+use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\SpecificationDefinition;
 use OnMoon\OpenApiServerBundle\CodeGenerator\Naming\NamingStrategy;
 use OnMoon\OpenApiServerBundle\Exception\CannotGenerateCodeForOperation;
 use Throwable;

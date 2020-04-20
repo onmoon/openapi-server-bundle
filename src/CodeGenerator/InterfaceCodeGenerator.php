@@ -4,8 +4,8 @@
 namespace OnMoon\OpenApiServerBundle\CodeGenerator;
 
 
-use OnMoon\OpenApiServerBundle\CodeGenerator\Dto\Definitions\GeneratedInterfaceDefinition;
-use OnMoon\OpenApiServerBundle\CodeGenerator\Dto\Definitions\ServiceInterfaceDefinition;
+use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\GeneratedInterfaceDefinition;
+use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\ServiceInterfaceDefinition;
 use PhpParser\BuilderFactory;
 use PhpParser\Node\Scalar\LNumber;
 use PhpParser\Node\Stmt\Declare_;
