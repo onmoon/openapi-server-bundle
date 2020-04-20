@@ -5,15 +5,13 @@ namespace OnMoon\OpenApiServerBundle\CodeGenerator;
 
 
 use OnMoon\OpenApiServerBundle\CodeGenerator\Dto\Definitions\DtoDefinition;
+use OnMoon\OpenApiServerBundle\CodeGenerator\Dto\Definitions\GraphDefinition;
 use OnMoon\OpenApiServerBundle\CodeGenerator\Dto\Definitions\SpecificationDefinition;
 
 class AttributeGenerator
 {
-    /**
-     * @param SpecificationDefinition[] $specificationDefinitions
-     */
-    public function generate(array $specificationDefinitions) {
-        foreach ($specificationDefinitions as $specificationDefinition) {
+    public function generate(GraphDefinition $graph) {
+        foreach ($graph->getSpecifications() as $specificationDefinition) {
             foreach ($specificationDefinition->getOperations() as $operation) {
                 if($operation->getRequest() !== null) {
                     $this->requestPass($operation->getRequest());

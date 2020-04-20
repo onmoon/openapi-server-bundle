@@ -16,12 +16,14 @@ use cebe\openapi\spec\Schema;
 use cebe\openapi\spec\Type;
 use Exception;
 use OnMoon\OpenApiServerBundle\CodeGenerator\Dto\Definitions\DtoDefinition;
+use OnMoon\OpenApiServerBundle\CodeGenerator\Dto\Definitions\GraphDefinition;
 use OnMoon\OpenApiServerBundle\CodeGenerator\Dto\Definitions\OperationDefinition;
 use OnMoon\OpenApiServerBundle\CodeGenerator\Dto\Definitions\PropertyDefinition;
 use OnMoon\OpenApiServerBundle\CodeGenerator\Dto\Definitions\RequestBodyDtoDefinition;
 use OnMoon\OpenApiServerBundle\CodeGenerator\Dto\Definitions\RequestDtoDefinition;
 use OnMoon\OpenApiServerBundle\CodeGenerator\Dto\Definitions\RequestParametersDtoDefinition;
 use OnMoon\OpenApiServerBundle\CodeGenerator\Dto\Definitions\ResponseDtoDefinition;
+use OnMoon\OpenApiServerBundle\CodeGenerator\Dto\Definitions\ServiceSubscriberDefinition;
 use OnMoon\OpenApiServerBundle\CodeGenerator\Dto\Definitions\SpecificationDefinition;
 use OnMoon\OpenApiServerBundle\Exception\CannotGenerateCodeForOperation;
 use OnMoon\OpenApiServerBundle\OpenApi\ScalarTypesResolver;
@@ -40,9 +42,9 @@ class GraphGenerator
     }
 
     /**
-     * @return SpecificationDefinition[]
+     * @return GraphDefinition
      */
-    public function generate() : array {
+    public function generate() : GraphDefinition {
         $specificationDefinitions = [];
         foreach ($this->loader->list() as $specificationName => $specification) {
             $parsedSpecification = $this->loader->load($specificationName);
@@ -99,7 +101,9 @@ class GraphGenerator
             }
             $specificationDefinitions[] = new SpecificationDefinition($specification, $operationDefinitions);
         }
-        return $specificationDefinitions;
+
+        $serviceSubscriber = new ServiceSubscriberDefinition();
+        return new GraphDefinition($specificationDefinitions, $serviceSubscriber);
     }
 
     /**

@@ -7,6 +7,7 @@ namespace OnMoon\OpenApiServerBundle\CodeGenerator;
 use OnMoon\OpenApiServerBundle\CodeGenerator\Dto\Definitions\ClassDefinition;
 use OnMoon\OpenApiServerBundle\CodeGenerator\Dto\Definitions\DtoDefinition;
 use OnMoon\OpenApiServerBundle\CodeGenerator\Dto\Definitions\GeneratedInterfaceDefinition;
+use OnMoon\OpenApiServerBundle\CodeGenerator\Dto\Definitions\GraphDefinition;
 use OnMoon\OpenApiServerBundle\CodeGenerator\Dto\Definitions\InterfaceDefinition;
 use OnMoon\OpenApiServerBundle\CodeGenerator\Dto\Definitions\ServiceInterfaceDefinition;
 use OnMoon\OpenApiServerBundle\CodeGenerator\Dto\Definitions\SpecificationDefinition;
@@ -26,11 +27,8 @@ class InterfaceGenerator
         $this->defaultService = $this->getDefaultInterface(RequestHandler::class);
     }
 
-    /**
-     * @param SpecificationDefinition[] $specificationDefinitions
-     */
-    public function generate(array $specificationDefinitions) {
-        foreach ($specificationDefinitions as $specificationDefinition) {
+    public function generate(GraphDefinition $graph) {
+        foreach ($graph->getSpecifications() as $specificationDefinition) {
             foreach ($specificationDefinition->getOperations() as $operation) {
                 $makersInterface = null;
                 /** @var ClassDefinition|null $responseClass */

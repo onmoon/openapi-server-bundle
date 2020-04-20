@@ -6,6 +6,7 @@ namespace OnMoon\OpenApiServerBundle\CodeGenerator;
 
 use OnMoon\OpenApiServerBundle\CodeGenerator\Dto\Definitions\DtoDefinition;
 use OnMoon\OpenApiServerBundle\CodeGenerator\Dto\Definitions\GeneratedInterfaceDefinition;
+use OnMoon\OpenApiServerBundle\CodeGenerator\Dto\Definitions\GraphDefinition;
 use OnMoon\OpenApiServerBundle\CodeGenerator\Dto\Definitions\SpecificationDefinition;
 use OnMoon\OpenApiServerBundle\CodeGenerator\Filesystem\FileWriter;
 
@@ -30,13 +31,12 @@ class FileGenerator
 
 
     /**
-     * @param SpecificationDefinition[] $specificationDefinitions
      * @return GeneratedClass[]
      */
-    public function generate(array $specificationDefinitions) : array {
+    public function generate(GraphDefinition $graph) : array {
         /** @var GeneratedClass[] $result */
         $result = [];
-        foreach ($specificationDefinitions as $specificationDefinition) {
+        foreach ($graph->getSpecifications() as $specificationDefinition) {
             foreach ($specificationDefinition->getOperations() as $operation) {
                 if($operation->getRequest() !== null) {
                     $result = array_merge($result, $this->generateDtoTree($operation->getRequest()));
