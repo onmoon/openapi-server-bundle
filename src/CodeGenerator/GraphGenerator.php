@@ -44,7 +44,7 @@ class GraphGenerator
     /**
      * @return GraphDefinition
      */
-    public function generate() : GraphDefinition {
+    public function generateClassGraph() : GraphDefinition {
         $specificationDefinitions = [];
         foreach ($this->loader->list() as $specificationName => $specification) {
             $parsedSpecification = $this->loader->load($specificationName);

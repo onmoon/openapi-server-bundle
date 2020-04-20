@@ -1,7 +1,7 @@
 <?php
 
 
-namespace OnMoon\OpenApiServerBundle\CodeGenerator;
+namespace OnMoon\OpenApiServerBundle\CodeGenerator\PhpParserGenerators;
 
 
 use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\ClassDefinition;

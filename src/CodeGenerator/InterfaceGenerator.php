@@ -27,7 +27,7 @@ class InterfaceGenerator
         $this->defaultService = $this->getDefaultInterface(RequestHandler::class);
     }
 
-    public function generate(GraphDefinition $graph) {
+    public function setAllInterfaces(GraphDefinition $graph) {
         $graph->getServiceSubscriber()->setImplements([
             $this->getDefaultInterface(ServiceSubscriberInterface::class),
             $this->getDefaultInterface(ApiLoader::class),

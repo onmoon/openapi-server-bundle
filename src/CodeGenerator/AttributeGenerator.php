@@ -10,7 +10,7 @@ use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\SpecificationDefinition
 
 class AttributeGenerator
 {
-    public function generate(GraphDefinition $graph) {
+    public function setAllAttributes(GraphDefinition $graph) {
         foreach ($graph->getSpecifications() as $specificationDefinition) {
             foreach ($specificationDefinition->getOperations() as $operation) {
                 if($operation->getRequest() !== null) {

@@ -75,10 +75,10 @@ class ApiServerCodeGenerator
 
     public function generate() : void
     {
-        $graph = $this->graphGenerator->generate();
-        $this->interfaceGenerator->generate($graph);
-        $this->attributeGenerator->generate($graph);
-        $this->nameGenerator->generate($graph);
+        $graph = $this->graphGenerator->generateClassGraph();
+        $this->interfaceGenerator->setAllInterfaces($graph);
+        $this->attributeGenerator->setAllAttributes($graph);
+        $this->nameGenerator->setAllNamesAndPaths($graph);
         //ToDo: remove this loop
         foreach ($graph->getSpecifications() as $specificationDefinition) {
             foreach ($specificationDefinition->getOperations() as $operation) {
@@ -95,7 +95,7 @@ class ApiServerCodeGenerator
                 }
             }
         }
-        $files = $this->filesGenerator->generate($graph);
+        $files = $this->filesGenerator->generateAllFiles($graph);
 
         foreach ($files as $item) {
             $this->writer->write($item->getClass()->getFilePath(), $item->getClass()->getFileName(), $item->getFileContents());

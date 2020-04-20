@@ -44,7 +44,7 @@ class NameGenerator
         $this->rootPath = $rootPath;
     }
 
-    public function generate(GraphDefinition $graph) {
+    public function setAllNamesAndPaths(GraphDefinition $graph) {
         $graph->getServiceSubscriber()
             ->setClassName('ApiServiceLoaderServiceSubscriber')
             ->setNamespace($this->naming->buildNamespace($this->rootNamespace, 'ServiceSubscriber'))

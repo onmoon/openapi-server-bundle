@@ -8,6 +8,9 @@ use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\DtoDefinition;
 use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\GeneratedFileDefinition;
 use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\GeneratedInterfaceDefinition;
 use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\GraphDefinition;
+use OnMoon\OpenApiServerBundle\CodeGenerator\PhpParserGenerators\DtoCodeGenerator;
+use OnMoon\OpenApiServerBundle\CodeGenerator\PhpParserGenerators\InterfaceCodeGenerator;
+use OnMoon\OpenApiServerBundle\CodeGenerator\PhpParserGenerators\ServiceSubscriberCodeGenerator;
 
 class FileGenerator
 {
@@ -33,7 +36,7 @@ class FileGenerator
     /**
      * @return GeneratedFileDefinition[]
      */
-    public function generate(GraphDefinition $graph) : array {
+    public function generateAllFiles(GraphDefinition $graph) : array {
         /** @var GeneratedFileDefinition[] $result */
         $result = [];
         foreach ($graph->getSpecifications() as $specificationDefinition) {

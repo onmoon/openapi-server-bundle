@@ -1,9 +1,10 @@
 <?php
 
 
-namespace OnMoon\OpenApiServerBundle\CodeGenerator;
+namespace OnMoon\OpenApiServerBundle\CodeGenerator\PhpParserGenerators;
 
 
+use OnMoon\OpenApiServerBundle\CodeGenerator\PhpParserGenerators\CodeGenerator;
 use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\GeneratedFileDefinition;
 use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\GeneratedInterfaceDefinition;
 use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\ServiceInterfaceDefinition;

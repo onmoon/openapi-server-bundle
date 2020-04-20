@@ -1,10 +1,11 @@
 <?php
 
 
-namespace OnMoon\OpenApiServerBundle\CodeGenerator;
+namespace OnMoon\OpenApiServerBundle\CodeGenerator\PhpParserGenerators;
 
 use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\GeneratedFileDefinition;
 use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\GraphDefinition;
+use OnMoon\OpenApiServerBundle\CodeGenerator\PhpParserGenerators\CodeGenerator;
 use OnMoon\OpenApiServerBundle\CodeGenerator\RequestHandlerInterface\Definitions\RequestHandlerInterfaceDefinition;
 use OnMoon\OpenApiServerBundle\Interfaces\ApiLoader;
 use OnMoon\OpenApiServerBundle\Interfaces\RequestHandler;
