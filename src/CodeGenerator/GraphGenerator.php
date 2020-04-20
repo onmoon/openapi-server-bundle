@@ -59,26 +59,33 @@ class GraphGenerator
                     $operationId = $operation->operationId;
                     $summary     = $operation->summary;
 
+                    $exceptionContext = [
+                        'url' => $url,
+                        'method' => $method,
+                        'path' => $specification->getPath()
+                    ];
+
                     if ($operationId === '') {
-                        throw CannotGenerateCodeForOperation::becauseNoOperationIdSpecified(
-                            $url,
-                            $method,
-                            $specification->getPath()
-                        );
+                        throw CannotGenerateCodeForOperation::becauseNoOperationIdSpecified($exceptionContext);
                     }
 
-                    $responses = $this->getResponseDtoDefinitions($operation->responses, $specification, $url, $method);
+                    $responses = $this->getResponseDtoDefinitions($operation->responses, $specification, $exceptionContext);
 
                     $requestSchema = $this->findByMediaType($operation->requestBody, $specification->getMediaType());
                     $requestBody = null;
                     if($requestSchema !== null) {
-                        $requestBody = new RequestBodyDtoDefinition($this->getPropertyGraph($requestSchema));
+                        $requestBody = new RequestBodyDtoDefinition(
+                            $this->getPropertyGraph(
+                                $requestSchema,
+                                array_merge($exceptionContext, ['location' => 'request body'])
+                            )
+                        );
                     }
                     $parameters = $this->mergeParameters($pathItem, $operation);
                     $requestDefinitions = new RequestDtoDefinition(
                         $requestBody,
-                        $this->parametersToDto('query', $parameters),
-                        $this->parametersToDto('path', $parameters)
+                        $this->parametersToDto('query', $parameters, array_merge($exceptionContext, ['location' => 'request query parameters'])),
+                        $this->parametersToDto('path', $parameters, array_merge($exceptionContext, ['location' => 'request path parameters']))
                     );
                     $operationDefinitions[] = new OperationDefinition(
                         $url,
@@ -101,8 +108,7 @@ class GraphGenerator
     private function getResponseDtoDefinitions(
         ?Responses $responses,
         Specification $specification,
-        string $url,
-        string $method
+        array $exceptionContext
     ) : array
     {
         $responseDtoDefinitions = [];
@@ -113,16 +119,14 @@ class GraphGenerator
             foreach ($responses->getResponses() as $responseCode => $response) {
                 $responseSchema = $this->findByMediaType($response, $specification->getMediaType());
                 if($responseSchema !== null) {
+                    $exceptionContext = array_merge($exceptionContext, ['location' => 'response (code "' . $responseCode . '")']);
                     if ($responseSchema->type !== Type::OBJECT) {
                         throw CannotGenerateCodeForOperation::becauseRootIsNotObject(
-                            $url,
-                            $method,
-                            'response (code "' . $responseCode . '")',
-                            $specification->getPath(),
+                            $exceptionContext,
                             ($responseSchema->type === Type::ARRAY)
                         );
                     }
-                    $propertyDefinitions = $this->getPropertyGraph($responseSchema);
+                    $propertyDefinitions = $this->getPropertyGraph($responseSchema, $exceptionContext);
                     $responseDefinition = new ResponseDtoDefinition($responseCode, $propertyDefinitions);
                     $responseDtoDefinitions[] = $responseDefinition;
                 }
@@ -203,11 +207,11 @@ class GraphGenerator
      * @param Parameter[] $parameters
      * @return RequestParametersDtoDefinition|null
      */
-    private function parametersToDto(string $in, array $parameters) : ?RequestParametersDtoDefinition {
+    private function parametersToDto(string $in, array $parameters, array $exceptionContext) : ?RequestParametersDtoDefinition {
         $properties = array_map(
             fn (Parameter $p) =>
                 $this
-                    ->getProperty($p->name, $p->schema, false)
+                    ->getProperty($p->name, $p->schema, $exceptionContext, false)
                     ->setRequired($p->required)
                     ->setDescription($p->description),
             $this->filterSupportedParameters($in, $parameters)
@@ -223,20 +227,20 @@ class GraphGenerator
     /**
      * @return PropertyDefinition[]
      */
-    private function getPropertyGraph(Schema $schema) : array {
+    private function getPropertyGraph(Schema $schema, array $exceptionContext) : array {
         $propertyDefinitions = [];
         /**
          * @var string $propertyName
          */
         foreach ($schema->properties as $propertyName => $property) {
             $required = is_array($schema->required) && in_array($propertyName, $schema->required);
-            $propertyDefinitions[] = $this->getProperty($propertyName, $property)->setRequired($required);
+            $propertyDefinitions[] = $this->getProperty($propertyName, $property, $exceptionContext)->setRequired($required);
         }
 
         return $propertyDefinitions;
     }
 
-    private function getProperty(string $propertyName, Schema $property, bool $allowNonScalar = true) : PropertyDefinition {
+    private function getProperty(string $propertyName, Schema $property, array $exceptionContext, bool $allowNonScalar = true) : PropertyDefinition {
         if (! ($property instanceof Schema)) {
             throw new Exception('Property is not scheme');
         }
@@ -249,7 +253,7 @@ class GraphGenerator
 
         if ($property->type === Type::ARRAY) {
             if (! ($property->items instanceof Schema)) {
-                throw new Exception('Array items must be described');
+                throw CannotGenerateCodeForOperation::becauseArrayIsNotDescribed($propertyName, $exceptionContext);
             }
             $propertyDefinition->setArray(true);
             $property = $property->items;
@@ -260,20 +264,21 @@ class GraphGenerator
             $propertyDefinition->setScalarTypeId($typeId);
             $isScalar = true;
         } elseif ($property->type === Type::OBJECT) {
-            $type = new DtoDefinition($this->getPropertyGraph($property));
+            $type = new DtoDefinition($this->getPropertyGraph($property, $exceptionContext));
             $propertyDefinition->setObjectTypeDefinition($type);
         } else {
-            throw new Exception('\''.$property->type.'\' type is not supported');
+            throw CannotGenerateCodeForOperation::becauseTypeNotSupported($propertyName, $property->type, $exceptionContext);
         }
 
         /** @var string|int|float|bool|null $schemaDefaultValue */
         $schemaDefaultValue = $property->default;
-        if ($schemaDefaultValue !== null && $isScalar) {
+        //ToDo: Support DateTime assignments
+        if ($schemaDefaultValue !== null && $isScalar && !class_exists($this->typeResolver->getPhpType($propertyDefinition->getScalarTypeId()))) {
             $propertyDefinition->setDefaultValue($schemaDefaultValue);
         }
 
         if (!$isScalar && !$allowNonScalar) {
-            throw new Exception('Non scalar types are not allowed here');
+            throw CannotGenerateCodeForOperation::becauseOnlyScalarAreAllowed($propertyName, $exceptionContext);
         }
 
         return $propertyDefinition;
