@@ -81,7 +81,7 @@ class DefaultNamingStrategy implements NamingStrategy
         );
 
         if ($propertyName === '') {
-            throw CannotCreatePropertyName::becauseTextContaintsNoValidSymbols($text);
+            throw CannotCreatePropertyName::becauseTextContainsNoValidSymbols($text);
         }
 
         return $propertyName;
