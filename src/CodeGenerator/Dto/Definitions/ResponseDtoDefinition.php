@@ -10,7 +10,7 @@ class ResponseDtoDefinition extends DtoDefinition
 
     /**
      * DtoDefinition constructor.
-     * @param array|PropertyDtoDefinition[] $properties
+     * @param array|PropertyDefinition[] $properties
      */
     public function __construct(string $statusCode, array $properties)
     {
@@ -22,14 +22,6 @@ class ResponseDtoDefinition extends DtoDefinition
     public function getStatusCode(): string
     {
         return $this->statusCode;
-    }
-
-    /**
-     * @return InterfaceDefinition|null
-     */
-    public function getMarkersInterface(): ?InterfaceDefinition
-    {
-        return $this->markersInterface;
     }
 
 }

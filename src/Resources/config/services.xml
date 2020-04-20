@@ -29,10 +29,6 @@
             <argument key="$rootNamespace">%openapi.generated.code.root.namespace%</argument>
             <argument key="$languageLevel">%openapi.generated.code.language.level%</argument>
         </service>
-        <service id="OnMoon\OpenApiServerBundle\CodeGenerator\Dto\RequestDtoFactory" class="OnMoon\OpenApiServerBundle\CodeGenerator\Dto\PhpParserRequestDtoFactory" />
-        <service id="OnMoon\OpenApiServerBundle\CodeGenerator\Dto\DtoFactory" class="OnMoon\OpenApiServerBundle\CodeGenerator\Dto\PhpParserDtoFactory">
-            <argument key="$languageLevel">%openapi.generated.code.language.level%</argument>
-        </service>
         <service id="OnMoon\OpenApiServerBundle\CodeGenerator\DtoCodeGenerator">
             <argument key="$languageLevel">%openapi.generated.code.language.level%</argument>
         </service>
@@ -42,8 +38,6 @@
         <service id="OnMoon\OpenApiServerBundle\CodeGenerator\ServiceSubscriberCodeGenerator">
             <argument key="$languageLevel">%openapi.generated.code.language.level%</argument>
         </service>
-        <service id="OnMoon\OpenApiServerBundle\CodeGenerator\RequestHandlerInterface\RequestHandlerInterfaceFactory" class="OnMoon\OpenApiServerBundle\CodeGenerator\RequestHandlerInterface\PhpParserRequestHandlerInterfaceFactory" />
-        <service id="OnMoon\OpenApiServerBundle\CodeGenerator\ServiceSubscriber\ServiceSubscriberFactory" class="OnMoon\OpenApiServerBundle\CodeGenerator\ServiceSubscriber\PhpParserServiceSubscriberFactory" />
         <service id="OnMoon\OpenApiServerBundle\CodeGenerator\Filesystem\FileWriter" class="OnMoon\OpenApiServerBundle\CodeGenerator\Filesystem\FilePutContentsFileWriter">
             <argument key="$dirPemissions">%openapi.generated.code.dir.permissions%</argument>
         </service>

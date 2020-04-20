@@ -7,7 +7,7 @@ namespace OnMoon\OpenApiServerBundle\CodeGenerator\Dto\Definitions;
 class DtoDefinition extends ClassDefinition
 {
     /**
-     * @var PropertyDtoDefinition[] $properties;
+     * @var PropertyDefinition[] $properties;
      */
     private array $properties;
     private ?string $fileName = null;
@@ -16,7 +16,7 @@ class DtoDefinition extends ClassDefinition
 
     /**
      * DtoDefinition constructor.
-     * @param array|PropertyDtoDefinition[] $properties
+     * @param PropertyDefinition[] $properties
      */
     public function __construct($properties)
     {
