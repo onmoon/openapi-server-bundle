@@ -11,15 +11,17 @@ use OnMoon\OpenApiServerBundle\CodeGenerator\Dto\Definitions\RequestDtoDefinitio
 use OnMoon\OpenApiServerBundle\CodeGenerator\Dto\Definitions\ResponseDtoDefinition;
 use OnMoon\OpenApiServerBundle\CodeGenerator\Dto\Definitions\SpecificationDefinition;
 use OnMoon\OpenApiServerBundle\CodeGenerator\Naming\NamingStrategy;
+use OnMoon\OpenApiServerBundle\Exception\CannotGenerateCodeForOperation;
 use Throwable;
 
 class NameGenerator
 {
-    private const DTO_NAMESPACE   = 'Dto';
-    private const REQUEST_SUFFIX  = 'Request';
-    private const RESPONSE_SUFFIX = 'Response';
-    public const DTO_SUFFIX       = 'Dto';
-    private const APIS_NAMESPACE  = 'Apis';
+    private const DTO_NAMESPACE    = 'Dto';
+    private const REQUEST_SUFFIX   = 'Request';
+    private const RESPONSE_SUFFIX  = 'Response';
+    public const DTO_SUFFIX        = 'Dto';
+    private const APIS_NAMESPACE   = 'Apis';
+    private const DUPLICATE_PREFIX = 'Property';
 
     private NamingStrategy $naming;
     private Httpstatus $httpstatus;
@@ -65,9 +67,11 @@ class NameGenerator
                     ->setMethodName($methodName)
                     ->setMethodDescription($operation->getSummary());
 
-                if($operation->getRequest() !== null) {
-                    $this->setRequestNames($operation->getRequest(), $operationNamespace, $operationName, $operationPath);
-                    $this->setTreeGettersSetters($operation->getRequest());
+                $request = $operation->getRequest();
+                if($request !== null) {
+                    $this->setTreePropertyClassNames($request);
+                    $this->setRequestNames($request, $operationNamespace, $operationName, $operationPath);
+                    $this->setTreeGettersSetters($request);
                 }
 
                 $responseNamespace = $this->naming->buildNamespace(
@@ -83,6 +87,7 @@ class NameGenerator
                 );
 
                 foreach ($operation->getResponses() as $response) {
+                    $this->setTreePropertyClassNames($response);
                     $this->setResponseNames($response, $responseNamespace, $operationName, $responsePath);
                     $this->setTreeGettersSetters($response);
                 }
@@ -100,7 +105,7 @@ class NameGenerator
         }
     }
 
-    private function setRequestNames(RequestDtoDefinition $request, string $operationNamespace, string $operationName, string $operationPath) {
+    public function setRequestNames(RequestDtoDefinition $request, string $operationNamespace, string $operationName, string $operationPath) {
         $requestDtoNamespace = $this->naming->buildNamespace(
             $operationNamespace,
             self::DTO_NAMESPACE,
@@ -115,10 +120,10 @@ class NameGenerator
             self::REQUEST_SUFFIX
         );
 
-        $this->setTreeNames($request, $requestDtoNamespace, $requestDtoClassName, $requestDtoPath);
+        $this->setTreePathsAndClassNames($request, $requestDtoNamespace, $requestDtoClassName, $requestDtoPath);
     }
 
-    private function setResponseNames(ResponseDtoDefinition $response, string $responseNamespace, string $operationName, string $responsePath) {
+    public function setResponseNames(ResponseDtoDefinition $response, string $responseNamespace, string $operationName, string $responsePath) {
         try {
             $statusNamespace = $this->httpstatus->getReasonPhrase($response->getStatusCode());
         } catch (Throwable $e) {
@@ -133,10 +138,10 @@ class NameGenerator
         );
         $responseDtoPath      = $this->naming->buildPath($responsePath, $statusNamespace);
 
-        $this->setTreeNames($response, $responseDtoNamespace, $responseDtoClassName, $responseDtoPath);
+        $this->setTreePathsAndClassNames($response, $responseDtoNamespace, $responseDtoClassName, $responseDtoPath);
     }
-//ToDo: back to private
-    public function setTreeNames(DtoDefinition $root, string $namespace, string $className, string $path) {
+
+    public function setTreePathsAndClassNames(DtoDefinition $root, string $namespace, string $className, string $path) {
         $root->setClassName($className);
         $root->setFileName($this->getFileName($className));
         $root->setFilePath($path);
@@ -147,18 +152,24 @@ class NameGenerator
             if($objectDefinition !== null) {
                 $part = $this->naming->stringToNamespace($property->getClassPropertyName());
                 $subClassName = $this->naming->stringToNamespace($part . self::DTO_SUFFIX);
+
+                if($subClassName === $className) {
+                    //ToDo: check if more elegant way exists
+                    $subClassName = self::DUPLICATE_PREFIX. $subClassName;
+                }
+
                 $subNamespace = $this->naming->buildNamespace($namespace, $part);
                 $subPath = $this->naming->buildPath($path, $part);
-                $this->setTreeNames($objectDefinition, $subNamespace, $subClassName, $subPath);
+                $this->setTreePathsAndClassNames($objectDefinition, $subNamespace, $subClassName, $subPath);
             }
         }
     }
 
-    private function getFileName($className) {
+    public function getFileName(string $className) {
         return $className . '.php';
     }
 
-    private function setTreeGettersSetters(DtoDefinition $root) {
+    public function setTreeGettersSetters(DtoDefinition $root) {
         foreach ($root->getProperties() as $property) {
             $baseName = ucfirst($this->naming->stringToMethodName($property->getClassPropertyName()));
             $property->setGetterName('get' . $baseName);
@@ -167,6 +178,21 @@ class NameGenerator
             $objectDefinition = $property->getObjectTypeDefinition();
             if($objectDefinition !== null) {
                 $this->setTreeGettersSetters($objectDefinition);
+            }
+        }
+    }
+
+    public function setTreePropertyClassNames(DtoDefinition $root) {
+        foreach ($root->getProperties() as $property) {
+            $propertyName = $property->getSpecPropertyName();
+            if (!$this->naming->isAllowedPhpPropertyName($propertyName)) {
+                throw CannotGenerateCodeForOperation::becausePropertyNameIsReservedWord($propertyName);
+            }
+            $property->setClassPropertyName($propertyName);
+
+            $objectDefinition = $property->getObjectTypeDefinition();
+            if($objectDefinition !== null) {
+                $this->setTreePropertyClassNames($objectDefinition);
             }
         }
     }

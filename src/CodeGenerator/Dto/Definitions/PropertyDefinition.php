@@ -7,7 +7,7 @@ namespace OnMoon\OpenApiServerBundle\CodeGenerator\Dto\Definitions;
 class PropertyDefinition
 {
     private string $specPropertyName;
-    private string $classPropertyName;
+    private ?string $classPropertyName = null;
     private bool $array = false;
     private $defaultValue = null;
     private bool $required = false;
@@ -47,7 +47,6 @@ class PropertyDefinition
     public function __construct(string $specPropertyName)
     {
         $this->specPropertyName = $specPropertyName;
-        $this->classPropertyName = $specPropertyName;
     }
 
     /**
@@ -59,18 +58,18 @@ class PropertyDefinition
     }
 
     /**
-     * @return string
+     * @return string|null
      */
-    public function getClassPropertyName(): string
+    public function getClassPropertyName(): ?string
     {
         return $this->classPropertyName;
     }
 
     /**
-     * @param string $classPropertyName
+     * @param string|null $classPropertyName
      * @return PropertyDefinition
      */
-    public function setClassPropertyName(string $classPropertyName): PropertyDefinition
+    public function setClassPropertyName(?string $classPropertyName): PropertyDefinition
     {
         $this->classPropertyName = $classPropertyName;
         return $this;
