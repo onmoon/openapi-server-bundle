@@ -46,6 +46,7 @@ open_api_server:
   root_path: %kernel.project_dir%/src/Generated 
   language_level: 7.4.0 # minimum PHP version the generated code should be compatible with
   generated_dir_permissions: 0755 # permissions for the generated directories
+  full_doc_blocks: false # whether to generate DocBlocks for typed variables and params  
   specs:
     petstore:
       path: '../spec/petstore.yaml' # path to OpenApi specification

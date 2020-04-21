@@ -33,6 +33,7 @@ class ServiceSubscriberCodeGenerator extends CodeGenerator
         $fileBuilder = $this->factory->namespace($subscriberDefinition->getNamespace());
 
         $fileBuilder->addStmt($this->factory->use(ContainerInterface::class));
+        $fileBuilder->addStmt($this->factory->use(RequestHandler::class));
 
         $classBuilder = $this
             ->factory
@@ -44,9 +45,6 @@ class ServiceSubscriberCodeGenerator extends CodeGenerator
             $this->use($fileBuilder, $subscriberDefinition->getNamespace(), $implement);
         }
 
-        //ToDo: move upwards
-        $fileBuilder->addStmt($this->factory->use(RequestHandler::class));
-
         $services = [];
         foreach ($graphDefinition->getSpecifications() as $specification) {
             foreach ($specification->getOperations() as $operation) {
@@ -55,85 +53,99 @@ class ServiceSubscriberCodeGenerator extends CodeGenerator
             }
         }
 
-        //ToDo: full DocBlock support
-        $classBuilder->addStmts(
-            [
-                $this
-                        ->factory
-                        ->property('locator')
-                        ->makePrivate()
-                        ->setType('ContainerInterface'),
-                $this
-                        ->factory
-                        ->method('__construct')
-                        ->makePublic()
-                        ->addParam(
-                            $this->factory->param('locator')->setType('ContainerInterface')
-                        )
-                        ->addStmt(
-                            new Assign(new Variable('this->locator'), new Variable('locator'))
-                        ),
-                $this
-                        ->factory
-                        ->method('getSubscribedServices')
-                        ->makePublic()
-                        ->makeStatic()
-                        ->setDocComment('/**
+        $property = $this
+            ->factory
+            ->property('locator')
+            ->makePrivate()
+            ->setType('ContainerInterface');
+        if ($this->fullDocs) {
+            $property->setDocComment('/** @var ContainerInterface */');
+        }
+
+        $constructor = $this
+            ->factory
+            ->method('__construct')
+            ->makePublic()
+            ->addParam(
+                $this->factory->param('locator')->setType('ContainerInterface')
+            )
+            ->addStmt(
+                new Assign(new Variable('this->locator'), new Variable('locator'))
+            );
+        if ($this->fullDocs) {
+            $constructor->setDocComment('/** @param ContainerInterface $locator */');
+        }
+
+        $getSubscribedServices = $this
+            ->factory
+            ->method('getSubscribedServices')
+            ->makePublic()
+            ->makeStatic()
+            ->setDocComment('/**
                                          * @inheritDoc
                                          */')
-                        ->addStmt(
-                            new Return_(
-                                new Array_(
-                                    array_map(
-                                        static fn (string $service) : ArrayItem =>
-                                        new ArrayItem(
-                                            new Concat(
-                                                new String_('?'),
-                                                new ClassConstFetch(
-                                                    new Name($service),
-                                                    'class'
-                                                )
-                                            )
-                                        ),
-                                        $services
+            ->addStmt(
+                new Return_(
+                    new Array_(
+                        array_map(
+                            static fn (string $service) : ArrayItem =>
+                            new ArrayItem(
+                                new Concat(
+                                    new String_('?'),
+                                    new ClassConstFetch(
+                                        new Name($service),
+                                        'class'
                                     )
                                 )
-                            )
-                        ),
-                $this
-                        ->factory
-                        ->method('get')
-                        ->makePublic()
-                        ->setReturnType('?RequestHandler')
-                        ->addParam(
-                            $this->factory->param('interface')->setType('string')
+                            ),
+                            $services
                         )
-                        ->addStmt(
-                            new If_(new BooleanNot(new MethodCall(
-                                new Variable('this->locator'),
-                                'has',
-                                [
-                                    new Arg(
-                                        new Variable('interface')
-                                    ),
-                                ]
-                            )), ['stmts' => [new Return_($this->factory->val(null))]])
-                        )
-                        ->addStmt(
-                            new Return_(
-                                new MethodCall(
-                                    new Variable('this->locator'),
-                                    'get',
-                                    [
-                                        new Arg(
-                                            new Variable('interface')
-                                        ),
-                                    ]
-                                )
-                            )
+                    )
+                )
+            );
+
+        $getRequestHandler = $this
+            ->factory
+            ->method('get')
+            ->makePublic()
+            ->setReturnType('?RequestHandler')
+            ->addParam(
+                $this->factory->param('interface')->setType('string')
+            )
+            ->addStmt(
+                new If_(new BooleanNot(new MethodCall(
+                    new Variable('this->locator'),
+                    'has',
+                    [
+                        new Arg(
+                            new Variable('interface')
                         ),
-            ]
-        );
+                    ]
+                )), ['stmts' => [new Return_($this->factory->val(null))]])
+            )
+            ->addStmt(
+                new Return_(
+                    new MethodCall(
+                        new Variable('this->locator'),
+                        'get',
+                        [
+                            new Arg(
+                                new Variable('interface')
+                            ),
+                        ]
+                    )
+                )
+            );
+
+        if ($this->fullDocs) {
+            $docs = [
+                '@param string $interface',
+                '@return RequestHandler|null',
+            ];
+            $getRequestHandler->setDocComment($this->getDocComment($docs));
+        }
+
+        $classBuilder->addStmts([$property, $constructor, $getSubscribedServices, $getRequestHandler]);
 
         $fileBuilder->addStmt($classBuilder);
 

@@ -32,6 +32,7 @@ class OpenApiServerExtension extends Extension implements ExtensionInterface
          *     root_name_space:string,
          *     language_level:string,
          *     generated_dir_permissions: string,
+         *     full_doc_blocks: bool,
          *     specs: array{
          *         path: string,
          *         type?: string,
@@ -60,6 +61,7 @@ class OpenApiServerExtension extends Extension implements ExtensionInterface
         $container->setParameter('openapi.generated.code.root.namespace', $rootNameSpace);
         $container->setParameter('openapi.generated.code.language.level', $config['language_level']);
         $container->setParameter('openapi.generated.code.dir.permissions', $config['generated_dir_permissions']);
+        $container->setParameter('openapi.generated.code.full.doc.blocks', $config['full_doc_blocks']);
 
         $definition = $container->getDefinition(SpecificationLoader::class);
 

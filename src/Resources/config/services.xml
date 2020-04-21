@@ -31,12 +31,15 @@
         </service>
         <service id="OnMoon\OpenApiServerBundle\CodeGenerator\PhpParserGenerators\DtoCodeGenerator">
             <argument key="$languageLevel">%openapi.generated.code.language.level%</argument>
+            <argument key="$fullDocs">%openapi.generated.code.full.doc.blocks%</argument>
         </service>
         <service id="OnMoon\OpenApiServerBundle\CodeGenerator\PhpParserGenerators\InterfaceCodeGenerator">
             <argument key="$languageLevel">%openapi.generated.code.language.level%</argument>
+            <argument key="$fullDocs">%openapi.generated.code.full.doc.blocks%</argument>
         </service>
         <service id="OnMoon\OpenApiServerBundle\CodeGenerator\PhpParserGenerators\ServiceSubscriberCodeGenerator">
             <argument key="$languageLevel">%openapi.generated.code.language.level%</argument>
+            <argument key="$fullDocs">%openapi.generated.code.full.doc.blocks%</argument>
         </service>
         <service id="OnMoon\OpenApiServerBundle\CodeGenerator\Filesystem\FileWriter" class="OnMoon\OpenApiServerBundle\CodeGenerator\Filesystem\FilePutContentsFileWriter">
             <argument key="$dirPemissions">%openapi.generated.code.dir.permissions%</argument>

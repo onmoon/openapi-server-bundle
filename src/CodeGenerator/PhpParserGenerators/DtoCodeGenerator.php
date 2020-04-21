@@ -18,8 +18,6 @@ use PhpParser\Node\Expr\Variable;
 use PhpParser\Node\Stmt\Return_;
 use function count;
 use function Safe\sprintf;
-use function str_replace;
-use function strpos;
 
 class DtoCodeGenerator extends CodeGenerator
 {
@@ -51,14 +49,13 @@ class DtoCodeGenerator extends CodeGenerator
         }
 
         $classBuilder->addStmts($this->generateProperties($definition));
-        //ToDo: Move below after tests
-        if ($definition instanceof ResponseDtoDefinition) {
-            $classBuilder->addStmt($this->generateResponseCodeStaticMethod($definition));
-        }
-
         $classBuilder->addStmts($this->generateConstructor($definition));
         $classBuilder->addStmts($this->generateGetters($definition));
         $classBuilder->addStmts($this->generateSetters($definition));
+
+        if ($definition instanceof ResponseDtoDefinition) {
+            $classBuilder->addStmt($this->generateResponseCodeStaticMethod($definition));
+        }
 
         $fileBuilder = $fileBuilder->addStmt($classBuilder);
 
@@ -176,13 +173,14 @@ class DtoCodeGenerator extends CodeGenerator
             $docCommentLines[] = '';
         }
 
-        //ToDo: remove this
-        if (strpos($definition->getClassPropertyName(), 'queryParameters') === false
-            &&
-            strpos($definition->getClassPropertyName(), 'pathParameters') === false
-            &&
-            strpos($definition->getClassPropertyName(), 'body') === false
-        ) {
+        $supportSymfonySerializer = true;
+        /*
+         * Symfony serializer does not support property class definitions.
+         * ToDo: Remove this hack and phpstan ignores after serializer is no longer used.
+         */
+
+        /** @phpstan-ignore-next-line */
+        if ($this->fullDocs || $definition->isArray() || $supportSymfonySerializer) {
             $docCommentLines[] = sprintf(
                 '@var %s $%s ',
                 $this->getTypeDocBlock($definition),
@@ -190,6 +188,7 @@ class DtoCodeGenerator extends CodeGenerator
             );
         }
 
+        /** @phpstan-ignore-next-line */
         if (count($docCommentLines)) {
             $property->setDocComment($this->getDocComment($docCommentLines));
         }
@@ -199,11 +198,10 @@ class DtoCodeGenerator extends CodeGenerator
 
     private function generateMethodParameter(PropertyDefinition $definition) : Param
     {
-//ToDo: Remove
         return $this
             ->factory
             ->param($definition->getClassPropertyName())
-            ->setType(str_replace('?', '', $this->getTypePhp($definition)));
+            ->setType($this->getTypePhp($definition));
     }
 
     private function getAssignmentDefinition(string $name) : Assign
@@ -250,12 +248,12 @@ class DtoCodeGenerator extends CodeGenerator
             ->addParam($this->generateMethodParameter($definition))
             ->addStmt($this->getAssignmentDefinition($definition->getClassPropertyName()))
             ->addStmt(new Return_(new Variable('this')));
-//ToDo: remove
+
         if ($this->fullDocs || $definition->isArray()) {
             $blocks = [
                 sprintf(
                     '@param %s $%s',
-                    str_replace('|null', '', $this->getTypeDocBlock($definition)),
+                    $this->getTypeDocBlock($definition),
                     $definition->getClassPropertyName()
                 ),
             ];

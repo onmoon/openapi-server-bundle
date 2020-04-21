@@ -22,6 +22,7 @@ class Configuration implements ConfigurationInterface
                 ->scalarNode('root_name_space')->defaultValue('App\Generated')->cannotBeEmpty()->end()
                 ->scalarNode('language_level')->defaultValue('7.4.0')->cannotBeEmpty()->end()
                 ->scalarNode('generated_dir_permissions')->defaultValue('0755')->cannotBeEmpty()->end()
+                ->booleanNode('full_doc_blocks')->defaultValue(false)->end()
                 ->arrayNode('specs')
                     ->arrayPrototype()
                         ->children()
