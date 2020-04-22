@@ -181,7 +181,7 @@ class ApiController
         $statusCode = null;
 
         if ($responseDto instanceof ResponseDto) {
-            $response->setContent($this->serializer->createResponse($responseDto));
+            $response->setData($responseDto->toArray());
             $statusCode = $responseDto::_getResponseCode() ?? $statusCode;
         }
 

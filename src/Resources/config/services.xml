@@ -22,8 +22,8 @@
         <service id="OnMoon\OpenApiServerBundle\Controller\ApiController">
             <tag name="controller.service_arguments" />
         </service>
-        <service id="OnMoon\OpenApiServerBundle\OpenApi\ArgumentResolver" />
-        <service id="OnMoon\OpenApiServerBundle\OpenApi\ScalarTypesResolver" />
+        <service id="OnMoon\OpenApiServerBundle\Types\ArgumentResolver" />
+        <service id="OnMoon\OpenApiServerBundle\Types\ScalarTypesResolver" />
         <service id="PhpParser\BuilderFactory" />
         <service id="OnMoon\OpenApiServerBundle\CodeGenerator\Naming\NamingStrategy" class="OnMoon\OpenApiServerBundle\CodeGenerator\Naming\DefaultNamingStrategy">
             <argument key="$rootNamespace">%openapi.generated.code.root.namespace%</argument>

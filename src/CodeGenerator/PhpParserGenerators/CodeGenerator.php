@@ -7,7 +7,7 @@ namespace OnMoon\OpenApiServerBundle\CodeGenerator\PhpParserGenerators;
 use Exception;
 use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\ClassDefinition;
 use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\PropertyDefinition;
-use OnMoon\OpenApiServerBundle\OpenApi\ScalarTypesResolver;
+use OnMoon\OpenApiServerBundle\Types\ScalarTypesResolver;
 use PhpParser\Builder\Namespace_;
 use PhpParser\BuilderFactory;
 use PhpParser\Node\Scalar\LNumber;

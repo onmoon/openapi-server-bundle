@@ -9,13 +9,27 @@ use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\DtoDefinition;
 use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\GeneratedFileDefinition;
 use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\PropertyDefinition;
 use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\ResponseDtoDefinition;
+use OnMoon\OpenApiServerBundle\Types\ScalarTypesResolver;
 use PhpParser\Builder;
 use PhpParser\Builder\Method;
 use PhpParser\Builder\Param;
 use PhpParser\Builder\Property;
+use PhpParser\Node\Arg;
+use PhpParser\Node\Expr;
+use PhpParser\Node\Expr\Array_;
+use PhpParser\Node\Expr\ArrayItem;
+use PhpParser\Node\Expr\ArrowFunction;
 use PhpParser\Node\Expr\Assign;
+use PhpParser\Node\Expr\BinaryOp\Identical;
+use PhpParser\Node\Expr\FuncCall;
+use PhpParser\Node\Expr\MethodCall;
+use PhpParser\Node\Expr\StaticCall;
+use PhpParser\Node\Expr\Ternary;
 use PhpParser\Node\Expr\Variable;
+use PhpParser\Node\Name;
+use PhpParser\Node\Scalar\String_;
 use PhpParser\Node\Stmt\Return_;
+use function array_map;
 use function count;
 use function Safe\sprintf;
 
@@ -55,6 +69,12 @@ class DtoCodeGenerator extends CodeGenerator
 
         if ($definition instanceof ResponseDtoDefinition) {
             $classBuilder->addStmt($this->generateResponseCodeStaticMethod($definition));
+        }
+
+        $needSerializerClass = false;
+        $classBuilder->addStmt($this->generateToArray($definition, $needSerializerClass));
+        if ($needSerializerClass) {
+            $fileBuilder->addStmt($this->factory->use(ScalarTypesResolver::SERIALIZER_FULL_CLASS));
         }
 
         $fileBuilder = $fileBuilder->addStmt($classBuilder);
@@ -288,5 +308,80 @@ class DtoCodeGenerator extends CodeGenerator
         }
 
         return $method;
+    }
+
+    private function generateToArray(DtoDefinition $definition, bool &$needSerializerClass) : Method
+    {
+        return $this
+            ->factory
+            ->method('toArray')
+            ->makePublic()
+            ->setReturnType('array')
+            ->setDocComment($this->getDocComment(['@inheritDoc']))
+            ->addStmt(
+                new Return_(
+                    new Array_(
+                        array_map(
+                            function ($p) use (&$needSerializerClass) {
+                                /** @psalm-suppress MixedArgument */
+                                return $this->generateToArrayItem($p, $needSerializerClass);
+                            },
+                            $definition->getProperties()
+                        )
+                    )
+                )
+            );
+    }
+
+    private function generateToArrayItem(PropertyDefinition $property, bool &$needSerializerClass) : ArrayItem
+    {
+        $source = new Variable('this->' . $property->getClassPropertyName());
+
+        $serializer = null;
+        $scalarType = $property->getScalarTypeId();
+        if ($scalarType !== null) {
+            $serializerFn = $this->typeResolver->getSerializer($scalarType);
+            if ($serializerFn !== null) {
+                $serializer          = static fn (Expr $v) : Expr => new StaticCall(
+                    new Name(ScalarTypesResolver::SERIALIZER_CLASS),
+                    $serializerFn,
+                    [new Arg($v)]
+                );
+                $needSerializerClass = true;
+            }
+        } elseif ($property->getObjectTypeDefinition() !== null) {
+            $serializer = static fn (Expr $v) : Expr => new MethodCall($v, 'toArray');
+        }
+
+        if ($property->isArray() && $serializer !== null) {
+            $serializer = fn (Expr $v) : Expr => new FuncCall(
+                new Name('array_map'),
+                [
+                    new Arg(
+                        new ArrowFunction(
+                            [
+                                'static' => true,
+                                'params' => [$this->factory->param('v')->getNode()],
+                                'expr' => $serializer(new Variable('v')),
+                            ]
+                        )
+                    ),
+                    new Arg($v),
+                ]
+            );
+        }
+
+        if ($property->isNullable() && $serializer !== null) {
+            $serializer = fn (Expr $v) : Expr => new Ternary(
+                new Identical($this->factory->val(null), $v),
+                $this->factory->val(null),
+                $serializer($v)
+            );
+        }
+
+        return new ArrayItem(
+            $serializer !== null ? $serializer($source) : $source,
+            new String_($property->getSpecPropertyName())
+        );
     }
 }
