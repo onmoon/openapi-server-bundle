@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace OnMoon\OpenApiServerBundle\OpenApi;
+namespace OnMoon\OpenApiServerBundle\Types;
 
 use cebe\openapi\spec\Parameter;
 use cebe\openapi\spec\Schema;

@@ -26,7 +26,7 @@ use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\ResponseDtoDefinition;
 use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\ServiceSubscriberDefinition;
 use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\SpecificationDefinition;
 use OnMoon\OpenApiServerBundle\Exception\CannotGenerateCodeForOperation;
-use OnMoon\OpenApiServerBundle\OpenApi\ScalarTypesResolver;
+use OnMoon\OpenApiServerBundle\Types\ScalarTypesResolver;
 use OnMoon\OpenApiServerBundle\Specification\Specification;
 use OnMoon\OpenApiServerBundle\Specification\SpecificationLoader;
 use function array_filter;

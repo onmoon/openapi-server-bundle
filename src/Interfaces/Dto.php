@@ -6,4 +6,5 @@ namespace OnMoon\OpenApiServerBundle\Interfaces;
 
 interface Dto
 {
+    public function toArray() : array;
 }

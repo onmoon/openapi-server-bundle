@@ -195,6 +195,7 @@ class NameGenerator
     {
         foreach ($root->getProperties() as $property) {
             $propertyName = $property->getSpecPropertyName();
+            //ToDo: change name to suitable after toArray and fromArray implementation
             if (! $this->naming->isAllowedPhpPropertyName($propertyName)) {
                 throw CannotGenerateCodeForOperation::becausePropertyNameIsReservedWord($propertyName);
             }

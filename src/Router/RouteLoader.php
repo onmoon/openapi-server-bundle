@@ -7,7 +7,7 @@ namespace OnMoon\OpenApiServerBundle\Router;
 use cebe\openapi\spec\Parameter;
 use cebe\openapi\spec\Reference;
 use OnMoon\OpenApiServerBundle\Controller\ApiController;
-use OnMoon\OpenApiServerBundle\OpenApi\ArgumentResolver;
+use OnMoon\OpenApiServerBundle\Types\ArgumentResolver;
 use OnMoon\OpenApiServerBundle\Specification\SpecificationLoader;
 use Symfony\Component\Config\Loader\Loader;
 use Symfony\Component\Config\Loader\LoaderInterface;
