@@ -312,11 +312,12 @@ class DtoCodeGenerator extends CodeGenerator
 
     private function generateToArray(DtoDefinition $definition, bool &$needSerializerClass) : Method
     {
-        $method = $this
+        return $this
             ->factory
             ->method('toArray')
             ->makePublic()
             ->setReturnType('array')
+            ->setDocComment($this->getDocComment(['@inheritDoc']))
             ->addStmt(
                 new Return_(
                     new Array_(
@@ -330,14 +331,6 @@ class DtoCodeGenerator extends CodeGenerator
                     )
                 )
             );
-
-        if ($this->fullDocs) {
-            $method->setDocComment(
-                $this->getDocComment(['@inheritDoc'])
-            );
-        }
-
-        return $method;
     }
 
     private function generateToArrayItem(PropertyDefinition $property, bool &$needSerializerClass) : ArrayItem
