@@ -6,9 +6,6 @@ namespace OnMoon\OpenApiServerBundle\Types;
 
 use cebe\openapi\spec\Schema;
 use cebe\openapi\spec\Type;
-use Safe\DateTime;
-use function Safe\base64_decode;
-use function Safe\settype;
 
 class ScalarTypesResolver
 {
@@ -23,10 +20,9 @@ class ScalarTypesResolver
      * }>
      * @var mixed[]
      */
-    private array $scalarTypes = [];
+    private array $scalarTypes         = [];
     public const SERIALIZER_FULL_CLASS = TypeSerializer::class;
-    public const SERIALIZER_CLASS = 'TypeSerializer';
-
+    public const SERIALIZER_CLASS      = 'TypeSerializer';
 
     public function __construct()
     {
@@ -37,24 +33,24 @@ class ScalarTypesResolver
                 'format' => 'date',
                 'phpType' => '\DateTime',
                 'pattern' => '\d{4}-\d{2}-\d{2}',
-                'deserializer' => 'DeserializeDate',
-                'serializer' => 'SerializeDate',
+                'deserializer' => 'deserializeDate',
+                'serializer' => 'serializeDate',
             ],
             [
                 'type' => Type::STRING,
                 'format' => 'date-time',
                 'phpType' => '\DateTime',
                 'pattern' => '\d{4}-\d{2}-\d{2}( |T)\d{2}:\d{2}:\d{2}(|\.\d*)(Z|(\+|-)\d{2}:\d{2})',
-                'deserializer' => 'DeserializeDateTime',
-                'serializer' => 'SerializeDateTime',
+                'deserializer' => 'deserializeDateTime',
+                'serializer' => 'serializeDateTime',
             ],
             [
                 'type' => Type::STRING,
                 'format' => 'byte',
                 'phpType' => 'string',
                 'pattern' => '[a-zA-Z0-9+/]+[=]*',
-                'deserializer' => 'DeserializeByte',
-                'serializer' => 'SerializeByte',
+                'deserializer' => 'deserializeByte',
+                'serializer' => 'serializeByte',
             ],
             ['type' => Type::STRING, 'format' => 'binary', 'phpType' => 'string'],
 
@@ -68,11 +64,13 @@ class ScalarTypesResolver
         ];
     }
 
-    public function getSerializer (int $id) : ?string {
+    public function getSerializer(int $id) : ?string
+    {
         return $this->scalarTypes[$id]['serializer'] ?? null;
     }
 
-    public function getDeserializer (int $id) : ?string {
+    public function getDeserializer(int $id) : ?string
+    {
         return $this->scalarTypes[$id]['deserializer'] ?? null;
     }
 
