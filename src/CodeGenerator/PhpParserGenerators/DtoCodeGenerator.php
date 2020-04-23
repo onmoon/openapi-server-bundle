@@ -18,13 +18,14 @@ use PhpParser\Builder\Property;
 use PhpParser\Node\Arg;
 use PhpParser\Node\Expr;
 use PhpParser\Node\Expr\Array_;
+use PhpParser\Node\Expr\ArrayDimFetch;
 use PhpParser\Node\Expr\ArrayItem;
 use PhpParser\Node\Expr\ArrowFunction;
 use PhpParser\Node\Expr\Assign;
 use PhpParser\Node\Expr\AssignOp\Coalesce as CoalesceAssign;
 use PhpParser\Node\Expr\BinaryOp\Identical;
-use PhpParser\Node\Expr\FuncCall;
 use PhpParser\Node\Expr\MethodCall;
+use PhpParser\Node\Expr\New_;
 use PhpParser\Node\Expr\StaticCall;
 use PhpParser\Node\Expr\Ternary;
 use PhpParser\Node\Expr\Variable;
@@ -343,8 +344,9 @@ class DtoCodeGenerator extends CodeGenerator
     private function generateToArrayItem(PropertyDefinition $property, bool &$needSerializerClass) : ArrayItem
     {
         $source = new Variable('this->' . $property->getClassPropertyName());
-        $serializer = $this->getConverter($property, false, $needSerializerClass);
-        return new ArrayItem($serializer($source), new String_($property->getSpecPropertyName()));
+        $value  = $this->getConverter($property, false, $source, $needSerializerClass);
+
+        return new ArrayItem($value, new String_($property->getSpecPropertyName()));
     }
 
     private function generateFromArray(DtoDefinition $definition, bool &$needSerializerClass) : Method
@@ -356,10 +358,10 @@ class DtoCodeGenerator extends CodeGenerator
         $statements = [];
 
         foreach ($definition->getProperties() as $property) {
-            $fetch  = $this->generateFromArrayPropFetch($property, $source, $needSerializerClass);
+            $fetch = $this->generateFromArrayPropFetch($property, $source, $needSerializerClass);
 
             if ($property->isInConstructor()) {
-                if (!$property->isRequired()) {
+                if (! $property->isRequired()) {
                     $statements[] = new CoalesceAssign(
                         $this->generateFromArrayGetValue($property, $source),
                         $this->factory->val(null)
@@ -392,14 +394,15 @@ class DtoCodeGenerator extends CodeGenerator
             }
         }
 
-        $new = new Expr\New_(new Name($definition->getClassName()), $args);
+        $new = new New_(new Name($definition->getClassName()), $args);
 
-        if(count($setters) > 0) {
-            $var = new Variable('dto');
+        if (count($setters) > 0) {
+            $var          = new Variable('dto');
             $statements[] = new Assign($var, $new);
             foreach ($setters as $setter) {
                 $statements[] = $setter($var);
             }
+
             $statements[] = new Return_($var);
         } else {
             $statements[] = new Return_($new);
@@ -419,22 +422,25 @@ class DtoCodeGenerator extends CodeGenerator
     private function generateFromArrayPropFetch(PropertyDefinition $property, Variable $sourceVar, bool &$needSerializerClass) : Arg
     {
         $source = $this->generateFromArrayGetValue($property, $sourceVar);
-        $deserializer = $this->getConverter($property, true, $needSerializerClass);
-        return new Arg($deserializer($source));
+        $value  = $this->getConverter($property, true, $source, $needSerializerClass);
+
+        return new Arg($value);
     }
 
-    private function generateFromArrayGetValue(PropertyDefinition $property, Variable $sourceVar) : Expr {
-        return new Expr\ArrayDimFetch($sourceVar, new String_($property->getSpecPropertyName()));
+    private function generateFromArrayGetValue(PropertyDefinition $property, Variable $sourceVar) : Expr
+    {
+        return new ArrayDimFetch($sourceVar, new String_($property->getSpecPropertyName()));
     }
 
-    private function getConverter(PropertyDefinition $property, bool $deserialize, bool &$needSerializerClass) : callable {
-        $converter = null;
+    private function getConverter(PropertyDefinition $property, bool $deserialize, Expr $source, bool &$needSerializerClass) : Expr
+    {
+        $converter  = null;
         $scalarType = $property->getScalarTypeId();
         $objectType = $property->getObjectTypeDefinition();
         if ($scalarType !== null) {
             $converterFn = $this->typeResolver->getConverter($deserialize, $scalarType);
             if ($converterFn !== null) {
-                $converter          = static fn (Expr $v) : Expr => new StaticCall(
+                $converter           = static fn (Expr $v) : Expr => new StaticCall(
                     new Name(ScalarTypesResolver::SERIALIZER_CLASS),
                     $converterFn,
                     [new Arg($v)]
@@ -458,7 +464,7 @@ class DtoCodeGenerator extends CodeGenerator
                         'expr' => $converter(new Variable('v')),
                     ]
                 ),
-                $v
+                $v,
             ]);
         }
 
@@ -470,11 +476,10 @@ class DtoCodeGenerator extends CodeGenerator
             );
         }
 
-        if($converter === null) {
-            $converter = fn($v) => $v;
+        if ($converter === null) {
+            return $source;
         }
 
-        return $converter;
+        return $converter($source);
     }
-
 }
