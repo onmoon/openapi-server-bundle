@@ -15,35 +15,17 @@ class AttributeGenerator
             foreach ($specificationDefinition->getOperations() as $operation) {
                 $request = $operation->getRequest();
                 if ($request !== null) {
-                    $this->requestPass($request);
+                    $this->setTreeAttributes($request);
                 }
 
                 foreach ($operation->getResponses() as $response) {
-                    $this->responsePass($response);
+                    $this->setTreeAttributes($response);
                 }
             }
         }
     }
 
-    public function requestPass(DtoDefinition $root) : void
-    {
-        foreach ($root->getProperties() as $property) {
-            $property
-                ->setHasGetter(true)
-                ->setHasSetter(false)
-                ->setNullable(! $property->isRequired() && $property->getDefaultValue() === null)
-                ->setInConstructor(false);
-
-            $object = $property->getObjectTypeDefinition();
-            if ($object === null) {
-                continue;
-            }
-
-            $this->requestPass($object);
-        }
-    }
-
-    public function responsePass(DtoDefinition $root) : void
+    public function setTreeAttributes(DtoDefinition $root) : void
     {
         foreach ($root->getProperties() as $property) {
             $property
@@ -57,7 +39,7 @@ class AttributeGenerator
                 continue;
             }
 
-            $this->responsePass($object);
+            $this->setTreeAttributes($object);
         }
     }
 }

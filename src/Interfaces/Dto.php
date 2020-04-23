@@ -12,4 +12,11 @@ interface Dto
      * @return mixed[]
      */
     public function toArray() : array;
+
+    /**
+     * Generate Dto tree from normalized array
+     *
+     * @param mixed[] $data
+     */
+    public static function fromArray(array $data) : self;
 }
