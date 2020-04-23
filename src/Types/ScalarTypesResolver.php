@@ -74,6 +74,11 @@ class ScalarTypesResolver
         return $this->scalarTypes[$id]['deserializer'] ?? null;
     }
 
+    public function getConverter(bool $deserialize, int $id) : ?string
+    {
+        return $deserialize ? $this->getDeserializer($id) : $this->getSerializer($id);
+    }
+
     /**
      * @return bool|string
      */

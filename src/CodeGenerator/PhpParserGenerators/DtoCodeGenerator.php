@@ -343,53 +343,8 @@ class DtoCodeGenerator extends CodeGenerator
     private function generateToArrayItem(PropertyDefinition $property, bool &$needSerializerClass) : ArrayItem
     {
         $source = new Variable('this->' . $property->getClassPropertyName());
-
-        $serializer = null;
-        $scalarType = $property->getScalarTypeId();
-        if ($scalarType !== null) {
-            $serializerFn = $this->typeResolver->getSerializer($scalarType);
-            if ($serializerFn !== null) {
-                $serializer          = static fn (Expr $v) : Expr => new StaticCall(
-                    new Name(ScalarTypesResolver::SERIALIZER_CLASS),
-                    $serializerFn,
-                    [new Arg($v)]
-                );
-                $needSerializerClass = true;
-            }
-        } elseif ($property->getObjectTypeDefinition() !== null) {
-            $serializer = static fn (Expr $v) : Expr => new MethodCall($v, 'toArray');
-        }
-
-        if ($property->isArray() && $serializer !== null) {
-            $serializer = fn (Expr $v) : Expr => new FuncCall(
-                new Name('array_map'),
-                [
-                    new Arg(
-                        new ArrowFunction(
-                            [
-                                'static' => true,
-                                'params' => [$this->factory->param('v')->getNode()],
-                                'expr' => $serializer(new Variable('v')),
-                            ]
-                        )
-                    ),
-                    new Arg($v),
-                ]
-            );
-        }
-
-        if ($property->isNullable() && $serializer !== null) {
-            $serializer = fn (Expr $v) : Expr => new Ternary(
-                new Identical($this->factory->val(null), $v),
-                $this->factory->val(null),
-                $serializer($v)
-            );
-        }
-
-        return new ArrayItem(
-            $serializer !== null ? $serializer($source) : $source,
-            new String_($property->getSpecPropertyName())
-        );
+        $serializer = $this->getConverter($property, false, $needSerializerClass);
+        return new ArrayItem($serializer($source), new String_($property->getSpecPropertyName()));
     }
 
     private function generateFromArray(DtoDefinition $definition, bool &$needSerializerClass) : Method
@@ -464,55 +419,62 @@ class DtoCodeGenerator extends CodeGenerator
     private function generateFromArrayPropFetch(PropertyDefinition $property, Variable $sourceVar, bool &$needSerializerClass) : Arg
     {
         $source = $this->generateFromArrayGetValue($property, $sourceVar);
-
-        $deserializer = null;
-        $scalarType = $property->getScalarTypeId();
-        $objectType = $property->getObjectTypeDefinition();
-        if ($scalarType !== null) {
-            $deserializerFn = $this->typeResolver->getDeserializer($scalarType);
-            if ($deserializerFn !== null) {
-                $deserializer          = static fn (Expr $v) : Expr => new StaticCall(
-                    new Name(ScalarTypesResolver::SERIALIZER_CLASS),
-                    $deserializerFn,
-                    [new Arg($v)]
-                );
-                $needSerializerClass = true;
-            }
-        } elseif ($objectType !== null) {
-            $deserializer = static fn (Expr $v) : Expr => new StaticCall(new Name($objectType->getClassName()), 'fromArray', [new Arg($v)]);
-        }
-
-        if ($property->isArray() && $deserializer !== null) {
-            $deserializer = fn (Expr $v) : Expr => new FuncCall(
-                new Name('array_map'),
-                [
-                    new Arg(
-                        new ArrowFunction(
-                            [
-                                'static' => true,
-                                'params' => [$this->factory->param('v')->getNode()],
-                                'expr' => $deserializer(new Variable('v')),
-                            ]
-                        )
-                    ),
-                    new Arg($v),
-                ]
-            );
-        }
-
-        if ($property->isNullable() && $deserializer !== null) {
-            $deserializer = fn (Expr $v) : Expr => new Ternary(
-                new Identical($this->factory->val(null), $v),
-                $this->factory->val(null),
-                $deserializer($v)
-            );
-        }
-
-
-        return new Arg($deserializer === null ? $source : $deserializer($source));
+        $deserializer = $this->getConverter($property, true, $needSerializerClass);
+        return new Arg($deserializer($source));
     }
 
     private function generateFromArrayGetValue(PropertyDefinition $property, Variable $sourceVar) : Expr {
         return new Expr\ArrayDimFetch($sourceVar, new String_($property->getSpecPropertyName()));
     }
+
+    private function getConverter(PropertyDefinition $property, bool $deserialize, bool &$needSerializerClass) : callable {
+        $converter = null;
+        $scalarType = $property->getScalarTypeId();
+        $objectType = $property->getObjectTypeDefinition();
+        if ($scalarType !== null) {
+            $converterFn = $this->typeResolver->getConverter($deserialize, $scalarType);
+            if ($converterFn !== null) {
+                $converter          = static fn (Expr $v) : Expr => new StaticCall(
+                    new Name(ScalarTypesResolver::SERIALIZER_CLASS),
+                    $converterFn,
+                    [new Arg($v)]
+                );
+                $needSerializerClass = true;
+            }
+        } elseif ($objectType !== null) {
+            if ($deserialize) {
+                $converter = static fn (Expr $v) : Expr => new StaticCall(new Name($objectType->getClassName()), 'fromArray', [new Arg($v)]);
+            } else {
+                $converter = static fn (Expr $v) : Expr => new MethodCall($v, 'toArray');
+            }
+        }
+
+        if ($property->isArray() && $converter !== null) {
+            $converter = fn (Expr $v) : Expr => $this->factory->funcCall('array_map', [
+                new ArrowFunction(
+                    [
+                        'static' => true,
+                        'params' => [$this->factory->param('v')->getNode()],
+                        'expr' => $converter(new Variable('v')),
+                    ]
+                ),
+                $v
+            ]);
+        }
+
+        if ($property->isNullable() && $converter !== null) {
+            $converter = fn (Expr $v) : Expr => new Ternary(
+                new Identical($this->factory->val(null), $v),
+                $this->factory->val(null),
+                $converter($v)
+            );
+        }
+
+        if($converter === null) {
+            $converter = fn($v) => $v;
+        }
+
+        return $converter;
+    }
+
 }
