@@ -53,17 +53,6 @@ final class CannotGenerateCodeForOperation extends OpenApiError
         );
     }
 
-    public static function becauseNoAssignmentFound(string $className, string $propertyName) : self
-    {
-        return new self(
-            sprintf(
-                'Failed to generate fromArray, property "%s" of "%s" neither is in constructor nor has a setter',
-                $propertyName,
-                $className
-            )
-        );
-    }
-
     /** @param string[] $context */
     public static function becauseOnlyScalarAreAllowed(string $propertyName, array $context) : self
     {

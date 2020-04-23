@@ -9,7 +9,6 @@ use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\DtoDefinition;
 use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\GeneratedFileDefinition;
 use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\PropertyDefinition;
 use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\ResponseDtoDefinition;
-use OnMoon\OpenApiServerBundle\Exception\CannotGenerateCodeForOperation;
 use OnMoon\OpenApiServerBundle\Types\ScalarTypesResolver;
 use PhpParser\Builder;
 use PhpParser\Builder\Method;
@@ -26,13 +25,13 @@ use PhpParser\Node\Expr\AssignOp\Coalesce as CoalesceAssign;
 use PhpParser\Node\Expr\BinaryOp\Identical;
 use PhpParser\Node\Expr\MethodCall;
 use PhpParser\Node\Expr\New_;
+use PhpParser\Node\Expr\PropertyFetch;
 use PhpParser\Node\Expr\StaticCall;
 use PhpParser\Node\Expr\Ternary;
 use PhpParser\Node\Expr\Variable;
 use PhpParser\Node\Name;
 use PhpParser\Node\Param as Param_;
 use PhpParser\Node\Scalar\String_;
-use PhpParser\Node\Stmt;
 use PhpParser\Node\Stmt\Expression;
 use PhpParser\Node\Stmt\If_;
 use PhpParser\Node\Stmt\Return_;
@@ -352,6 +351,7 @@ class DtoCodeGenerator extends CodeGenerator
     private function generateFromArray(DtoDefinition $definition, bool &$needSerializerClass) : Method
     {
         $source = new Variable('data');
+        $dto    = new Variable('dto');
 
         $args       = [];
         $setters    = [];
@@ -368,42 +368,31 @@ class DtoCodeGenerator extends CodeGenerator
                     );
                 }
 
-                $args[] = $fetch;
-            } elseif ($property->hasSetter()) {
-                $setterName = $property->getSetterName();
-                if ($setterName === null) {
-                    throw new Exception('setterName can not be null if hasSetter is true');
-                }
-
-                $setter = static fn (Expr $v) : Stmt =>  new Expression(new MethodCall($v, $setterName, [$fetch]));
+                $args[] = new Arg($fetch);
+            } else {
+                $setter = new Expression(new Assign(new PropertyFetch($dto, $property->getClassPropertyName()), $fetch));
                 if (! $property->isRequired()) {
-                    $setter = fn (Expr $v) : Stmt => new If_(
+                    $setter = new If_(
                         $this->factory->funcCall('array_key_exists', [$property->getSpecPropertyName(), $source]),
                         [
-                            'stmts' => [$setter($v)],
+                            'stmts' => [$setter],
                         ]
                     );
                 }
 
                 $setters[] = $setter;
-            } else {
-                throw CannotGenerateCodeForOperation::becauseNoAssignmentFound(
-                    $definition->getClassName(),
-                    $property->getSpecPropertyName()
-                );
             }
         }
 
         $new = new New_(new Name($definition->getClassName()), $args);
 
         if (count($setters) > 0) {
-            $var          = new Variable('dto');
-            $statements[] = new Assign($var, $new);
+            $statements[] = new Assign($dto, $new);
             foreach ($setters as $setter) {
-                $statements[] = $setter($var);
+                $statements[] = $setter;
             }
 
-            $statements[] = new Return_($var);
+            $statements[] = new Return_($dto);
         } else {
             $statements[] = new Return_($new);
         }
@@ -419,12 +408,11 @@ class DtoCodeGenerator extends CodeGenerator
             ->addStmts($statements);
     }
 
-    private function generateFromArrayPropFetch(PropertyDefinition $property, Variable $sourceVar, bool &$needSerializerClass) : Arg
+    private function generateFromArrayPropFetch(PropertyDefinition $property, Variable $sourceVar, bool &$needSerializerClass) : Expr
     {
         $source = $this->generateFromArrayGetValue($property, $sourceVar);
-        $value  = $this->getConverter($property, true, $source, $needSerializerClass);
 
-        return new Arg($value);
+        return $this->getConverter($property, true, $source, $needSerializerClass);
     }
 
     private function generateFromArrayGetValue(PropertyDefinition $property, Variable $sourceVar) : Expr
