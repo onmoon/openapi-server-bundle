@@ -47,11 +47,15 @@ class ReflectionDtoSerializer implements DtoSerializer
         }
 
         $input = [];
-        if(method_exists($inputDtoFQCN, 'getQueryParameters')) {
-            $input['queryParameters'] = $request->query->all();
+        /** @var int[][] $params */
+        $params = $route->getOption(RouteLoader::OPENAPI_ARGUMENTS);
+        if(array_key_exists('query', $params)) {
+            $source = $request->query->all();
+            $input['queryParameters'] = $this->getParameters($source, $params['query']);
         }
-        if(method_exists($inputDtoFQCN, 'getPathParameters')) {
-            $input['pathParameters'] = $this->getPathParameters($request, $route);
+        if(array_key_exists('path', $params)) {
+            $source = (array) $request->attributes->get('_route_params', []);
+            $input['pathParameters'] = $this->getParameters($source, $params['path']);
         }
         if(method_exists($inputDtoFQCN, 'getBody')) {
             $input['body'] = json_decode($request->getContent(), true);
@@ -59,15 +63,17 @@ class ReflectionDtoSerializer implements DtoSerializer
 
         /** @var Dto $inputDto */
         $inputDto = call_user_func($inputDtoFQCN.'::fromArray', $input);
-        return $inputDto;
+        var_dump($inputDto);
     }
 
-    /** @return mixed[] */
-    private function getPathParameters(Request $request, Route $route) : array {
-        $source = (array) $request->attributes->get('_route_params', []);
+    /**
+     * @param string[] $source
+     * @param int[] $params
+     * @return mixed[]
+     */
+    private function getParameters(array $source, array $params) : array {
+
         $result = [];
-        /** @var int[] $params */
-        $params = $route->getOption(RouteLoader::OPENAPI_ARGUMENTS);
         foreach ($params as $name => $typeId) {
             if(array_key_exists($name, $source)) {
                 $result[$name] = $this->resolver->serialize($typeId, $source[$name]);

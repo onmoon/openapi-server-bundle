@@ -31,16 +31,16 @@ class ArgumentResolver
 
         foreach ([$pathParameters, $methodParameter] as $parameters) {
             foreach ($parameters as $parameter) {
-                if ($parameter->in !== 'path') {
-                    continue;
-                }
-
                 if (! ($parameter->schema instanceof Schema)) {
                     continue;
                 }
 
                 $type                    = $this->typesResolver->findScalarType($parameter->schema);
-                $types[$parameter->name] = $type;
+                $types[$parameter->in][$parameter->name] = $type;
+
+                if ($parameter->in !== 'path') {
+                    continue;
+                }
 
                 $schema  = $parameter->schema;
                 $pattern = $this->typesResolver->getPattern($type);
