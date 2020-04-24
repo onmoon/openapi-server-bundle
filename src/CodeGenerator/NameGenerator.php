@@ -11,7 +11,6 @@ use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\GraphDefinition;
 use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\RequestDtoDefinition;
 use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\ResponseDtoDefinition;
 use OnMoon\OpenApiServerBundle\CodeGenerator\Naming\NamingStrategy;
-use OnMoon\OpenApiServerBundle\Exception\CannotGenerateCodeForOperation;
 use Throwable;
 use function ucfirst;
 
@@ -195,9 +194,9 @@ class NameGenerator
     {
         foreach ($root->getProperties() as $property) {
             $propertyName = $property->getSpecPropertyName();
-            //ToDo: change name to suitable after toArray and fromArray implementation
+
             if (! $this->naming->isAllowedPhpPropertyName($propertyName)) {
-                throw CannotGenerateCodeForOperation::becausePropertyNameIsReservedWord($propertyName);
+                $propertyName = $this->naming->stringToMethodName($propertyName);
             }
 
             $property->setClassPropertyName($propertyName);

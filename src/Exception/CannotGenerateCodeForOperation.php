@@ -43,16 +43,6 @@ final class CannotGenerateCodeForOperation extends OpenApiError
         );
     }
 
-    public static function becausePropertyNameIsReservedWord(string $propertyName) : self
-    {
-        return new self(
-            sprintf(
-                'Cannot generate property name for DTO class, property name: "%s" is a reserved word in PHP.',
-                $propertyName
-            )
-        );
-    }
-
     /** @param string[] $context */
     public static function becauseOnlyScalarAreAllowed(string $propertyName, array $context) : self
     {

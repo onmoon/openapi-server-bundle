@@ -22,7 +22,7 @@ use function is_resource;
 use function method_exists;
 use function Safe\json_decode;
 
-class ReflectionDtoSerializer implements DtoSerializer
+class ArrayDtoSerializer implements DtoSerializer
 {
     private ScalarTypesResolver $resolver;
 
@@ -79,10 +79,9 @@ class ReflectionDtoSerializer implements DtoSerializer
         }
 
         /**
-         * @phpstan-ignore-next-line
          * @var Dto $inputDto
          */
-        $inputDto = call_user_func($inputDtoFQCN . '::fromArray', $input);
+        $inputDto = $inputDtoFQCN::{'fromArray'}($input);
 
         return $inputDto;
     }
