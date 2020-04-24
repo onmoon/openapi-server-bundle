@@ -63,7 +63,7 @@ class ReflectionDtoSerializer implements DtoSerializer
 
         /** @var Dto $inputDto */
         $inputDto = call_user_func($inputDtoFQCN.'::fromArray', $input);
-        var_dump($inputDto);
+        return $inputDto;
     }
 
     /**
@@ -76,7 +76,7 @@ class ReflectionDtoSerializer implements DtoSerializer
         $result = [];
         foreach ($params as $name => $typeId) {
             if(array_key_exists($name, $source)) {
-                $result[$name] = $this->resolver->serialize($typeId, $source[$name]);
+                $result[$name] = $this->resolver->setType($typeId, $source[$name]);
             }
         }
         return $result;

@@ -80,7 +80,7 @@ class ScalarTypesResolver
     }
 
     /** @return mixed */
-    public function serialize(int $id, ?string $value)
+    public function setType(int $id, ?string $value)
     {
         if($value === null) {
             return null;
@@ -89,7 +89,9 @@ class ScalarTypesResolver
         $format = $this->scalarTypes[$id];
 
         if (isset($format['serializer'])) {
-            return call_user_func(self::SERIALIZER_FULL_CLASS.'::'.$format['serializer'], $value);
+            //ToDo: think of moving complete serializer here
+            //Main issues is that body is not passed thru setType now
+            return $value;
         }
 
         /** phpcs:disable Generic.PHP.ForbiddenFunctions.Found */
