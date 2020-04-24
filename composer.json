@@ -42,7 +42,6 @@
         "symfony/property-info": "4.4.*",
         "symfony/psr-http-message-bridge": "^2.0",
         "symfony/routing": "4.4.*",
-        "symfony/serializer": "4.4.*",
         "symfony/yaml": "4.4.*",
         "thecodingmachine/safe": "^1.0"
     },

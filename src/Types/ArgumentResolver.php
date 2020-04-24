@@ -35,7 +35,7 @@ class ArgumentResolver
                     continue;
                 }
 
-                $type                    = $this->typesResolver->findScalarType($parameter->schema);
+                $type                                    = $this->typesResolver->findScalarType($parameter->schema);
                 $types[$parameter->in][$parameter->name] = $type;
 
                 if ($parameter->in !== 'path') {

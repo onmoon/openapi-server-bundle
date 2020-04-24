@@ -6,6 +6,7 @@ namespace OnMoon\OpenApiServerBundle\Types;
 
 use cebe\openapi\spec\Schema;
 use cebe\openapi\spec\Type;
+use function Safe\settype;
 
 class ScalarTypesResolver
 {
@@ -82,7 +83,7 @@ class ScalarTypesResolver
     /** @return mixed */
     public function setType(int $id, ?string $value)
     {
-        if($value === null) {
+        if ($value === null) {
             return null;
         }
 
