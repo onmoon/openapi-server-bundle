@@ -79,6 +79,25 @@ class ScalarTypesResolver
         return $deserialize ? $this->getDeserializer($id) : $this->getSerializer($id);
     }
 
+    /** @return mixed */
+    public function serialize(int $id, ?string $value)
+    {
+        if($value === null) {
+            return null;
+        }
+
+        $format = $this->scalarTypes[$id];
+
+        if (isset($format['serializer'])) {
+            return call_user_func(self::SERIALIZER_FULL_CLASS.'::'.$format['serializer'], $value);
+        }
+
+        /** phpcs:disable Generic.PHP.ForbiddenFunctions.Found */
+        settype($value, $format['phpType']);
+
+        return $value;
+    }
+
     /**
      * @return bool|string
      */

@@ -200,14 +200,7 @@ class DtoCodeGenerator extends CodeGenerator
             $docCommentLines[] = '';
         }
 
-        $supportSymfonySerializer = true;
-        /*
-         * Symfony serializer does not support property class definitions.
-         * ToDo: Remove this hack and phpstan ignores after serializer is no longer used.
-         */
-
-        /** @phpstan-ignore-next-line */
-        if ($this->fullDocs || $definition->isArray() || $supportSymfonySerializer) {
+        if ($this->fullDocs || $definition->isArray()) {
             $docCommentLines[] = sprintf(
                 '@var %s $%s ',
                 $this->getTypeDocBlock($definition),
@@ -215,7 +208,6 @@ class DtoCodeGenerator extends CodeGenerator
             );
         }
 
-        /** @phpstan-ignore-next-line */
         if (count($docCommentLines)) {
             $property->setDocComment($this->getDocComment($docCommentLines));
         }

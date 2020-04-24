@@ -7,22 +7,24 @@ namespace OnMoon\OpenApiServerBundle\Serializer;
 use OnMoon\OpenApiServerBundle\Interfaces\Dto;
 /** phpcs:disable SlevomatCodingStandard.Namespaces.UnusedUses.UnusedUse */
 use OnMoon\OpenApiServerBundle\Interfaces\RequestHandler;
+use OnMoon\OpenApiServerBundle\Router\RouteLoader;
+use OnMoon\OpenApiServerBundle\Types\ScalarTypesResolver;
 use ReflectionClass;
 use ReflectionNamedType;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Route;
-use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
-use Symfony\Component\Serializer\SerializerInterface;
-use function assert;
-use function count;
 
 class ReflectionDtoSerializer implements DtoSerializer
 {
-    private SerializerInterface $serializer;
+    private ScalarTypesResolver $resolver;
 
-    public function __construct(SerializerInterface $serializer)
+    /**
+     * ReflectionDtoSerializer constructor.
+     * @param ScalarTypesResolver $resolver
+     */
+    public function __construct(ScalarTypesResolver $resolver)
     {
-        $this->serializer = $serializer;
+        $this->resolver = $resolver;
     }
 
     /**
@@ -44,105 +46,34 @@ class ReflectionDtoSerializer implements DtoSerializer
             return null;
         }
 
+        $input = [];
+        if(method_exists($inputDtoFQCN, 'getQueryParameters')) {
+            $input['queryParameters'] = $request->query->all();
+        }
+        if(method_exists($inputDtoFQCN, 'getPathParameters')) {
+            $input['pathParameters'] = $this->getPathParameters($request, $route);
+        }
+        if(method_exists($inputDtoFQCN, 'getBody')) {
+            $input['body'] = json_decode($request->getContent(), true);
+        }
+
         /** @var Dto $inputDto */
-        $inputDto                = new $inputDtoFQCN();
-        $inputDtoReflectionClass = new ReflectionClass($inputDto);
-
-        $this->setRequestBody($inputDto, $inputDtoReflectionClass, $request);
-        $this->setRequestPathParameters($inputDto, $inputDtoReflectionClass, $request);
-        $this->setRequestQueryParameters($inputDto, $inputDtoReflectionClass, $request);
-
+        $inputDto = call_user_func($inputDtoFQCN.'::fromArray', $input);
         return $inputDto;
     }
 
-    public function createResponse(object $dto) : string
-    {
-        return $this->serializer->serialize($dto, 'json');
-    }
-
-    /**
-     * @param ReflectionClass<Dto> $inputDtoRefl
-     */
-    private function setRequestQueryParameters(object $inputDto, ReflectionClass $inputDtoRefl, Request $request) : void
-    {
-        if (! $inputDtoRefl->hasProperty('queryParameters')) {
-            return;
+    /** @return mixed[] */
+    private function getPathParameters(Request $request, Route $route) : array {
+        $source = (array) $request->attributes->get('_route_params', []);
+        $result = [];
+        /** @var int[] $params */
+        $params = $route->getOption(RouteLoader::OPENAPI_ARGUMENTS);
+        foreach ($params as $name => $typeId) {
+            if(array_key_exists($name, $source)) {
+                $result[$name] = $this->resolver->serialize($typeId, $source[$name]);
+            }
         }
-
-        $dtoQueryParametersProperty = $inputDtoRefl->getProperty('queryParameters');
-        /** @var ReflectionNamedType $dtoQueryParametersPropertyType */
-        $dtoQueryParametersPropertyType = $dtoQueryParametersProperty->getType();
-        /** @var class-string<Dto> $dtoQueryParametersPropertyTypeFQCN */
-        $dtoQueryParametersPropertyTypeFQCN = $dtoQueryParametersPropertyType->getName();
-
-        $queryParametersDto                = new $dtoQueryParametersPropertyTypeFQCN();
-        $queryParametersDtoReflectionClass = new ReflectionClass($queryParametersDto);
-
-        foreach ($queryParametersDtoReflectionClass->getProperties() as $property) {
-            $property->setAccessible(true);
-            $property->setValue($queryParametersDto, $request->get($property->getName()));
-        }
-
-        $dtoQueryParametersProperty->setAccessible(true);
-        $dtoQueryParametersProperty->setValue($inputDto, $queryParametersDto);
-    }
-
-    /**
-     * @param ReflectionClass<Dto> $inputDtoRefl
-     */
-    private function setRequestPathParameters(object $inputDto, ReflectionClass $inputDtoRefl, Request $request) : void
-    {
-        /** @psalm-var array<string, string> $pathParameters */
-        $pathParameters = (array) $request->attributes->get('_route_params', []);
-
-        if (! $inputDtoRefl->hasProperty('pathParameters')) {
-            return;
-        }
-
-        $dtoPathParametersProperty = $inputDtoRefl->getProperty('pathParameters');
-        /** @var ReflectionNamedType $dtoPathParametersPropertyType */
-        $dtoPathParametersPropertyType = $dtoPathParametersProperty->getType();
-        /** @var class-string<Dto> $dtoPathParametersPropertyTypeFQCN */
-        $dtoPathParametersPropertyTypeFQCN = $dtoPathParametersPropertyType->getName();
-
-        $pathParametersDto                = new $dtoPathParametersPropertyTypeFQCN();
-        $pathParametersDtoReflectionClass = new ReflectionClass($pathParametersDto);
-
-        foreach ($pathParameters as $parameter => $value) {
-            $parameterReflectionProperty = $pathParametersDtoReflectionClass->getProperty($parameter);
-
-            $parameterReflectionProperty->setAccessible(true);
-            $parameterReflectionProperty->setValue($pathParametersDto, $value);
-        }
-
-        $dtoPathParametersProperty->setAccessible(true);
-        $dtoPathParametersProperty->setValue($inputDto, $pathParametersDto);
-    }
-
-    /**
-     * @param ReflectionClass<Dto> $inputDtoRefl
-     */
-    private function setRequestBody(object $inputDto, ReflectionClass $inputDtoRefl, Request $request) : void
-    {
-        if (! $inputDtoRefl->hasProperty('body')) {
-            return;
-        }
-
-        $dtoBodyProperty = $inputDtoRefl->getProperty('body');
-        /** @var ReflectionNamedType $dtoBodyPropertyType */
-        $dtoBodyPropertyType = $dtoBodyProperty->getType();
-        /** @var class-string<Dto> $dtoBodyPropertyTypeFQCN */
-        $dtoBodyPropertyTypeFQCN = $dtoBodyPropertyType->getName();
-
-        $dtoBodyProperty->setAccessible(true);
-        $dtoBodyProperty->setValue(
-            $inputDto,
-            $this->serializer->deserialize(
-                $request->getContent(),
-                $dtoBodyPropertyTypeFQCN,
-                'json'
-            )
-        );
+        return $result;
     }
 
     /**

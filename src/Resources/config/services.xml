@@ -55,26 +55,7 @@
         <service id="OnMoon\OpenApiServerBundle\Command\RefreshApiCodeCommand">
             <argument key="$rootPath">%openapi.generated.code.root.path%</argument>
         </service>
-        <service id="Symfony\Component\PropertyInfo\Extractor\PhpDocExtractor" />
-        <service id="Symfony\Component\Serializer\Normalizer\PropertyNormalizer">
-            <argument key="$propertyTypeExtractor" type="service" id="Symfony\Component\PropertyInfo\Extractor\PhpDocExtractor" />
-        </service>
-        <service id="Symfony\Component\Serializer\Normalizer\DateTimeNormalizer" />
-        <service id="Symfony\Component\Serializer\Normalizer\ArrayDenormalizer" />
-        <service id="Symfony\Component\Serializer\Encoder\JsonEncoder" />
-        <service id="openapi.bundle.serializer" class="Symfony\Component\Serializer\Serializer">
-            <argument key="$normalizers" type="collection">
-                <argument type="service" id="Symfony\Component\Serializer\Normalizer\PropertyNormalizer" />
-                <argument type="service" id="Symfony\Component\Serializer\Normalizer\DateTimeNormalizer" />
-                <argument type="service" id="Symfony\Component\Serializer\Normalizer\ArrayDenormalizer" />
-            </argument>
-            <argument key="$encoders" type="collection">
-                <argument type="service" id="Symfony\Component\Serializer\Encoder\JsonEncoder" />
-            </argument>
-        </service>
-        <service id="OnMoon\OpenApiServerBundle\Serializer\DtoSerializer" class="OnMoon\OpenApiServerBundle\Serializer\ReflectionDtoSerializer">
-            <argument key="$serializer" type="service" id="openapi.bundle.serializer" />
-        </service>
+        <service id="OnMoon\OpenApiServerBundle\Serializer\DtoSerializer" class="OnMoon\OpenApiServerBundle\Serializer\ReflectionDtoSerializer" />
         <service id="OnMoon\OpenApiServerBundle\Specification\SpecificationLoader">
             <argument key="$locator" type="service" id="file_locator" />
             <argument key="$cache" type="service" id="cache.app.taggable" />

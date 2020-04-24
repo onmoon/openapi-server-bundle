@@ -21,6 +21,4 @@ interface DtoSerializer
         string $requestHandlerInterface,
         string $methodName
     ) : ?Dto;
-
-    public function createResponse(object $dto) : string;
 }
