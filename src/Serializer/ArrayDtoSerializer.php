@@ -15,7 +15,6 @@ use ReflectionNamedType;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Route;
 use function array_key_exists;
-use function assert;
 use function call_user_func;
 use function count;
 use function is_resource;
@@ -120,8 +119,8 @@ class ArrayDtoSerializer implements DtoSerializer
             return null;
         }
 
+        /** @var ReflectionNamedType $inputType */
         $inputType = $methodParameters[0]->getType();
-        assert($inputType instanceof ReflectionNamedType);
 
         return $inputType->getName();
     }
