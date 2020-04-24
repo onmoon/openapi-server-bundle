@@ -6,6 +6,7 @@ namespace OnMoon\OpenApiServerBundle\Types;
 
 use cebe\openapi\spec\Schema;
 use cebe\openapi\spec\Type;
+use function Safe\settype;
 
 class ScalarTypesResolver
 {
@@ -77,6 +78,27 @@ class ScalarTypesResolver
     public function getConverter(bool $deserialize, int $id) : ?string
     {
         return $deserialize ? $this->getDeserializer($id) : $this->getSerializer($id);
+    }
+
+    /** @return mixed */
+    public function setType(int $id, ?string $value)
+    {
+        if ($value === null) {
+            return null;
+        }
+
+        $format = $this->scalarTypes[$id];
+
+        if (isset($format['serializer'])) {
+            //ToDo: think of moving complete serializer here
+            //Main issues is that body is not passed thru setType now
+            return $value;
+        }
+
+        /** phpcs:disable Generic.PHP.ForbiddenFunctions.Found */
+        settype($value, $format['phpType']);
+
+        return $value;
     }
 
     /**
