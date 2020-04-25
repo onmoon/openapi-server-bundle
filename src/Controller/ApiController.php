@@ -69,10 +69,9 @@ class ApiController
         $route         = $this->getRoute($request);
         $operationId   = (string) $route->getOption(RouteLoader::OPENAPI_OPERATION);
         $specification = $this->getSpecification($route);
-        $operation     = $specification->getOperations()[$operationId];
 
         $this->eventDispatcher->dispatch(new RequestEvent($request, $operationId, $specification));
-        $this->requestValidator->validate($request, $specification->getOpenApi(), $operation->getUrl(), $operation->getMethod());
+        $this->requestValidator->validate($request, $specification, $operationId);
 
         $requestDto = $this->createRequestDto($request, $route, $operationId);
         $this->eventDispatcher->dispatch(new RequestDtoEvent($requestDto, $operationId, $specification));

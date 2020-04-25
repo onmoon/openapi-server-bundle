@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace OnMoon\OpenApiServerBundle\Validator;
 
-use cebe\openapi\spec\OpenApi;
 use League\OpenAPIValidation\PSR7\OperationAddress;
 use League\OpenAPIValidation\PSR7\ValidatorBuilder;
+use OnMoon\OpenApiServerBundle\Specification\Definitions\Specification;
 use Symfony\Bridge\PsrHttpMessage\Factory\PsrHttpFactory;
 use Symfony\Component\HttpFoundation\Request;
 
@@ -25,15 +25,15 @@ class LeaguePSR7RequestSchemaValidator implements RequestSchemaValidator
 
     public function validate(
         Request $request,
-        OpenApi $specification,
-        string $path,
-        string $method
+        Specification $specification,
+        string $operationId
     ) : void {
+        $operation = $specification->getOperations()[$operationId];
         $this->validatorBuilder
-            ->fromSchema($specification)
+            ->fromSchema($specification->getOpenApi())
             ->getRoutedRequestValidator()
             ->validate(
-                new OperationAddress($path, $method),
+                new OperationAddress($operation->getUrl(), $operation->getMethod()),
                 $this->httpFactory->createRequest($request)
             );
     }
