@@ -30,13 +30,15 @@ class SpecificationLoader
      * @psalm-var array<string, Specification>
      */
     private array $specs = [];
+    private SpecificationParser $parser;
     private FileLocatorInterface $locator;
     private TagAwareCacheInterface $cache;
 
-    public function __construct(FileLocatorInterface $locator, TagAwareCacheInterface $cache)
+    public function __construct(SpecificationParser $parser, FileLocatorInterface $locator, TagAwareCacheInterface $cache)
     {
+        $this->parser = $parser;
         $this->locator = $locator;
-        $this->cache   = $cache;
+        $this->cache = $cache;
     }
 
     /**
@@ -87,12 +89,12 @@ class SpecificationLoader
         return $parsedSpecification;
     }
 
-    private function parseSpecification(SpecificationConfig $spec) : OpenApi
+    private function parseSpecification(SpecificationConfig $specificationConfig) : OpenApi
     {
-        $specPath = $this->locator->locate($spec->getPath());
+        $specPath = $this->locator->locate($specificationConfig->getPath());
 
         if (! is_string($specPath)) {
-            throw new Exception(sprintf('More than one file path found for specification "%s".', $spec->getPath()));
+            throw new Exception(sprintf('More than one file path found for specification "%s".', $specificationConfig->getPath()));
         }
 
         if (! stream_is_local($specPath)) {
@@ -103,38 +105,31 @@ class SpecificationLoader
             throw new Exception(sprintf('File "%s" not found.', $specPath));
         }
 
-        $type = $spec->getType();
+        $type = $specificationConfig->getType();
 
         if ($type === null) {
             $type = pathinfo($specPath, PATHINFO_EXTENSION);
         }
 
+        $specification = null;
         if ($type === 'yaml') {
-            /**
-             * phpcs:disable SlevomatCodingStandard.PHP.RequireExplicitAssertion.RequiredExplicitAssertion
-             * @var OpenApi $specification
-             */
             $specification = Reader::readFromYamlFile($specPath);
-
-            return $specification;
         }
 
         if ($type === 'json') {
-            /**
-             * phpcs:disable SlevomatCodingStandard.PHP.RequireExplicitAssertion.RequiredExplicitAssertion
-             * @var OpenApi $specification
-             */
             $specification = Reader::readFromJsonFile($specPath);
-
-            return $specification;
         }
 
-        throw new Exception(
-            sprintf(
-                'Failed to determine spec type for "%s".
-                Try specifying "type" parameter in bundle config with either "yaml" or "json" value',
-                $specPath
-            )
-        );
+        if(!($specification instanceof OpenApi)) {
+            throw new Exception(
+                sprintf(
+                    'Failed to determine spec type for "%s".
+                    Try specifying "type" parameter in bundle config with either "yaml" or "json" value',
+                    $specPath
+                )
+            );
+        }
+
+        return $specification;
     }
 }

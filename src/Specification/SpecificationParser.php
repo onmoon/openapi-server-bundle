@@ -300,9 +300,8 @@ class SpecificationParser
             $propertyDefinition->setDefaultValue($schemaDefaultValue);
         }
 
-        if (property_exists($property, 'pattern')) {
-            $propertyDefinition->setPattern($property->pattern);
-        }
+        $propertyDefinition->setPattern($property->pattern);
+
 
         if (! $isScalar && ! $allowNonScalar) {
             throw CannotGenerateCodeForOperation::becauseOnlyScalarAreAllowed($propertyName, $exceptionContext);

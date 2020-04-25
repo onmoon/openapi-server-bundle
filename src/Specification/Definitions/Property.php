@@ -12,7 +12,6 @@ class Property
     /** @var string|int|float|bool|null  */
     private $defaultValue                           = null;
     private bool $required                          = false;
-    private bool $nullable                          = true;
     private ?int $scalarTypeId                      = null;
     private ?ObjectType $objectTypeDefinition       = null;
     private ?string $description                    = null;
@@ -86,24 +85,6 @@ class Property
     public function setRequired(bool $required): self
     {
         $this->required = $required;
-        return $this;
-    }
-
-    /**
-     * @return bool
-     */
-    public function isNullable(): bool
-    {
-        return $this->nullable;
-    }
-
-    /**
-     * @param bool $nullable
-     * @return Property
-     */
-    public function setNullable(bool $nullable): self
-    {
-        $this->nullable = $nullable;
         return $this;
     }
 
