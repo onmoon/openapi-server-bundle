@@ -22,6 +22,20 @@ final class CannotGenerateCodeForOperation extends OpenApiError
     }
 
     /** @param string[] $context */
+    public static function becauseDuplicateOperationId(string $id, array $context) : self
+    {
+        return new self(
+            sprintf(
+                'Operation ID "%s" already taken for operation: "%s" of path: "%s" in specification file: "%s".',
+                $id,
+                $context['method'],
+                $context['url'],
+                $context['path']
+            )
+        );
+    }
+
+    /** @param string[] $context */
     public static function becauseRootIsNotObject(
         array $context,
         bool $isArray
