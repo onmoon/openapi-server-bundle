@@ -7,6 +7,7 @@ namespace OnMoon\OpenApiServerBundle\Specification;
 use cebe\openapi\Reader;
 use cebe\openapi\spec\OpenApi;
 use Exception;
+use OnMoon\OpenApiServerBundle\Specification\Definitions\SpecificationConfig;
 use Symfony\Component\Config\FileLocatorInterface;
 use Symfony\Contracts\Cache\ItemInterface;
 use Symfony\Contracts\Cache\TagAwareCacheInterface;
@@ -25,7 +26,7 @@ class SpecificationLoader
     private const CACHE_KEY_PREFIX = 'openapi-server-bundle-specification-';
 
     /**
-     * @var Specification[]
+     * @var SpecificationConfig[]
      * @psalm-var array<string, Specification>
      */
     private array $specs = [];
@@ -43,7 +44,7 @@ class SpecificationLoader
      */
     public function registerSpec(string $name, array $spec) : void
     {
-        $this->specs[$name] = new Specification(
+        $this->specs[$name] = new SpecificationConfig(
             $spec['path'],
             $spec['type'] ?? null,
             $spec['name_space'],
@@ -52,7 +53,7 @@ class SpecificationLoader
     }
 
     /**
-     * @return Specification[]
+     * @return SpecificationConfig[]
      *
      * @psalm-return array<string, Specification>
      */
@@ -61,7 +62,7 @@ class SpecificationLoader
         return $this->specs;
     }
 
-    public function get(string $name) : Specification
+    public function get(string $name) : SpecificationConfig
     {
         if (empty($this->specs[$name])) {
             throw new Exception('OpenApi spec "' . $name . '" is not registered in bundle config, ' .
@@ -86,7 +87,7 @@ class SpecificationLoader
         return $parsedSpecification;
     }
 
-    private function parseSpecification(Specification $spec) : OpenApi
+    private function parseSpecification(SpecificationConfig $spec) : OpenApi
     {
         $specPath = $this->locator->locate($spec->getPath());
 

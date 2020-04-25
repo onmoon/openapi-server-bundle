@@ -4,14 +4,14 @@
 namespace OnMoon\OpenApiServerBundle\Specification\Definitions;
 
 
-class SpecificationDefinition
+class Specification
 {
-    /** @var OperationDefinition[] */
+    /** @var Operation[] */
     private array $operations;
 
     /**
      * SpecificationDefinition constructor.
-     * @param OperationDefinition[] $operations
+     * @param Operation[] $operations
      */
     public function __construct($operations)
     {
@@ -19,7 +19,7 @@ class SpecificationDefinition
     }
 
     /**
-     * @return OperationDefinition[]
+     * @return Operation[]
      */
     public function getOperations(): array
     {

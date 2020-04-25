@@ -4,7 +4,7 @@
 namespace OnMoon\OpenApiServerBundle\Specification\Definitions;
 
 
-class PropertyDefinition
+class Property
 {
     private string $name;
 
@@ -14,7 +14,7 @@ class PropertyDefinition
     private bool $required                          = false;
     private bool $nullable                          = true;
     private ?int $scalarTypeId                      = null;
-    private ?ObjectDefinition $objectTypeDefinition = null;
+    private ?ObjectType $objectTypeDefinition       = null;
     private ?string $description                    = null;
     private ?string $pattern                        = null;
 
@@ -45,7 +45,7 @@ class PropertyDefinition
 
     /**
      * @param bool $array
-     * @return PropertyDefinition
+     * @return Property
      */
     public function setArray(bool $array): self
     {
@@ -63,7 +63,7 @@ class PropertyDefinition
 
     /**
      * @param bool|float|int|string|null $defaultValue
-     * @return PropertyDefinition
+     * @return Property
      */
     public function setDefaultValue($defaultValue)
     {
@@ -81,7 +81,7 @@ class PropertyDefinition
 
     /**
      * @param bool $required
-     * @return PropertyDefinition
+     * @return Property
      */
     public function setRequired(bool $required): self
     {
@@ -99,7 +99,7 @@ class PropertyDefinition
 
     /**
      * @param bool $nullable
-     * @return PropertyDefinition
+     * @return Property
      */
     public function setNullable(bool $nullable): self
     {
@@ -117,7 +117,7 @@ class PropertyDefinition
 
     /**
      * @param int|null $scalarTypeId
-     * @return PropertyDefinition
+     * @return Property
      */
     public function setScalarTypeId(?int $scalarTypeId): self
     {
@@ -126,18 +126,18 @@ class PropertyDefinition
     }
 
     /**
-     * @return ObjectDefinition|null
+     * @return ObjectType|null
      */
-    public function getObjectTypeDefinition(): ?ObjectDefinition
+    public function getObjectTypeDefinition(): ?ObjectType
     {
         return $this->objectTypeDefinition;
     }
 
     /**
-     * @param ObjectDefinition|null $objectTypeDefinition
-     * @return PropertyDefinition
+     * @param ObjectType|null $objectTypeDefinition
+     * @return Property
      */
-    public function setObjectTypeDefinition(?ObjectDefinition $objectTypeDefinition): self
+    public function setObjectTypeDefinition(?ObjectType $objectTypeDefinition): self
     {
         $this->objectTypeDefinition = $objectTypeDefinition;
         return $this;
@@ -153,7 +153,7 @@ class PropertyDefinition
 
     /**
      * @param string|null $description
-     * @return PropertyDefinition
+     * @return Property
      */
     public function setDescription(?string $description): self
     {
@@ -171,7 +171,7 @@ class PropertyDefinition
 
     /**
      * @param string|null $pattern
-     * @return PropertyDefinition
+     * @return Property
      */
     public function setPattern(?string $pattern): self
     {

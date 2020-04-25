@@ -4,18 +4,18 @@ declare(strict_types=1);
 
 namespace OnMoon\OpenApiServerBundle\CodeGenerator\Definitions;
 
-use OnMoon\OpenApiServerBundle\Specification\Specification;
+use OnMoon\OpenApiServerBundle\Specification\Definitions\SpecificationConfig;
 
 class SpecificationDefinition
 {
-    private Specification $specification;
+    private SpecificationConfig $specification;
     /** @var OperationDefinition[] */
     private array $operations;
 
     /**
      * @param OperationDefinition[] $operations
      */
-    public function __construct(Specification $specification, array $operations)
+    public function __construct(SpecificationConfig $specification, array $operations)
     {
         $this->specification = $specification;
         $this->operations    = $operations;
@@ -29,7 +29,7 @@ class SpecificationDefinition
         return $this->operations;
     }
 
-    public function getSpecification() : Specification
+    public function getSpecification() : SpecificationConfig
     {
         return $this->specification;
     }

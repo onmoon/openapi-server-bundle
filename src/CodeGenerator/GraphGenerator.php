@@ -26,7 +26,7 @@ use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\ResponseDtoDefinition;
 use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\ServiceSubscriberDefinition;
 use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\SpecificationDefinition;
 use OnMoon\OpenApiServerBundle\Exception\CannotGenerateCodeForOperation;
-use OnMoon\OpenApiServerBundle\Specification\Specification;
+use OnMoon\OpenApiServerBundle\Specification\Definitions\SpecificationConfig;
 use OnMoon\OpenApiServerBundle\Specification\SpecificationLoader;
 use OnMoon\OpenApiServerBundle\Types\ScalarTypesResolver;
 use function array_filter;
@@ -122,7 +122,7 @@ class GraphGenerator
      */
     private function getResponseDtoDefinitions(
         $responses,
-        Specification $specification,
+        SpecificationConfig $specification,
         array $exceptionContext
     ) : array {
         $responseDtoDefinitions = [];

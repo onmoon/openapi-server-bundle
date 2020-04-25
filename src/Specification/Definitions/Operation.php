@@ -4,15 +4,15 @@
 namespace OnMoon\OpenApiServerBundle\Specification\Definitions;
 
 
-class OperationDefinition
+class Operation
 {
     private string $url;
     private string $method;
     private ?string $summary                   = null;
-    private ?ObjectDefinition $requestBody     = null;
-    /** @var ObjectDefinition[] */
+    private ?ObjectType $requestBody     = null;
+    /** @var ObjectType[] */
     private array $requestParameters = [];
-    /** @var ObjectDefinition[] */
+    /** @var ObjectType[] */
     private array $responses = [];
 
     /**
@@ -20,11 +20,11 @@ class OperationDefinition
      * @param string $url
      * @param string $method
      * @param string|null $summary
-     * @param ObjectDefinition|null $requestBody
-     * @param array|ObjectDefinition[] $requestParameters
-     * @param array|ObjectDefinition[] $responses
+     * @param ObjectType|null $requestBody
+     * @param array|ObjectType[] $requestParameters
+     * @param array|ObjectType[] $responses
      */
-    public function __construct(string $url, string $method, ?string $summary, ?ObjectDefinition $requestBody, $requestParameters, $responses)
+    public function __construct(string $url, string $method, ?string $summary, ?ObjectType $requestBody, $requestParameters, $responses)
     {
         $this->url = $url;
         $this->method = $method;

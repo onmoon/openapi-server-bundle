@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace OnMoon\OpenApiServerBundle\Specification;
+namespace OnMoon\OpenApiServerBundle\Specification\Definitions;
 
-class Specification
+class SpecificationConfig
 {
     private string $path;
     private ?string $type;

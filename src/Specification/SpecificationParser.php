@@ -17,10 +17,11 @@ use cebe\openapi\spec\Schema;
 use cebe\openapi\spec\Type;
 use Exception;
 use OnMoon\OpenApiServerBundle\Exception\CannotGenerateCodeForOperation;
-use OnMoon\OpenApiServerBundle\Specification\Definitions\ObjectDefinition;
-use OnMoon\OpenApiServerBundle\Specification\Definitions\OperationDefinition;
-use OnMoon\OpenApiServerBundle\Specification\Definitions\PropertyDefinition;
-use OnMoon\OpenApiServerBundle\Specification\Definitions\SpecificationDefinition;
+use OnMoon\OpenApiServerBundle\Specification\Definitions\ObjectType as ObjectDefinition;
+use OnMoon\OpenApiServerBundle\Specification\Definitions\Operation as OperationDefinition;
+use OnMoon\OpenApiServerBundle\Specification\Definitions\Property as PropertyDefinition;
+use OnMoon\OpenApiServerBundle\Specification\Definitions\Specification;
+use OnMoon\OpenApiServerBundle\Specification\Definitions\SpecificationConfig;
 use OnMoon\OpenApiServerBundle\Types\ScalarTypesResolver;
 
 class SpecificationParser
@@ -32,7 +33,7 @@ class SpecificationParser
         $this->typeResolver = $typeResolver;
     }
 
-    public function parseOpenApi(Specification $specification, OpenApi $parsedSpecification): SpecificationDefinition
+    public function parseOpenApi(SpecificationConfig $specificationConfig, OpenApi $parsedSpecification): Specification
     {
         $operationDefinitions = [];
         /**
@@ -49,7 +50,7 @@ class SpecificationParser
                 $exceptionContext = [
                     'url' => $url,
                     'method' => $method,
-                    'path' => $specification->getPath(),
+                    'path' => $specificationConfig->getPath(),
                 ];
 
                 if ($operationId === '') {
@@ -59,9 +60,9 @@ class SpecificationParser
                     throw CannotGenerateCodeForOperation::becauseDuplicateOperationId($operationId, $exceptionContext);
                 }
 
-                $responses = $this->getResponseDtoDefinitions($operation->responses, $specification, $exceptionContext);
+                $responses = $this->getResponseDtoDefinitions($operation->responses, $specificationConfig, $exceptionContext);
 
-                $requestSchema = $this->findByMediaType($operation->requestBody, $specification->getMediaType());
+                $requestSchema = $this->findByMediaType($operation->requestBody, $specificationConfig->getMediaType());
                 $requestBody   = null;
                 if ($requestSchema !== null) {
                     $requestBody = new ObjectDefinition(
@@ -92,7 +93,7 @@ class SpecificationParser
             }
         }
 
-        return new SpecificationDefinition($operationDefinitions);
+        return new Specification($operationDefinitions);
     }
 
     /**
@@ -103,7 +104,7 @@ class SpecificationParser
      */
     private function getResponseDtoDefinitions(
         $responses,
-        Specification $specification,
+        SpecificationConfig $specificationConfig,
         array $exceptionContext
     ) : array {
         $responseDefinitions = [];
@@ -120,7 +121,7 @@ class SpecificationParser
          * @var string $responseCode
          */
         foreach ($responses as $responseCode => $response) {
-            $responseSchema = $this->findByMediaType($response, $specification->getMediaType());
+            $responseSchema = $this->findByMediaType($response, $specificationConfig->getMediaType());
             if ($responseSchema === null) {
                 continue;
             }

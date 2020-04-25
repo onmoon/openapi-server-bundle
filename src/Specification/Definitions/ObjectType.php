@@ -4,14 +4,14 @@
 namespace OnMoon\OpenApiServerBundle\Specification\Definitions;
 
 
-class ObjectDefinition
+class ObjectType
 {
-    /** @var PropertyDefinition[] $properties; */
+    /** @var Property[] $properties; */
     private array $properties;
 
     /**
      * ObjectDefinition constructor.
-     * @param PropertyDefinition[] $properties
+     * @param Property[] $properties
      */
     public function __construct($properties)
     {
@@ -19,7 +19,7 @@ class ObjectDefinition
     }
 
     /**
-     * @return PropertyDefinition[]
+     * @return Property[]
      */
     public function getProperties(): array
     {
