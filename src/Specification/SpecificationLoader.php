@@ -28,7 +28,7 @@ class SpecificationLoader
 
     /**
      * @var SpecificationConfig[]
-     * @psalm-var array<string, Specification>
+     * @psalm-var array<string, SpecificationConfig>
      */
     private array $specs = [];
     private SpecificationParser $parser;
@@ -58,7 +58,7 @@ class SpecificationLoader
     /**
      * @return SpecificationConfig[]
      *
-     * @psalm-return array<string, Specification>
+     * @psalm-return array<string, SpecificationConfig>
      */
     public function list() : array
     {
