@@ -4,9 +4,7 @@ declare(strict_types=1);
 
 namespace OnMoon\OpenApiServerBundle\Types;
 
-use cebe\openapi\spec\Parameter;
-use cebe\openapi\spec\Schema;
-use function property_exists;
+use OnMoon\OpenApiServerBundle\Specification\Definitions\ObjectType;
 use function Safe\preg_match;
 
 class ArgumentResolver
@@ -19,39 +17,39 @@ class ArgumentResolver
     }
 
     /**
-     * @param Parameter[] $pathParameters
-     * @param Parameter[] $methodParameter
+     * @param ObjectType[] $parameters
      *
      * @return mixed[]
+     *
+     * @psalm-param array<string, ObjectType> $parameters
      */
-    public function resolveArgumentsTypeAndPattern(array $pathParameters, array $methodParameter) : array
+    public function resolveArgumentsTypeAndPattern(array $parameters) : array
     {
         $types    = [];
         $patterns = [];
 
-        foreach ([$pathParameters, $methodParameter] as $parameters) {
-            foreach ($parameters as $parameter) {
-                if (! ($parameter->schema instanceof Schema)) {
+        foreach ($parameters as $in => $parametersObject) {
+            foreach ($parametersObject->getProperties() as $parameter) {
+                $type = $parameter->getScalarTypeId();
+                if($type === null) {
+                    throw new \Exception('Object types are not supported in parameters');
+                }
+                $types[$in][$parameter->getName()] = $type;
+
+                if ($in !== 'path') {
                     continue;
                 }
 
-                $type                                    = $this->typesResolver->findScalarType($parameter->schema);
-                $types[$parameter->in][$parameter->name] = $type;
-
-                if ($parameter->in !== 'path') {
-                    continue;
-                }
-
-                $schema  = $parameter->schema;
+                $schemaPattern  = $parameter->getPattern();
                 $pattern = $this->typesResolver->getPattern($type);
 
-                if (property_exists($schema, 'pattern') &&
-                    preg_match('/^\^(.*)\$$/', $schema->pattern, $matches)
+                if ($schemaPattern !== null &&
+                    preg_match('/^\^(.*)\$$/', $schemaPattern, $matches)
                 ) {
                     /** @psalm-suppress PossiblyNullArrayAccess */
-                    $patterns[$parameter->name] = (string) $matches[1];
+                    $patterns[$parameter->getName()] = (string) $matches[1];
                 } elseif ($pattern) {
-                    $patterns[$parameter->name] = $pattern;
+                    $patterns[$parameter->getName()] = $pattern;
                 }
             }
         }
