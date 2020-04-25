@@ -98,7 +98,7 @@ class ApiController
 
     private function getSpecification(Route $route) : OpenApi
     {
-        return $this->specificationLoader->load($this->getSpecificationName($route));
+        return $this->specificationLoader->load($this->getSpecificationName($route))->getOpenApi();
     }
 
     /**

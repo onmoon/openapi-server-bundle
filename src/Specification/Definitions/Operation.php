@@ -34,4 +34,53 @@ class Operation
         $this->responses = $responses;
     }
 
+    /**
+     * @return string
+     */
+    public function getUrl(): string
+    {
+        return $this->url;
+    }
+
+    /**
+     * @return string
+     */
+    public function getMethod(): string
+    {
+        return $this->method;
+    }
+
+    /**
+     * @return string|null
+     */
+    public function getSummary(): ?string
+    {
+        return $this->summary;
+    }
+
+    /**
+     * @return ObjectType|null
+     */
+    public function getRequestBody(): ?ObjectType
+    {
+        return $this->requestBody;
+    }
+
+    /**
+     * @return ObjectType[]
+     */
+    public function getRequestParameters(): array
+    {
+        return $this->requestParameters;
+    }
+
+    /**
+     * @return ObjectType[]
+     */
+    public function getResponses(): array
+    {
+        return $this->responses;
+    }
+
+
 }

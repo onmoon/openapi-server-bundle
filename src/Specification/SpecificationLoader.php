@@ -7,6 +7,7 @@ namespace OnMoon\OpenApiServerBundle\Specification;
 use cebe\openapi\Reader;
 use cebe\openapi\spec\OpenApi;
 use Exception;
+use OnMoon\OpenApiServerBundle\Specification\Definitions\Specification;
 use OnMoon\OpenApiServerBundle\Specification\Definitions\SpecificationConfig;
 use Symfony\Component\Config\FileLocatorInterface;
 use Symfony\Contracts\Cache\ItemInterface;
@@ -74,12 +75,12 @@ class SpecificationLoader
         return $this->specs[$name];
     }
 
-    public function load(string $name) : OpenApi
+    public function load(string $name) : Specification
     {
-        /** @var OpenApi $parsedSpecification */
+        /** @var Specification $parsedSpecification */
         $parsedSpecification = $this->cache->get(
             self::CACHE_KEY_PREFIX . $name,
-            function (ItemInterface $cacheItem) use ($name) : OpenApi {
+            function (ItemInterface $cacheItem) use ($name) : Specification {
                 $cacheItem->tag(self::CACHE_TAG);
 
                 return $this->parseSpecification($this->get($name));
@@ -89,7 +90,7 @@ class SpecificationLoader
         return $parsedSpecification;
     }
 
-    private function parseSpecification(SpecificationConfig $specificationConfig) : OpenApi
+    private function parseSpecification(SpecificationConfig $specificationConfig) : Specification
     {
         $specPath = $this->locator->locate($specificationConfig->getPath());
 
@@ -130,6 +131,6 @@ class SpecificationLoader
             );
         }
 
-        return $specification;
+        return $this->parser->parseOpenApi($specificationConfig, $specification);
     }
 }

@@ -93,7 +93,7 @@ class SpecificationParser
             }
         }
 
-        return new Specification($operationDefinitions);
+        return new Specification($operationDefinitions, $parsedSpecification);
     }
 
     /**

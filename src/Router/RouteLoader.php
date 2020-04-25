@@ -36,7 +36,7 @@ class RouteLoader extends Loader implements LoaderInterface
      */
     public function load($resource, $type = null) : RouteCollection
     {
-        $openApi = $this->loader->load((string) $resource);
+        $openApi = $this->loader->load((string) $resource)->getOpenApi();
 
         $routes = new RouteCollection();
 
