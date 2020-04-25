@@ -38,7 +38,6 @@ class RouteLoader extends Loader implements LoaderInterface
 
         $routes = new RouteCollection();
 
-
         foreach ($specification->getOperations() as $operationId => $operation) {
             [$types, $requirements] = $this->argumentResolver->resolveArgumentsTypeAndPattern($operation->getRequestParameters());
 
@@ -56,7 +55,6 @@ class RouteLoader extends Loader implements LoaderInterface
             $routeName = $operationId;
             $routes->add($routeName, $route);
         }
-
 
         return $routes;
     }

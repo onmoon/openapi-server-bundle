@@ -4,9 +4,6 @@ declare(strict_types=1);
 
 namespace OnMoon\OpenApiServerBundle\Controller;
 
-use cebe\openapi\spec\OpenApi;
-use cebe\openapi\spec\Operation;
-use cebe\openapi\spec\PathItem;
 use OnMoon\OpenApiServerBundle\CodeGenerator\Naming\NamingStrategy;
 use OnMoon\OpenApiServerBundle\Event\Server\RequestDtoEvent;
 use OnMoon\OpenApiServerBundle\Event\Server\RequestEvent;
@@ -22,6 +19,7 @@ use OnMoon\OpenApiServerBundle\Interfaces\SetClientIp;
 use OnMoon\OpenApiServerBundle\Interfaces\SetRequest;
 use OnMoon\OpenApiServerBundle\Router\RouteLoader;
 use OnMoon\OpenApiServerBundle\Serializer\DtoSerializer;
+use OnMoon\OpenApiServerBundle\Specification\Definitions\Specification;
 use OnMoon\OpenApiServerBundle\Specification\SpecificationLoader;
 use OnMoon\OpenApiServerBundle\Validator\RequestSchemaValidator;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -69,24 +67,23 @@ class ApiController
     public function handle(Request $request) : Response
     {
         $route         = $this->getRoute($request);
-        $path          = (string) $route->getOption(RouteLoader::OPENAPI_PATH);
-        $method        = (string) $route->getOption(RouteLoader::OPENAPI_METHOD);
+        $operationId   = (string) $route->getOption(RouteLoader::OPENAPI_OPERATION);
         $specification = $this->getSpecification($route);
-        $operation     = $this->getOperation($specification, $path, $method);
+        $operation     = $specification->getOperations()[$operationId];
 
-        $this->eventDispatcher->dispatch(new RequestEvent($request, $operation, $path, $method));
-        $this->requestValidator->validate($request, $specification, $path, $method);
+        $this->eventDispatcher->dispatch(new RequestEvent($request, $operationId, $specification));
+        $this->requestValidator->validate($request, $specification->getOpenApi(), $operation->getUrl(), $operation->getMethod());
 
-        $requestDto = $this->createRequestDto($request, $route, $operation);
-        $this->eventDispatcher->dispatch(new RequestDtoEvent($requestDto, $operation, $path, $method));
+        $requestDto = $this->createRequestDto($request, $route, $operationId);
+        $this->eventDispatcher->dispatch(new RequestDtoEvent($requestDto, $operationId, $specification));
 
-        $requestHandler = $this->getRequestHandler($request, $this->getRequestHandlerInterface($route, $operation));
+        $requestHandler = $this->getRequestHandler($request, $this->getRequestHandlerInterface($route, $operationId));
 
-        $responseDto = $this->executeRequestHandler($requestHandler, $operation, $requestDto);
-        $this->eventDispatcher->dispatch(new ResponseDtoEvent($responseDto, $operation, $path, $method));
+        $responseDto = $this->executeRequestHandler($requestHandler, $operationId, $requestDto);
+        $this->eventDispatcher->dispatch(new ResponseDtoEvent($responseDto, $operationId, $specification));
 
         $response = $this->createResponse($requestHandler, $responseDto);
-        $this->eventDispatcher->dispatch(new ResponseEvent($response, $operation, $path, $method));
+        $this->eventDispatcher->dispatch(new ResponseEvent($response, $operationId, $specification));
 
         return $response;
     }
@@ -96,41 +93,41 @@ class ApiController
         return (string) $route->getOption(RouteLoader::OPENAPI_SPEC);
     }
 
-    private function getSpecification(Route $route) : OpenApi
+    private function getSpecification(Route $route) : Specification
     {
-        return $this->specificationLoader->load($this->getSpecificationName($route))->getOpenApi();
+        return $this->specificationLoader->load($this->getSpecificationName($route));
     }
 
     /**
      * @psalm-return class-string<RequestHandler>
      */
-    private function getRequestHandlerInterface(Route $route, Operation $operation) : string
+    private function getRequestHandlerInterface(Route $route, string $operationId) : string
     {
         $specificationName      = $this->getSpecificationName($route);
         $specificationNamespace = $this->specificationLoader->get($specificationName)->getNameSpace();
 
-        return $this->namingStrategy->getInterfaceFQCN($specificationNamespace, $operation->operationId);
+        return $this->namingStrategy->getInterfaceFQCN($specificationNamespace, $operationId);
     }
 
     private function createRequestDto(
         Request $request,
         Route $route,
-        Operation $operation
+        string $operationId
     ) : ?Dto {
         return $this->serializer->createRequestDto(
             $request,
             $route,
-            $this->getRequestHandlerInterface($route, $operation),
-            $this->namingStrategy->stringToMethodName($operation->operationId)
+            $this->getRequestHandlerInterface($route, $operationId),
+            $this->namingStrategy->stringToMethodName($operationId)
         );
     }
 
     private function executeRequestHandler(
         RequestHandler $requestHandler,
-        Operation $operation,
+        string $operationId,
         ?Dto $requestDto
     ) : ?ResponseDto {
-        $requestHandlerMethodName = $this->namingStrategy->stringToMethodName($operation->operationId);
+        $requestHandlerMethodName = $this->namingStrategy->stringToMethodName($operationId);
 
         /** @var ResponseDto|null $responseDto */
         $responseDto = $requestDto !== null ?
@@ -161,16 +158,6 @@ class ApiController
         }
 
         return $requestHandler;
-    }
-
-    private function getOperation(OpenApi $specification, string $path, string $method) : Operation
-    {
-        /** @var PathItem $pathItem */
-        $pathItem = $specification->paths[$path];
-        /** @var Operation $operation */
-        $operation = $pathItem->{$method};
-
-        return $operation;
     }
 
     private function createResponse(RequestHandler $requestHandler, ?ResponseDto $responseDto = null) : Response

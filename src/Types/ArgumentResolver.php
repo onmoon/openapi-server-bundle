@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace OnMoon\OpenApiServerBundle\Types;
 
+use Exception;
 use OnMoon\OpenApiServerBundle\Specification\Definitions\ObjectType;
 use function Safe\preg_match;
 
@@ -31,17 +32,18 @@ class ArgumentResolver
         foreach ($parameters as $in => $parametersObject) {
             foreach ($parametersObject->getProperties() as $parameter) {
                 $type = $parameter->getScalarTypeId();
-                if($type === null) {
-                    throw new \Exception('Object types are not supported in parameters');
+                if ($type === null) {
+                    throw new Exception('Object types are not supported in parameters');
                 }
+
                 $types[$in][$parameter->getName()] = $type;
 
                 if ($in !== 'path') {
                     continue;
                 }
 
-                $schemaPattern  = $parameter->getPattern();
-                $pattern = $this->typesResolver->getPattern($type);
+                $schemaPattern = $parameter->getPattern();
+                $pattern       = $this->typesResolver->getPattern($type);
 
                 if ($schemaPattern !== null &&
                     preg_match('/^\^(.*)\$$/', $schemaPattern, $matches)
