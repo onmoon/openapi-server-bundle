@@ -294,7 +294,7 @@ class SpecificationParser
         }
 
         if (Type::isScalar($property->type)) {
-            $typeId = $this->typeResolver->findScalarType($property);
+            $typeId = $this->typeResolver->findScalarType($property->type, $property->format);
             $propertyDefinition->setScalarTypeId($typeId);
             $isScalar = true;
         } elseif ($property->type === Type::OBJECT) {

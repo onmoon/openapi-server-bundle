@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace OnMoon\OpenApiServerBundle\Types;
 
-use cebe\openapi\spec\Schema;
 use cebe\openapi\spec\Type;
 use function Safe\settype;
 
@@ -120,17 +119,17 @@ class ScalarTypesResolver
         return (string) $this->scalarTypes[$id]['phpType'];
     }
 
-    public function findScalarType(Schema $schema) : int
+    public function findScalarType(?string $type, ?string $format) : int
     {
-        if (empty($schema->type)) {
+        if ($type === null) {
             return 0;
         }
 
-        if (! empty($schema->format)) {
+        if ($format !== null) {
             foreach ($this->scalarTypes as $id => $scalar) {
-                if ($scalar['type'] === $schema->type &&
+                if ($scalar['type'] === $type &&
                     isset($scalar['format']) &&
-                    $scalar['format'] === $schema->format
+                    $scalar['format'] === $format
                 ) {
                     return $id;
                 }
@@ -138,7 +137,7 @@ class ScalarTypesResolver
         }
 
         foreach ($this->scalarTypes as $id => $scalar) {
-            if ($scalar['type'] === $schema->type &&
+            if ($scalar['type'] === $type &&
                 ! isset($scalar['format'])
             ) {
                 return $id;
