@@ -17,19 +17,16 @@ use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\SpecificationDefinition
 use OnMoon\OpenApiServerBundle\Specification\Definitions\ObjectType;
 use OnMoon\OpenApiServerBundle\Specification\Definitions\Property;
 use OnMoon\OpenApiServerBundle\Specification\SpecificationLoader;
-use OnMoon\OpenApiServerBundle\Types\ScalarTypesResolver;
+use function array_key_exists;
 use function array_map;
-
 
 class GraphGenerator
 {
     private SpecificationLoader $loader;
-    private ScalarTypesResolver $typeResolver;
 
-    public function __construct(SpecificationLoader $loader, ScalarTypesResolver $typeResolver)
+    public function __construct(SpecificationLoader $loader)
     {
-        $this->loader       = $loader;
-        $this->typeResolver = $typeResolver;
+        $this->loader = $loader;
     }
 
     public function generateClassGraph() : GraphDefinition
@@ -42,14 +39,14 @@ class GraphGenerator
 
             foreach ($parsedSpecification->getOperations() as $operationId => $operation) {
                 $requestBody = null;
-                $bodyType = $operation->getRequestBody();
+                $bodyType    = $operation->getRequestBody();
                 if ($bodyType !== null) {
                     $requestBody = new RequestBodyDtoDefinition(
                         $this->propertiesToDefinitions($bodyType->getProperties())
                     );
                 }
 
-                $requestDefinitions     = new RequestDtoDefinition(
+                $requestDefinitions = new RequestDtoDefinition(
                     $requestBody,
                     $this->parametersToDto('query', $operation->getRequestParameters()),
                     $this->parametersToDto('path', $operation->getRequestParameters())
@@ -78,7 +75,8 @@ class GraphGenerator
      *
      * @return ResponseDtoDefinition[]
      */
-    private function getResponseDtoDefinitions(array $responses) : array {
+    private function getResponseDtoDefinitions(array $responses) : array
+    {
         $responseDtoDefinitions = [];
 
         foreach ($responses as $statusCode => $response) {
@@ -96,16 +94,18 @@ class GraphGenerator
      */
     private function parametersToDto(string $in, array $parameters) : ?RequestParametersDtoDefinition
     {
-        if(!array_key_exists($in, $parameters))
+        if (! array_key_exists($in, $parameters)) {
             return null;
+        }
 
         return new RequestParametersDtoDefinition(
             $this->propertiesToDefinitions($parameters[$in]->getProperties())
         );
     }
 
-    private function objectTypeToDefinition(?ObjectType $type) : ?DtoDefinition {
-        if($type === null) {
+    private function objectTypeToDefinition(?ObjectType $type) : ?DtoDefinition
+    {
+        if ($type === null) {
             return null;
         }
 
@@ -114,16 +114,19 @@ class GraphGenerator
 
     /**
      * @param Property[] $properties
+     *
      * @return PropertyDefinition[]
      */
-    private function propertiesToDefinitions(array $properties) : array {
+    private function propertiesToDefinitions(array $properties) : array
+    {
         return array_map(
             fn (Property $p) : PropertyDefinition => $this->propertyToDefinition($p),
             $properties
         );
     }
 
-    private function propertyToDefinition(Property $property) : PropertyDefinition {
+    private function propertyToDefinition(Property $property) : PropertyDefinition
+    {
         return (new PropertyDefinition($property->getName()))
             ->setRequired($property->isRequired())
             ->setArray($property->isArray())
@@ -132,5 +135,4 @@ class GraphGenerator
             ->setDescription($property->getDescription())
             ->setDefaultValue($property->getDefaultValue());
     }
-
 }

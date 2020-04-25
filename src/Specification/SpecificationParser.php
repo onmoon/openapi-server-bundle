@@ -1,8 +1,8 @@
 <?php
 
+declare(strict_types=1);
 
 namespace OnMoon\OpenApiServerBundle\Specification;
-
 
 use cebe\openapi\spec\MediaType;
 use cebe\openapi\spec\OpenApi;
@@ -23,6 +23,14 @@ use OnMoon\OpenApiServerBundle\Specification\Definitions\Property as PropertyDef
 use OnMoon\OpenApiServerBundle\Specification\Definitions\Specification;
 use OnMoon\OpenApiServerBundle\Specification\Definitions\SpecificationConfig;
 use OnMoon\OpenApiServerBundle\Types\ScalarTypesResolver;
+use function array_filter;
+use function array_key_exists;
+use function array_map;
+use function array_merge;
+use function class_exists;
+use function count;
+use function in_array;
+use function is_array;
 
 class SpecificationParser
 {
@@ -33,7 +41,7 @@ class SpecificationParser
         $this->typeResolver = $typeResolver;
     }
 
-    public function parseOpenApi(SpecificationConfig $specificationConfig, OpenApi $parsedSpecification): Specification
+    public function parseOpenApi(SpecificationConfig $specificationConfig, OpenApi $parsedSpecification) : Specification
     {
         $operationDefinitions = [];
         /**
@@ -56,6 +64,7 @@ class SpecificationParser
                 if ($operationId === '') {
                     throw CannotGenerateCodeForOperation::becauseNoOperationIdSpecified($exceptionContext);
                 }
+
                 if (array_key_exists($operationId, $operationDefinitions)) {
                     throw CannotGenerateCodeForOperation::becauseDuplicateOperationId($operationId, $exceptionContext);
                 }
@@ -73,13 +82,15 @@ class SpecificationParser
                     );
                 }
 
-                $parameters             = $this->mergeParameters($pathItem, $operation);
+                $parameters        = $this->mergeParameters($pathItem, $operation);
                 $requestParameters = [];
                 foreach (['path', 'query'] as $in) {
-                    $params = $this->parseParameters($in, $parameters, array_merge($exceptionContext, ['location' => 'request '.$in.' parameters']));
-                    if($params !== null) {
-                        $requestParameters[$in] = $params;
+                    $params = $this->parseParameters($in, $parameters, array_merge($exceptionContext, ['location' => 'request ' . $in . ' parameters']));
+                    if ($params === null) {
+                        continue;
                     }
+
+                    $requestParameters[$in] = $params;
                 }
 
                 $operationDefinitions[$operationId] = new OperationDefinition(
@@ -134,8 +145,8 @@ class SpecificationParser
                 );
             }
 
-            $propertyDefinitions      = $this->getPropertyGraph($responseSchema, $exceptionContext);
-            $responseDefinition       = new ObjectDefinition($propertyDefinitions);
+            $propertyDefinitions                = $this->getPropertyGraph($responseSchema, $exceptionContext);
+            $responseDefinition                 = new ObjectDefinition($propertyDefinitions);
             $responseDefinitions[$responseCode] = $responseDefinition;
         }
 
@@ -189,14 +200,14 @@ class SpecificationParser
                 $this->filterParameters($pathItem->parameters),
                 static function (Parameter $pathParameter) use ($operationParameters) : bool {
                     return count(
-                            array_filter(
-                                $operationParameters,
-                                static function (Parameter $operationParameter) use ($pathParameter) : bool {
+                        array_filter(
+                            $operationParameters,
+                            static function (Parameter $operationParameter) use ($pathParameter) : bool {
                                     return $operationParameter->name === $pathParameter->name &&
                                         $operationParameter->in === $pathParameter->in;
-                                }
-                            )
-                        ) === 0;
+                            }
+                        )
+                    ) === 0;
                 }
             ),
             $operationParameters
@@ -228,7 +239,7 @@ class SpecificationParser
             $this->filterSupportedParameters($in, $parameters)
         );
 
-        if(count($properties) === 0) {
+        if (count($properties) === 0) {
             return null;
         }
 
@@ -301,7 +312,6 @@ class SpecificationParser
         }
 
         $propertyDefinition->setPattern($property->pattern);
-
 
         if (! $isScalar && ! $allowNonScalar) {
             throw CannotGenerateCodeForOperation::becauseOnlyScalarAreAllowed($propertyName, $exceptionContext);

@@ -37,9 +37,9 @@ class SpecificationLoader
 
     public function __construct(SpecificationParser $parser, FileLocatorInterface $locator, TagAwareCacheInterface $cache)
     {
-        $this->parser = $parser;
+        $this->parser  = $parser;
         $this->locator = $locator;
-        $this->cache = $cache;
+        $this->cache   = $cache;
     }
 
     /**
@@ -121,7 +121,7 @@ class SpecificationLoader
             $specification = Reader::readFromJsonFile($specPath);
         }
 
-        if(!($specification instanceof OpenApi)) {
+        if (! ($specification instanceof OpenApi)) {
             throw new Exception(
                 sprintf(
                     'Failed to determine spec type for "%s".

@@ -1,8 +1,8 @@
 <?php
 
+declare(strict_types=1);
 
 namespace OnMoon\OpenApiServerBundle\Specification\Definitions;
-
 
 class ObjectType
 {
@@ -10,10 +10,9 @@ class ObjectType
     private array $properties;
 
     /**
-     * ObjectDefinition constructor.
      * @param Property[] $properties
      */
-    public function __construct($properties)
+    public function __construct(array $properties)
     {
         $this->properties = $properties;
     }
@@ -21,7 +20,7 @@ class ObjectType
     /**
      * @return Property[]
      */
-    public function getProperties(): array
+    public function getProperties() : array
     {
         return $this->properties;
     }

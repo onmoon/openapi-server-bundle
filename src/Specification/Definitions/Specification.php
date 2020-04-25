@@ -1,8 +1,8 @@
 <?php
 
+declare(strict_types=1);
 
 namespace OnMoon\OpenApiServerBundle\Specification\Definitions;
-
 
 use cebe\openapi\spec\OpenApi;
 
@@ -13,31 +13,24 @@ class Specification
     private OpenApi $openApi;
 
     /**
-     * Specification constructor.
      * @param array|Operation[] $operations
-     * @param OpenApi $openApi
      */
-    public function __construct($operations, OpenApi $openApi)
+    public function __construct(array $operations, OpenApi $openApi)
     {
         $this->operations = $operations;
-        $this->openApi = $openApi;
+        $this->openApi    = $openApi;
     }
 
     /**
      * @return Operation[]
      */
-    public function getOperations(): array
+    public function getOperations() : array
     {
         return $this->operations;
     }
 
-    /**
-     * @return OpenApi
-     */
-    public function getOpenApi(): OpenApi
+    public function getOpenApi() : OpenApi
     {
         return $this->openApi;
     }
-
-
 }
