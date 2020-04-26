@@ -6,13 +6,12 @@ namespace OnMoon\OpenApiServerBundle\Serializer;
 
 use Exception;
 use OnMoon\OpenApiServerBundle\Interfaces\Dto;
-use OnMoon\OpenApiServerBundle\Router\RouteLoader;
+use OnMoon\OpenApiServerBundle\Specification\Definitions\ObjectType;
+use OnMoon\OpenApiServerBundle\Specification\Definitions\Operation;
 use OnMoon\OpenApiServerBundle\Types\ScalarTypesResolver;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\Routing\Route;
 use function array_key_exists;
 use function is_resource;
-use function method_exists;
 use function Safe\json_decode;
 
 class ArrayDtoSerializer implements DtoSerializer
@@ -26,13 +25,12 @@ class ArrayDtoSerializer implements DtoSerializer
 
     public function createRequestDto(
         Request $request,
-        Route $route,
+        Operation $operation,
         string $inputDtoFQCN
     ) : Dto {
         /** @var mixed[] $input */
-        $input = [];
-        /** @var int[][] $params */
-        $params = $route->getOption(RouteLoader::OPENAPI_ARGUMENTS);
+        $input  = [];
+        $params = $operation->getRequestParameters();
         if (array_key_exists('query', $params)) {
             /** @var string[] $source */
             $source                   = $request->query->all();
@@ -45,7 +43,7 @@ class ArrayDtoSerializer implements DtoSerializer
             $input['pathParameters'] = $this->getParameters($source, $params['path']);
         }
 
-        if (method_exists($inputDtoFQCN, 'getBody')) {
+        if ($operation->getRequestBody() !== null) {
             $source = $request->getContent();
             if (is_resource($source)) {
                 throw new Exception('Expecting string as contents, resource received');
@@ -67,16 +65,21 @@ class ArrayDtoSerializer implements DtoSerializer
 
     /**
      * @param string[] $source
-     * @param int[]    $params
      *
      * @return mixed[]
      */
-    private function getParameters(array $source, array $params) : array
+    private function getParameters(array $source, ObjectType $params) : array
     {
         $result = [];
-        foreach ($params as $name => $typeId) {
+        foreach ($params->getProperties() as $property) {
+            $name = $property->getName();
             if (! array_key_exists($name, $source)) {
                 continue;
+            }
+
+            $typeId = $property->getScalarTypeId();
+            if ($typeId === null) {
+                throw new Exception('Non scalar property is not supported');
             }
 
             /** @psalm-suppress MixedAssignment */

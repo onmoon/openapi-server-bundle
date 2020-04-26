@@ -100,10 +100,7 @@ class ScalarTypesResolver
         return $value;
     }
 
-    /**
-     * @return bool|string
-     */
-    public function getPattern(int $id)
+    public function getPattern(int $id) : ?string
     {
         $format = $this->scalarTypes[$id];
 
@@ -111,7 +108,7 @@ class ScalarTypesResolver
             return $format['pattern'];
         }
 
-        return false;
+        return null;
     }
 
     public function getPhpType(int $id) : string

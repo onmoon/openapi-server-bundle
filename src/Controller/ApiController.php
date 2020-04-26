@@ -20,6 +20,7 @@ use OnMoon\OpenApiServerBundle\Interfaces\SetClientIp;
 use OnMoon\OpenApiServerBundle\Interfaces\SetRequest;
 use OnMoon\OpenApiServerBundle\Router\RouteLoader;
 use OnMoon\OpenApiServerBundle\Serializer\DtoSerializer;
+use OnMoon\OpenApiServerBundle\Specification\Definitions\Operation;
 use OnMoon\OpenApiServerBundle\Specification\Definitions\Specification;
 use OnMoon\OpenApiServerBundle\Specification\SpecificationLoader;
 use OnMoon\OpenApiServerBundle\Validator\RequestSchemaValidator;
@@ -84,7 +85,8 @@ class ApiController
 
         $requestDto = null;
         if ($inputDtoClass !== null) {
-            $requestDto = $this->createRequestDto($request, $route, $inputDtoClass);
+            $operation  = $specification->getOperations()[$operationId];
+            $requestDto = $this->createRequestDto($request, $operation, $inputDtoClass);
             $this->eventDispatcher->dispatch(new RequestDtoEvent($requestDto, $operationId, $specification));
         }
 
@@ -126,12 +128,12 @@ class ApiController
      */
     private function createRequestDto(
         Request $request,
-        Route $route,
+        Operation $operation,
         string $inputDtoClass
     ) : Dto {
         return $this->serializer->createRequestDto(
             $request,
-            $route,
+            $operation,
             $inputDtoClass
         );
     }

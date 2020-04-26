@@ -11,6 +11,7 @@ use Symfony\Component\Config\Loader\Loader;
 use Symfony\Component\Config\Loader\LoaderInterface;
 use Symfony\Component\Routing\Route;
 use Symfony\Component\Routing\RouteCollection;
+use function array_key_exists;
 
 class RouteLoader extends Loader implements LoaderInterface
 {
@@ -18,9 +19,6 @@ class RouteLoader extends Loader implements LoaderInterface
     private ArgumentResolver $argumentResolver;
     public const OPENAPI_TYPE      = 'open_api';
     public const OPENAPI_SPEC      = '_openapi_spec';
-    public const OPENAPI_PATH      = '_openapi_path';
-    public const OPENAPI_METHOD    = '_openapi_method';
-    public const OPENAPI_ARGUMENTS = '_openapi_args';
     public const OPENAPI_OPERATION = '_openapi_operation';
 
     public function __construct(SpecificationLoader $loader, ArgumentResolver $argumentResolver)
@@ -34,24 +32,27 @@ class RouteLoader extends Loader implements LoaderInterface
      */
     public function load($resource, $type = null) : RouteCollection
     {
-        $specification = $this->loader->load((string) $resource);
+        $specName      = (string) $resource;
+        $specification = $this->loader->load($specName);
 
         $routes = new RouteCollection();
 
         foreach ($specification->getOperations() as $operationId => $operation) {
-            [$types, $requirements] = $this->argumentResolver->resolveArgumentsTypeAndPattern($operation->getRequestParameters());
+            $requirements = [];
+
+            $parameters = $operation->getRequestParameters();
+            if (array_key_exists('path', $parameters)) {
+                $requirements = $this->argumentResolver->resolveArgumentPatterns($parameters['path']);
+            }
 
             $defaults  = [
                 '_controller' => ApiController::class . '::handle',
             ];
             $options   = [
-                self::OPENAPI_SPEC => $resource,
-                self::OPENAPI_PATH => $operation->getUrl(),
-                self::OPENAPI_METHOD => $operation->getMethod(),
+                self::OPENAPI_SPEC => $specName,
                 self::OPENAPI_OPERATION => $operationId,
-                self::OPENAPI_ARGUMENTS => $types,
             ];
-            $route     = new Route($operation->getUrl(), $defaults, (array) $requirements, $options, '', [], [$operation->getMethod()]);
+            $route     = new Route($operation->getUrl(), $defaults, $requirements, $options, '', [], [$operation->getMethod()]);
             $routeName = $operationId;
             $routes->add($routeName, $route);
         }

@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace OnMoon\OpenApiServerBundle\Serializer;
 
 use OnMoon\OpenApiServerBundle\Interfaces\Dto;
+use OnMoon\OpenApiServerBundle\Specification\Definitions\Operation;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\Routing\Route;
 
 interface DtoSerializer
 {
@@ -15,7 +15,7 @@ interface DtoSerializer
      */
     public function createRequestDto(
         Request $request,
-        Route $route,
+        Operation $operation,
         string $inputDtoFQCN
     ) : Dto;
 }
