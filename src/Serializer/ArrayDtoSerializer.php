@@ -6,17 +6,11 @@ namespace OnMoon\OpenApiServerBundle\Serializer;
 
 use Exception;
 use OnMoon\OpenApiServerBundle\Interfaces\Dto;
-/** phpcs:disable SlevomatCodingStandard.Namespaces.UnusedUses.UnusedUse */
-use OnMoon\OpenApiServerBundle\Interfaces\RequestHandler;
 use OnMoon\OpenApiServerBundle\Router\RouteLoader;
 use OnMoon\OpenApiServerBundle\Types\ScalarTypesResolver;
-use ReflectionClass;
-use ReflectionNamedType;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Route;
 use function array_key_exists;
-use function call_user_func;
-use function count;
 use function is_resource;
 use function method_exists;
 use function Safe\json_decode;
@@ -30,25 +24,11 @@ class ArrayDtoSerializer implements DtoSerializer
         $this->resolver = $resolver;
     }
 
-    /**
-     * @psalm-param class-string<RequestHandler> $requestHandlerInterface
-     */
     public function createRequestDto(
         Request $request,
         Route $route,
-        string $requestHandlerInterface,
-        string $methodName
-    ) : ?Dto {
-        /**
-         * phpcs:disable SlevomatCodingStandard.PHP.RequireExplicitAssertion.RequiredExplicitAssertion
-         * @var class-string<Dto>|null $inputDtoFQCN
-         */
-        $inputDtoFQCN = $this->getInputDtoFQCN($requestHandlerInterface, $methodName);
-
-        if ($inputDtoFQCN === null) {
-            return null;
-        }
-
+        string $inputDtoFQCN
+    ) : Dto {
         /** @var mixed[] $input */
         $input = [];
         /** @var int[][] $params */
@@ -104,24 +84,5 @@ class ArrayDtoSerializer implements DtoSerializer
         }
 
         return $result;
-    }
-
-    /**
-     * @psalm-param class-string<RequestHandler> $requestHandlerInterface
-     */
-    private function getInputDtoFQCN(string $requestHandlerInterface, string $methodName) : ?string
-    {
-        $interfaceReflectionClass = new ReflectionClass($requestHandlerInterface);
-        $method                   = $interfaceReflectionClass->getMethod($methodName);
-        $methodParameters         = $method->getParameters();
-
-        if (count($methodParameters) === 0) {
-            return null;
-        }
-
-        /** @var ReflectionNamedType $inputType */
-        $inputType = $methodParameters[0]->getType();
-
-        return $inputType->getName();
     }
 }
