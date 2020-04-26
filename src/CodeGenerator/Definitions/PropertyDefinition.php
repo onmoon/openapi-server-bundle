@@ -115,7 +115,7 @@ class PropertyDefinition
         return $this->objectTypeDefinition;
     }
 
-    public function setObjectTypeDefinition(DtoDefinition $objectTypeDefinition) : self
+    public function setObjectTypeDefinition(?DtoDefinition $objectTypeDefinition) : self
     {
         $this->objectTypeDefinition = $objectTypeDefinition;
 

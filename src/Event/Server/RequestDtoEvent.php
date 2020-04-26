@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace OnMoon\OpenApiServerBundle\Event\Server;
 
-use cebe\openapi\spec\Operation;
 use OnMoon\OpenApiServerBundle\Interfaces\Dto;
+use OnMoon\OpenApiServerBundle\Specification\Definitions\Specification;
 use Symfony\Contracts\EventDispatcher\Event;
 
 /**
@@ -25,39 +25,28 @@ use Symfony\Contracts\EventDispatcher\Event;
 class RequestDtoEvent extends Event
 {
     private ?Dto $requestDto;
-    private Operation $operation;
-    private string $path;
-    private string $method;
+    private string $operationId;
+    private Specification $specification;
 
-    public function __construct(
-        ?Dto $requestDto,
-        Operation $operation,
-        string $path,
-        string $method
-    ) {
-        $this->requestDto = $requestDto;
-        $this->operation  = $operation;
-        $this->path       = $path;
-        $this->method     = $method;
+    public function __construct(?Dto $requestDto, string $operationId, Specification $specification)
+    {
+        $this->requestDto    = $requestDto;
+        $this->operationId   = $operationId;
+        $this->specification = $specification;
     }
 
-    public function requestDto() : ?Dto
+    public function getRequestDto() : ?Dto
     {
         return $this->requestDto;
     }
 
-    public function operation() : Operation
+    public function getOperationId() : string
     {
-        return $this->operation;
+        return $this->operationId;
     }
 
-    public function path() : string
+    public function getSpecification() : Specification
     {
-        return $this->path;
-    }
-
-    public function method() : string
-    {
-        return $this->method;
+        return $this->specification;
     }
 }

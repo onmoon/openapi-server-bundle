@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace OnMoon\OpenApiServerBundle\Event\Server;
 
-use cebe\openapi\spec\Operation;
+use OnMoon\OpenApiServerBundle\Specification\Definitions\Specification;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Contracts\EventDispatcher\Event;
 
@@ -18,39 +18,28 @@ use Symfony\Contracts\EventDispatcher\Event;
 class ResponseEvent extends Event
 {
     private Response $response;
-    private Operation $operation;
-    private string $path;
-    private string $method;
+    private string $operationId;
+    private Specification $specification;
 
-    public function __construct(
-        Response $response,
-        Operation $operation,
-        string $path,
-        string $method
-    ) {
-        $this->response  = $response;
-        $this->operation = $operation;
-        $this->path      = $path;
-        $this->method    = $method;
+    public function __construct(Response $response, string $operationId, Specification $specification)
+    {
+        $this->response      = $response;
+        $this->operationId   = $operationId;
+        $this->specification = $specification;
     }
 
-    public function response() : Response
+    public function getResponse() : Response
     {
         return $this->response;
     }
 
-    public function operation() : Operation
+    public function getOperationId() : string
     {
-        return $this->operation;
+        return $this->operationId;
     }
 
-    public function path() : string
+    public function getSpecification() : Specification
     {
-        return $this->path;
-    }
-
-    public function method() : string
-    {
-        return $this->method;
+        return $this->specification;
     }
 }

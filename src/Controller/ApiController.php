@@ -4,9 +4,7 @@ declare(strict_types=1);
 
 namespace OnMoon\OpenApiServerBundle\Controller;
 
-use cebe\openapi\spec\OpenApi;
-use cebe\openapi\spec\Operation;
-use cebe\openapi\spec\PathItem;
+use Exception;
 use OnMoon\OpenApiServerBundle\CodeGenerator\Naming\NamingStrategy;
 use OnMoon\OpenApiServerBundle\Event\Server\RequestDtoEvent;
 use OnMoon\OpenApiServerBundle\Event\Server\RequestEvent;
@@ -22,8 +20,13 @@ use OnMoon\OpenApiServerBundle\Interfaces\SetClientIp;
 use OnMoon\OpenApiServerBundle\Interfaces\SetRequest;
 use OnMoon\OpenApiServerBundle\Router\RouteLoader;
 use OnMoon\OpenApiServerBundle\Serializer\DtoSerializer;
+use OnMoon\OpenApiServerBundle\Specification\Definitions\Operation;
+use OnMoon\OpenApiServerBundle\Specification\Definitions\Specification;
 use OnMoon\OpenApiServerBundle\Specification\SpecificationLoader;
 use OnMoon\OpenApiServerBundle\Validator\RequestSchemaValidator;
+use ReflectionClass;
+use ReflectionMethod;
+use ReflectionNamedType;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -31,6 +34,8 @@ use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Routing\Route;
 use Symfony\Component\Routing\RouterInterface;
 use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
+use function count;
+use function Safe\sprintf;
 use const JSON_PRETTY_PRINT;
 use const JSON_THROW_ON_ERROR;
 use const JSON_UNESCAPED_UNICODE;
@@ -69,24 +74,29 @@ class ApiController
     public function handle(Request $request) : Response
     {
         $route         = $this->getRoute($request);
-        $path          = (string) $route->getOption(RouteLoader::OPENAPI_PATH);
-        $method        = (string) $route->getOption(RouteLoader::OPENAPI_METHOD);
+        $operationId   = (string) $route->getOption(RouteLoader::OPENAPI_OPERATION);
         $specification = $this->getSpecification($route);
-        $operation     = $this->getOperation($specification, $path, $method);
 
-        $this->eventDispatcher->dispatch(new RequestEvent($request, $operation, $path, $method));
-        $this->requestValidator->validate($request, $specification, $path, $method);
+        $requestHandlerInterface      = $this->getRequestHandlerInterface($route, $operationId);
+        [$methodName, $inputDtoClass] = $this->getMethodAndInputDtoFQCN($requestHandlerInterface);
 
-        $requestDto = $this->createRequestDto($request, $route, $operation);
-        $this->eventDispatcher->dispatch(new RequestDtoEvent($requestDto, $operation, $path, $method));
+        $this->eventDispatcher->dispatch(new RequestEvent($request, $operationId, $specification));
+        $this->requestValidator->validate($request, $specification, $operationId);
 
-        $requestHandler = $this->getRequestHandler($request, $this->getRequestHandlerInterface($route, $operation));
+        $requestDto = null;
+        if ($inputDtoClass !== null) {
+            $operation  = $specification->getOperations()[$operationId];
+            $requestDto = $this->createRequestDto($request, $operation, $inputDtoClass);
+            $this->eventDispatcher->dispatch(new RequestDtoEvent($requestDto, $operationId, $specification));
+        }
 
-        $responseDto = $this->executeRequestHandler($requestHandler, $operation, $requestDto);
-        $this->eventDispatcher->dispatch(new ResponseDtoEvent($responseDto, $operation, $path, $method));
+        $requestHandler = $this->getRequestHandler($request, $requestHandlerInterface);
+
+        $responseDto = $this->executeRequestHandler($requestHandler, $methodName, $requestDto);
+        $this->eventDispatcher->dispatch(new ResponseDtoEvent($responseDto, $operationId, $specification));
 
         $response = $this->createResponse($requestHandler, $responseDto);
-        $this->eventDispatcher->dispatch(new ResponseEvent($response, $operation, $path, $method));
+        $this->eventDispatcher->dispatch(new ResponseEvent($response, $operationId, $specification));
 
         return $response;
     }
@@ -96,7 +106,7 @@ class ApiController
         return (string) $route->getOption(RouteLoader::OPENAPI_SPEC);
     }
 
-    private function getSpecification(Route $route) : OpenApi
+    private function getSpecification(Route $route) : Specification
     {
         return $this->specificationLoader->load($this->getSpecificationName($route));
     }
@@ -104,38 +114,39 @@ class ApiController
     /**
      * @psalm-return class-string<RequestHandler>
      */
-    private function getRequestHandlerInterface(Route $route, Operation $operation) : string
+    private function getRequestHandlerInterface(Route $route, string $operationId) : string
     {
         $specificationName      = $this->getSpecificationName($route);
         $specificationNamespace = $this->specificationLoader->get($specificationName)->getNameSpace();
 
-        return $this->namingStrategy->getInterfaceFQCN($specificationNamespace, $operation->operationId);
+        //ToDo: get rid of naming strategy here
+        return $this->namingStrategy->getInterfaceFQCN($specificationNamespace, $operationId);
     }
 
+    /**
+     * @psalm-param class-string<Dto> $inputDtoClass
+     */
     private function createRequestDto(
         Request $request,
-        Route $route,
-        Operation $operation
-    ) : ?Dto {
+        Operation $operation,
+        string $inputDtoClass
+    ) : Dto {
         return $this->serializer->createRequestDto(
             $request,
-            $route,
-            $this->getRequestHandlerInterface($route, $operation),
-            $this->namingStrategy->stringToMethodName($operation->operationId)
+            $operation,
+            $inputDtoClass
         );
     }
 
     private function executeRequestHandler(
         RequestHandler $requestHandler,
-        Operation $operation,
+        string $methodName,
         ?Dto $requestDto
     ) : ?ResponseDto {
-        $requestHandlerMethodName = $this->namingStrategy->stringToMethodName($operation->operationId);
-
         /** @var ResponseDto|null $responseDto */
         $responseDto = $requestDto !== null ?
-            $requestHandler->{$requestHandlerMethodName}($requestDto) :
-            $requestHandler->{$requestHandlerMethodName}();
+            $requestHandler->{$methodName}($requestDto) :
+            $requestHandler->{$methodName}();
 
         return $responseDto;
     }
@@ -161,16 +172,6 @@ class ApiController
         }
 
         return $requestHandler;
-    }
-
-    private function getOperation(OpenApi $specification, string $path, string $method) : Operation
-    {
-        /** @var PathItem $pathItem */
-        $pathItem = $specification->paths[$path];
-        /** @var Operation $operation */
-        $operation = $pathItem->{$method};
-
-        return $operation;
     }
 
     private function createResponse(RequestHandler $requestHandler, ?ResponseDto $responseDto = null) : Response
@@ -206,5 +207,42 @@ class ApiController
         }
 
         return $route;
+    }
+
+    /**
+     * @return array{0: string, 1: class-string<Dto>|null}
+     *
+     * @psalm-param class-string<RequestHandler> $requestHandlerInterface
+     */
+    private function getMethodAndInputDtoFQCN(string $requestHandlerInterface) : array
+    {
+        $interfaceReflectionClass = new ReflectionClass($requestHandlerInterface);
+        $methods                  = $interfaceReflectionClass->getMethods(ReflectionMethod::IS_PUBLIC);
+        if (count($methods) !== 1) {
+            throw new Exception(
+                sprintf(
+                    '"%s" has %d public methods, exactly one expected',
+                    $requestHandlerInterface,
+                    count($methods)
+                )
+            );
+        }
+
+        $methodName       = $methods[0]->getName();
+        $methodParameters = $methods[0]->getParameters();
+
+        if (count($methodParameters) === 0) {
+            return [$methodName, null];
+        }
+
+        $inputType = $methodParameters[0]->getType();
+        if (! ($inputType instanceof ReflectionNamedType)) {
+            throw new Exception('Input parameter for ' . $requestHandlerInterface . ' is not a named type');
+        }
+
+        /** @var class-string<Dto> $inputTypeName */
+        $inputTypeName = $inputType->getName();
+
+        return [$methodName, $inputTypeName];
     }
 }

@@ -7,6 +7,8 @@ namespace OnMoon\OpenApiServerBundle\Specification;
 use cebe\openapi\Reader;
 use cebe\openapi\spec\OpenApi;
 use Exception;
+use OnMoon\OpenApiServerBundle\Specification\Definitions\Specification;
+use OnMoon\OpenApiServerBundle\Specification\Definitions\SpecificationConfig;
 use Symfony\Component\Config\FileLocatorInterface;
 use Symfony\Contracts\Cache\ItemInterface;
 use Symfony\Contracts\Cache\TagAwareCacheInterface;
@@ -25,15 +27,17 @@ class SpecificationLoader
     private const CACHE_KEY_PREFIX = 'openapi-server-bundle-specification-';
 
     /**
-     * @var Specification[]
-     * @psalm-var array<string, Specification>
+     * @var SpecificationConfig[]
+     * @psalm-var array<string, SpecificationConfig>
      */
     private array $specs = [];
+    private SpecificationParser $parser;
     private FileLocatorInterface $locator;
     private TagAwareCacheInterface $cache;
 
-    public function __construct(FileLocatorInterface $locator, TagAwareCacheInterface $cache)
+    public function __construct(SpecificationParser $parser, FileLocatorInterface $locator, TagAwareCacheInterface $cache)
     {
+        $this->parser  = $parser;
         $this->locator = $locator;
         $this->cache   = $cache;
     }
@@ -43,7 +47,7 @@ class SpecificationLoader
      */
     public function registerSpec(string $name, array $spec) : void
     {
-        $this->specs[$name] = new Specification(
+        $this->specs[$name] = new SpecificationConfig(
             $spec['path'],
             $spec['type'] ?? null,
             $spec['name_space'],
@@ -52,16 +56,16 @@ class SpecificationLoader
     }
 
     /**
-     * @return Specification[]
+     * @return SpecificationConfig[]
      *
-     * @psalm-return array<string, Specification>
+     * @psalm-return array<string, SpecificationConfig>
      */
     public function list() : array
     {
         return $this->specs;
     }
 
-    public function get(string $name) : Specification
+    public function get(string $name) : SpecificationConfig
     {
         if (empty($this->specs[$name])) {
             throw new Exception('OpenApi spec "' . $name . '" is not registered in bundle config, ' .
@@ -71,12 +75,12 @@ class SpecificationLoader
         return $this->specs[$name];
     }
 
-    public function load(string $name) : OpenApi
+    public function load(string $name) : Specification
     {
-        /** @var OpenApi $parsedSpecification */
+        /** @var Specification $parsedSpecification */
         $parsedSpecification = $this->cache->get(
             self::CACHE_KEY_PREFIX . $name,
-            function (ItemInterface $cacheItem) use ($name) : OpenApi {
+            function (ItemInterface $cacheItem) use ($name) : Specification {
                 $cacheItem->tag(self::CACHE_TAG);
 
                 return $this->parseSpecification($this->get($name));
@@ -86,12 +90,12 @@ class SpecificationLoader
         return $parsedSpecification;
     }
 
-    private function parseSpecification(Specification $spec) : OpenApi
+    private function parseSpecification(SpecificationConfig $specificationConfig) : Specification
     {
-        $specPath = $this->locator->locate($spec->getPath());
+        $specPath = $this->locator->locate($specificationConfig->getPath());
 
         if (! is_string($specPath)) {
-            throw new Exception(sprintf('More than one file path found for specification "%s".', $spec->getPath()));
+            throw new Exception(sprintf('More than one file path found for specification "%s".', $specificationConfig->getPath()));
         }
 
         if (! stream_is_local($specPath)) {
@@ -102,38 +106,31 @@ class SpecificationLoader
             throw new Exception(sprintf('File "%s" not found.', $specPath));
         }
 
-        $type = $spec->getType();
+        $type = $specificationConfig->getType();
 
         if ($type === null) {
             $type = pathinfo($specPath, PATHINFO_EXTENSION);
         }
 
+        $specification = null;
         if ($type === 'yaml') {
-            /**
-             * phpcs:disable SlevomatCodingStandard.PHP.RequireExplicitAssertion.RequiredExplicitAssertion
-             * @var OpenApi $specification
-             */
             $specification = Reader::readFromYamlFile($specPath);
-
-            return $specification;
         }
 
         if ($type === 'json') {
-            /**
-             * phpcs:disable SlevomatCodingStandard.PHP.RequireExplicitAssertion.RequiredExplicitAssertion
-             * @var OpenApi $specification
-             */
             $specification = Reader::readFromJsonFile($specPath);
-
-            return $specification;
         }
 
-        throw new Exception(
-            sprintf(
-                'Failed to determine spec type for "%s".
-                Try specifying "type" parameter in bundle config with either "yaml" or "json" value',
-                $specPath
-            )
-        );
+        if (! ($specification instanceof OpenApi)) {
+            throw new Exception(
+                sprintf(
+                    'Failed to determine spec type for "%s".
+                    Try specifying "type" parameter in bundle config with either "yaml" or "json" value',
+                    $specPath
+                )
+            );
+        }
+
+        return $this->parser->parseOpenApi($specificationConfig, $specification);
     }
 }

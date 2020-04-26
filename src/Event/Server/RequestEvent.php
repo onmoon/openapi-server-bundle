@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace OnMoon\OpenApiServerBundle\Event\Server;
 
-use cebe\openapi\spec\Operation;
+use OnMoon\OpenApiServerBundle\Specification\Definitions\Specification;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Contracts\EventDispatcher\Event;
 
@@ -19,39 +19,28 @@ use Symfony\Contracts\EventDispatcher\Event;
 class RequestEvent extends Event
 {
     private Request $request;
-    private Operation $operation;
-    private string $path;
-    private string $method;
+    private string $operationId;
+    private Specification $specification;
 
-    public function __construct(
-        Request $request,
-        Operation $operation,
-        string $path,
-        string $method
-    ) {
-        $this->request   = $request;
-        $this->operation = $operation;
-        $this->path      = $path;
-        $this->method    = $method;
+    public function __construct(Request $request, string $operationId, Specification $specification)
+    {
+        $this->request       = $request;
+        $this->operationId   = $operationId;
+        $this->specification = $specification;
     }
 
-    public function request() : Request
+    public function getRequest() : Request
     {
         return $this->request;
     }
 
-    public function operation() : Operation
+    public function getOperationId() : string
     {
-        return $this->operation;
+        return $this->operationId;
     }
 
-    public function path() : string
+    public function getSpecification() : Specification
     {
-        return $this->path;
-    }
-
-    public function method() : string
-    {
-        return $this->method;
+        return $this->specification;
     }
 }
