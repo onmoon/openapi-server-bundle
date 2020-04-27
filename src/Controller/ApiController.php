@@ -145,8 +145,10 @@ class ApiController
 
         $serviceName = $operation->getServiceName();
 
-        /** @psalm-param class-string<RequestHandler> $requestHandlerInterface */
-        $requestHandlerInterface = ltrim($this->apiLoader::getSubscribedServices()[$serviceName], '?');
+        /** @var string $serviceSubscribedString */
+        $serviceSubscribedString = $this->apiLoader::getSubscribedServices()[$serviceName];
+        /** @psalm-var class-string<RequestHandler> $requestHandlerInterface */
+        $requestHandlerInterface = ltrim($serviceSubscribedString, '?');
         $requestHandler          = $this->apiLoader->get($serviceName);
 
         if ($requestHandler === null) {
