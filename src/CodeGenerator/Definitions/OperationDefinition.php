@@ -9,11 +9,11 @@ class OperationDefinition
     private string $url;
     private string $method;
     private string $operationId;
-    private string $serviceName;
+    private string $requestHandlerName;
     private ?string $summary                   = null;
     private ?RequestDtoDefinition $request     = null;
     private ?ClassDefinition $markersInterface = null;
-    private ServiceInterfaceDefinition $serviceInterface;
+    private RequestHandlerInterfaceDefinition $requestHandlerInterface;
 
     /** @var ResponseDtoDefinition[] */
     private array $responses;
@@ -21,15 +21,15 @@ class OperationDefinition
     /**
      * @param ResponseDtoDefinition[] $responses
      */
-    public function __construct(string $url, string $method, string $operationId, string $serviceName, ?string $summary, ?RequestDtoDefinition $request, array $responses)
+    public function __construct(string $url, string $method, string $operationId, string $requestHandlerName, ?string $summary, ?RequestDtoDefinition $request, array $responses)
     {
-        $this->url         = $url;
-        $this->method      = $method;
-        $this->operationId = $operationId;
-        $this->serviceName = $serviceName;
-        $this->summary     = $summary;
-        $this->request     = $request;
-        $this->responses   = $responses;
+        $this->url                = $url;
+        $this->method             = $method;
+        $this->operationId        = $operationId;
+        $this->requestHandlerName = $requestHandlerName;
+        $this->summary            = $summary;
+        $this->request            = $request;
+        $this->responses          = $responses;
     }
 
     public function getUrl() : string
@@ -47,9 +47,9 @@ class OperationDefinition
         return $this->operationId;
     }
 
-    public function getServiceName() : string
+    public function getRequestHandlerName() : string
     {
-        return $this->serviceName;
+        return $this->requestHandlerName;
     }
 
     public function getSummary() : ?string
@@ -82,14 +82,14 @@ class OperationDefinition
         return $this;
     }
 
-    public function getServiceInterface() : ServiceInterfaceDefinition
+    public function getRequestHandlerInterface() : RequestHandlerInterfaceDefinition
     {
-        return $this->serviceInterface;
+        return $this->requestHandlerInterface;
     }
 
-    public function setServiceInterface(ServiceInterfaceDefinition $serviceInterface) : self
+    public function setRequestHandlerInterface(RequestHandlerInterfaceDefinition $requestHandlerInterface) : self
     {
-        $this->serviceInterface = $serviceInterface;
+        $this->requestHandlerInterface = $requestHandlerInterface;
 
         return $this;
     }

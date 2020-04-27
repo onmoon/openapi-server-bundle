@@ -8,7 +8,7 @@ class Operation
 {
     private string $url;
     private string $method;
-    private string $serviceName;
+    private string $requestHandlerName;
     private ?string $summary         = null;
     private ?ObjectType $requestBody = null;
 
@@ -30,15 +30,15 @@ class Operation
      * @psalm-param array<string, ObjectType> $requestParameters
      * @psalm-param array<string|int, ObjectType> $responses
      */
-    public function __construct(string $url, string $method, string $serviceName, ?string $summary, ?ObjectType $requestBody, array $requestParameters, array $responses)
+    public function __construct(string $url, string $method, string $requestHandlerName, ?string $summary, ?ObjectType $requestBody, array $requestParameters, array $responses)
     {
-        $this->url               = $url;
-        $this->method            = $method;
-        $this->serviceName       = $serviceName;
-        $this->summary           = $summary;
-        $this->requestBody       = $requestBody;
-        $this->requestParameters = $requestParameters;
-        $this->responses         = $responses;
+        $this->url                = $url;
+        $this->method             = $method;
+        $this->requestHandlerName = $requestHandlerName;
+        $this->summary            = $summary;
+        $this->requestBody        = $requestBody;
+        $this->requestParameters  = $requestParameters;
+        $this->responses          = $responses;
     }
 
     public function getUrl() : string
@@ -51,9 +51,9 @@ class Operation
         return $this->method;
     }
 
-    public function getServiceName() : string
+    public function getRequestHandlerName() : string
     {
-        return $this->serviceName;
+        return $this->requestHandlerName;
     }
 
     public function getSummary() : ?string

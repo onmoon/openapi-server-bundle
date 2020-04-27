@@ -8,7 +8,7 @@ use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\ClassDefinition;
 use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\DtoDefinition;
 use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\GeneratedInterfaceDefinition;
 use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\GraphDefinition;
-use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\ServiceInterfaceDefinition;
+use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\RequestHandlerInterfaceDefinition;
 use OnMoon\OpenApiServerBundle\Interfaces\ApiLoader;
 use OnMoon\OpenApiServerBundle\Interfaces\Dto;
 use OnMoon\OpenApiServerBundle\Interfaces\RequestHandler;
@@ -65,12 +65,12 @@ class InterfaceGenerator
                     $this->setChildrenRecursive($request, $this->defaultDto);
                 }
 
-                $service = new ServiceInterfaceDefinition();
+                $service = new RequestHandlerInterfaceDefinition();
                 $service
                     ->setResponseType($responseClass)
                     ->setRequestType($operation->getRequest())
                     ->setExtends($this->defaultService);
-                $operation->setServiceInterface($service);
+                $operation->setRequestHandlerInterface($service);
             }
         }
     }

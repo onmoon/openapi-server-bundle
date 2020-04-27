@@ -93,12 +93,12 @@ class SpecificationParser
                     $requestParameters[$in] = $params;
                 }
 
-                $serviceName = $specificationName . '.' . $operationId;
+                $handlerName = $specificationName . '.' . $operationId;
 
                 $operationDefinitions[$operationId] = new OperationDefinition(
                     $url,
                     $method,
-                    $serviceName,
+                    $handlerName,
                     $summary,
                     $requestBody,
                     $requestParameters,

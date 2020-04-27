@@ -73,7 +73,7 @@ class ApiController
         $route         = $this->getRoute($request);
         $operationId   = (string) $route->getOption(RouteLoader::OPENAPI_OPERATION);
         $specification = $this->getSpecification($route);
-        $operation     = $specification->getOperations()[$operationId];
+        $operation     = $specification->getOperation($operationId);
 
         $this->eventDispatcher->dispatch(new RequestEvent($request, $operationId, $specification));
         $this->requestValidator->validate($request, $specification, $operationId);
@@ -143,13 +143,14 @@ class ApiController
             throw ApiCallFailed::becauseApiLoaderNotFound();
         }
 
-        $serviceName = $operation->getServiceName();
+        $handlerName = $operation->getRequestHandlerName();
 
-        /** @var string $serviceSubscribedString */
-        $serviceSubscribedString = $this->apiLoader::getSubscribedServices()[$serviceName];
+        $requestHandlers = $this->apiLoader::getSubscribedServices();
+        /** @var string $requestHandlerSubscribedString */
+        $requestHandlerSubscribedString = $requestHandlers[$handlerName];
         /** @psalm-var class-string<RequestHandler> $requestHandlerInterface */
-        $requestHandlerInterface = ltrim($serviceSubscribedString, '?');
-        $requestHandler          = $this->apiLoader->get($serviceName);
+        $requestHandlerInterface = ltrim($requestHandlerSubscribedString, '?');
+        $requestHandler          = $this->apiLoader->get($handlerName);
 
         if ($requestHandler === null) {
             throw ApiCallFailed::becauseNotImplemented($requestHandlerInterface);

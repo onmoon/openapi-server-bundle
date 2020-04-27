@@ -51,13 +51,13 @@ class ServiceSubscriberCodeGenerator extends CodeGenerator
                     new Concat(
                         new String_('?'),
                         new ClassConstFetch(
-                            new Name($operation->getServiceInterface()->getClassName()),
+                            new Name($operation->getRequestHandlerInterface()->getClassName()),
                             'class'
                         )
                     ),
-                    new String_($operation->getServiceName())
+                    new String_($operation->getRequestHandlerName())
                 );
-                $this->use($fileBuilder, $subscriberDefinition->getNamespace(), $operation->getServiceInterface());
+                $this->use($fileBuilder, $subscriberDefinition->getNamespace(), $operation->getRequestHandlerInterface());
             }
         }
 
