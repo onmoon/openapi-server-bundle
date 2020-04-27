@@ -76,7 +76,7 @@ class ApiController
         $route         = $this->getRoute($request);
         $operationId   = (string) $route->getOption(RouteLoader::OPENAPI_OPERATION);
         $specification = $this->getSpecification($route);
-        $operation     = $specification->getOperations()[$operationId];
+        $operation     = $specification->getOperation($operationId);
 
         $requestHandlerInterface      = $this->getRequestHandlerInterface($route, $operationId);
         [$methodName, $inputDtoClass] = $this->getMethodAndInputDtoFQCN($requestHandlerInterface);

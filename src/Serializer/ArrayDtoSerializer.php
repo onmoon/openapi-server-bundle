@@ -71,7 +71,7 @@ class ArrayDtoSerializer implements DtoSerializer
         $statusCode = $responseDto::_getResponseCode();
         $source     = $responseDto->toArray();
 
-        return $this->convert(false, $source, $operation->getResponses()[$statusCode]);
+        return $this->convert(false, $source, $operation->getResponse($statusCode));
     }
 
     /**
