@@ -126,9 +126,9 @@ class NameGenerator
     public function setResponseNames(ResponseDtoDefinition $response, string $responseNamespace, string $operationName, string $responsePath) : void
     {
         try {
-            $statusNamespace = $this->httpstatus->getReasonPhrase((string) $response->getStatusCode());
+            $statusNamespace = $this->httpstatus->getReasonPhrase($response->getStatusCode());
         } catch (Throwable $e) {
-            $statusNamespace = (string) $response->getStatusCode();
+            $statusNamespace = $response->getStatusCode();
         }
 
         $statusNamespace = $this->naming->stringToNamespace($statusNamespace);

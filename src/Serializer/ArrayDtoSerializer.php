@@ -6,6 +6,7 @@ namespace OnMoon\OpenApiServerBundle\Serializer;
 
 use Exception;
 use OnMoon\OpenApiServerBundle\Interfaces\Dto;
+use OnMoon\OpenApiServerBundle\Interfaces\ResponseDto;
 use OnMoon\OpenApiServerBundle\Specification\Definitions\ObjectType;
 use OnMoon\OpenApiServerBundle\Specification\Definitions\Operation;
 use OnMoon\OpenApiServerBundle\Types\ScalarTypesResolver;
@@ -34,13 +35,13 @@ class ArrayDtoSerializer implements DtoSerializer
         if (array_key_exists('query', $params)) {
             /** @var string[] $source */
             $source                   = $request->query->all();
-            $input['queryParameters'] = $this->serialize($source, $params['query']);
+            $input['queryParameters'] = $this->deserialize($source, $params['query']);
         }
 
         if (array_key_exists('path', $params)) {
             /** @var string[] $source */
             $source                  = (array) $request->attributes->get('_route_params', []);
-            $input['pathParameters'] = $this->serialize($source, $params['path']);
+            $input['pathParameters'] = $this->deserialize($source, $params['path']);
         }
 
         $bodyType = $operation->getRequestBody();
@@ -50,8 +51,8 @@ class ArrayDtoSerializer implements DtoSerializer
                 throw new Exception('Expecting string as contents, resource received');
             }
 
-            $rawBody = json_decode($source, true);
-            $input['body'] = $this->serialize($rawBody, $bodyType);
+            $rawBody       = json_decode($source, true);
+            $input['body'] = $this->deserialize($rawBody, $bodyType);
         }
 
         /**
@@ -60,6 +61,43 @@ class ArrayDtoSerializer implements DtoSerializer
         $inputDto = $inputDtoFQCN::{'fromArray'}($input);
 
         return $inputDto;
+    }
+
+    /** @inheritDoc */
+    public function createResponseFromDto(ResponseDto $responseDto, Operation $operation) : array
+    {
+        $statusCode = $responseDto::_getResponseCode();
+        $source     = $responseDto->toArray();
+
+        return $this->serialize($source, $operation->getResponses()[$statusCode]);
+    }
+
+    /**
+     * @param mixed[] $source
+     *
+     * @return mixed[]
+     */
+    private function deserialize(array $source, ObjectType $params) : array
+    {
+        $result = [];
+        foreach ($params->getProperties() as $property) {
+            $name = $property->getName();
+            if (! array_key_exists($name, $source)) {
+                $result[$name] = $property->getDefaultValue();
+                continue;
+            }
+
+            $typeId     = $property->getScalarTypeId();
+            $objectType = $property->getObjectTypeDefinition();
+            if ($typeId !== null) {
+                /** @psalm-suppress MixedAssignment */
+                $result[$name] = $this->resolver->deserialize($typeId, $source[$name]);
+            } elseif ($objectType !== null) {
+                $result[$name] = $this->deserialize($source[$name], $objectType);
+            }
+        }
+
+        return $result;
     }
 
     /**
@@ -71,19 +109,23 @@ class ArrayDtoSerializer implements DtoSerializer
     {
         $result = [];
         foreach ($params->getProperties() as $property) {
-            $name = $property->getName();
-            if (! array_key_exists($name, $source)) {
-                $result[$name] = $property->getDefaultValue();
+            $name  = $property->getName();
+            $value = $source[$name];
+
+            //ToDo: uncomment
+            /*
+            if ($value === null && !$property->isRequired()) {
                 continue;
             }
+            */
 
-            $typeId = $property->getScalarTypeId();
+            $typeId     = $property->getScalarTypeId();
             $objectType = $property->getObjectTypeDefinition();
             if ($typeId !== null) {
                 /** @psalm-suppress MixedAssignment */
-                $result[$name] = $this->resolver->serialize($typeId, $source[$name]);
-            }elseif($objectType !== null) {
-                $result[$name] = $this->serialize($source[$name], $objectType);
+                $result[$name] = $this->resolver->serialize($typeId, $value);
+            } elseif ($objectType !== null) {
+                $result[$name] = $this->serialize($value, $objectType);
             }
         }
 

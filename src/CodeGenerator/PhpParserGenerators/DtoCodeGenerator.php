@@ -9,7 +9,6 @@ use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\DtoDefinition;
 use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\GeneratedFileDefinition;
 use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\PropertyDefinition;
 use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\ResponseDtoDefinition;
-use OnMoon\OpenApiServerBundle\Types\ScalarTypesResolver;
 use PhpParser\Builder;
 use PhpParser\Builder\Method;
 use PhpParser\Builder\Param;
@@ -21,7 +20,6 @@ use PhpParser\Node\Expr\ArrayDimFetch;
 use PhpParser\Node\Expr\ArrayItem;
 use PhpParser\Node\Expr\ArrowFunction;
 use PhpParser\Node\Expr\Assign;
-use PhpParser\Node\Expr\AssignOp\Coalesce as CoalesceAssign;
 use PhpParser\Node\Expr\BinaryOp\Identical;
 use PhpParser\Node\Expr\MethodCall;
 use PhpParser\Node\Expr\New_;
@@ -33,7 +31,6 @@ use PhpParser\Node\Name;
 use PhpParser\Node\Param as Param_;
 use PhpParser\Node\Scalar\String_;
 use PhpParser\Node\Stmt\Expression;
-use PhpParser\Node\Stmt\If_;
 use PhpParser\Node\Stmt\Return_;
 use function array_map;
 use function count;
@@ -284,21 +281,21 @@ class DtoCodeGenerator extends CodeGenerator
 
     private function generateResponseCodeStaticMethod(ResponseDtoDefinition $definition) : Method
     {
-        $responseCode = (int) $definition->getStatusCode();
+        $responseCode = $definition->getStatusCode();
         $method       = $this
             ->factory
             ->method('_getResponseCode')
             ->makePublic()
             ->makeStatic()
-            ->setReturnType('?int')
+            ->setReturnType('string')
             ->addStmt(
                 new Return_(
-                    $this->factory->val($responseCode !== 0 ? $responseCode : null)
+                    new String_($responseCode)
                 )
             );
         if ($this->fullDocs) {
             $method->setDocComment(
-                $this->getDocComment(['@return ?int'])
+                $this->getDocComment(['@return string'])
             );
         }
 
@@ -338,9 +335,8 @@ class DtoCodeGenerator extends CodeGenerator
         $source = new Variable('data');
         $dto    = new Variable('dto');
 
-        $args       = [];
-        $setters    = [];
-
+        $args    = [];
+        $setters = [];
 
         foreach ($definition->getProperties() as $property) {
             $fetch = $this->generateFromArrayPropFetch($property, $source);

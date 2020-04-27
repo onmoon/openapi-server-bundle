@@ -81,6 +81,30 @@ class ScalarTypesResolver
 
     /**
      * @param mixed $value
+     *
+     * @return mixed
+     */
+    public function deserialize(int $id, $value)
+    {
+        if ($value === null) {
+            return null;
+        }
+
+        $format = $this->scalarTypes[$id];
+
+        if (isset($format['deserializer'])) {
+            return TypeSerializer::{$format['deserializer']}($value);
+        }
+
+        /** phpcs:disable Generic.PHP.ForbiddenFunctions.Found */
+        settype($value, $format['phpType']);
+
+        return $value;
+    }
+
+    /**
+     * @param mixed $value
+     *
      * @return mixed
      */
     public function serialize(int $id, $value)
@@ -94,9 +118,6 @@ class ScalarTypesResolver
         if (isset($format['serializer'])) {
             return TypeSerializer::{$format['serializer']}($value);
         }
-
-        /** phpcs:disable Generic.PHP.ForbiddenFunctions.Found */
-        settype($value, $format['phpType']);
 
         return $value;
     }

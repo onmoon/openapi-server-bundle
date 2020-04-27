@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace OnMoon\OpenApiServerBundle\Serializer;
 
 use OnMoon\OpenApiServerBundle\Interfaces\Dto;
+use OnMoon\OpenApiServerBundle\Interfaces\ResponseDto;
 use OnMoon\OpenApiServerBundle\Specification\Definitions\Operation;
 use Symfony\Component\HttpFoundation\Request;
 
@@ -18,4 +19,7 @@ interface DtoSerializer
         Operation $operation,
         string $inputDtoFQCN
     ) : Dto;
+
+    /** @return mixed[] */
+    public function createResponseFromDto(ResponseDto $responseDto, Operation $operation) : array;
 }
