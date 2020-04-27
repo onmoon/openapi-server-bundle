@@ -81,7 +81,7 @@ class ScalarTypesResolver
             return TypeSerializer::{$format[$deserialize?'deserializer':'serializer']}($value);
         }
 
-        if($deserialize) {
+        if ($deserialize) {
             /** phpcs:disable Generic.PHP.ForbiddenFunctions.Found */
             settype($value, $format['phpType']);
         }

@@ -12,6 +12,7 @@ use OnMoon\OpenApiServerBundle\Specification\Definitions\Operation;
 use OnMoon\OpenApiServerBundle\Types\ScalarTypesResolver;
 use Symfony\Component\HttpFoundation\Request;
 use function array_key_exists;
+use function array_map;
 use function is_resource;
 use function Safe\json_decode;
 
@@ -77,16 +78,20 @@ class ArrayDtoSerializer implements DtoSerializer
      * @param mixed[] $source
      *
      * @return mixed[]
+     *
+     * @psalm-suppress MissingClosureReturnType
+     * @psalm-suppress MissingParamType
+     * @psalm-suppress MixedArgument
+     * @psalm-suppress MixedAssignment
      */
     private function convert(bool $deserialize, array $source, ObjectType $params) : array
     {
         $result = [];
         foreach ($params->getProperties() as $property) {
-            $name = $property->getName();
-            /** @psalm-var mixed $value */
+            $name  = $property->getName();
             $value = $source[$name];
 
-            if ($deserialize && !array_key_exists($name, $source)) {
+            if ($deserialize && ! array_key_exists($name, $source)) {
                 $result[$name] = $property->getDefaultValue();
                 continue;
             }
@@ -107,8 +112,8 @@ class ArrayDtoSerializer implements DtoSerializer
                 $converter = fn($v) => $this->resolver->convert($deserialize, $typeId??0, $v);
             }
 
-            if($property->isArray()) {
-                $converter = fn($v) => array_map(fn ($i) => $converter($i), $v);
+            if ($property->isArray()) {
+                $converter = static fn($v) => array_map(static fn ($i) => $converter($i), $v);
             }
 
             $result[$name] = $converter($value);
