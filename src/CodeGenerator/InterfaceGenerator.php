@@ -8,12 +8,11 @@ use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\ClassDefinition;
 use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\DtoDefinition;
 use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\GeneratedInterfaceDefinition;
 use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\GraphDefinition;
-use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\ServiceInterfaceDefinition;
+use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\RequestHandlerInterfaceDefinition;
 use OnMoon\OpenApiServerBundle\Interfaces\ApiLoader;
 use OnMoon\OpenApiServerBundle\Interfaces\Dto;
 use OnMoon\OpenApiServerBundle\Interfaces\RequestHandler;
 use OnMoon\OpenApiServerBundle\Interfaces\ResponseDto;
-use Symfony\Contracts\Service\ServiceSubscriberInterface;
 use function count;
 use function Safe\substr;
 use function strrpos;
@@ -34,7 +33,6 @@ class InterfaceGenerator
     public function setAllInterfaces(GraphDefinition $graph) : void
     {
         $graph->getServiceSubscriber()->setImplements([
-            $this->getDefaultInterface(ServiceSubscriberInterface::class),
             $this->getDefaultInterface(ApiLoader::class),
         ]);
 
@@ -67,12 +65,12 @@ class InterfaceGenerator
                     $this->setChildrenRecursive($request, $this->defaultDto);
                 }
 
-                $service = new ServiceInterfaceDefinition();
+                $service = new RequestHandlerInterfaceDefinition();
                 $service
                     ->setResponseType($responseClass)
                     ->setRequestType($operation->getRequest())
                     ->setExtends($this->defaultService);
-                $operation->setServiceInterface($service);
+                $operation->setRequestHandlerInterface($service);
             }
         }
     }

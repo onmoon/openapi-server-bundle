@@ -6,7 +6,7 @@ namespace OnMoon\OpenApiServerBundle\CodeGenerator\PhpParserGenerators;
 
 use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\GeneratedFileDefinition;
 use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\GeneratedInterfaceDefinition;
-use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\ServiceInterfaceDefinition;
+use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\RequestHandlerInterfaceDefinition;
 use function count;
 use function Safe\sprintf;
 
@@ -29,7 +29,7 @@ class InterfaceCodeGenerator extends CodeGenerator
             $this->use($fileBuilder, $definition->getNamespace(), $extends);
         }
 
-        if ($definition instanceof ServiceInterfaceDefinition) {
+        if ($definition instanceof RequestHandlerInterfaceDefinition) {
             $methodBuilder = $this->factory->method($definition->getMethodName())->makePublic();
             $request       = $definition->getRequestType();
             $docBlocks     = [];

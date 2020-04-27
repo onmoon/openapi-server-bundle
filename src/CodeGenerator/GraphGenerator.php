@@ -56,6 +56,7 @@ class GraphGenerator
                     $operation->getUrl(),
                     $operation->getMethod(),
                     $operationId,
+                    $operation->getRequestHandlerName(),
                     $operation->getSummary(),
                     $requestDefinitions->isEmpty() ? null : $requestDefinitions,
                     $this->getResponseDtoDefinitions($operation->getResponses())

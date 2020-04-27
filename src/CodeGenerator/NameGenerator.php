@@ -56,7 +56,7 @@ class NameGenerator
                 $operationPath      = $this->naming->buildPath($apiPath, $operationName);
 
                 $methodName = $this->naming->stringToMethodName($operation->getOperationId());
-                $operation->getServiceInterface()
+                $operation->getRequestHandlerInterface()
                     ->setMethodName($methodName)
                     ->setMethodDescription($operation->getSummary())
                     ->setFileName($this->getFileName($operationName))
