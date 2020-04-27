@@ -34,25 +34,24 @@ class ArrayDtoSerializer implements DtoSerializer
         if (array_key_exists('query', $params)) {
             /** @var string[] $source */
             $source                   = $request->query->all();
-            $input['queryParameters'] = $this->getParameters($source, $params['query']);
+            $input['queryParameters'] = $this->serialize($source, $params['query']);
         }
 
         if (array_key_exists('path', $params)) {
             /** @var string[] $source */
             $source                  = (array) $request->attributes->get('_route_params', []);
-            $input['pathParameters'] = $this->getParameters($source, $params['path']);
+            $input['pathParameters'] = $this->serialize($source, $params['path']);
         }
 
-        if ($operation->getRequestBody() !== null) {
+        $bodyType = $operation->getRequestBody();
+        if ($bodyType !== null) {
             $source = $request->getContent();
             if (is_resource($source)) {
                 throw new Exception('Expecting string as contents, resource received');
             }
 
-            /**
-             * @psalm-suppress MixedAssignment
-             */
-            $input['body'] = json_decode($source, true);
+            $rawBody = json_decode($source, true);
+            $input['body'] = $this->serialize($rawBody, $bodyType);
         }
 
         /**
@@ -64,26 +63,28 @@ class ArrayDtoSerializer implements DtoSerializer
     }
 
     /**
-     * @param string[] $source
+     * @param mixed[] $source
      *
      * @return mixed[]
      */
-    private function getParameters(array $source, ObjectType $params) : array
+    private function serialize(array $source, ObjectType $params) : array
     {
         $result = [];
         foreach ($params->getProperties() as $property) {
             $name = $property->getName();
             if (! array_key_exists($name, $source)) {
+                $result[$name] = $property->getDefaultValue();
                 continue;
             }
 
             $typeId = $property->getScalarTypeId();
-            if ($typeId === null) {
-                throw new Exception('Non scalar property is not supported');
+            $objectType = $property->getObjectTypeDefinition();
+            if ($typeId !== null) {
+                /** @psalm-suppress MixedAssignment */
+                $result[$name] = $this->resolver->serialize($typeId, $source[$name]);
+            }elseif($objectType !== null) {
+                $result[$name] = $this->serialize($source[$name], $objectType);
             }
-
-            /** @psalm-suppress MixedAssignment */
-            $result[$name] = $this->resolver->setType($typeId, $source[$name]);
         }
 
         return $result;
