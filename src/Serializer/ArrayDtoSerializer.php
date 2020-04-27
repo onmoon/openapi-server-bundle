@@ -51,6 +51,7 @@ class ArrayDtoSerializer implements DtoSerializer
                 throw new Exception('Expecting string as contents, resource received');
             }
 
+            /** @var mixed[] $rawBody */
             $rawBody       = json_decode($source, true);
             $input['body'] = $this->deserialize($rawBody, $bodyType);
         }
@@ -93,6 +94,7 @@ class ArrayDtoSerializer implements DtoSerializer
                 /** @psalm-suppress MixedAssignment */
                 $result[$name] = $this->resolver->deserialize($typeId, $source[$name]);
             } elseif ($objectType !== null) {
+                /** @psalm-suppress MixedArgument */
                 $result[$name] = $this->deserialize($source[$name], $objectType);
             }
         }
@@ -109,7 +111,8 @@ class ArrayDtoSerializer implements DtoSerializer
     {
         $result = [];
         foreach ($params->getProperties() as $property) {
-            $name  = $property->getName();
+            $name = $property->getName();
+            /** @psalm-var mixed $value */
             $value = $source[$name];
 
             //ToDo: uncomment
@@ -125,6 +128,7 @@ class ArrayDtoSerializer implements DtoSerializer
                 /** @psalm-suppress MixedAssignment */
                 $result[$name] = $this->resolver->serialize($typeId, $value);
             } elseif ($objectType !== null) {
+                /** @psalm-suppress MixedArgument */
                 $result[$name] = $this->serialize($value, $objectType);
             }
         }
