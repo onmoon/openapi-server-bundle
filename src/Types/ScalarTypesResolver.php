@@ -64,27 +64,12 @@ class ScalarTypesResolver
         ];
     }
 
-    public function getSerializer(int $id) : ?string
-    {
-        return $this->scalarTypes[$id]['serializer'] ?? null;
-    }
-
-    public function getDeserializer(int $id) : ?string
-    {
-        return $this->scalarTypes[$id]['deserializer'] ?? null;
-    }
-
-    public function getConverter(bool $deserialize, int $id) : ?string
-    {
-        return $deserialize ? $this->getDeserializer($id) : $this->getSerializer($id);
-    }
-
     /**
      * @param mixed $value
      *
      * @return mixed
      */
-    public function deserialize(int $id, $value)
+    public function convert(bool $deserialize, int $id, $value)
     {
         if ($value === null) {
             return null;
@@ -92,31 +77,13 @@ class ScalarTypesResolver
 
         $format = $this->scalarTypes[$id];
 
-        if (isset($format['deserializer'])) {
-            return TypeSerializer::{$format['deserializer']}($value);
+        if (isset($format[$deserialize?'deserializer':'serializer'])) {
+            return TypeSerializer::{$format[$deserialize?'deserializer':'serializer']}($value);
         }
 
-        /** phpcs:disable Generic.PHP.ForbiddenFunctions.Found */
-        settype($value, $format['phpType']);
-
-        return $value;
-    }
-
-    /**
-     * @param mixed $value
-     *
-     * @return mixed
-     */
-    public function serialize(int $id, $value)
-    {
-        if ($value === null) {
-            return null;
-        }
-
-        $format = $this->scalarTypes[$id];
-
-        if (isset($format['serializer'])) {
-            return TypeSerializer::{$format['serializer']}($value);
+        if($deserialize) {
+            /** phpcs:disable Generic.PHP.ForbiddenFunctions.Found */
+            settype($value, $format['phpType']);
         }
 
         return $value;

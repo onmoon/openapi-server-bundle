@@ -35,13 +35,13 @@ class ArrayDtoSerializer implements DtoSerializer
         if (array_key_exists('query', $params)) {
             /** @var string[] $source */
             $source                   = $request->query->all();
-            $input['queryParameters'] = $this->deserialize($source, $params['query']);
+            $input['queryParameters'] = $this->convert(true, $source, $params['query']);
         }
 
         if (array_key_exists('path', $params)) {
             /** @var string[] $source */
             $source                  = (array) $request->attributes->get('_route_params', []);
-            $input['pathParameters'] = $this->deserialize($source, $params['path']);
+            $input['pathParameters'] = $this->convert(true, $source, $params['path']);
         }
 
         $bodyType = $operation->getRequestBody();
@@ -53,7 +53,7 @@ class ArrayDtoSerializer implements DtoSerializer
 
             /** @var mixed[] $rawBody */
             $rawBody       = json_decode($source, true);
-            $input['body'] = $this->deserialize($rawBody, $bodyType);
+            $input['body'] = $this->convert(true, $rawBody, $bodyType);
         }
 
         /**
@@ -70,7 +70,7 @@ class ArrayDtoSerializer implements DtoSerializer
         $statusCode = $responseDto::_getResponseCode();
         $source     = $responseDto->toArray();
 
-        return $this->serialize($source, $operation->getResponses()[$statusCode]);
+        return $this->convert(false, $source, $operation->getResponses()[$statusCode]);
     }
 
     /**
@@ -78,36 +78,7 @@ class ArrayDtoSerializer implements DtoSerializer
      *
      * @return mixed[]
      */
-    private function deserialize(array $source, ObjectType $params) : array
-    {
-        $result = [];
-        foreach ($params->getProperties() as $property) {
-            $name = $property->getName();
-            if (! array_key_exists($name, $source)) {
-                $result[$name] = $property->getDefaultValue();
-                continue;
-            }
-
-            $typeId     = $property->getScalarTypeId();
-            $objectType = $property->getObjectTypeDefinition();
-            if ($typeId !== null) {
-                /** @psalm-suppress MixedAssignment */
-                $result[$name] = $this->resolver->deserialize($typeId, $source[$name]);
-            } elseif ($objectType !== null) {
-                /** @psalm-suppress MixedArgument */
-                $result[$name] = $this->deserialize($source[$name], $objectType);
-            }
-        }
-
-        return $result;
-    }
-
-    /**
-     * @param mixed[] $source
-     *
-     * @return mixed[]
-     */
-    private function serialize(array $source, ObjectType $params) : array
+    private function convert(bool $deserialize, array $source, ObjectType $params) : array
     {
         $result = [];
         foreach ($params->getProperties() as $property) {
@@ -115,22 +86,32 @@ class ArrayDtoSerializer implements DtoSerializer
             /** @psalm-var mixed $value */
             $value = $source[$name];
 
+            if ($deserialize && !array_key_exists($name, $source)) {
+                $result[$name] = $property->getDefaultValue();
+                continue;
+            }
+
             //ToDo: uncomment
             /*
-            if ($value === null && !$property->isRequired()) {
+            if (!$deserialize && $value === null && !$property->isRequired()) {
                 continue;
             }
             */
 
             $typeId     = $property->getScalarTypeId();
             $objectType = $property->getObjectTypeDefinition();
-            if ($typeId !== null) {
-                /** @psalm-suppress MixedAssignment */
-                $result[$name] = $this->resolver->serialize($typeId, $value);
-            } elseif ($objectType !== null) {
-                /** @psalm-suppress MixedArgument */
-                $result[$name] = $this->serialize($value, $objectType);
+
+            if ($objectType !== null) {
+                $converter = fn($v) => $this->convert($deserialize, $v, $objectType);
+            } else {
+                $converter = fn($v) => $this->resolver->convert($deserialize, $typeId??0, $v);
             }
+
+            if($property->isArray()) {
+                $converter = fn($v) => array_map(fn ($i) => $converter($i), $v);
+            }
+
+            $result[$name] = $converter($value);
         }
 
         return $result;
