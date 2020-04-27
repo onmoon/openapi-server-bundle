@@ -156,6 +156,7 @@ class ShowPetByIdHandler implements ShowPetById
 Additionally, your API call handler can implement the following interfaces:
 - `\OnMoon\OpenApiServerBundle\Interfaces\SetClientIp` - if it needs the client IP address
 - `\OnMoon\OpenApiServerBundle\Interfaces\SetRequest` - if it needs the Symfony request object
+- `\OnMoon\OpenApiServerBundle\Interfaces\GetResponseCode` - if it needs to specify custom HTTP response codes
 
 ## Customizing the API server behavior
 
