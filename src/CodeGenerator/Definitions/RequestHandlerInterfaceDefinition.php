@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace OnMoon\OpenApiServerBundle\CodeGenerator\Definitions;
 
-class ServiceInterfaceDefinition extends GeneratedInterfaceDefinition
+class RequestHandlerInterfaceDefinition extends GeneratedInterfaceDefinition
 {
     private ?ClassDefinition $requestType  = null;
     private ?ClassDefinition $responseType = null;

@@ -36,6 +36,11 @@ class Specification
         return $this->operations;
     }
 
+    public function getOperation(string $id) : Operation
+    {
+        return $this->operations[$id];
+    }
+
     public function getOpenApi() : OpenApi
     {
         return $this->openApi;

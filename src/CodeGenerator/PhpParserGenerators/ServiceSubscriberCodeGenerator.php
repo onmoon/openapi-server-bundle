@@ -21,7 +21,6 @@ use PhpParser\Node\Scalar\String_;
 use PhpParser\Node\Stmt\If_;
 use PhpParser\Node\Stmt\Return_;
 use Psr\Container\ContainerInterface;
-use function array_map;
 use function Safe\sprintf;
 
 class ServiceSubscriberCodeGenerator extends CodeGenerator
@@ -48,8 +47,17 @@ class ServiceSubscriberCodeGenerator extends CodeGenerator
         $services = [];
         foreach ($graphDefinition->getSpecifications() as $specification) {
             foreach ($specification->getOperations() as $operation) {
-                $services[] = $operation->getServiceInterface()->getClassName();
-                $this->use($fileBuilder, $subscriberDefinition->getNamespace(), $operation->getServiceInterface());
+                $services[] =  new ArrayItem(
+                    new Concat(
+                        new String_('?'),
+                        new ClassConstFetch(
+                            new Name($operation->getRequestHandlerInterface()->getClassName()),
+                            'class'
+                        )
+                    ),
+                    new String_($operation->getRequestHandlerName())
+                );
+                $this->use($fileBuilder, $subscriberDefinition->getNamespace(), $operation->getRequestHandlerInterface());
             }
         }
 
@@ -87,19 +95,7 @@ class ServiceSubscriberCodeGenerator extends CodeGenerator
             ->addStmt(
                 new Return_(
                     new Array_(
-                        array_map(
-                            static fn (string $service) : ArrayItem =>
-                            new ArrayItem(
-                                new Concat(
-                                    new String_('?'),
-                                    new ClassConstFetch(
-                                        new Name($service),
-                                        'class'
-                                    )
-                                )
-                            ),
-                            $services
-                        )
+                        $services
                     )
                 )
             );
