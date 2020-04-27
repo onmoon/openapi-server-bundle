@@ -9,6 +9,7 @@ class OperationDefinition
     private string $url;
     private string $method;
     private string $operationId;
+    private string $serviceName;
     private ?string $summary                   = null;
     private ?RequestDtoDefinition $request     = null;
     private ?ClassDefinition $markersInterface = null;
@@ -20,11 +21,12 @@ class OperationDefinition
     /**
      * @param ResponseDtoDefinition[] $responses
      */
-    public function __construct(string $url, string $method, string $operationId, ?string $summary, ?RequestDtoDefinition $request, array $responses)
+    public function __construct(string $url, string $method, string $operationId, string $serviceName, ?string $summary, ?RequestDtoDefinition $request, array $responses)
     {
         $this->url         = $url;
         $this->method      = $method;
         $this->operationId = $operationId;
+        $this->serviceName = $serviceName;
         $this->summary     = $summary;
         $this->request     = $request;
         $this->responses   = $responses;
@@ -43,6 +45,11 @@ class OperationDefinition
     public function getOperationId() : string
     {
         return $this->operationId;
+    }
+
+    public function getServiceName() : string
+    {
+        return $this->serviceName;
     }
 
     public function getSummary() : ?string

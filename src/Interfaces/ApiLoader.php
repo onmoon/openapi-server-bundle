@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace OnMoon\OpenApiServerBundle\Interfaces;
 
-interface ApiLoader
+use Symfony\Contracts\Service\ServiceSubscriberInterface;
+
+interface ApiLoader extends ServiceSubscriberInterface
 {
     public function get(string $interfaceName) : ?RequestHandler;
 }

@@ -8,8 +8,10 @@ class Operation
 {
     private string $url;
     private string $method;
+    private string $serviceName;
     private ?string $summary         = null;
     private ?ObjectType $requestBody = null;
+
     /**
      * @var ObjectType[]
      * @psalm-var array<string, ObjectType>
@@ -28,10 +30,11 @@ class Operation
      * @psalm-param array<string, ObjectType> $requestParameters
      * @psalm-param array<string|int, ObjectType> $responses
      */
-    public function __construct(string $url, string $method, ?string $summary, ?ObjectType $requestBody, array $requestParameters, array $responses)
+    public function __construct(string $url, string $method, string $serviceName, ?string $summary, ?ObjectType $requestBody, array $requestParameters, array $responses)
     {
         $this->url               = $url;
         $this->method            = $method;
+        $this->serviceName       = $serviceName;
         $this->summary           = $summary;
         $this->requestBody       = $requestBody;
         $this->requestParameters = $requestParameters;
@@ -46,6 +49,11 @@ class Operation
     public function getMethod() : string
     {
         return $this->method;
+    }
+
+    public function getServiceName() : string
+    {
+        return $this->serviceName;
     }
 
     public function getSummary() : ?string

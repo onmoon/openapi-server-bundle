@@ -13,7 +13,6 @@ use OnMoon\OpenApiServerBundle\Interfaces\ApiLoader;
 use OnMoon\OpenApiServerBundle\Interfaces\Dto;
 use OnMoon\OpenApiServerBundle\Interfaces\RequestHandler;
 use OnMoon\OpenApiServerBundle\Interfaces\ResponseDto;
-use Symfony\Contracts\Service\ServiceSubscriberInterface;
 use function count;
 use function Safe\substr;
 use function strrpos;
@@ -34,7 +33,6 @@ class InterfaceGenerator
     public function setAllInterfaces(GraphDefinition $graph) : void
     {
         $graph->getServiceSubscriber()->setImplements([
-            $this->getDefaultInterface(ServiceSubscriberInterface::class),
             $this->getDefaultInterface(ApiLoader::class),
         ]);
 

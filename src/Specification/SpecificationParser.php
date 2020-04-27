@@ -41,7 +41,7 @@ class SpecificationParser
         $this->typeResolver = $typeResolver;
     }
 
-    public function parseOpenApi(SpecificationConfig $specificationConfig, OpenApi $parsedSpecification) : Specification
+    public function parseOpenApi(string $specificationName, SpecificationConfig $specificationConfig, OpenApi $parsedSpecification) : Specification
     {
         $operationDefinitions = [];
         /**
@@ -93,9 +93,12 @@ class SpecificationParser
                     $requestParameters[$in] = $params;
                 }
 
+                $serviceName = $specificationName . '.' . $operationId;
+
                 $operationDefinitions[$operationId] = new OperationDefinition(
                     $url,
                     $method,
+                    $serviceName,
                     $summary,
                     $requestBody,
                     $requestParameters,
