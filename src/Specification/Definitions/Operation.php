@@ -85,4 +85,9 @@ class Operation
     {
         return $this->responses;
     }
+
+    public function getResponse(string $code) : ObjectType
+    {
+        return $this->responses[$code];
+    }
 }

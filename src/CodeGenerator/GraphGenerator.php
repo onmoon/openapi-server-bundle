@@ -82,7 +82,7 @@ class GraphGenerator
 
         foreach ($responses as $statusCode => $response) {
             $responseDtoDefinitions[] = new ResponseDtoDefinition(
-                $statusCode,
+                (string) $statusCode,
                 $this->propertiesToDefinitions($response->getProperties())
             );
         }

@@ -64,23 +64,12 @@ class ScalarTypesResolver
         ];
     }
 
-    public function getSerializer(int $id) : ?string
-    {
-        return $this->scalarTypes[$id]['serializer'] ?? null;
-    }
-
-    public function getDeserializer(int $id) : ?string
-    {
-        return $this->scalarTypes[$id]['deserializer'] ?? null;
-    }
-
-    public function getConverter(bool $deserialize, int $id) : ?string
-    {
-        return $deserialize ? $this->getDeserializer($id) : $this->getSerializer($id);
-    }
-
-    /** @return mixed */
-    public function setType(int $id, ?string $value)
+    /**
+     * @param mixed $value
+     *
+     * @return mixed
+     */
+    public function convert(bool $deserialize, int $id, $value)
     {
         if ($value === null) {
             return null;
@@ -88,14 +77,14 @@ class ScalarTypesResolver
 
         $format = $this->scalarTypes[$id];
 
-        if (isset($format['serializer'])) {
-            //ToDo: think of moving complete serializer here
-            //Main issues is that body is not passed thru setType now
-            return $value;
+        if (isset($format[$deserialize?'deserializer':'serializer'])) {
+            return TypeSerializer::{$format[$deserialize?'deserializer':'serializer']}($value);
         }
 
-        /** phpcs:disable Generic.PHP.ForbiddenFunctions.Found */
-        settype($value, $format['phpType']);
+        if ($deserialize) {
+            /** phpcs:disable Generic.PHP.ForbiddenFunctions.Found */
+            settype($value, $format['phpType']);
+        }
 
         return $value;
     }
@@ -114,6 +103,11 @@ class ScalarTypesResolver
     public function getPhpType(int $id) : string
     {
         return (string) $this->scalarTypes[$id]['phpType'];
+    }
+
+    public function isDateTime(int $id) : bool
+    {
+        return $this->getPhpType($id) === '\DateTime';
     }
 
     public function findScalarType(?string $type, ?string $format) : int

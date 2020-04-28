@@ -6,11 +6,13 @@ namespace OnMoon\OpenApiServerBundle\Serializer;
 
 use Exception;
 use OnMoon\OpenApiServerBundle\Interfaces\Dto;
+use OnMoon\OpenApiServerBundle\Interfaces\ResponseDto;
 use OnMoon\OpenApiServerBundle\Specification\Definitions\ObjectType;
 use OnMoon\OpenApiServerBundle\Specification\Definitions\Operation;
 use OnMoon\OpenApiServerBundle\Types\ScalarTypesResolver;
 use Symfony\Component\HttpFoundation\Request;
 use function array_key_exists;
+use function array_map;
 use function is_resource;
 use function Safe\json_decode;
 
@@ -34,25 +36,25 @@ class ArrayDtoSerializer implements DtoSerializer
         if (array_key_exists('query', $params)) {
             /** @var string[] $source */
             $source                   = $request->query->all();
-            $input['queryParameters'] = $this->getParameters($source, $params['query']);
+            $input['queryParameters'] = $this->convert(true, $source, $params['query']);
         }
 
         if (array_key_exists('path', $params)) {
             /** @var string[] $source */
             $source                  = (array) $request->attributes->get('_route_params', []);
-            $input['pathParameters'] = $this->getParameters($source, $params['path']);
+            $input['pathParameters'] = $this->convert(true, $source, $params['path']);
         }
 
-        if ($operation->getRequestBody() !== null) {
+        $bodyType = $operation->getRequestBody();
+        if ($bodyType !== null) {
             $source = $request->getContent();
             if (is_resource($source)) {
                 throw new Exception('Expecting string as contents, resource received');
             }
 
-            /**
-             * @psalm-suppress MixedAssignment
-             */
-            $input['body'] = json_decode($source, true);
+            /** @var mixed[] $rawBody */
+            $rawBody       = json_decode($source, true);
+            $input['body'] = $this->convert(true, $rawBody, $bodyType);
         }
 
         /**
@@ -63,27 +65,54 @@ class ArrayDtoSerializer implements DtoSerializer
         return $inputDto;
     }
 
+    /** @inheritDoc */
+    public function createResponseFromDto(ResponseDto $responseDto, Operation $operation) : array
+    {
+        $statusCode = $responseDto::_getResponseCode();
+        $source     = $responseDto->toArray();
+
+        return $this->convert(false, $source, $operation->getResponse($statusCode));
+    }
+
     /**
-     * @param string[] $source
+     * @param mixed[] $source
      *
      * @return mixed[]
+     *
+     * @psalm-suppress MissingClosureReturnType
+     * @psalm-suppress MissingParamType
+     * @psalm-suppress MixedArgument
+     * @psalm-suppress MixedAssignment
      */
-    private function getParameters(array $source, ObjectType $params) : array
+    private function convert(bool $deserialize, array $source, ObjectType $params) : array
     {
         $result = [];
         foreach ($params->getProperties() as $property) {
             $name = $property->getName();
-            if (! array_key_exists($name, $source)) {
+            if ($deserialize && ! array_key_exists($name, $source)) {
+                $result[$name] = $property->getDefaultValue();
                 continue;
             }
 
-            $typeId = $property->getScalarTypeId();
-            if ($typeId === null) {
-                throw new Exception('Non scalar property is not supported');
+            if (! $deserialize && $source[$name] === null) {
+                $result[$name] = $property->getDefaultValue();
+                continue;
             }
 
-            /** @psalm-suppress MixedAssignment */
-            $result[$name] = $this->resolver->setType($typeId, $source[$name]);
+            $typeId     = $property->getScalarTypeId();
+            $objectType = $property->getObjectTypeDefinition();
+
+            if ($objectType !== null) {
+                $converter = fn($v) => $this->convert($deserialize, $v, $objectType);
+            } else {
+                $converter = fn($v) => $this->resolver->convert($deserialize, $typeId??0, $v);
+            }
+
+            if ($property->isArray()) {
+                $converter = static fn($v) => array_map(static fn ($i) => $converter($i), $v);
+            }
+
+            $result[$name] = $converter($source[$name]);
         }
 
         return $result;

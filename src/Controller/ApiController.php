@@ -90,7 +90,7 @@ class ApiController
         $responseDto = $this->executeRequestHandler($requestHandler, $methodName, $requestDto);
         $this->eventDispatcher->dispatch(new ResponseDtoEvent($responseDto, $operationId, $specification));
 
-        $response = $this->createResponse($requestHandler, $responseDto);
+        $response = $this->createResponse($requestHandler, $operation, $responseDto);
         $this->eventDispatcher->dispatch(new ResponseEvent($response, $operationId, $specification));
 
         return $response;
@@ -167,7 +167,7 @@ class ApiController
         return [$requestHandlerInterface, $requestHandler];
     }
 
-    private function createResponse(RequestHandler $requestHandler, ?ResponseDto $responseDto = null) : Response
+    private function createResponse(RequestHandler $requestHandler, Operation $operation, ?ResponseDto $responseDto = null) : Response
     {
         $response = new JsonResponse();
         $response->setEncodingOptions(JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_THROW_ON_ERROR);
@@ -175,8 +175,10 @@ class ApiController
         $statusCode = null;
 
         if ($responseDto instanceof ResponseDto) {
-            $response->setData($responseDto->toArray());
-            $statusCode = $responseDto::_getResponseCode() ?? $statusCode;
+            $responseData = $this->serializer->createResponseFromDto($responseDto, $operation);
+            $response->setData($responseData);
+            $dtoStatusCode = (int) $responseDto::_getResponseCode();
+            $statusCode    =  $dtoStatusCode !== 0 ? $dtoStatusCode : $statusCode;
         }
 
         if ($requestHandler instanceof GetResponseCode) {
