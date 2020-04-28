@@ -73,10 +73,9 @@ operation must have an unique `operationId`.
 
 Currently, there are also the following limitations:
 - `number` without `format` is treated as float
-- Default values are not supported for `date` and `date-time` string formats
-- Only scalar types are allowed in path parameters
-- Partial match pattern are ignored in path parameter patterns, only `^...$` patterns are used
-- If pattern is specified in path parameter then type- and format-generated requirements are ignored
+- Only scalar types are allowed in path and query parameters
+- Partial match pattern are ignored in path parameter patterns when selecting route, only `^...$` patterns are used
+- If pattern is specified in path parameter then type- and format-generated patterns are ignored
 - Only one media-type can be used for request and response body schemas. See: https://swagger.io/docs/specification/media-types/
 
 ## Generating the API Server code
