@@ -105,6 +105,11 @@ class ScalarTypesResolver
         return (string) $this->scalarTypes[$id]['phpType'];
     }
 
+    public function isDateTime(int $id) : bool
+    {
+        return $this->getPhpType($id) === '\DateTime';
+    }
+
     public function findScalarType(?string $type, ?string $format) : int
     {
         if ($type === null) {

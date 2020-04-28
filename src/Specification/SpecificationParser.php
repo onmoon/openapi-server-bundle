@@ -282,7 +282,7 @@ class SpecificationParser
         $propertyDefinition->setDescription($property->description);
 
         $type     = null;
-        $isScalar = false;
+        $isScalar = true;
 
         if ($property->type === Type::ARRAY) {
             if (! ($property->items instanceof Schema)) {
@@ -291,23 +291,33 @@ class SpecificationParser
 
             $propertyDefinition->setArray(true);
             $property = $property->items;
+            $isScalar = false;
         }
 
         if (Type::isScalar($property->type)) {
-            $typeId = $this->typeResolver->findScalarType($property->type, $property->format);
-            $propertyDefinition->setScalarTypeId($typeId);
-            $isScalar = true;
+            $type = $this->typeResolver->findScalarType($property->type, $property->format);
+            $propertyDefinition->setScalarTypeId($type);
         } elseif ($property->type === Type::OBJECT) {
             $type = new ObjectDefinition($this->getPropertyGraph($property, $exceptionContext));
             $propertyDefinition->setObjectTypeDefinition($type);
+            $isScalar = false;
         } else {
             throw CannotGenerateCodeForOperation::becauseTypeNotSupported($propertyName, $property->type, $exceptionContext);
         }
 
         /** @var string|int|float|bool|null $schemaDefaultValue */
         $schemaDefaultValue = $property->default;
-        //ToDo: Support DateTime assignments
-        if ($schemaDefaultValue !== null && $isScalar && ! class_exists($this->typeResolver->getPhpType($propertyDefinition->getScalarTypeId()??0))) {
+
+        if ($schemaDefaultValue !== null && $isScalar) {
+            if($this->typeResolver->isDateTime($type)) {
+                // Symfony Yaml parses fields that looks like datetime into unix timestamp
+                // however leaves strings untouched. We need to make types more solid
+                if(is_int($schemaDefaultValue)) {
+                    $datetime = (new \DateTime())->setTimestamp($schemaDefaultValue);
+                    $schemaDefaultValue = $this->typeResolver->convert(false, $type, $datetime);
+                }
+            }
+
             $propertyDefinition->setDefaultValue($schemaDefaultValue);
         }
 

@@ -89,19 +89,15 @@ class ArrayDtoSerializer implements DtoSerializer
         $result = [];
         foreach ($params->getProperties() as $property) {
             $name  = $property->getName();
-            $value = $source[$name];
-
             if ($deserialize && ! array_key_exists($name, $source)) {
                 $result[$name] = $property->getDefaultValue();
                 continue;
             }
 
-            //ToDo: uncomment
-            /*
-            if (!$deserialize && $value === null && !$property->isRequired()) {
+            if (!$deserialize && $source[$name] === null) {
+                $result[$name] = $property->getDefaultValue();
                 continue;
             }
-            */
 
             $typeId     = $property->getScalarTypeId();
             $objectType = $property->getObjectTypeDefinition();
@@ -116,7 +112,7 @@ class ArrayDtoSerializer implements DtoSerializer
                 $converter = static fn($v) => array_map(static fn ($i) => $converter($i), $v);
             }
 
-            $result[$name] = $converter($value);
+            $result[$name] = $converter($source[$name]);
         }
 
         return $result;
