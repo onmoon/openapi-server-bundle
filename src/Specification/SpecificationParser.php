@@ -15,6 +15,7 @@ use cebe\openapi\spec\Response;
 use cebe\openapi\spec\Responses;
 use cebe\openapi\spec\Schema;
 use cebe\openapi\spec\Type;
+use DateTime;
 use Exception;
 use OnMoon\OpenApiServerBundle\Exception\CannotGenerateCodeForOperation;
 use OnMoon\OpenApiServerBundle\Specification\Definitions\ObjectType as ObjectDefinition;
@@ -27,10 +28,10 @@ use function array_filter;
 use function array_key_exists;
 use function array_map;
 use function array_merge;
-use function class_exists;
 use function count;
 use function in_array;
 use function is_array;
+use function is_int;
 
 class SpecificationParser
 {
@@ -312,11 +313,11 @@ class SpecificationParser
         $schemaDefaultValue = $property->default;
 
         if ($schemaDefaultValue !== null && $isScalar) {
-            if($this->typeResolver->isDateTime($type)) {
+            if ($this->typeResolver->isDateTime($type)) {
                 // Symfony Yaml parses fields that looks like datetime into unix timestamp
                 // however leaves strings untouched. We need to make types more solid
-                if(is_int($schemaDefaultValue)) {
-                    $datetime = (new \DateTime())->setTimestamp($schemaDefaultValue);
+                if (is_int($schemaDefaultValue)) {
+                    $datetime           = (new DateTime())->setTimestamp($schemaDefaultValue);
                     $schemaDefaultValue = $this->typeResolver->convert(false, $type, $datetime);
                 }
             }

@@ -49,7 +49,7 @@ class AttributeGenerator
             $property
                 ->setHasGetter(true)
                 ->setHasSetter(! $property->isRequired())
-                ->setNullable(! $property->isRequired() && $property->getDefaultValue() === null)
+                ->setNullable(! $property->isRequired() || $property->getDefaultValue() !== null)
                 ->setInConstructor($property->isRequired());
 
             $object = $property->getObjectTypeDefinition();

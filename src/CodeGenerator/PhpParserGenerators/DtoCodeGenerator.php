@@ -178,9 +178,7 @@ class DtoCodeGenerator extends CodeGenerator
             ->property($definition->getClassPropertyName())
             ->makePrivate();
 
-        if ($definition->getDefaultValue() !== null) {
-            $property->setDefault($definition->getDefaultValue());
-        } elseif ($definition->isNullable()) {
+        if ($definition->isNullable()) {
             $property->setDefault(null);
         }
 

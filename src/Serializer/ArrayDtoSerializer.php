@@ -88,13 +88,13 @@ class ArrayDtoSerializer implements DtoSerializer
     {
         $result = [];
         foreach ($params->getProperties() as $property) {
-            $name  = $property->getName();
+            $name = $property->getName();
             if ($deserialize && ! array_key_exists($name, $source)) {
                 $result[$name] = $property->getDefaultValue();
                 continue;
             }
 
-            if (!$deserialize && $source[$name] === null) {
+            if (! $deserialize && $source[$name] === null) {
                 $result[$name] = $property->getDefaultValue();
                 continue;
             }
