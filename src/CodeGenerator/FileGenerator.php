@@ -52,7 +52,7 @@ class FileGenerator
                     $result[] = $this->interfaceGenerator->generate($markersInterface);
                 }
 
-                $result[] = $this->interfaceGenerator->generate($operation->getServiceInterface());
+                $result[] = $this->interfaceGenerator->generate($operation->getRequestHandlerInterface());
             }
         }
 

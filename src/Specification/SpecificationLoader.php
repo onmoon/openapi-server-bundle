@@ -83,14 +83,14 @@ class SpecificationLoader
             function (ItemInterface $cacheItem) use ($name) : Specification {
                 $cacheItem->tag(self::CACHE_TAG);
 
-                return $this->parseSpecification($this->get($name));
+                return $this->parseSpecification($name, $this->get($name));
             }
         );
 
         return $parsedSpecification;
     }
 
-    private function parseSpecification(SpecificationConfig $specificationConfig) : Specification
+    private function parseSpecification(string $specificationName, SpecificationConfig $specificationConfig) : Specification
     {
         $specPath = $this->locator->locate($specificationConfig->getPath());
 
@@ -131,6 +131,6 @@ class SpecificationLoader
             );
         }
 
-        return $this->parser->parseOpenApi($specificationConfig, $specification);
+        return $this->parser->parseOpenApi($specificationName, $specificationConfig, $specification);
     }
 }

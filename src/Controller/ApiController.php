@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace OnMoon\OpenApiServerBundle\Controller;
 
 use Exception;
-use OnMoon\OpenApiServerBundle\CodeGenerator\Naming\NamingStrategy;
 use OnMoon\OpenApiServerBundle\Event\Server\RequestDtoEvent;
 use OnMoon\OpenApiServerBundle\Event\Server\RequestEvent;
 use OnMoon\OpenApiServerBundle\Event\Server\ResponseDtoEvent;
@@ -35,6 +34,7 @@ use Symfony\Component\Routing\Route;
 use Symfony\Component\Routing\RouterInterface;
 use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 use function count;
+use function ltrim;
 use function Safe\sprintf;
 use const JSON_PRETTY_PRINT;
 use const JSON_THROW_ON_ERROR;
@@ -46,7 +46,6 @@ class ApiController
     private SpecificationLoader $specificationLoader;
     private RouterInterface $router;
     private DtoSerializer $serializer;
-    private NamingStrategy $namingStrategy;
     private EventDispatcherInterface $eventDispatcher;
     private RequestSchemaValidator $requestValidator;
 
@@ -54,14 +53,12 @@ class ApiController
         SpecificationLoader $specificationLoader,
         RouterInterface $router,
         DtoSerializer $serializer,
-        NamingStrategy $namingStrategy,
         EventDispatcherInterface $eventDispatcher,
         RequestSchemaValidator $requestValidator
     ) {
         $this->specificationLoader = $specificationLoader;
         $this->router              = $router;
         $this->serializer          = $serializer;
-        $this->namingStrategy      = $namingStrategy;
         $this->eventDispatcher     = $eventDispatcher;
         $this->requestValidator    = $requestValidator;
     }
@@ -78,19 +75,17 @@ class ApiController
         $specification = $this->getSpecification($route);
         $operation     = $specification->getOperation($operationId);
 
-        $requestHandlerInterface      = $this->getRequestHandlerInterface($route, $operationId);
-        [$methodName, $inputDtoClass] = $this->getMethodAndInputDtoFQCN($requestHandlerInterface);
-
         $this->eventDispatcher->dispatch(new RequestEvent($request, $operationId, $specification));
         $this->requestValidator->validate($request, $specification, $operationId);
+
+        [$requestHandlerInterface, $requestHandler] = $this->getRequestHandler($request, $operation);
+        [$methodName, $inputDtoClass]               = $this->getMethodAndInputDtoFQCN($requestHandlerInterface);
 
         $requestDto = null;
         if ($inputDtoClass !== null) {
             $requestDto = $this->createRequestDto($request, $operation, $inputDtoClass);
             $this->eventDispatcher->dispatch(new RequestDtoEvent($requestDto, $operationId, $specification));
         }
-
-        $requestHandler = $this->getRequestHandler($request, $requestHandlerInterface);
 
         $responseDto = $this->executeRequestHandler($requestHandler, $methodName, $requestDto);
         $this->eventDispatcher->dispatch(new ResponseDtoEvent($responseDto, $operationId, $specification));
@@ -109,18 +104,6 @@ class ApiController
     private function getSpecification(Route $route) : Specification
     {
         return $this->specificationLoader->load($this->getSpecificationName($route));
-    }
-
-    /**
-     * @psalm-return class-string<RequestHandler>
-     */
-    private function getRequestHandlerInterface(Route $route, string $operationId) : string
-    {
-        $specificationName      = $this->getSpecificationName($route);
-        $specificationNamespace = $this->specificationLoader->get($specificationName)->getNameSpace();
-
-        //ToDo: get rid of naming strategy here
-        return $this->namingStrategy->getInterfaceFQCN($specificationNamespace, $operationId);
     }
 
     /**
@@ -151,13 +134,23 @@ class ApiController
         return $responseDto;
     }
 
-    private function getRequestHandler(Request $request, string $requestHandlerInterface) : RequestHandler
+    /**
+     * @return array{0: class-string<RequestHandler>, 1: RequestHandler}
+     */
+    private function getRequestHandler(Request $request, Operation $operation) : array
     {
         if ($this->apiLoader === null) {
             throw ApiCallFailed::becauseApiLoaderNotFound();
         }
 
-        $requestHandler = $this->apiLoader->get($requestHandlerInterface);
+        $handlerName = $operation->getRequestHandlerName();
+
+        $requestHandlers = $this->apiLoader::getSubscribedServices();
+        /** @var string $requestHandlerSubscribedString */
+        $requestHandlerSubscribedString = $requestHandlers[$handlerName];
+        /** @psalm-var class-string<RequestHandler> $requestHandlerInterface */
+        $requestHandlerInterface = ltrim($requestHandlerSubscribedString, '?');
+        $requestHandler          = $this->apiLoader->get($handlerName);
 
         if ($requestHandler === null) {
             throw ApiCallFailed::becauseNotImplemented($requestHandlerInterface);
@@ -171,7 +164,7 @@ class ApiController
             $requestHandler->setClientIp((string) $request->getClientIp());
         }
 
-        return $requestHandler;
+        return [$requestHandlerInterface, $requestHandler];
     }
 
     private function createResponse(RequestHandler $requestHandler, Operation $operation, ?ResponseDto $responseDto = null) : Response
