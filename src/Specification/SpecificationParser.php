@@ -15,7 +15,6 @@ use cebe\openapi\spec\Response;
 use cebe\openapi\spec\Responses;
 use cebe\openapi\spec\Schema;
 use cebe\openapi\spec\Type;
-use DateTime;
 use Exception;
 use OnMoon\OpenApiServerBundle\Exception\CannotGenerateCodeForOperation;
 use OnMoon\OpenApiServerBundle\Specification\Definitions\ObjectType as ObjectDefinition;
@@ -24,6 +23,7 @@ use OnMoon\OpenApiServerBundle\Specification\Definitions\Property as PropertyDef
 use OnMoon\OpenApiServerBundle\Specification\Definitions\Specification;
 use OnMoon\OpenApiServerBundle\Specification\Definitions\SpecificationConfig;
 use OnMoon\OpenApiServerBundle\Types\ScalarTypesResolver;
+use Safe\DateTime;
 use function array_filter;
 use function array_key_exists;
 use function array_map;
@@ -285,8 +285,9 @@ class SpecificationParser
         $propertyDefinition = new PropertyDefinition($propertyName);
         $propertyDefinition->setDescription($property->description);
 
-        $type     = null;
-        $isScalar = true;
+        $scalarTypeId = null;
+        $objectType   = null;
+        $isScalar     = true;
 
         if ($property->type === Type::ARRAY) {
             if (! ($property->items instanceof Schema)) {
@@ -299,11 +300,11 @@ class SpecificationParser
         }
 
         if (Type::isScalar($property->type)) {
-            $type = $this->typeResolver->findScalarType($property->type, $property->format);
-            $propertyDefinition->setScalarTypeId($type);
+            $scalarTypeId = $this->typeResolver->findScalarType($property->type, $property->format);
+            $propertyDefinition->setScalarTypeId($scalarTypeId);
         } elseif ($property->type === Type::OBJECT) {
-            $type = new ObjectDefinition($this->getPropertyGraph($property, $exceptionContext));
-            $propertyDefinition->setObjectTypeDefinition($type);
+            $objectType = new ObjectDefinition($this->getPropertyGraph($property, $exceptionContext));
+            $propertyDefinition->setObjectTypeDefinition($objectType);
             $isScalar = false;
         } else {
             throw CannotGenerateCodeForOperation::becauseTypeNotSupported($propertyName, $property->type, $exceptionContext);
@@ -312,13 +313,14 @@ class SpecificationParser
         /** @var string|int|float|bool|null $schemaDefaultValue */
         $schemaDefaultValue = $property->default;
 
-        if ($schemaDefaultValue !== null && $isScalar) {
-            if ($this->typeResolver->isDateTime($type)) {
+        if ($schemaDefaultValue !== null && $isScalar && $scalarTypeId !== null) {
+            if ($this->typeResolver->isDateTime($scalarTypeId)) {
                 // Symfony Yaml parses fields that looks like datetime into unix timestamp
                 // however leaves strings untouched. We need to make types more solid
                 if (is_int($schemaDefaultValue)) {
-                    $datetime           = (new DateTime())->setTimestamp($schemaDefaultValue);
-                    $schemaDefaultValue = $this->typeResolver->convert(false, $type, $datetime);
+                    $datetime = (new DateTime())->setTimestamp($schemaDefaultValue);
+                    /** @var string $schemaDefaultValue */
+                    $schemaDefaultValue = $this->typeResolver->convert(false, $scalarTypeId, $datetime);
                 }
             }
 
