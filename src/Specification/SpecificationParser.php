@@ -78,6 +78,7 @@ class SpecificationParser
                     $requestBody = new ObjectDefinition(
                         $this->getPropertyGraph(
                             $requestSchema,
+                            true,
                             array_merge($exceptionContext, ['location' => 'request body'])
                         )
                     );
@@ -149,7 +150,7 @@ class SpecificationParser
                 );
             }
 
-            $propertyDefinitions                = $this->getPropertyGraph($responseSchema, $exceptionContext);
+            $propertyDefinitions                = $this->getPropertyGraph($responseSchema, false, $exceptionContext);
             $responseDefinition                 = new ObjectDefinition($propertyDefinitions);
             $responseDefinitions[$responseCode] = $responseDefinition;
         }
@@ -237,7 +238,7 @@ class SpecificationParser
         $properties = array_map(
             fn (Parameter $p) =>
             $this
-                ->getProperty($p->name, $p->schema, $exceptionContext, false)
+                ->getProperty($p->name, $p->schema, true, $exceptionContext, false)
                 ->setRequired($p->required)
                 ->setDescription($p->description),
             $this->filterSupportedParameters($in, $parameters)
@@ -255,18 +256,21 @@ class SpecificationParser
      *
      * @return PropertyDefinition[]
      */
-    private function getPropertyGraph(Schema $schema, array $exceptionContext) : array
+    private function getPropertyGraph(Schema $schema, bool $isRequest, array $exceptionContext) : array
     {
         $propertyDefinitions = [];
         /**
          * @var string $propertyName
          */
         foreach ($schema->properties as $propertyName => $property) {
+            if(($property->readOnly && $isRequest) || ($property->writeOnly && !$isRequest)) {
+                continue;
+            }
             /**
              * @psalm-suppress RedundantConditionGivenDocblockType
              */
             $required              = is_array($schema->required) && in_array($propertyName, $schema->required);
-            $propertyDefinitions[] = $this->getProperty($propertyName, $property, $exceptionContext)->setRequired($required);
+            $propertyDefinitions[] = $this->getProperty($propertyName, $property, $isRequest, $exceptionContext)->setRequired($required);
         }
 
         return $propertyDefinitions;
@@ -276,7 +280,7 @@ class SpecificationParser
      * @param Schema|Reference|null $property
      * @param string[]              $exceptionContext
      */
-    private function getProperty(string $propertyName, $property, array $exceptionContext, bool $allowNonScalar = true) : PropertyDefinition
+    private function getProperty(string $propertyName, $property, bool $isRequest, array $exceptionContext, bool $allowNonScalar = true) : PropertyDefinition
     {
         if (! ($property instanceof Schema)) {
             throw new Exception('Property is not scheme');
@@ -307,7 +311,7 @@ class SpecificationParser
             $scalarTypeId = $this->typeResolver->findScalarType($itemProperty->type, $itemProperty->format);
             $propertyDefinition->setScalarTypeId($scalarTypeId);
         } elseif ($itemProperty->type === Type::OBJECT) {
-            $objectType = new ObjectDefinition($this->getPropertyGraph($itemProperty, $exceptionContext));
+            $objectType = new ObjectDefinition($this->getPropertyGraph($itemProperty, $isRequest, $exceptionContext));
             $propertyDefinition->setObjectTypeDefinition($objectType);
             $isScalar = false;
         } else {
