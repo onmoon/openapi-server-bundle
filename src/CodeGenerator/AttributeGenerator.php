@@ -29,10 +29,11 @@ class AttributeGenerator
     {
         foreach ($root->getProperties() as $property) {
             $specProperty = $property->getSpecProperty();
+            $willExist = $specProperty->isRequired() || $specProperty->getDefaultValue() !== null;
             $property
                 ->setHasGetter(true)
                 ->setHasSetter(false)
-                ->setNullable(! $specProperty->isRequired() && $specProperty->getDefaultValue() === null)
+                ->setNullable(! $willExist || $specProperty->isNullable())
                 ->setInConstructor(false);
 
             $object = $property->getObjectTypeDefinition();
@@ -48,11 +49,12 @@ class AttributeGenerator
     {
         foreach ($root->getProperties() as $property) {
             $specProperty = $property->getSpecProperty();
+            $needValue = $specProperty->isRequired() && $specProperty->getDefaultValue() === null;
             $property
                 ->setHasGetter(true)
-                ->setHasSetter(! $specProperty->isRequired())
-                ->setNullable(! $specProperty->isRequired() || $specProperty->getDefaultValue() !== null)
-                ->setInConstructor($specProperty->isRequired());
+                ->setHasSetter(!$needValue)
+                ->setNullable(! $needValue || $specProperty->isNullable())
+                ->setInConstructor($needValue);
 
             $object = $property->getObjectTypeDefinition();
             if ($object === null) {
