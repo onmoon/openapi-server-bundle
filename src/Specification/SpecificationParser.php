@@ -284,6 +284,8 @@ class SpecificationParser
 
         $propertyDefinition = new PropertyDefinition($propertyName);
         $propertyDefinition->setDescription($property->description);
+        $propertyDefinition->setNullable($property->nullable);
+        $propertyDefinition->setPattern($property->pattern);
 
         $scalarTypeId = null;
         $objectType   = null;
@@ -295,23 +297,25 @@ class SpecificationParser
             }
 
             $propertyDefinition->setArray(true);
-            $property = $property->items;
-            $isScalar = false;
+            $itemProperty = $property->items;
+            $isScalar     = false;
+        } else {
+            $itemProperty = $property;
         }
 
-        if (Type::isScalar($property->type)) {
-            $scalarTypeId = $this->typeResolver->findScalarType($property->type, $property->format);
+        if (Type::isScalar($itemProperty->type)) {
+            $scalarTypeId = $this->typeResolver->findScalarType($itemProperty->type, $itemProperty->format);
             $propertyDefinition->setScalarTypeId($scalarTypeId);
-        } elseif ($property->type === Type::OBJECT) {
-            $objectType = new ObjectDefinition($this->getPropertyGraph($property, $exceptionContext));
+        } elseif ($itemProperty->type === Type::OBJECT) {
+            $objectType = new ObjectDefinition($this->getPropertyGraph($itemProperty, $exceptionContext));
             $propertyDefinition->setObjectTypeDefinition($objectType);
             $isScalar = false;
         } else {
-            throw CannotGenerateCodeForOperation::becauseTypeNotSupported($propertyName, $property->type, $exceptionContext);
+            throw CannotGenerateCodeForOperation::becauseTypeNotSupported($propertyName, $itemProperty->type, $exceptionContext);
         }
 
         /** @var string|int|float|bool|null $schemaDefaultValue */
-        $schemaDefaultValue = $property->default;
+        $schemaDefaultValue = $itemProperty->default;
 
         if ($schemaDefaultValue !== null && $isScalar && $scalarTypeId !== null) {
             if ($this->typeResolver->isDateTime($scalarTypeId)) {
@@ -326,8 +330,6 @@ class SpecificationParser
 
             $propertyDefinition->setDefaultValue($schemaDefaultValue);
         }
-
-        $propertyDefinition->setPattern($property->pattern);
 
         if (! $isScalar && ! $allowNonScalar) {
             throw CannotGenerateCodeForOperation::becauseOnlyScalarAreAllowed($propertyName, $exceptionContext);
