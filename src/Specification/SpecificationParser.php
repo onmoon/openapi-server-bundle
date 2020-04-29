@@ -79,6 +79,7 @@ class SpecificationParser
                         $this->getPropertyGraph(
                             $requestSchema,
                             true,
+                            true,
                             array_merge($exceptionContext, ['location' => 'request body'])
                         )
                     );
@@ -142,15 +143,12 @@ class SpecificationParser
                 continue;
             }
 
-            $exceptionContext = array_merge($exceptionContext, ['location' => 'response (code "' . $responseCode . '")']);
-            if ($responseSchema->type !== Type::OBJECT) {
-                throw CannotGenerateCodeForOperation::becauseRootIsNotObject(
-                    $exceptionContext,
-                    ($responseSchema->type === Type::ARRAY)
-                );
-            }
-
-            $propertyDefinitions                = $this->getPropertyGraph($responseSchema, false, $exceptionContext);
+            $propertyDefinitions                = $this->getPropertyGraph(
+                $responseSchema,
+                false,
+                true,
+                array_merge($exceptionContext, ['location' => 'response (code "' . $responseCode . '")'])
+            );
             $responseDefinition                 = new ObjectDefinition($propertyDefinitions);
             $responseDefinitions[$responseCode] = $responseDefinition;
         }
@@ -256,8 +254,15 @@ class SpecificationParser
      *
      * @return PropertyDefinition[]
      */
-    private function getPropertyGraph(Schema $schema, bool $isRequest, array $exceptionContext) : array
+    private function getPropertyGraph(Schema $schema, bool $isRequest, bool $isRoot, array $exceptionContext) : array
     {
+        if ($isRoot && $schema->type !== Type::OBJECT) {
+            throw CannotGenerateCodeForOperation::becauseRootIsNotObject(
+                $exceptionContext,
+                ($schema->type === Type::ARRAY)
+            );
+        }
+
         $propertyDefinitions = [];
         /**
          * @var string $propertyName
@@ -316,7 +321,7 @@ class SpecificationParser
             $scalarTypeId = $this->typeResolver->findScalarType($itemProperty->type, $itemProperty->format);
             $propertyDefinition->setScalarTypeId($scalarTypeId);
         } elseif ($itemProperty->type === Type::OBJECT) {
-            $objectType = new ObjectDefinition($this->getPropertyGraph($itemProperty, $isRequest, $exceptionContext));
+            $objectType = new ObjectDefinition($this->getPropertyGraph($itemProperty, $isRequest, false, $exceptionContext));
             $propertyDefinition->setObjectTypeDefinition($objectType);
             $isScalar = false;
         } else {
