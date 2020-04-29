@@ -4,44 +4,33 @@ declare(strict_types=1);
 
 namespace OnMoon\OpenApiServerBundle\CodeGenerator\Definitions;
 
+use OnMoon\OpenApiServerBundle\Specification\Definitions\Property;
+
 class PropertyDefinition
 {
-    private string $specPropertyName;
+    private Property $specProperty;
     private string $classPropertyName;
-    private bool $array = false;
-    /** @var string|int|float|bool|null  */
-    private $defaultValue                        = null;
-    private bool $required                       = false;
     private bool $nullable                       = true;
-    private ?int $scalarTypeId                   = null;
     private ?DtoDefinition $objectTypeDefinition = null;
-    private ?string $description                 = null;
     private ?string $getterName                  = null;
     private ?string $setterName                  = null;
     private bool $hasGetter                      = false;
     private bool $hasSetter                      = false;
     private bool $inConstructor                  = false;
 
+    public function __construct(Property $specProperty)
+    {
+        $this->specProperty = $specProperty;
+    }
+
     public function getDescription() : ?string
     {
-        return $this->description;
+        return $this->specProperty->getDescription();
     }
 
-    public function setDescription(?string $description) : self
+    public function getSpecProperty() : Property
     {
-        $this->description = $description;
-
-        return $this;
-    }
-
-    public function __construct(string $specPropertyName)
-    {
-        $this->specPropertyName = $specPropertyName;
-    }
-
-    public function getSpecPropertyName() : string
-    {
-        return $this->specPropertyName;
+        return $this->specProperty;
     }
 
     public function getClassPropertyName() : string
@@ -56,58 +45,19 @@ class PropertyDefinition
         return $this;
     }
 
+    public function getSpecPropertyName() : string
+    {
+        return $this->specProperty->getName();
+    }
+
     public function isArray() : bool
     {
-        return $this->array;
-    }
-
-    public function setArray(bool $array) : self
-    {
-        $this->array = $array;
-
-        return $this;
-    }
-
-    /**
-     * @return string|int|float|bool|null
-     */
-    public function getDefaultValue()
-    {
-        return $this->defaultValue;
-    }
-
-    /**
-     * @param string|int|float|bool|null $defaultValue
-     */
-    public function setDefaultValue($defaultValue) : self
-    {
-        $this->defaultValue = $defaultValue;
-
-        return $this;
-    }
-
-    public function isRequired() : bool
-    {
-        return $this->required;
-    }
-
-    public function setRequired(bool $required) : self
-    {
-        $this->required = $required;
-
-        return $this;
+        return $this->specProperty->isArray();
     }
 
     public function getScalarTypeId() : ?int
     {
-        return $this->scalarTypeId;
-    }
-
-    public function setScalarTypeId(?int $scalarTypeId) : self
-    {
-        $this->scalarTypeId = $scalarTypeId;
-
-        return $this;
+        return $this->specProperty->getScalarTypeId();
     }
 
     public function getObjectTypeDefinition() : ?DtoDefinition

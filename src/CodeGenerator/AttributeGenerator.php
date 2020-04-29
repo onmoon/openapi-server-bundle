@@ -28,10 +28,12 @@ class AttributeGenerator
     public function requestPass(DtoDefinition $root) : void
     {
         foreach ($root->getProperties() as $property) {
+            $specProperty = $property->getSpecProperty();
+            $willExist    = $specProperty->isRequired() || $specProperty->getDefaultValue() !== null;
             $property
                 ->setHasGetter(true)
                 ->setHasSetter(false)
-                ->setNullable(! $property->isRequired() && $property->getDefaultValue() === null)
+                ->setNullable(! $willExist || $specProperty->isNullable())
                 ->setInConstructor(false);
 
             $object = $property->getObjectTypeDefinition();
@@ -46,11 +48,13 @@ class AttributeGenerator
     public function responsePass(DtoDefinition $root) : void
     {
         foreach ($root->getProperties() as $property) {
+            $specProperty = $property->getSpecProperty();
+            $needValue    = $specProperty->isRequired() && $specProperty->getDefaultValue() === null;
             $property
                 ->setHasGetter(true)
-                ->setHasSetter(! $property->isRequired())
-                ->setNullable(! $property->isRequired() || $property->getDefaultValue() !== null)
-                ->setInConstructor($property->isRequired());
+                ->setHasSetter(! $needValue)
+                ->setNullable(! $needValue || $specProperty->isNullable())
+                ->setInConstructor($needValue);
 
             $object = $property->getObjectTypeDefinition();
             if ($object === null) {

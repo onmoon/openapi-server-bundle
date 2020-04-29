@@ -78,6 +78,8 @@ class SpecificationParser
                     $requestBody = new ObjectDefinition(
                         $this->getPropertyGraph(
                             $requestSchema,
+                            true,
+                            true,
                             array_merge($exceptionContext, ['location' => 'request body'])
                         )
                     );
@@ -141,15 +143,12 @@ class SpecificationParser
                 continue;
             }
 
-            $exceptionContext = array_merge($exceptionContext, ['location' => 'response (code "' . $responseCode . '")']);
-            if ($responseSchema->type !== Type::OBJECT) {
-                throw CannotGenerateCodeForOperation::becauseRootIsNotObject(
-                    $exceptionContext,
-                    ($responseSchema->type === Type::ARRAY)
-                );
-            }
-
-            $propertyDefinitions                = $this->getPropertyGraph($responseSchema, $exceptionContext);
+            $propertyDefinitions                = $this->getPropertyGraph(
+                $responseSchema,
+                false,
+                true,
+                array_merge($exceptionContext, ['location' => 'response (code "' . $responseCode . '")'])
+            );
             $responseDefinition                 = new ObjectDefinition($propertyDefinitions);
             $responseDefinitions[$responseCode] = $responseDefinition;
         }
@@ -237,7 +236,7 @@ class SpecificationParser
         $properties = array_map(
             fn (Parameter $p) =>
             $this
-                ->getProperty($p->name, $p->schema, $exceptionContext, false)
+                ->getProperty($p->name, $p->schema, true, $exceptionContext, false)
                 ->setRequired($p->required)
                 ->setDescription($p->description),
             $this->filterSupportedParameters($in, $parameters)
@@ -255,18 +254,33 @@ class SpecificationParser
      *
      * @return PropertyDefinition[]
      */
-    private function getPropertyGraph(Schema $schema, array $exceptionContext) : array
+    private function getPropertyGraph(Schema $schema, bool $isRequest, bool $isRoot, array $exceptionContext) : array
     {
+        if ($isRoot && $schema->type !== Type::OBJECT) {
+            throw CannotGenerateCodeForOperation::becauseRootIsNotObject(
+                $exceptionContext,
+                ($schema->type === Type::ARRAY)
+            );
+        }
+
         $propertyDefinitions = [];
         /**
          * @var string $propertyName
          */
         foreach ($schema->properties as $propertyName => $property) {
+            if (! ($property instanceof Schema)) {
+                throw new Exception('Property is not scheme');
+            }
+
+            if (($property->readOnly && $isRequest) || ($property->writeOnly && ! $isRequest)) {
+                continue;
+            }
+
             /**
              * @psalm-suppress RedundantConditionGivenDocblockType
              */
             $required              = is_array($schema->required) && in_array($propertyName, $schema->required);
-            $propertyDefinitions[] = $this->getProperty($propertyName, $property, $exceptionContext)->setRequired($required);
+            $propertyDefinitions[] = $this->getProperty($propertyName, $property, $isRequest, $exceptionContext)->setRequired($required);
         }
 
         return $propertyDefinitions;
@@ -276,7 +290,7 @@ class SpecificationParser
      * @param Schema|Reference|null $property
      * @param string[]              $exceptionContext
      */
-    private function getProperty(string $propertyName, $property, array $exceptionContext, bool $allowNonScalar = true) : PropertyDefinition
+    private function getProperty(string $propertyName, $property, bool $isRequest, array $exceptionContext, bool $allowNonScalar = true) : PropertyDefinition
     {
         if (! ($property instanceof Schema)) {
             throw new Exception('Property is not scheme');
@@ -284,6 +298,8 @@ class SpecificationParser
 
         $propertyDefinition = new PropertyDefinition($propertyName);
         $propertyDefinition->setDescription($property->description);
+        $propertyDefinition->setNullable($property->nullable);
+        $propertyDefinition->setPattern($property->pattern);
 
         $scalarTypeId = null;
         $objectType   = null;
@@ -295,23 +311,25 @@ class SpecificationParser
             }
 
             $propertyDefinition->setArray(true);
-            $property = $property->items;
-            $isScalar = false;
+            $itemProperty = $property->items;
+            $isScalar     = false;
+        } else {
+            $itemProperty = $property;
         }
 
-        if (Type::isScalar($property->type)) {
-            $scalarTypeId = $this->typeResolver->findScalarType($property->type, $property->format);
+        if (Type::isScalar($itemProperty->type)) {
+            $scalarTypeId = $this->typeResolver->findScalarType($itemProperty->type, $itemProperty->format);
             $propertyDefinition->setScalarTypeId($scalarTypeId);
-        } elseif ($property->type === Type::OBJECT) {
-            $objectType = new ObjectDefinition($this->getPropertyGraph($property, $exceptionContext));
+        } elseif ($itemProperty->type === Type::OBJECT) {
+            $objectType = new ObjectDefinition($this->getPropertyGraph($itemProperty, $isRequest, false, $exceptionContext));
             $propertyDefinition->setObjectTypeDefinition($objectType);
             $isScalar = false;
         } else {
-            throw CannotGenerateCodeForOperation::becauseTypeNotSupported($propertyName, $property->type, $exceptionContext);
+            throw CannotGenerateCodeForOperation::becauseTypeNotSupported($propertyName, $itemProperty->type, $exceptionContext);
         }
 
         /** @var string|int|float|bool|null $schemaDefaultValue */
-        $schemaDefaultValue = $property->default;
+        $schemaDefaultValue = $itemProperty->default;
 
         if ($schemaDefaultValue !== null && $isScalar && $scalarTypeId !== null) {
             if ($this->typeResolver->isDateTime($scalarTypeId)) {
@@ -326,8 +344,6 @@ class SpecificationParser
 
             $propertyDefinition->setDefaultValue($schemaDefaultValue);
         }
-
-        $propertyDefinition->setPattern($property->pattern);
 
         if (! $isScalar && ! $allowNonScalar) {
             throw CannotGenerateCodeForOperation::becauseOnlyScalarAreAllowed($propertyName, $exceptionContext);

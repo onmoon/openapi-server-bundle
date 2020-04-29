@@ -47,6 +47,7 @@ open_api_server:
   language_level: 7.4.0 # minimum PHP version the generated code should be compatible with
   generated_dir_permissions: 0755 # permissions for the generated directories
   full_doc_blocks: false # whether to generate DocBlocks for typed variables and params  
+  send_nulls: false # return null values in responses if property is nullable and not required
   specs:
     petstore:
       path: '../spec/petstore.yaml' # path to OpenApi specification

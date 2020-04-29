@@ -33,6 +33,7 @@ class OpenApiServerExtension extends Extension implements ExtensionInterface
          *     language_level:string,
          *     generated_dir_permissions: string,
          *     full_doc_blocks: bool,
+         *     send_nulls: bool,
          *     specs: array{
          *         path: string,
          *         type?: string,
@@ -62,6 +63,7 @@ class OpenApiServerExtension extends Extension implements ExtensionInterface
         $container->setParameter('openapi.generated.code.language.level', $config['language_level']);
         $container->setParameter('openapi.generated.code.dir.permissions', $config['generated_dir_permissions']);
         $container->setParameter('openapi.generated.code.full.doc.blocks', $config['full_doc_blocks']);
+        $container->setParameter('openapi.send.nulls', $config['send_nulls']);
 
         $definition = $container->getDefinition(SpecificationLoader::class);
 

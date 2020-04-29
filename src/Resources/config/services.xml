@@ -55,7 +55,9 @@
         <service id="OnMoon\OpenApiServerBundle\Command\RefreshApiCodeCommand">
             <argument key="$rootPath">%openapi.generated.code.root.path%</argument>
         </service>
-        <service id="OnMoon\OpenApiServerBundle\Serializer\DtoSerializer" class="OnMoon\OpenApiServerBundle\Serializer\ArrayDtoSerializer" />
+        <service id="OnMoon\OpenApiServerBundle\Serializer\DtoSerializer" class="OnMoon\OpenApiServerBundle\Serializer\ArrayDtoSerializer">
+            <argument key="$sendNulls">%openapi.send.nulls%</argument>
+        </service>
         <service id="OnMoon\OpenApiServerBundle\Specification\SpecificationLoader">
             <argument key="$locator" type="service" id="file_locator" />
             <argument key="$cache" type="service" id="cache.app.taggable" />

@@ -19,10 +19,12 @@ use function Safe\json_decode;
 class ArrayDtoSerializer implements DtoSerializer
 {
     private ScalarTypesResolver $resolver;
+    private bool $sendNotRequiredNullableNulls;
 
-    public function __construct(ScalarTypesResolver $resolver)
+    public function __construct(ScalarTypesResolver $resolver, bool $sendNulls)
     {
-        $this->resolver = $resolver;
+        $this->resolver                     = $resolver;
+        $this->sendNotRequiredNullableNulls = $sendNulls;
     }
 
     public function createRequestDto(
@@ -95,7 +97,13 @@ class ArrayDtoSerializer implements DtoSerializer
             }
 
             if (! $deserialize && $source[$name] === null) {
-                $result[$name] = $property->getDefaultValue();
+                $value =  $property->getDefaultValue();
+                if ($property->isRequired() || $value !== null ||
+                    ($this->sendNotRequiredNullableNulls && $property->isNullable())
+                ) {
+                    $result[$name] = $value;
+                }
+
                 continue;
             }
 

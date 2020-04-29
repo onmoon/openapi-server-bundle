@@ -12,6 +12,7 @@ class Property
     /** @var string|int|float|bool|null  */
     private $defaultValue                     = null;
     private bool $required                    = false;
+    private bool $nullable                    = false;
     private ?int $scalarTypeId                = null;
     private ?ObjectType $objectTypeDefinition = null;
     private ?string $description              = null;
@@ -131,6 +132,18 @@ class Property
     public function setPattern(?string $pattern) : self
     {
         $this->pattern = $pattern;
+
+        return $this;
+    }
+
+    public function isNullable() : bool
+    {
+        return $this->nullable;
+    }
+
+    public function setNullable(bool $nullable) : self
+    {
+        $this->nullable = $nullable;
 
         return $this;
     }

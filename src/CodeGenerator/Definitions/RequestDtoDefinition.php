@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace OnMoon\OpenApiServerBundle\CodeGenerator\Definitions;
 
+use OnMoon\OpenApiServerBundle\Specification\Definitions\Property;
+
 class RequestDtoDefinition extends DtoDefinition
 {
     public function __construct(
@@ -24,9 +26,9 @@ class RequestDtoDefinition extends DtoDefinition
                 continue;
             }
 
-            $properties[] = (new PropertyDefinition($name))
-                ->setObjectTypeDefinition($definition)
-                ->setRequired(true);
+            $specProperty = (new Property($name))->setRequired(true);
+            $properties[] = (new PropertyDefinition($specProperty))
+                ->setObjectTypeDefinition($definition);
         }
 
         parent::__construct($properties);

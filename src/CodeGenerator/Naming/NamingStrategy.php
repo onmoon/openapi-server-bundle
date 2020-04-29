@@ -4,10 +4,12 @@ declare(strict_types=1);
 
 namespace OnMoon\OpenApiServerBundle\CodeGenerator\Naming;
 
+use OnMoon\OpenApiServerBundle\Interfaces\RequestHandler;
+
 interface NamingStrategy
 {
     /**
-     * @psalm-return class-string<\OnMoon\OpenApiServerBundle\Interfaces\RequestHandler>
+     * @psalm-return class-string<RequestHandler>
      */
     public function getInterfaceFQCN(string $apiNameSpace, string $operationId) : string;
 
