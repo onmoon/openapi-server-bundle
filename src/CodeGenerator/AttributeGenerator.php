@@ -29,7 +29,7 @@ class AttributeGenerator
     {
         foreach ($root->getProperties() as $property) {
             $specProperty = $property->getSpecProperty();
-            $willExist = $specProperty->isRequired() || $specProperty->getDefaultValue() !== null;
+            $willExist    = $specProperty->isRequired() || $specProperty->getDefaultValue() !== null;
             $property
                 ->setHasGetter(true)
                 ->setHasSetter(false)
@@ -49,10 +49,10 @@ class AttributeGenerator
     {
         foreach ($root->getProperties() as $property) {
             $specProperty = $property->getSpecProperty();
-            $needValue = $specProperty->isRequired() && $specProperty->getDefaultValue() === null;
+            $needValue    = $specProperty->isRequired() && $specProperty->getDefaultValue() === null;
             $property
                 ->setHasGetter(true)
-                ->setHasSetter(!$needValue)
+                ->setHasSetter(! $needValue)
                 ->setNullable(! $needValue || $specProperty->isNullable())
                 ->setInConstructor($needValue);
 

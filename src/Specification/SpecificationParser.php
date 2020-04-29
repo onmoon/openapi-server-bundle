@@ -263,9 +263,14 @@ class SpecificationParser
          * @var string $propertyName
          */
         foreach ($schema->properties as $propertyName => $property) {
-            if(($property->readOnly && $isRequest) || ($property->writeOnly && !$isRequest)) {
+            if (! ($property instanceof Schema)) {
+                throw new Exception('Property is not scheme');
+            }
+
+            if (($property->readOnly && $isRequest) || ($property->writeOnly && ! $isRequest)) {
                 continue;
             }
+
             /**
              * @psalm-suppress RedundantConditionGivenDocblockType
              */
