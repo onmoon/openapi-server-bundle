@@ -98,7 +98,9 @@ class ArrayDtoSerializer implements DtoSerializer
 
             if (! $deserialize && $source[$name] === null) {
                 $value =  $property->getDefaultValue();
-                if ($property->isRequired() || ($this->sendNotRequiredNullableNulls && $property->isNullable())) {
+                if ($property->isRequired() || $value !== null ||
+                    ($this->sendNotRequiredNullableNulls && $property->isNullable())
+                ) {
                     $result[$name] = $value;
                 }
 
