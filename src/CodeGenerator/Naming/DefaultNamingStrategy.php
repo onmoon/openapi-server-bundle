@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace OnMoon\OpenApiServerBundle\CodeGenerator\Naming;
 
 use OnMoon\OpenApiServerBundle\CodeGenerator\NameGenerator;
+use OnMoon\OpenApiServerBundle\Interfaces\RequestHandler;
 use sspat\ReservedWords\ReservedWords;
 use function array_map;
 use function implode;
@@ -41,7 +42,7 @@ class DefaultNamingStrategy implements NamingStrategy
 
     public function getInterfaceFQCN(string $apiNameSpace, string $operationId) : string
     {
-        /** @psalm-var class-string<\OnMoon\OpenApiServerBundle\Interfaces\RequestHandler> $interfaceNamespace */
+        /** @psalm-var class-string<RequestHandler> $interfaceNamespace */
         $interfaceNamespace = $this->buildNamespace(
             $this->rootNamespace,
             NameGenerator::APIS_NAMESPACE,
