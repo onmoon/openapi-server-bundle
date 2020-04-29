@@ -128,12 +128,7 @@ class GraphGenerator
 
     private function propertyToDefinition(Property $property) : PropertyDefinition
     {
-        return (new PropertyDefinition($property->getName()))
-            ->setRequired($property->isRequired())
-            ->setArray($property->isArray())
-            ->setScalarTypeId($property->getScalarTypeId())
-            ->setObjectTypeDefinition($this->objectTypeToDefinition($property->getObjectTypeDefinition()))
-            ->setDescription($property->getDescription())
-            ->setDefaultValue($property->getDefaultValue());
+        return (new PropertyDefinition($property))
+            ->setObjectTypeDefinition($this->objectTypeToDefinition($property->getObjectTypeDefinition()));
     }
 }
