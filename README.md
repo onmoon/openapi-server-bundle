@@ -158,6 +158,30 @@ Additionally, your API call handler can implement the following interfaces:
 - `\OnMoon\OpenApiServerBundle\Interfaces\SetRequest` - if it needs the Symfony request object
 - `\OnMoon\OpenApiServerBundle\Interfaces\GetResponseCode` - if it needs to specify custom HTTP response codes
 
+## Using DTO mapper
+
+If you want to use Doctrine entities or other business logic classes as sources for API 
+response, you can easily copy contents into DTO using DTO mapper.
+
+Install it with 
+```
+composer require onmoon/dto-mapper
+```
+
+And use like follows
+```php
+public function showPetById(ShowPetByIdRequestDto $request) : ShowPetByIdResponseDto
+{
+    $petId = $request->getPathParameters()->getPetId();
+    $pet   = $this->pets->getById($petId);
+
+    /** @var OnMoon\DtoMapper\DtoMapper $this->mapper */
+    return $this->mapper->map($pet, ShowPetByIdResponseDto::class);
+}
+```
+
+[More information](https://github.com/onmoon/dto-mapper)
+
 ## Customizing the API server behavior
 
 During the request handling lyfecycle the API server emits several events that can be used instead
