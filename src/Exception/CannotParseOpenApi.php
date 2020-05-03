@@ -6,7 +6,7 @@ namespace OnMoon\OpenApiServerBundle\Exception;
 
 use function Safe\sprintf;
 
-final class CannotGenerateCodeForOperation extends OpenApiError
+final class CannotParseOpenApi extends OpenApiError
 {
     /** @param string[] $context */
     public static function becauseNoOperationIdSpecified(array $context) : self

@@ -16,7 +16,7 @@ use cebe\openapi\spec\Responses;
 use cebe\openapi\spec\Schema;
 use cebe\openapi\spec\Type;
 use Exception;
-use OnMoon\OpenApiServerBundle\Exception\CannotGenerateCodeForOperation;
+use OnMoon\OpenApiServerBundle\Exception\CannotParseOpenApi;
 use OnMoon\OpenApiServerBundle\Specification\Definitions\ObjectType as ObjectDefinition;
 use OnMoon\OpenApiServerBundle\Specification\Definitions\Operation as OperationDefinition;
 use OnMoon\OpenApiServerBundle\Specification\Definitions\Property as PropertyDefinition;
@@ -63,11 +63,11 @@ class SpecificationParser
                 ];
 
                 if ($operationId === '') {
-                    throw CannotGenerateCodeForOperation::becauseNoOperationIdSpecified($exceptionContext);
+                    throw CannotParseOpenApi::becauseNoOperationIdSpecified($exceptionContext);
                 }
 
                 if (array_key_exists($operationId, $operationDefinitions)) {
-                    throw CannotGenerateCodeForOperation::becauseDuplicateOperationId($operationId, $exceptionContext);
+                    throw CannotParseOpenApi::becauseDuplicateOperationId($operationId, $exceptionContext);
                 }
 
                 $responses = $this->getResponseDtoDefinitions($operation->responses, $specificationConfig, $exceptionContext);
@@ -257,7 +257,7 @@ class SpecificationParser
     private function getPropertyGraph(Schema $schema, bool $isRequest, bool $isRoot, array $exceptionContext) : array
     {
         if ($isRoot && $schema->type !== Type::OBJECT) {
-            throw CannotGenerateCodeForOperation::becauseRootIsNotObject(
+            throw CannotParseOpenApi::becauseRootIsNotObject(
                 $exceptionContext,
                 ($schema->type === Type::ARRAY)
             );
@@ -307,7 +307,7 @@ class SpecificationParser
 
         if ($property->type === Type::ARRAY) {
             if (! ($property->items instanceof Schema)) {
-                throw CannotGenerateCodeForOperation::becauseArrayIsNotDescribed($propertyName, $exceptionContext);
+                throw CannotParseOpenApi::becauseArrayIsNotDescribed($propertyName, $exceptionContext);
             }
 
             $propertyDefinition->setArray(true);
@@ -325,7 +325,7 @@ class SpecificationParser
             $propertyDefinition->setObjectTypeDefinition($objectType);
             $isScalar = false;
         } else {
-            throw CannotGenerateCodeForOperation::becauseTypeNotSupported($propertyName, $itemProperty->type, $exceptionContext);
+            throw CannotParseOpenApi::becauseTypeNotSupported($propertyName, $itemProperty->type, $exceptionContext);
         }
 
         /** @var string|int|float|bool|null $schemaDefaultValue */
@@ -346,7 +346,7 @@ class SpecificationParser
         }
 
         if (! $isScalar && ! $allowNonScalar) {
-            throw CannotGenerateCodeForOperation::becauseOnlyScalarAreAllowed($propertyName, $exceptionContext);
+            throw CannotParseOpenApi::becauseOnlyScalarAreAllowed($propertyName, $exceptionContext);
         }
 
         return $propertyDefinition;
