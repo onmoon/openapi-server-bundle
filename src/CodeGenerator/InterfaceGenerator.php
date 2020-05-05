@@ -14,8 +14,6 @@ use OnMoon\OpenApiServerBundle\Interfaces\Dto;
 use OnMoon\OpenApiServerBundle\Interfaces\RequestHandler;
 use OnMoon\OpenApiServerBundle\Interfaces\ResponseDto;
 use function count;
-use function Safe\substr;
-use function strrpos;
 
 class InterfaceGenerator
 {

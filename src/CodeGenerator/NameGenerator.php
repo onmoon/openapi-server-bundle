@@ -16,11 +16,11 @@ use function ucfirst;
 
 class NameGenerator
 {
-    private const DTO_NAMESPACE    = 'Dto';
-    private const REQUEST_SUFFIX   = 'Request';
-    private const RESPONSE_SUFFIX  = 'Response';
-    public const DTO_SUFFIX        = 'Dto';
-    public const APIS_NAMESPACE    = 'Apis';
+    private const DTO_NAMESPACE   = 'Dto';
+    private const REQUEST_SUFFIX  = 'Request';
+    private const RESPONSE_SUFFIX = 'Response';
+    public const DTO_SUFFIX       = 'Dto';
+    public const APIS_NAMESPACE   = 'Apis';
 
     private NamingStrategy $naming;
     private Httpstatus $httpstatus;

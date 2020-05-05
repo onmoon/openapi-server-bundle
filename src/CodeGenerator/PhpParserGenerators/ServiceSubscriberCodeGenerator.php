@@ -33,7 +33,7 @@ class ServiceSubscriberCodeGenerator extends CodeGenerator
         $fileBuilder = new FileBuilder($subscriberDefinition);
 
         $containerInterfaceClass = $fileBuilder->getReference(ClassDefinition::fromFQCN(ContainerInterface::class));
-        $requestHandlerClass = $fileBuilder->getReference(ClassDefinition::fromFQCN(RequestHandler::class));
+        $requestHandlerClass     = $fileBuilder->getReference(ClassDefinition::fromFQCN(RequestHandler::class));
 
         $classBuilder = $this
             ->factory
@@ -66,7 +66,7 @@ class ServiceSubscriberCodeGenerator extends CodeGenerator
             ->makePrivate()
             ->setType($containerInterfaceClass);
         if ($this->fullDocs) {
-            $property->setDocComment('/** @var '.$containerInterfaceClass.' */');
+            $property->setDocComment('/** @var ' . $containerInterfaceClass . ' */');
         }
 
         $constructor = $this
@@ -80,7 +80,7 @@ class ServiceSubscriberCodeGenerator extends CodeGenerator
                 new Assign(new Variable('this->locator'), new Variable('locator'))
             );
         if ($this->fullDocs) {
-            $constructor->setDocComment('/** @param '.$containerInterfaceClass.' $locator */');
+            $constructor->setDocComment('/** @param ' . $containerInterfaceClass . ' $locator */');
         }
 
         $getSubscribedServices = $this
@@ -103,7 +103,7 @@ class ServiceSubscriberCodeGenerator extends CodeGenerator
             ->factory
             ->method('get')
             ->makePublic()
-            ->setReturnType('?'.$requestHandlerClass)
+            ->setReturnType('?' . $requestHandlerClass)
             ->addParam(
                 $this->factory->param('interface')->setType('string')
             )
@@ -135,7 +135,7 @@ class ServiceSubscriberCodeGenerator extends CodeGenerator
         if ($this->fullDocs) {
             $docs = [
                 '@param string $interface',
-                '@return '.$requestHandlerClass.'|null',
+                '@return ' . $requestHandlerClass . '|null',
             ];
             $getRequestHandler->setDocComment($this->getDocComment($docs));
         }
