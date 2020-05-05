@@ -30,16 +30,20 @@ class FileBuilder extends Namespace_
         }
 
         $reference = $class->getClassName();
+        $rename = false;
         while (array_search($reference, $this->references) !== false) {
             $reference = $this->rename($reference);
+            $rename = true;
         }
 
         $this->references[$fullName] = $reference;
-        $use = new Use_($fullName, UseStmt::TYPE_NORMAL);
-        if($reference !== $class->getClassName()) {
-            $use->as($reference);
+        if($class->getNamespace() !== $this->definition->getNamespace() || $rename) {
+            $use = new Use_($fullName, UseStmt::TYPE_NORMAL);
+            if ($rename) {
+                $use->as($reference);
+            }
+            $this->addStmt($use);
         }
-        $this->addStmt($use);
         return $reference;
     }
 
@@ -47,7 +51,8 @@ class FileBuilder extends Namespace_
         if(substr($class, -1) === '_') {
             return $class.'1';
         } elseif(preg_match('"_(\d+)$"', $class, $match)) {
-            return preg_replace('"_\d+$"', $class, '_'.($match[1]+1));
+            $oldNumber = (int)$match[1];
+            return preg_replace('"_\d+$"', '_'.($oldNumber+1), $class);
         } else {
             return $class.'_';
         }
