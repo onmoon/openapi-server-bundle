@@ -7,7 +7,6 @@ namespace OnMoon\OpenApiServerBundle\CodeGenerator\PhpParserGenerators;
 use Exception;
 use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\PropertyDefinition;
 use OnMoon\OpenApiServerBundle\Types\ScalarTypesResolver;
-use PhpParser\Builder\Namespace_;
 use PhpParser\BuilderFactory;
 use PhpParser\Node\Scalar\LNumber;
 use PhpParser\Node\Stmt\Declare_;
@@ -85,11 +84,11 @@ abstract class CodeGenerator
         return sprintf('/**%s */', $glued);
     }
 
-    public function printFile(Namespace_ $fileBuilder) : string
+    public function printFile(FileBuilder $fileBuilder) : string
     {
         return (new Standard())->prettyPrintFile([
             new Declare_([new DeclareDeclare('strict_types', new LNumber(1))]),
-            $fileBuilder->getNode(),
+            $fileBuilder->getNamespace()->getNode(),
         ]);
     }
 }

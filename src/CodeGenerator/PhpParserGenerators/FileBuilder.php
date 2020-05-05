@@ -15,9 +15,10 @@ use function Safe\preg_match;
 use function Safe\preg_replace;
 use function Safe\substr;
 
-class FileBuilder extends Namespace_
+class FileBuilder
 {
     private ClassDefinition $definition;
+    private Namespace_ $namespace;
     /** @var string[] */
     private array $references = [];
 
@@ -25,7 +26,7 @@ class FileBuilder extends Namespace_
     {
         $this->definition = $definition;
         $this->getReference($definition);
-        parent::__construct($definition->getNamespace());
+        $this->namespace = new Namespace_($definition->getNamespace());
     }
 
     public function getReference(ClassDefinition $class) : string
@@ -83,13 +84,15 @@ class FileBuilder extends Namespace_
      *
      * @return $this The builder instance (for fluid interface)
      */
-    public function addStmt($stmt)
+    public function addStmt($stmt) : self
     {
-        /**
-         * phpstan goes crazy on this call...
-         *
-         * @phpstan-ignore-next-line
-         */
-        return parent::addStmt($stmt);
+        $this->namespace->addStmt($stmt);
+
+        return $this;
+    }
+
+    public function getNamespace() : Namespace_
+    {
+        return $this->namespace;
     }
 }
