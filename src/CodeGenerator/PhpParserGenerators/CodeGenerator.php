@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace OnMoon\OpenApiServerBundle\CodeGenerator\PhpParserGenerators;
 
 use Exception;
-use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\ClassDefinition;
 use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\PropertyDefinition;
 use OnMoon\OpenApiServerBundle\Types\ScalarTypesResolver;
 use PhpParser\Builder\Namespace_;
@@ -41,35 +40,26 @@ abstract class CodeGenerator
         $this->fullDocs      = $fullDocs;
     }
 
-    public function use(Namespace_ $builder, string $parentNameSpace, ClassDefinition $class) : void
+    public function getTypeDocBlock(FileBuilder $builder, PropertyDefinition $definition) : string
     {
-        if ($parentNameSpace === $class->getNamespace()) {
-            return;
-        }
-
-        $builder->addStmt($this->factory->use($class->getFQCN()));
-    }
-
-    public function getTypeDocBlock(PropertyDefinition $definition) : string
-    {
-        return $this->getTypeName($definition) .
+        return $this->getTypeName($builder, $definition) .
             ($definition->isArray() ? '[]' : '') .
             ($definition->isNullable() ? '|null' : '');
     }
 
-    public function getTypePhp(PropertyDefinition $definition) : string
+    public function getTypePhp(FileBuilder $builder, PropertyDefinition $definition) : string
     {
         return ($definition->isNullable() ? '?' : '') .
-            ($definition->isArray() ? 'array' : $this->getTypeName($definition));
+            ($definition->isArray() ? 'array' : $this->getTypeName($builder, $definition));
     }
 
-    public function getTypeName(PropertyDefinition $definition) : string
+    public function getTypeName(FileBuilder $builder, PropertyDefinition $definition) : string
     {
         $objectType = $definition->getObjectTypeDefinition();
         $scalarType = $definition->getScalarTypeId();
 
         if ($objectType !== null) {
-            return $objectType->getClassName();
+            return $builder->getReference($objectType);
         }
 
         if ($scalarType === null) {
