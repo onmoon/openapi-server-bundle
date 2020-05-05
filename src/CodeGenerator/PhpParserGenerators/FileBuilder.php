@@ -5,8 +5,10 @@ declare(strict_types=1);
 namespace OnMoon\OpenApiServerBundle\CodeGenerator\PhpParserGenerators;
 
 use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\ClassDefinition;
+use PhpParser\Builder;
 use PhpParser\Builder\Namespace_;
 use PhpParser\Builder\Use_;
+use PhpParser\Node;
 use PhpParser\Node\Stmt\Use_ as UseStmt;
 use function array_search;
 use function Safe\preg_match;
@@ -72,5 +74,22 @@ class FileBuilder extends Namespace_
         }
 
         return $class . '_';
+    }
+
+    /**
+     * Adds a statement.
+     *
+     * @param Node|Builder $stmt The statement to add
+     *
+     * @return $this The builder instance (for fluid interface)
+     */
+    public function addStmt($stmt)
+    {
+        /**
+         * phpstan goes crazy on this call...
+         *
+         * @phpstan-ignore-next-line
+         */
+        return parent::addStmt($stmt);
     }
 }
