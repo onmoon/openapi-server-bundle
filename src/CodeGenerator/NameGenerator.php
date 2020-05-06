@@ -16,12 +16,11 @@ use function ucfirst;
 
 class NameGenerator
 {
-    private const DTO_NAMESPACE    = 'Dto';
-    private const REQUEST_SUFFIX   = 'Request';
-    private const RESPONSE_SUFFIX  = 'Response';
-    public const DTO_SUFFIX        = 'Dto';
-    public const APIS_NAMESPACE    = 'Apis';
-    private const DUPLICATE_PREFIX = 'Property';
+    private const DTO_NAMESPACE   = 'Dto';
+    private const REQUEST_SUFFIX  = 'Request';
+    private const RESPONSE_SUFFIX = 'Response';
+    public const DTO_SUFFIX       = 'Dto';
+    public const APIS_NAMESPACE   = 'Apis';
 
     private NamingStrategy $naming;
     private Httpstatus $httpstatus;
@@ -157,12 +156,6 @@ class NameGenerator
 
             $part         = $this->naming->stringToNamespace($property->getClassPropertyName());
             $subClassName = $this->naming->stringToNamespace($part . self::DTO_SUFFIX);
-
-            if ($subClassName === $className) {
-                //ToDo: check if more elegant way exists
-                $subClassName = self::DUPLICATE_PREFIX . $subClassName;
-            }
-
             $subNamespace = $this->naming->buildNamespace($namespace, $part);
             $subPath      = $this->naming->buildPath($path, $part);
             $this->setTreePathsAndClassNames($objectDefinition, $subNamespace, $subClassName, $subPath);

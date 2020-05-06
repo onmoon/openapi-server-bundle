@@ -14,26 +14,24 @@ use OnMoon\OpenApiServerBundle\Interfaces\Dto;
 use OnMoon\OpenApiServerBundle\Interfaces\RequestHandler;
 use OnMoon\OpenApiServerBundle\Interfaces\ResponseDto;
 use function count;
-use function Safe\substr;
-use function strrpos;
 
 class InterfaceGenerator
 {
     private ClassDefinition $defaultDto;
     private ClassDefinition $defaultResponseDto;
-    private ClassDefinition $defaultService;
+    private ClassDefinition $defaultHandler;
 
     public function __construct()
     {
-        $this->defaultDto         = $this->getDefaultInterface(Dto::class);
-        $this->defaultResponseDto = $this->getDefaultInterface(ResponseDto::class);
-        $this->defaultService     = $this->getDefaultInterface(RequestHandler::class);
+        $this->defaultDto         = ClassDefinition::fromFQCN(Dto::class);
+        $this->defaultResponseDto = ClassDefinition::fromFQCN(ResponseDto::class);
+        $this->defaultHandler     = ClassDefinition::fromFQCN(RequestHandler::class);
     }
 
     public function setAllInterfaces(GraphDefinition $graph) : void
     {
         $graph->getServiceSubscriber()->setImplements([
-            $this->getDefaultInterface(ApiLoader::class),
+            ClassDefinition::fromFQCN(ApiLoader::class),
         ]);
 
         foreach ($graph->getSpecifications() as $specificationDefinition) {
@@ -69,26 +67,10 @@ class InterfaceGenerator
                 $service
                     ->setResponseType($responseClass)
                     ->setRequestType($operation->getRequest())
-                    ->setExtends($this->defaultService);
+                    ->setExtends($this->defaultHandler);
                 $operation->setRequestHandlerInterface($service);
             }
         }
-    }
-
-    public function getDefaultInterface(string $className) : ClassDefinition
-    {
-        $lastPart = strrpos($className, '\\');
-        if ($lastPart !== false) {
-            $namespace = substr($className, 0, $lastPart);
-            $name      = substr($className, $lastPart + 1);
-        } else {
-            $namespace = '';
-            $name      = $className;
-        }
-
-        return (new ClassDefinition())
-            ->setNamespace($namespace)
-            ->setClassName($name);
     }
 
     public function setChildrenRecursive(DtoDefinition $root, ClassDefinition $implements) : void
