@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace OnMoon\OpenApiServerBundle\CodeGenerator\Naming;
 
 use OnMoon\OpenApiServerBundle\CodeGenerator\NameGenerator;
+// phpcs:ignore SlevomatCodingStandard.Namespaces.UnusedUses.UnusedUse
 use OnMoon\OpenApiServerBundle\Interfaces\RequestHandler;
 use sspat\ReservedWords\ReservedWords;
 use function array_map;

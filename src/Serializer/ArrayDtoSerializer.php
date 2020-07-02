@@ -111,12 +111,15 @@ class ArrayDtoSerializer implements DtoSerializer
             $objectType = $property->getObjectTypeDefinition();
 
             if ($objectType !== null) {
+                /** @psalm-suppress MissingClosureParamType */
                 $converter = fn($v) => $this->convert($deserialize, $v, $objectType);
             } else {
+                /** @psalm-suppress MissingClosureParamType */
                 $converter = fn($v) => $this->resolver->convert($deserialize, $typeId??0, $v);
             }
 
             if ($property->isArray()) {
+                /** @psalm-suppress MissingClosureParamType */
                 $converter = static fn($v) => array_map(static fn ($i) => $converter($i), $v);
             }
 

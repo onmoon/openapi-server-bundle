@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace OnMoon\OpenApiServerBundle\CodeGenerator\Naming;
 
+// phpcs:ignore SlevomatCodingStandard.Namespaces.UnusedUses.UnusedUse
 use OnMoon\OpenApiServerBundle\Interfaces\RequestHandler;
 
 interface NamingStrategy

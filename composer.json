@@ -45,12 +45,12 @@
     },
     "require-dev": {
         "doctrine/coding-standard": "^7.0",
-        "phpstan/phpstan": "^0.12.8",
-        "phpunit/phpunit": "^8.5",
+        "phpstan/phpstan": "^0.12.32",
+        "phpunit/phpunit": "^9.2",
+        "psalm/phar": "^3.12",
         "sensiolabs/security-checker": "^6.0",
         "squizlabs/php_codesniffer": "^3.5",
-        "thecodingmachine/phpstan-safe-rule": "^1.0",
-        "vimeo/psalm": "^3.8"
+        "thecodingmachine/phpstan-safe-rule": "^1.0"
     },
     "minimum-stability": "stable",
     "config": {
@@ -72,10 +72,12 @@
     "scripts": {
         "cs": "phpcs",
         "csfix": "phpcbf",
-        "psalm": "psalm",
+        "psalm": "psalm.phar",
+        "psalmwin": "psalm.phar.bat",
         "stan": "phpstan analyze src -l 8 --memory-limit=512m",
         "sec": "security-checker security:check",
         "test": "phpunit",
-        "all": "composer psalm && composer stan && composer test && composer cs && composer sec"
+        "all": "composer psalm && composer stan && composer test && composer cs && composer sec",
+        "allwin": "composer psalmwin && composer stan && composer test && composer cs && composer sec"
     }
 }

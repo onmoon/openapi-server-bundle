@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace OnMoon\OpenApiServerBundle\Types;
 
 use cebe\openapi\spec\Type;
+use function array_key_exists;
 use function Safe\settype;
 
 class ScalarTypesResolver
@@ -77,8 +78,12 @@ class ScalarTypesResolver
 
         $format = $this->scalarTypes[$id];
 
-        if (isset($format[$deserialize?'deserializer':'serializer'])) {
-            return TypeSerializer::{$format[$deserialize?'deserializer':'serializer']}($value);
+        if ($deserialize && array_key_exists('deserializer', $format) && isset($format['deserializer'])) {
+            return TypeSerializer::{$format['deserializer']}($value);
+        }
+
+        if (! $deserialize && array_key_exists('serializer', $format) && isset($format['serializer'])) {
+            return TypeSerializer::{$format['serializer']}($value);
         }
 
         if ($deserialize) {
