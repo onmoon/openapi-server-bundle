@@ -31,7 +31,7 @@ class RouteLoader extends Loader implements LoaderInterface
     /**
      * @inheritDoc
      */
-    public function load($resource, $type = null): RouteCollection
+    public function load($resource, ?string $type = null): RouteCollection
     {
         $specName      = (string) $resource;
         $specification = $this->loader->load($specName);
@@ -64,7 +64,7 @@ class RouteLoader extends Loader implements LoaderInterface
     /**
      * @inheritDoc
      */
-    public function supports($resource, $type = null)
+    public function supports($resource, ?string $type = null)
     {
         return $type === self::OPENAPI_TYPE;
     }
