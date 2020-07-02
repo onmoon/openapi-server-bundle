@@ -8,5 +8,5 @@ use Symfony\Component\HttpFoundation\Request;
 
 interface SetRequest
 {
-    public function setRequest(Request $request) : void;
+    public function setRequest(Request $request): void;
 }

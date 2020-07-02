@@ -20,7 +20,7 @@ class ObjectType
     /**
      * @return Property[]
      */
-    public function getProperties() : array
+    public function getProperties(): array
     {
         return $this->properties;
     }

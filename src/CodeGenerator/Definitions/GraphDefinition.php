@@ -22,12 +22,12 @@ class GraphDefinition
     /**
      * @return SpecificationDefinition[]
      */
-    public function getSpecifications() : array
+    public function getSpecifications(): array
     {
         return $this->specifications;
     }
 
-    public function getServiceSubscriber() : ServiceSubscriberDefinition
+    public function getServiceSubscriber(): ServiceSubscriberDefinition
     {
         return $this->serviceSubscriber;
     }

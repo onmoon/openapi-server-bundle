@@ -8,7 +8,7 @@ class GeneratedInterfaceDefinition extends GeneratedClassDefinition
 {
     private ?ClassDefinition $extends = null;
 
-    public function getExtends() : ?ClassDefinition
+    public function getExtends(): ?ClassDefinition
     {
         return $this->extends;
     }
@@ -16,7 +16,7 @@ class GeneratedInterfaceDefinition extends GeneratedClassDefinition
     /**
      * @return GeneratedInterfaceDefinition
      */
-    public function setExtends(?ClassDefinition $extends) : self
+    public function setExtends(?ClassDefinition $extends): self
     {
         $this->extends = $extends;
 

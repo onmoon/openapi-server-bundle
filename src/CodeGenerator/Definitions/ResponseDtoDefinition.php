@@ -17,7 +17,7 @@ class ResponseDtoDefinition extends DtoDefinition
         parent::__construct($properties);
     }
 
-    public function getStatusCode() : string
+    public function getStatusCode(): string
     {
         return $this->statusCode;
     }

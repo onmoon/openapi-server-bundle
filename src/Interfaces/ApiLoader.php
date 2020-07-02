@@ -8,5 +8,5 @@ use Symfony\Contracts\Service\ServiceSubscriberInterface;
 
 interface ApiLoader extends ServiceSubscriberInterface
 {
-    public function get(string $interfaceName) : ?RequestHandler;
+    public function get(string $interfaceName): ?RequestHandler;
 }

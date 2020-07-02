@@ -13,7 +13,7 @@ class OpenApiServerBundle extends Bundle
 {
     public const API_LOADER_TAG = 'openapi.api_loader';
 
-    public function build(ContainerBuilder $container) : void
+    public function build(ContainerBuilder $container): void
     {
         $container->registerForAutoconfiguration(ApiLoader::class)->addTag(self::API_LOADER_TAG);
         $container->addCompilerPass(new CompilerPass(self::API_LOADER_TAG));

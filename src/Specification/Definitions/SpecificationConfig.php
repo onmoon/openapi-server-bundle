@@ -19,22 +19,22 @@ class SpecificationConfig
         $this->mediaType = $mediaType;
     }
 
-    public function getPath() : string
+    public function getPath(): string
     {
         return $this->path;
     }
 
-    public function getType() : ?string
+    public function getType(): ?string
     {
         return $this->type;
     }
 
-    public function getNameSpace() : string
+    public function getNameSpace(): string
     {
         return $this->nameSpace;
     }
 
-    public function getMediaType() : string
+    public function getMediaType(): string
     {
         return $this->mediaType;
     }

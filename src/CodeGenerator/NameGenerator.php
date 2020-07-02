@@ -12,6 +12,7 @@ use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\RequestDtoDefinition;
 use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\ResponseDtoDefinition;
 use OnMoon\OpenApiServerBundle\CodeGenerator\Naming\NamingStrategy;
 use Throwable;
+
 use function ucfirst;
 
 class NameGenerator
@@ -35,7 +36,7 @@ class NameGenerator
         $this->rootPath      = $rootPath;
     }
 
-    public function setAllNamesAndPaths(GraphDefinition $graph) : void
+    public function setAllNamesAndPaths(GraphDefinition $graph): void
     {
         $graph->getServiceSubscriber()
             ->setFileName('ApiServiceLoaderServiceSubscriber.php')
@@ -103,7 +104,7 @@ class NameGenerator
         }
     }
 
-    public function setRequestNames(RequestDtoDefinition $request, string $operationNamespace, string $operationName, string $operationPath) : void
+    public function setRequestNames(RequestDtoDefinition $request, string $operationNamespace, string $operationName, string $operationPath): void
     {
         $requestDtoNamespace = $this->naming->buildNamespace(
             $operationNamespace,
@@ -122,7 +123,7 @@ class NameGenerator
         $this->setTreePathsAndClassNames($request, $requestDtoNamespace, $requestDtoClassName, $requestDtoPath);
     }
 
-    public function setResponseNames(ResponseDtoDefinition $response, string $responseNamespace, string $operationName, string $responsePath) : void
+    public function setResponseNames(ResponseDtoDefinition $response, string $responseNamespace, string $operationName, string $responsePath): void
     {
         try {
             $statusNamespace = $this->httpstatus->getReasonPhrase($response->getStatusCode());
@@ -141,7 +142,7 @@ class NameGenerator
         $this->setTreePathsAndClassNames($response, $responseDtoNamespace, $responseDtoClassName, $responseDtoPath);
     }
 
-    public function setTreePathsAndClassNames(DtoDefinition $root, string $namespace, string $className, string $path) : void
+    public function setTreePathsAndClassNames(DtoDefinition $root, string $namespace, string $className, string $path): void
     {
         $root->setClassName($className);
         $root->setFileName($this->getFileName($className));
@@ -162,12 +163,12 @@ class NameGenerator
         }
     }
 
-    public function getFileName(string $className) : string
+    public function getFileName(string $className): string
     {
         return $className . '.php';
     }
 
-    public function setTreeGettersSetters(DtoDefinition $root) : void
+    public function setTreeGettersSetters(DtoDefinition $root): void
     {
         foreach ($root->getProperties() as $property) {
             $baseName = ucfirst($this->naming->stringToMethodName($property->getClassPropertyName()));
@@ -183,7 +184,7 @@ class NameGenerator
         }
     }
 
-    public function setTreePropertyClassNames(DtoDefinition $root) : void
+    public function setTreePropertyClassNames(DtoDefinition $root): void
     {
         foreach ($root->getProperties() as $property) {
             $propertyName = $property->getSpecPropertyName();

@@ -22,11 +22,12 @@ use PhpParser\Node\Scalar\String_;
 use PhpParser\Node\Stmt\If_;
 use PhpParser\Node\Stmt\Return_;
 use Psr\Container\ContainerInterface;
+
 use function Safe\sprintf;
 
 class ServiceSubscriberCodeGenerator extends CodeGenerator
 {
-    public function generate(GraphDefinition $graphDefinition) : GeneratedFileDefinition
+    public function generate(GraphDefinition $graphDefinition): GeneratedFileDefinition
     {
         $subscriberDefinition = $graphDefinition->getServiceSubscriber();
 

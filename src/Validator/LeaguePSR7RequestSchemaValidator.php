@@ -27,7 +27,7 @@ class LeaguePSR7RequestSchemaValidator implements RequestSchemaValidator
         Request $request,
         Specification $specification,
         string $operationId
-    ) : void {
+    ): void {
         $operation = $specification->getOperation($operationId);
         $this->validatorBuilder
             ->fromSchema($specification->getOpenApi())

@@ -12,11 +12,13 @@ use PhpParser\Node\Scalar\LNumber;
 use PhpParser\Node\Stmt\Declare_;
 use PhpParser\Node\Stmt\DeclareDeclare;
 use PhpParser\PrettyPrinter\Standard;
+
 use function array_map;
 use function count;
 use function implode;
 use function Safe\sprintf;
 use function trim;
+
 use const PHP_EOL;
 
 abstract class CodeGenerator
@@ -39,20 +41,20 @@ abstract class CodeGenerator
         $this->fullDocs      = $fullDocs;
     }
 
-    public function getTypeDocBlock(FileBuilder $builder, PropertyDefinition $definition) : string
+    public function getTypeDocBlock(FileBuilder $builder, PropertyDefinition $definition): string
     {
         return $this->getTypeName($builder, $definition) .
             ($definition->isArray() ? '[]' : '') .
             ($definition->isNullable() ? '|null' : '');
     }
 
-    public function getTypePhp(FileBuilder $builder, PropertyDefinition $definition) : string
+    public function getTypePhp(FileBuilder $builder, PropertyDefinition $definition): string
     {
         return ($definition->isNullable() ? '?' : '') .
             ($definition->isArray() ? 'array' : $this->getTypeName($builder, $definition));
     }
 
-    public function getTypeName(FileBuilder $builder, PropertyDefinition $definition) : string
+    public function getTypeName(FileBuilder $builder, PropertyDefinition $definition): string
     {
         $objectType = $definition->getObjectTypeDefinition();
         $scalarType = $definition->getScalarTypeId();
@@ -69,13 +71,13 @@ abstract class CodeGenerator
     }
 
     /** @param string[] $lines */
-    public function getDocComment(array $lines) : string
+    public function getDocComment(array $lines): string
     {
         if (count($lines) === 1) {
             $glued = ' ' . trim($lines[0]);
         } else {
             $asteriskLines = array_map(
-                static fn(string $line) : string => ' * ' . trim($line),
+                static fn (string $line): string => ' * ' . trim($line),
                 $lines
             );
             $glued         = PHP_EOL . implode(PHP_EOL, $asteriskLines) . PHP_EOL;
@@ -84,7 +86,7 @@ abstract class CodeGenerator
         return sprintf('/**%s */', $glued);
     }
 
-    public function printFile(FileBuilder $fileBuilder) : string
+    public function printFile(FileBuilder $fileBuilder): string
     {
         return (new Standard())->prettyPrintFile([
             new Declare_([new DeclareDeclare('strict_types', new LNumber(1))]),

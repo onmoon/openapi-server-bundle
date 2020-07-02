@@ -6,5 +6,5 @@ namespace OnMoon\OpenApiServerBundle\Interfaces;
 
 interface GetResponseCode
 {
-    public function getResponseCode(?int $guessedCode) : ?int;
+    public function getResponseCode(?int $guessedCode): ?int;
 }

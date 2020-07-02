@@ -7,6 +7,7 @@ namespace OnMoon\OpenApiServerBundle\CodeGenerator\Filesystem;
 use function is_dir;
 use function Safe\file_put_contents;
 use function Safe\mkdir;
+
 use const DIRECTORY_SEPARATOR;
 
 class FilePutContentsFileWriter implements FileWriter
@@ -18,7 +19,7 @@ class FilePutContentsFileWriter implements FileWriter
         $this->dirPemissions = $dirPemissions;
     }
 
-    public function write(string $path, string $filename, string $contents) : void
+    public function write(string $path, string $filename, string $contents): void
     {
         if (! is_dir($path)) {
             mkdir($path, $this->dirPemissions, true);

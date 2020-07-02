@@ -11,6 +11,7 @@ use Symfony\Component\Config\Loader\Loader;
 use Symfony\Component\Config\Loader\LoaderInterface;
 use Symfony\Component\Routing\Route;
 use Symfony\Component\Routing\RouteCollection;
+
 use function array_key_exists;
 
 class RouteLoader extends Loader implements LoaderInterface
@@ -30,7 +31,7 @@ class RouteLoader extends Loader implements LoaderInterface
     /**
      * @inheritDoc
      */
-    public function load($resource, $type = null) : RouteCollection
+    public function load($resource, $type = null): RouteCollection
     {
         $specName      = (string) $resource;
         $specification = $this->loader->load($specName);

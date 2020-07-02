@@ -41,27 +41,27 @@ class Operation
         $this->responses          = $responses;
     }
 
-    public function getUrl() : string
+    public function getUrl(): string
     {
         return $this->url;
     }
 
-    public function getMethod() : string
+    public function getMethod(): string
     {
         return $this->method;
     }
 
-    public function getRequestHandlerName() : string
+    public function getRequestHandlerName(): string
     {
         return $this->requestHandlerName;
     }
 
-    public function getSummary() : ?string
+    public function getSummary(): ?string
     {
         return $this->summary;
     }
 
-    public function getRequestBody() : ?ObjectType
+    public function getRequestBody(): ?ObjectType
     {
         return $this->requestBody;
     }
@@ -71,7 +71,7 @@ class Operation
      *
      * @psalm-return array<string, ObjectType>
      */
-    public function getRequestParameters() : array
+    public function getRequestParameters(): array
     {
         return $this->requestParameters;
     }
@@ -81,12 +81,12 @@ class Operation
      *
      * @psalm-return array<string|int, ObjectType>
      */
-    public function getResponses() : array
+    public function getResponses(): array
     {
         return $this->responses;
     }
 
-    public function getResponse(string $code) : ObjectType
+    public function getResponse(string $code): ObjectType
     {
         return $this->responses[$code];
     }

@@ -9,7 +9,7 @@ use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\GraphDefinition;
 
 class AttributeGenerator
 {
-    public function setAllAttributes(GraphDefinition $graph) : void
+    public function setAllAttributes(GraphDefinition $graph): void
     {
         foreach ($graph->getSpecifications() as $specificationDefinition) {
             foreach ($specificationDefinition->getOperations() as $operation) {
@@ -25,7 +25,7 @@ class AttributeGenerator
         }
     }
 
-    public function requestPass(DtoDefinition $root) : void
+    public function requestPass(DtoDefinition $root): void
     {
         foreach ($root->getProperties() as $property) {
             $specProperty = $property->getSpecProperty();
@@ -45,7 +45,7 @@ class AttributeGenerator
         }
     }
 
-    public function responsePass(DtoDefinition $root) : void
+    public function responsePass(DtoDefinition $root): void
     {
         foreach ($root->getProperties() as $property) {
             $specProperty = $property->getSpecProperty();

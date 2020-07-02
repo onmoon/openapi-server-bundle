@@ -6,5 +6,5 @@ namespace OnMoon\OpenApiServerBundle\CodeGenerator\Filesystem;
 
 interface FileWriter
 {
-    public function write(string $path, string $filename, string $contents) : void;
+    public function write(string $path, string $filename, string $contents): void;
 }

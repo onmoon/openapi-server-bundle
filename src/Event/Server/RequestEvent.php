@@ -29,17 +29,17 @@ class RequestEvent extends Event
         $this->specification = $specification;
     }
 
-    public function getRequest() : Request
+    public function getRequest(): Request
     {
         return $this->request;
     }
 
-    public function getOperationId() : string
+    public function getOperationId(): string
     {
         return $this->operationId;
     }
 
-    public function getSpecification() : Specification
+    public function getSpecification(): Specification
     {
         return $this->specification;
     }

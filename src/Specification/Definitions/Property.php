@@ -23,12 +23,12 @@ class Property
         $this->name = $name;
     }
 
-    public function getName() : string
+    public function getName(): string
     {
         return $this->name;
     }
 
-    public function isArray() : bool
+    public function isArray(): bool
     {
         return $this->array;
     }
@@ -36,7 +36,7 @@ class Property
     /**
      * @return Property
      */
-    public function setArray(bool $array) : self
+    public function setArray(bool $array): self
     {
         $this->array = $array;
 
@@ -54,14 +54,14 @@ class Property
     /**
      * @param bool|float|int|string|null $defaultValue
      */
-    public function setDefaultValue($defaultValue) : Property
+    public function setDefaultValue($defaultValue): Property
     {
         $this->defaultValue = $defaultValue;
 
         return $this;
     }
 
-    public function isRequired() : bool
+    public function isRequired(): bool
     {
         return $this->required;
     }
@@ -69,14 +69,14 @@ class Property
     /**
      * @return Property
      */
-    public function setRequired(bool $required) : self
+    public function setRequired(bool $required): self
     {
         $this->required = $required;
 
         return $this;
     }
 
-    public function getScalarTypeId() : ?int
+    public function getScalarTypeId(): ?int
     {
         return $this->scalarTypeId;
     }
@@ -84,14 +84,14 @@ class Property
     /**
      * @return Property
      */
-    public function setScalarTypeId(?int $scalarTypeId) : self
+    public function setScalarTypeId(?int $scalarTypeId): self
     {
         $this->scalarTypeId = $scalarTypeId;
 
         return $this;
     }
 
-    public function getObjectTypeDefinition() : ?ObjectType
+    public function getObjectTypeDefinition(): ?ObjectType
     {
         return $this->objectTypeDefinition;
     }
@@ -99,14 +99,14 @@ class Property
     /**
      * @return Property
      */
-    public function setObjectTypeDefinition(?ObjectType $objectTypeDefinition) : self
+    public function setObjectTypeDefinition(?ObjectType $objectTypeDefinition): self
     {
         $this->objectTypeDefinition = $objectTypeDefinition;
 
         return $this;
     }
 
-    public function getDescription() : ?string
+    public function getDescription(): ?string
     {
         return $this->description;
     }
@@ -114,14 +114,14 @@ class Property
     /**
      * @return Property
      */
-    public function setDescription(?string $description) : self
+    public function setDescription(?string $description): self
     {
         $this->description = $description;
 
         return $this;
     }
 
-    public function getPattern() : ?string
+    public function getPattern(): ?string
     {
         return $this->pattern;
     }
@@ -129,19 +129,19 @@ class Property
     /**
      * @return Property
      */
-    public function setPattern(?string $pattern) : self
+    public function setPattern(?string $pattern): self
     {
         $this->pattern = $pattern;
 
         return $this;
     }
 
-    public function isNullable() : bool
+    public function isNullable(): bool
     {
         return $this->nullable;
     }
 
-    public function setNullable(bool $nullable) : self
+    public function setNullable(bool $nullable): self
     {
         $this->nullable = $nullable;
 

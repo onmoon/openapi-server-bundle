@@ -15,17 +15,17 @@ final class GeneratedFileDefinition
         $this->fileContents = $fileContents;
     }
 
-    public function getClass() : GeneratedClassDefinition
+    public function getClass(): GeneratedClassDefinition
     {
         return $this->class;
     }
 
-    public function getFileContents() : string
+    public function getFileContents(): string
     {
         return $this->fileContents;
     }
 
-    public function setFileContents(string $fileContents) : self
+    public function setFileContents(string $fileContents): self
     {
         $this->fileContents = $fileContents;
 

@@ -30,7 +30,7 @@ class ApiServerCodeGenerator
         $this->eventDispatcher    = $eventDispatcher;
     }
 
-    public function generate() : void
+    public function generate(): void
     {
         $graph = $this->graphGenerator->generateClassGraph();
         $this->interfaceGenerator->setAllInterfaces($graph);
