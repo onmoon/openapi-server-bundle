@@ -73,11 +73,9 @@
         "cs": "phpcs",
         "csfix": "phpcbf",
         "psalm": "psalm.phar",
-        "psalmwin": "psalm.phar.bat",
         "stan": "phpstan analyze src -l 8 --memory-limit=512m",
         "sec": "security-checker security:check",
         "test": "phpunit",
-        "all": "composer psalm && composer stan && composer test && composer cs && composer sec",
-        "allwin": "composer psalmwin && composer stan && composer test && composer cs && composer sec"
+        "all": "composer psalm && composer stan && composer test && composer cs && composer sec"
     }
 }

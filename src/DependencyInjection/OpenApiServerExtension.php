@@ -54,6 +54,7 @@ class OpenApiServerExtension extends Extension implements ExtensionInterface
                 'using App namespace for generated code.');
             }
 
+            /** @var string $rootPath */
             $rootPath = preg_replace('|^App\\\\|', '%kernel.project_dir%/src/', $rootNameSpace);
             $rootPath = str_replace('\\', '/', $rootPath);
         } else {
