@@ -6,6 +6,7 @@ namespace OnMoon\OpenApiServerBundle\Types;
 
 use cebe\openapi\spec\Type;
 
+use function is_string;
 use function Safe\settype;
 
 class ScalarTypesResolver
@@ -87,8 +88,12 @@ class ScalarTypesResolver
         }
 
         if ($deserialize) {
-            /** phpcs:disable Generic.PHP.ForbiddenFunctions.Found */
-            settype($value, $format['phpType']);
+            if (is_string($value) && $format['phpType'] === 'bool') {
+                $value = $value === 'true';
+            } else {
+                /** phpcs:disable Generic.PHP.ForbiddenFunctions.Found */
+                settype($value, $format['phpType']);
+            }
         }
 
         return $value;
