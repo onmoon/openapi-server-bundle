@@ -12,7 +12,6 @@ use Symfony\Component\DependencyInjection\Extension\Extension;
 use Symfony\Component\DependencyInjection\Extension\ExtensionInterface;
 use Symfony\Component\DependencyInjection\Loader\XmlFileLoader;
 
-use function array_key_exists;
 use function Safe\preg_match;
 use function Safe\preg_replace;
 use function str_replace;
@@ -48,7 +47,7 @@ class OpenApiServerExtension extends Extension implements ExtensionInterface
 
         $rootNameSpace = $config['root_name_space'];
 
-        if (! array_key_exists('root_path', $config) || empty($config['root_path'])) {
+        if (empty($config['root_path'])) {
             if (! preg_match('|^App\\\\|', $rootNameSpace)) {
                 throw new Exception('Please specify "root_path" parameter in package config if you are not ' .
                 'using App namespace for generated code.');
@@ -58,7 +57,7 @@ class OpenApiServerExtension extends Extension implements ExtensionInterface
             $rootPath = preg_replace('|^App\\\\|', '%kernel.project_dir%/src/', $rootNameSpace);
             $rootPath = str_replace('\\', '/', $rootPath);
         } else {
-            $rootPath = $config['root_path'];
+            $rootPath = $config['root_path']; // @phpstan-ignore-line
         }
 
         $container->setParameter('openapi.generated.code.root.path', $rootPath);
