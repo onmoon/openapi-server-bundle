@@ -18,7 +18,7 @@ class CompilerPass implements CompilerPassInterface
         $this->tag = $tag;
     }
 
-    public function process(ContainerBuilder $container) : void
+    public function process(ContainerBuilder $container): void
     {
         if (! $container->has(ApiController::class)) {
             return;

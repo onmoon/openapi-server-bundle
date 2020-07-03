@@ -32,13 +32,14 @@ use PhpParser\Node\Param as Param_;
 use PhpParser\Node\Scalar\String_;
 use PhpParser\Node\Stmt\Expression;
 use PhpParser\Node\Stmt\Return_;
+
 use function array_map;
 use function count;
 use function Safe\sprintf;
 
 class DtoCodeGenerator extends CodeGenerator
 {
-    public function generate(DtoDefinition $definition) : GeneratedFileDefinition
+    public function generate(DtoDefinition $definition): GeneratedFileDefinition
     {
         $fileBuilder = new FileBuilder($definition);
 
@@ -76,7 +77,7 @@ class DtoCodeGenerator extends CodeGenerator
     /**
      * @return Builder[]
      */
-    private function generateProperties(FileBuilder $builder, DtoDefinition $definition) : array
+    private function generateProperties(FileBuilder $builder, DtoDefinition $definition): array
     {
         $properties = [];
         foreach ($definition->getProperties() as $property) {
@@ -89,7 +90,7 @@ class DtoCodeGenerator extends CodeGenerator
     /**
      * @return Builder[]
      */
-    private function generateGetters(FileBuilder $builder, DtoDefinition $definition) : array
+    private function generateGetters(FileBuilder $builder, DtoDefinition $definition): array
     {
         $properties = [];
         foreach ($definition->getProperties() as $property) {
@@ -106,7 +107,7 @@ class DtoCodeGenerator extends CodeGenerator
     /**
      * @return Builder[]
      */
-    private function generateSetters(FileBuilder $builder, DtoDefinition $definition) : array
+    private function generateSetters(FileBuilder $builder, DtoDefinition $definition): array
     {
         $properties = [];
         foreach ($definition->getProperties() as $property) {
@@ -123,7 +124,7 @@ class DtoCodeGenerator extends CodeGenerator
     /**
      * @return Builder[]
      */
-    private function generateConstructor(FileBuilder $builder, DtoDefinition $definition) : array
+    private function generateConstructor(FileBuilder $builder, DtoDefinition $definition): array
     {
         $constructorBuilder = $this->factory->method('__construct')->makePublic();
         $constructorDocs    = [];
@@ -160,7 +161,7 @@ class DtoCodeGenerator extends CodeGenerator
         return [$constructorBuilder];
     }
 
-    private function generateClassProperty(FileBuilder $builder, PropertyDefinition $definition) : Property
+    private function generateClassProperty(FileBuilder $builder, PropertyDefinition $definition): Property
     {
         $property = $this->factory
             ->property($definition->getClassPropertyName())
@@ -194,7 +195,7 @@ class DtoCodeGenerator extends CodeGenerator
         return $property;
     }
 
-    private function generateMethodParameter(FileBuilder $builder, PropertyDefinition $definition) : Param
+    private function generateMethodParameter(FileBuilder $builder, PropertyDefinition $definition): Param
     {
         return $this
             ->factory
@@ -202,7 +203,7 @@ class DtoCodeGenerator extends CodeGenerator
             ->setType($this->getTypePhp($builder, $definition));
     }
 
-    private function getAssignmentDefinition(string $name) : Assign
+    private function getAssignmentDefinition(string $name): Assign
     {
         return new Assign(
             new Variable('this->' . $name),
@@ -210,7 +211,7 @@ class DtoCodeGenerator extends CodeGenerator
         );
     }
 
-    private function generateGetter(FileBuilder $builder, PropertyDefinition $definition) : Method
+    private function generateGetter(FileBuilder $builder, PropertyDefinition $definition): Method
     {
         $getterName = $definition->getGetterName();
         if ($getterName === null) {
@@ -232,7 +233,7 @@ class DtoCodeGenerator extends CodeGenerator
         return $method;
     }
 
-    private function generateSetter(FileBuilder $builder, PropertyDefinition $definition) : Method
+    private function generateSetter(FileBuilder $builder, PropertyDefinition $definition): Method
     {
         $setterName = $definition->getSetterName();
         if ($setterName === null) {
@@ -265,7 +266,7 @@ class DtoCodeGenerator extends CodeGenerator
         return $method;
     }
 
-    private function generateResponseCodeStaticMethod(ResponseDtoDefinition $definition) : Method
+    private function generateResponseCodeStaticMethod(ResponseDtoDefinition $definition): Method
     {
         $responseCode = $definition->getStatusCode();
         $method       = $this
@@ -288,7 +289,7 @@ class DtoCodeGenerator extends CodeGenerator
         return $method;
     }
 
-    private function generateToArray(FileBuilder $builder, DtoDefinition $definition) : Method
+    private function generateToArray(FileBuilder $builder, DtoDefinition $definition): Method
     {
         return $this
             ->factory
@@ -308,7 +309,7 @@ class DtoCodeGenerator extends CodeGenerator
             );
     }
 
-    private function generateToArrayItem(FileBuilder $builder, PropertyDefinition $property) : ArrayItem
+    private function generateToArrayItem(FileBuilder $builder, PropertyDefinition $property): ArrayItem
     {
         $source = new Variable('this->' . $property->getClassPropertyName());
         $value  = $this->getConverter($builder, $property, false, $source);
@@ -316,7 +317,7 @@ class DtoCodeGenerator extends CodeGenerator
         return new ArrayItem($value, new String_($property->getSpecPropertyName()));
     }
 
-    private function generateFromArray(FileBuilder $builder, DtoDefinition $definition) : Method
+    private function generateFromArray(FileBuilder $builder, DtoDefinition $definition): Method
     {
         $source = new Variable('data');
         $dto    = new Variable('dto');
@@ -359,32 +360,32 @@ class DtoCodeGenerator extends CodeGenerator
             ->addStmts($statements);
     }
 
-    private function generateFromArrayPropFetch(FileBuilder $builder, PropertyDefinition $property, Variable $sourceVar) : Expr
+    private function generateFromArrayPropFetch(FileBuilder $builder, PropertyDefinition $property, Variable $sourceVar): Expr
     {
         $source = $this->generateFromArrayGetValue($property, $sourceVar);
 
         return $this->getConverter($builder, $property, true, $source);
     }
 
-    private function generateFromArrayGetValue(PropertyDefinition $property, Variable $sourceVar) : Expr
+    private function generateFromArrayGetValue(PropertyDefinition $property, Variable $sourceVar): Expr
     {
         return new ArrayDimFetch($sourceVar, new String_($property->getSpecPropertyName()));
     }
 
-    private function getConverter(FileBuilder $builder, PropertyDefinition $property, bool $deserialize, Expr $source) : Expr
+    private function getConverter(FileBuilder $builder, PropertyDefinition $property, bool $deserialize, Expr $source): Expr
     {
         $converter  = null;
         $objectType = $property->getObjectTypeDefinition();
         if ($objectType !== null) {
             if ($deserialize) {
-                $converter = static fn (Expr $v) : Expr => new StaticCall(new Name($builder->getReference($objectType)), 'fromArray', [new Arg($v)]);
+                $converter = static fn (Expr $v): Expr => new StaticCall(new Name($builder->getReference($objectType)), 'fromArray', [new Arg($v)]);
             } else {
-                $converter = static fn (Expr $v) : Expr => new MethodCall($v, 'toArray');
+                $converter = static fn (Expr $v): Expr => new MethodCall($v, 'toArray');
             }
         }
 
         if ($property->isArray() && $converter !== null) {
-            $converter = fn (Expr $v) : Expr => $this->factory->funcCall('array_map', [
+            $converter = fn (Expr $v): Expr => $this->factory->funcCall('array_map', [
                 new ArrowFunction(
                     [
                         'static' => true,
@@ -397,7 +398,7 @@ class DtoCodeGenerator extends CodeGenerator
         }
 
         if ($property->isNullable() && $converter !== null) {
-            $converter = fn (Expr $v) : Expr => new Ternary(
+            $converter = fn (Expr $v): Expr => new Ternary(
                 new Identical($this->factory->val(null), $v),
                 $this->factory->val(null),
                 $converter($v)

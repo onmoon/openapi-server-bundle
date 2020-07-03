@@ -23,121 +23,121 @@ class PropertyDefinition
         $this->specProperty = $specProperty;
     }
 
-    public function getDescription() : ?string
+    public function getDescription(): ?string
     {
         return $this->specProperty->getDescription();
     }
 
-    public function getSpecProperty() : Property
+    public function getSpecProperty(): Property
     {
         return $this->specProperty;
     }
 
-    public function getClassPropertyName() : string
+    public function getClassPropertyName(): string
     {
         return $this->classPropertyName;
     }
 
-    public function setClassPropertyName(string $classPropertyName) : self
+    public function setClassPropertyName(string $classPropertyName): self
     {
         $this->classPropertyName = $classPropertyName;
 
         return $this;
     }
 
-    public function getSpecPropertyName() : string
+    public function getSpecPropertyName(): string
     {
         return $this->specProperty->getName();
     }
 
-    public function isArray() : bool
+    public function isArray(): bool
     {
         return $this->specProperty->isArray();
     }
 
-    public function getScalarTypeId() : ?int
+    public function getScalarTypeId(): ?int
     {
         return $this->specProperty->getScalarTypeId();
     }
 
-    public function getObjectTypeDefinition() : ?DtoDefinition
+    public function getObjectTypeDefinition(): ?DtoDefinition
     {
         return $this->objectTypeDefinition;
     }
 
-    public function setObjectTypeDefinition(?DtoDefinition $objectTypeDefinition) : self
+    public function setObjectTypeDefinition(?DtoDefinition $objectTypeDefinition): self
     {
         $this->objectTypeDefinition = $objectTypeDefinition;
 
         return $this;
     }
 
-    public function isNullable() : bool
+    public function isNullable(): bool
     {
         return $this->nullable;
     }
 
-    public function setNullable(bool $nullable) : self
+    public function setNullable(bool $nullable): self
     {
         $this->nullable = $nullable;
 
         return $this;
     }
 
-    public function getGetterName() : ?string
+    public function getGetterName(): ?string
     {
         return $this->getterName;
     }
 
-    public function setGetterName(?string $getterName) : self
+    public function setGetterName(?string $getterName): self
     {
         $this->getterName = $getterName;
 
         return $this;
     }
 
-    public function getSetterName() : ?string
+    public function getSetterName(): ?string
     {
         return $this->setterName;
     }
 
-    public function setSetterName(?string $setterName) : self
+    public function setSetterName(?string $setterName): self
     {
         $this->setterName = $setterName;
 
         return $this;
     }
 
-    public function hasGetter() : bool
+    public function hasGetter(): bool
     {
         return $this->hasGetter;
     }
 
-    public function setHasGetter(bool $hasGetter) : self
+    public function setHasGetter(bool $hasGetter): self
     {
         $this->hasGetter = $hasGetter;
 
         return $this;
     }
 
-    public function hasSetter() : bool
+    public function hasSetter(): bool
     {
         return $this->hasSetter;
     }
 
-    public function setHasSetter(bool $hasSetter) : self
+    public function setHasSetter(bool $hasSetter): self
     {
         $this->hasSetter = $hasSetter;
 
         return $this;
     }
 
-    public function isInConstructor() : bool
+    public function isInConstructor(): bool
     {
         return $this->inConstructor;
     }
 
-    public function setInConstructor(bool $inConstructor) : self
+    public function setInConstructor(bool $inConstructor): self
     {
         $this->inConstructor = $inConstructor;
 

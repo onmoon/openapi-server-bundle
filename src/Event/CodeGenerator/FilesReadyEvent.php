@@ -30,7 +30,7 @@ class FilesReadyEvent extends Event
     /**
      * @return GeneratedFileDefinition[]
      */
-    public function files() : array
+    public function files(): array
     {
         return $this->files;
     }

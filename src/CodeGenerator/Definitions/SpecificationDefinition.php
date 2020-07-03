@@ -24,12 +24,12 @@ class SpecificationDefinition
     /**
      * @return OperationDefinition[]
      */
-    public function getOperations() : array
+    public function getOperations(): array
     {
         return $this->operations;
     }
 
-    public function getSpecification() : SpecificationConfig
+    public function getSpecification(): SpecificationConfig
     {
         return $this->specification;
     }

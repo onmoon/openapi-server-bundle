@@ -24,6 +24,7 @@ use OnMoon\OpenApiServerBundle\Specification\Definitions\Specification;
 use OnMoon\OpenApiServerBundle\Specification\Definitions\SpecificationConfig;
 use OnMoon\OpenApiServerBundle\Types\ScalarTypesResolver;
 use Safe\DateTime;
+
 use function array_filter;
 use function array_key_exists;
 use function array_map;
@@ -42,7 +43,7 @@ class SpecificationParser
         $this->typeResolver = $typeResolver;
     }
 
-    public function parseOpenApi(string $specificationName, SpecificationConfig $specificationConfig, OpenApi $parsedSpecification) : Specification
+    public function parseOpenApi(string $specificationName, SpecificationConfig $specificationConfig, OpenApi $parsedSpecification): Specification
     {
         $operationDefinitions = [];
         /**
@@ -123,7 +124,7 @@ class SpecificationParser
         $responses,
         SpecificationConfig $specificationConfig,
         array $exceptionContext
-    ) : array {
+    ): array {
         $responseDefinitions = [];
 
         if ($responses === null) {
@@ -159,7 +160,7 @@ class SpecificationParser
     /**
      * @param RequestBody|Response|Reference|null $body
      */
-    private function findByMediaType($body, string $mediaType) : ?Schema
+    private function findByMediaType($body, string $mediaType): ?Schema
     {
         if ($body === null || $body instanceof Reference) {
             return null;
@@ -183,10 +184,10 @@ class SpecificationParser
      *
      * @return Parameter[]
      */
-    private function filterParameters(array $parameters) : array
+    private function filterParameters(array $parameters): array
     {
         /** @var Parameter[] $parameters */
-        $parameters = array_filter($parameters, static fn ($parameter) : bool => $parameter instanceof Parameter);
+        $parameters = array_filter($parameters, static fn ($parameter): bool => $parameter instanceof Parameter);
 
         return $parameters;
     }
@@ -194,18 +195,18 @@ class SpecificationParser
     /**
      * @return Parameter[]
      */
-    private function mergeParameters(PathItem $pathItem, Operation $operation) : array
+    private function mergeParameters(PathItem $pathItem, Operation $operation): array
     {
         $operationParameters = $this->filterParameters($operation->parameters);
 
         return array_merge(
             array_filter(
                 $this->filterParameters($pathItem->parameters),
-                static function (Parameter $pathParameter) use ($operationParameters) : bool {
+                static function (Parameter $pathParameter) use ($operationParameters): bool {
                     return count(
                         array_filter(
                             $operationParameters,
-                            static function (Parameter $operationParameter) use ($pathParameter) : bool {
+                            static function (Parameter $operationParameter) use ($pathParameter): bool {
                                     return $operationParameter->name === $pathParameter->name &&
                                         $operationParameter->in === $pathParameter->in;
                             }
@@ -222,20 +223,19 @@ class SpecificationParser
      *
      * @return Parameter[]
      */
-    private function filterSupportedParameters(string $in, array $parameters) : array
+    private function filterSupportedParameters(string $in, array $parameters): array
     {
-        return array_filter($parameters, static fn ($parameter) : bool => $parameter->in === $in);
+        return array_filter($parameters, static fn ($parameter): bool => $parameter->in === $in);
     }
 
     /**
      * @param Parameter[] $parameters
      * @param string[]    $exceptionContext
      */
-    private function parseParameters(string $in, array $parameters, array $exceptionContext) : ?ObjectDefinition
+    private function parseParameters(string $in, array $parameters, array $exceptionContext): ?ObjectDefinition
     {
         $properties = array_map(
-            fn (Parameter $p) =>
-            $this
+            fn (Parameter $p) => $this
                 ->getProperty($p->name, $p->schema, true, $exceptionContext, false)
                 ->setRequired($p->required)
                 ->setDescription($p->description),
@@ -254,7 +254,7 @@ class SpecificationParser
      *
      * @return PropertyDefinition[]
      */
-    private function getPropertyGraph(Schema $schema, bool $isRequest, bool $isRoot, array $exceptionContext) : array
+    private function getPropertyGraph(Schema $schema, bool $isRequest, bool $isRoot, array $exceptionContext): array
     {
         if ($isRoot && $schema->type !== Type::OBJECT) {
             throw CannotParseOpenApi::becauseRootIsNotObject(
@@ -290,7 +290,7 @@ class SpecificationParser
      * @param Schema|Reference|null $property
      * @param string[]              $exceptionContext
      */
-    private function getProperty(string $propertyName, $property, bool $isRequest, array $exceptionContext, bool $allowNonScalar = true) : PropertyDefinition
+    private function getProperty(string $propertyName, $property, bool $isRequest, array $exceptionContext, bool $allowNonScalar = true): PropertyDefinition
     {
         if (! ($property instanceof Schema)) {
             throw new Exception('Property is not scheme');

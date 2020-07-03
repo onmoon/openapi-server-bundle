@@ -23,7 +23,7 @@ jobs:
   include:
     - stage: Psalm
       php: 7.4
-      script: ./vendor/bin/psalm
+      script: ./vendor/bin/psalm.phar
 
     - stage: Stan
       php: 7.4

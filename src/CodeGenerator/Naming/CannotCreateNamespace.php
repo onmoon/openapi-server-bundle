@@ -5,11 +5,12 @@ declare(strict_types=1);
 namespace OnMoon\OpenApiServerBundle\CodeGenerator\Naming;
 
 use OnMoon\OpenApiServerBundle\Exception\OpenApiError;
+
 use function Safe\sprintf;
 
 final class CannotCreateNamespace extends OpenApiError
 {
-    public static function becauseTextContainsNoValidSymbols(string $text) : self
+    public static function becauseTextContainsNoValidSymbols(string $text): self
     {
         return new self(
             sprintf(

@@ -11,48 +11,48 @@ class RequestHandlerInterfaceDefinition extends GeneratedInterfaceDefinition
     private string $methodName;
     private ?string $methodDescription = null;
 
-    public function getRequestType() : ?ClassDefinition
+    public function getRequestType(): ?ClassDefinition
     {
         return $this->requestType;
     }
 
-    public function setRequestType(?ClassDefinition $requestType) : self
+    public function setRequestType(?ClassDefinition $requestType): self
     {
         $this->requestType = $requestType;
 
         return $this;
     }
 
-    public function getResponseType() : ?ClassDefinition
+    public function getResponseType(): ?ClassDefinition
     {
         return $this->responseType;
     }
 
-    public function setResponseType(?ClassDefinition $responseType) : self
+    public function setResponseType(?ClassDefinition $responseType): self
     {
         $this->responseType = $responseType;
 
         return $this;
     }
 
-    public function getMethodName() : string
+    public function getMethodName(): string
     {
         return $this->methodName;
     }
 
-    public function setMethodName(string $methodName) : self
+    public function setMethodName(string $methodName): self
     {
         $this->methodName = $methodName;
 
         return $this;
     }
 
-    public function getMethodDescription() : ?string
+    public function getMethodDescription(): ?string
     {
         return $this->methodDescription;
     }
 
-    public function setMethodDescription(?string $methodDescription) : self
+    public function setMethodDescription(?string $methodDescription): self
     {
         $this->methodDescription = $methodDescription;
 

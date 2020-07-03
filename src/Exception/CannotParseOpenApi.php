@@ -9,7 +9,7 @@ use function Safe\sprintf;
 final class CannotParseOpenApi extends OpenApiError
 {
     /** @param string[] $context */
-    public static function becauseNoOperationIdSpecified(array $context) : self
+    public static function becauseNoOperationIdSpecified(array $context): self
     {
         return new self(
             sprintf(
@@ -22,7 +22,7 @@ final class CannotParseOpenApi extends OpenApiError
     }
 
     /** @param string[] $context */
-    public static function becauseDuplicateOperationId(string $id, array $context) : self
+    public static function becauseDuplicateOperationId(string $id, array $context): self
     {
         return new self(
             sprintf(
@@ -39,7 +39,7 @@ final class CannotParseOpenApi extends OpenApiError
     public static function becauseRootIsNotObject(
         array $context,
         bool $isArray
-    ) : self {
+    ): self {
         $moreInfo = '';
         if ($isArray) {
             $moreInfo = '(array as root is insecure, see https://haacked.com/archive/2009/06/25/json-hijacking.aspx/) ';
@@ -58,7 +58,7 @@ final class CannotParseOpenApi extends OpenApiError
     }
 
     /** @param string[] $context */
-    public static function becauseOnlyScalarAreAllowed(string $propertyName, array $context) : self
+    public static function becauseOnlyScalarAreAllowed(string $propertyName, array $context): self
     {
         return new self(
             sprintf(
@@ -73,7 +73,7 @@ final class CannotParseOpenApi extends OpenApiError
     }
 
     /** @param string[] $context */
-    public static function becauseArrayIsNotDescribed(string $propertyName, array $context) : self
+    public static function becauseArrayIsNotDescribed(string $propertyName, array $context): self
     {
         return new self(
             sprintf(
@@ -88,7 +88,7 @@ final class CannotParseOpenApi extends OpenApiError
     }
 
     /** @param string[] $context */
-    public static function becauseTypeNotSupported(string $propertyName, string $type, array $context) : self
+    public static function becauseTypeNotSupported(string $propertyName, string $type, array $context): self
     {
         return new self(
             sprintf(

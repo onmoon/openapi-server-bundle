@@ -8,12 +8,12 @@ use function Safe\sprintf;
 
 class ApiCallFailed extends OpenApiError
 {
-    public static function becauseApiLoaderNotFound() : self
+    public static function becauseApiLoaderNotFound(): self
     {
         return new self('ApiLoader not found. Try re-generating code');
     }
 
-    public static function becauseNotImplemented(string $interface) : self
+    public static function becauseNotImplemented(string $interface): self
     {
         return new self(
             sprintf(

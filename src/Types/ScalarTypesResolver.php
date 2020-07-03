@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace OnMoon\OpenApiServerBundle\Types;
 
 use cebe\openapi\spec\Type;
+
 use function Safe\settype;
 
 class ScalarTypesResolver
@@ -77,8 +78,12 @@ class ScalarTypesResolver
 
         $format = $this->scalarTypes[$id];
 
-        if (isset($format[$deserialize?'deserializer':'serializer'])) {
-            return TypeSerializer::{$format[$deserialize?'deserializer':'serializer']}($value);
+        if ($deserialize && isset($format['deserializer'])) {
+            return TypeSerializer::{$format['deserializer']}($value);
+        }
+
+        if (! $deserialize && isset($format['serializer'])) {
+            return TypeSerializer::{$format['serializer']}($value);
         }
 
         if ($deserialize) {
@@ -89,7 +94,7 @@ class ScalarTypesResolver
         return $value;
     }
 
-    public function getPattern(int $id) : ?string
+    public function getPattern(int $id): ?string
     {
         $format = $this->scalarTypes[$id];
 
@@ -100,17 +105,17 @@ class ScalarTypesResolver
         return null;
     }
 
-    public function getPhpType(int $id) : string
+    public function getPhpType(int $id): string
     {
         return (string) $this->scalarTypes[$id]['phpType'];
     }
 
-    public function isDateTime(int $id) : bool
+    public function isDateTime(int $id): bool
     {
         return $this->getPhpType($id) === '\DateTime';
     }
 
-    public function findScalarType(?string $type, ?string $format) : int
+    public function findScalarType(?string $type, ?string $format): int
     {
         if ($type === null) {
             return 0;
@@ -118,7 +123,8 @@ class ScalarTypesResolver
 
         if ($format !== null) {
             foreach ($this->scalarTypes as $id => $scalar) {
-                if ($scalar['type'] === $type &&
+                if (
+                    $scalar['type'] === $type &&
                     isset($scalar['format']) &&
                     $scalar['format'] === $format
                 ) {
@@ -128,7 +134,8 @@ class ScalarTypesResolver
         }
 
         foreach ($this->scalarTypes as $id => $scalar) {
-            if ($scalar['type'] === $type &&
+            if (
+                $scalar['type'] === $type &&
                 ! isset($scalar['format'])
             ) {
                 return $id;

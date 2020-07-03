@@ -12,7 +12,7 @@ class ServiceSubscriberDefinition extends GeneratedClassDefinition
     /**
      * @return ClassDefinition[]
      */
-    public function getImplements() : array
+    public function getImplements(): array
     {
         return $this->implements;
     }
@@ -20,7 +20,7 @@ class ServiceSubscriberDefinition extends GeneratedClassDefinition
     /**
      * @param ClassDefinition[] $implements
      */
-    public function setImplements(array $implements) : self
+    public function setImplements(array $implements): self
     {
         $this->implements = $implements;
 

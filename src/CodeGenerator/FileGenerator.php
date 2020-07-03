@@ -11,6 +11,7 @@ use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\GraphDefinition;
 use OnMoon\OpenApiServerBundle\CodeGenerator\PhpParserGenerators\DtoCodeGenerator;
 use OnMoon\OpenApiServerBundle\CodeGenerator\PhpParserGenerators\InterfaceCodeGenerator;
 use OnMoon\OpenApiServerBundle\CodeGenerator\PhpParserGenerators\ServiceSubscriberCodeGenerator;
+
 use function array_merge;
 
 class FileGenerator
@@ -32,7 +33,7 @@ class FileGenerator
     /**
      * @return GeneratedFileDefinition[]
      */
-    public function generateAllFiles(GraphDefinition $graph) : array
+    public function generateAllFiles(GraphDefinition $graph): array
     {
         /** @var GeneratedFileDefinition[] $result */
         $result = [];
@@ -64,7 +65,7 @@ class FileGenerator
     /**
      * @return GeneratedFileDefinition[]
      */
-    public function generateDtoTree(DtoDefinition $root) : array
+    public function generateDtoTree(DtoDefinition $root): array
     {
         $result   = [];
         $result[] = $this->dtoGenerator->generate($root);

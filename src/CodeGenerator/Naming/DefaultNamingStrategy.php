@@ -5,8 +5,10 @@ declare(strict_types=1);
 namespace OnMoon\OpenApiServerBundle\CodeGenerator\Naming;
 
 use OnMoon\OpenApiServerBundle\CodeGenerator\NameGenerator;
+// phpcs:ignore SlevomatCodingStandard.Namespaces.UnusedUses.UnusedUse
 use OnMoon\OpenApiServerBundle\Interfaces\RequestHandler;
 use sspat\ReservedWords\ReservedWords;
+
 use function array_map;
 use function implode;
 use function lcfirst;
@@ -17,6 +19,7 @@ use function str_replace;
 use function trim;
 use function ucfirst;
 use function ucwords;
+
 use const DIRECTORY_SEPARATOR;
 
 class DefaultNamingStrategy implements NamingStrategy
@@ -35,12 +38,12 @@ class DefaultNamingStrategy implements NamingStrategy
         $this->languageLevel = $languageLevel;
     }
 
-    public function isAllowedPhpPropertyName(string $name) : bool
+    public function isAllowedPhpPropertyName(string $name): bool
     {
         return ! preg_match('/^\d/', $name) && preg_match('/^[A-Za-z0-9_]+$/i', $name);
     }
 
-    public function getInterfaceFQCN(string $apiNameSpace, string $operationId) : string
+    public function getInterfaceFQCN(string $apiNameSpace, string $operationId): string
     {
         /** @psalm-var class-string<RequestHandler> $interfaceNamespace */
         $interfaceNamespace = $this->buildNamespace(
@@ -54,7 +57,7 @@ class DefaultNamingStrategy implements NamingStrategy
         return $interfaceNamespace;
     }
 
-    public function stringToNamespace(string $text) : string
+    public function stringToNamespace(string $text): string
     {
         $namespace = $this->padStringThatIsReservedNamespaceName(
             $this->padStringStartingWithNumber(
@@ -71,7 +74,7 @@ class DefaultNamingStrategy implements NamingStrategy
         return $namespace;
     }
 
-    public function stringToMethodName(string $text) : string
+    public function stringToMethodName(string $text): string
     {
         $propertyName = $this->padStringThatIsReservedMethodName(
             $this->padStringStartingWithNumber(
@@ -88,20 +91,20 @@ class DefaultNamingStrategy implements NamingStrategy
         return $propertyName;
     }
 
-    public function buildNamespace(string ...$parts) : string
+    public function buildNamespace(string ...$parts): string
     {
-        return implode('\\', array_map(static fn(string $part) : string => trim($part, '\\'), $parts));
+        return implode('\\', array_map(static fn (string $part): string => trim($part, '\\'), $parts));
     }
 
-    public function buildPath(string ...$parts) : string
+    public function buildPath(string ...$parts): string
     {
         return implode(
             DIRECTORY_SEPARATOR,
-            array_map(static fn(string $part) : string => rtrim($part, DIRECTORY_SEPARATOR), $parts)
+            array_map(static fn (string $part): string => rtrim($part, DIRECTORY_SEPARATOR), $parts)
         );
     }
 
-    private function prepareTextForPhp(string $text) : string
+    private function prepareTextForPhp(string $text): string
     {
         /** @var string $filteredText */
         $filteredText = preg_replace('/[^A-Z0-9]/i', ' ', $text);
@@ -109,17 +112,17 @@ class DefaultNamingStrategy implements NamingStrategy
         return str_replace(' ', '', ucwords($filteredText));
     }
 
-    private function padStringThatIsReservedNamespaceName(string $string) : string
+    private function padStringThatIsReservedNamespaceName(string $string): string
     {
         return $this->reservedWords->isReservedNamespaceName($string, $this->languageLevel) ? '_' . $string : $string;
     }
 
-    private function padStringThatIsReservedMethodName(string $string) : string
+    private function padStringThatIsReservedMethodName(string $string): string
     {
         return $this->reservedWords->isReservedMethodName($string, $this->languageLevel) ? '_' . $string : $string;
     }
 
-    private function padStringStartingWithNumber(string $string) : string
+    private function padStringStartingWithNumber(string $string): string
     {
         return preg_match('/^\d/', $string) ? '_' . $string : $string;
     }

@@ -28,17 +28,17 @@ class ResponseEvent extends Event
         $this->specification = $specification;
     }
 
-    public function getResponse() : Response
+    public function getResponse(): Response
     {
         return $this->response;
     }
 
-    public function getOperationId() : string
+    public function getOperationId(): string
     {
         return $this->operationId;
     }
 
-    public function getSpecification() : Specification
+    public function getSpecification(): Specification
     {
         return $this->specification;
     }

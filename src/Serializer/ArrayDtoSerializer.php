@@ -11,6 +11,7 @@ use OnMoon\OpenApiServerBundle\Specification\Definitions\ObjectType;
 use OnMoon\OpenApiServerBundle\Specification\Definitions\Operation;
 use OnMoon\OpenApiServerBundle\Types\ScalarTypesResolver;
 use Symfony\Component\HttpFoundation\Request;
+
 use function array_key_exists;
 use function array_map;
 use function is_resource;
@@ -31,7 +32,7 @@ class ArrayDtoSerializer implements DtoSerializer
         Request $request,
         Operation $operation,
         string $inputDtoFQCN
-    ) : Dto {
+    ): Dto {
         /** @var mixed[] $input */
         $input  = [];
         $params = $operation->getRequestParameters();
@@ -68,7 +69,7 @@ class ArrayDtoSerializer implements DtoSerializer
     }
 
     /** @inheritDoc */
-    public function createResponseFromDto(ResponseDto $responseDto, Operation $operation) : array
+    public function createResponseFromDto(ResponseDto $responseDto, Operation $operation): array
     {
         $statusCode = $responseDto::_getResponseCode();
         $source     = $responseDto->toArray();
@@ -86,7 +87,7 @@ class ArrayDtoSerializer implements DtoSerializer
      * @psalm-suppress MixedArgument
      * @psalm-suppress MixedAssignment
      */
-    private function convert(bool $deserialize, array $source, ObjectType $params) : array
+    private function convert(bool $deserialize, array $source, ObjectType $params): array
     {
         $result = [];
         foreach ($params->getProperties() as $property) {
@@ -98,7 +99,8 @@ class ArrayDtoSerializer implements DtoSerializer
 
             if (! $deserialize && $source[$name] === null) {
                 $value =  $property->getDefaultValue();
-                if ($property->isRequired() || $value !== null ||
+                if (
+                    $property->isRequired() || $value !== null ||
                     ($this->sendNotRequiredNullableNulls && $property->isNullable())
                 ) {
                     $result[$name] = $value;
@@ -111,13 +113,16 @@ class ArrayDtoSerializer implements DtoSerializer
             $objectType = $property->getObjectTypeDefinition();
 
             if ($objectType !== null) {
-                $converter = fn($v) => $this->convert($deserialize, $v, $objectType);
+                /** @psalm-suppress MissingClosureParamType */
+                $converter = fn ($v) => $this->convert($deserialize, $v, $objectType);
             } else {
-                $converter = fn($v) => $this->resolver->convert($deserialize, $typeId??0, $v);
+                /** @psalm-suppress MissingClosureParamType */
+                $converter = fn ($v) => $this->resolver->convert($deserialize, $typeId ?? 0, $v);
             }
 
             if ($property->isArray()) {
-                $converter = static fn($v) => array_map(static fn ($i) => $converter($i), $v);
+                /** @psalm-suppress MissingClosureParamType */
+                $converter = static fn ($v) => array_map(static fn ($i) => $converter($i), $v);
             }
 
             $result[$name] = $converter($source[$name]);

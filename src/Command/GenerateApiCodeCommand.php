@@ -10,6 +10,7 @@ use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Contracts\Cache\TagAwareCacheInterface;
+
 use function Safe\sprintf;
 
 class GenerateApiCodeCommand extends Command
@@ -33,7 +34,7 @@ class GenerateApiCodeCommand extends Command
         parent::__construct($name);
     }
 
-    protected function configure() : void
+    protected function configure(): void
     {
         $this->setDescription('Generates API server code');
     }
@@ -44,7 +45,7 @@ class GenerateApiCodeCommand extends Command
      */
     protected static $defaultName = self::COMMAND;
 
-    protected function execute(InputInterface $input, OutputInterface $output) : int
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $this->cache->invalidateTags([SpecificationLoader::CACHE_TAG]);
         $this->apiServerCodeGenerator->generate();

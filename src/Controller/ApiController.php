@@ -33,9 +33,11 @@ use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Routing\Route;
 use Symfony\Component\Routing\RouterInterface;
 use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
+
 use function count;
 use function ltrim;
 use function Safe\sprintf;
+
 use const JSON_PRETTY_PRINT;
 use const JSON_THROW_ON_ERROR;
 use const JSON_UNESCAPED_UNICODE;
@@ -63,12 +65,12 @@ class ApiController
         $this->requestValidator    = $requestValidator;
     }
 
-    public function setApiLoader(ApiLoader $loader) : void
+    public function setApiLoader(ApiLoader $loader): void
     {
         $this->apiLoader = $loader;
     }
 
-    public function handle(Request $request) : Response
+    public function handle(Request $request): Response
     {
         $route         = $this->getRoute($request);
         $operationId   = (string) $route->getOption(RouteLoader::OPENAPI_OPERATION);
@@ -96,12 +98,12 @@ class ApiController
         return $response;
     }
 
-    private function getSpecificationName(Route $route) : string
+    private function getSpecificationName(Route $route): string
     {
         return (string) $route->getOption(RouteLoader::OPENAPI_SPEC);
     }
 
-    private function getSpecification(Route $route) : Specification
+    private function getSpecification(Route $route): Specification
     {
         return $this->specificationLoader->load($this->getSpecificationName($route));
     }
@@ -113,7 +115,7 @@ class ApiController
         Request $request,
         Operation $operation,
         string $inputDtoClass
-    ) : Dto {
+    ): Dto {
         return $this->serializer->createRequestDto(
             $request,
             $operation,
@@ -125,7 +127,7 @@ class ApiController
         RequestHandler $requestHandler,
         string $methodName,
         ?Dto $requestDto
-    ) : ?ResponseDto {
+    ): ?ResponseDto {
         /** @var ResponseDto|null $responseDto */
         $responseDto = $requestDto !== null ?
             $requestHandler->{$methodName}($requestDto) :
@@ -137,7 +139,7 @@ class ApiController
     /**
      * @return array{0: class-string<RequestHandler>, 1: RequestHandler}
      */
-    private function getRequestHandler(Request $request, Operation $operation) : array
+    private function getRequestHandler(Request $request, Operation $operation): array
     {
         if ($this->apiLoader === null) {
             throw ApiCallFailed::becauseApiLoaderNotFound();
@@ -167,7 +169,7 @@ class ApiController
         return [$requestHandlerInterface, $requestHandler];
     }
 
-    private function createResponse(RequestHandler $requestHandler, Operation $operation, ?ResponseDto $responseDto = null) : Response
+    private function createResponse(RequestHandler $requestHandler, Operation $operation, ?ResponseDto $responseDto = null): Response
     {
         $response = new JsonResponse();
         $response->setEncodingOptions(JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_THROW_ON_ERROR);
@@ -192,7 +194,7 @@ class ApiController
         return $response;
     }
 
-    private function getRoute(Request $request) : Route
+    private function getRoute(Request $request): Route
     {
         $routeName = (string) $request->attributes->get('_route', '');
         $route     = $this->router->getRouteCollection()->get($routeName);
@@ -209,7 +211,7 @@ class ApiController
      *
      * @psalm-param class-string<RequestHandler> $requestHandlerInterface
      */
-    private function getMethodAndInputDtoFQCN(string $requestHandlerInterface) : array
+    private function getMethodAndInputDtoFQCN(string $requestHandlerInterface): array
     {
         $interfaceReflectionClass = new ReflectionClass($requestHandlerInterface);
         $methods                  = $interfaceReflectionClass->getMethods(ReflectionMethod::IS_PUBLIC);

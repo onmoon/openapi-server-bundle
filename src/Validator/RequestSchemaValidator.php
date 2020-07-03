@@ -9,5 +9,5 @@ use Symfony\Component\HttpFoundation\Request;
 
 interface RequestSchemaValidator
 {
-    public function validate(Request $request, Specification $specification, string $operationId) : void;
+    public function validate(Request $request, Specification $specification, string $operationId): void;
 }

@@ -32,32 +32,32 @@ class OperationDefinition
         $this->responses          = $responses;
     }
 
-    public function getUrl() : string
+    public function getUrl(): string
     {
         return $this->url;
     }
 
-    public function getMethod() : string
+    public function getMethod(): string
     {
         return $this->method;
     }
 
-    public function getOperationId() : string
+    public function getOperationId(): string
     {
         return $this->operationId;
     }
 
-    public function getRequestHandlerName() : string
+    public function getRequestHandlerName(): string
     {
         return $this->requestHandlerName;
     }
 
-    public function getSummary() : ?string
+    public function getSummary(): ?string
     {
         return $this->summary;
     }
 
-    public function getRequest() : ?RequestDtoDefinition
+    public function getRequest(): ?RequestDtoDefinition
     {
         return $this->request;
     }
@@ -65,29 +65,29 @@ class OperationDefinition
     /**
      * @return ResponseDtoDefinition[]
      */
-    public function getResponses() : array
+    public function getResponses(): array
     {
         return $this->responses;
     }
 
-    public function getMarkersInterface() : ?ClassDefinition
+    public function getMarkersInterface(): ?ClassDefinition
     {
         return $this->markersInterface;
     }
 
-    public function setMarkersInterface(?ClassDefinition $markersInterface) : self
+    public function setMarkersInterface(?ClassDefinition $markersInterface): self
     {
         $this->markersInterface = $markersInterface;
 
         return $this;
     }
 
-    public function getRequestHandlerInterface() : RequestHandlerInterfaceDefinition
+    public function getRequestHandlerInterface(): RequestHandlerInterfaceDefinition
     {
         return $this->requestHandlerInterface;
     }
 
-    public function setRequestHandlerInterface(RequestHandlerInterfaceDefinition $requestHandlerInterface) : self
+    public function setRequestHandlerInterface(RequestHandlerInterfaceDefinition $requestHandlerInterface): self
     {
         $this->requestHandlerInterface = $requestHandlerInterface;
 

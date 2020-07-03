@@ -17,6 +17,7 @@ use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\SpecificationDefinition
 use OnMoon\OpenApiServerBundle\Specification\Definitions\ObjectType;
 use OnMoon\OpenApiServerBundle\Specification\Definitions\Property;
 use OnMoon\OpenApiServerBundle\Specification\SpecificationLoader;
+
 use function array_key_exists;
 use function array_map;
 
@@ -29,7 +30,7 @@ class GraphGenerator
         $this->loader = $loader;
     }
 
-    public function generateClassGraph() : GraphDefinition
+    public function generateClassGraph(): GraphDefinition
     {
         $specificationDefinitions = [];
         foreach ($this->loader->list() as $specificationName => $specificationConfig) {
@@ -76,7 +77,7 @@ class GraphGenerator
      *
      * @return ResponseDtoDefinition[]
      */
-    private function getResponseDtoDefinitions(array $responses) : array
+    private function getResponseDtoDefinitions(array $responses): array
     {
         $responseDtoDefinitions = [];
 
@@ -93,7 +94,7 @@ class GraphGenerator
     /**
      * @param ObjectType[] $parameters
      */
-    private function parametersToDto(string $in, array $parameters) : ?RequestParametersDtoDefinition
+    private function parametersToDto(string $in, array $parameters): ?RequestParametersDtoDefinition
     {
         if (! array_key_exists($in, $parameters)) {
             return null;
@@ -104,7 +105,7 @@ class GraphGenerator
         );
     }
 
-    private function objectTypeToDefinition(?ObjectType $type) : ?DtoDefinition
+    private function objectTypeToDefinition(?ObjectType $type): ?DtoDefinition
     {
         if ($type === null) {
             return null;
@@ -118,15 +119,15 @@ class GraphGenerator
      *
      * @return PropertyDefinition[]
      */
-    private function propertiesToDefinitions(array $properties) : array
+    private function propertiesToDefinitions(array $properties): array
     {
         return array_map(
-            fn (Property $p) : PropertyDefinition => $this->propertyToDefinition($p),
+            fn (Property $p): PropertyDefinition => $this->propertyToDefinition($p),
             $properties
         );
     }
 
-    private function propertyToDefinition(Property $property) : PropertyDefinition
+    private function propertyToDefinition(Property $property): PropertyDefinition
     {
         return (new PropertyDefinition($property))
             ->setObjectTypeDefinition($this->objectTypeToDefinition($property->getObjectTypeDefinition()));

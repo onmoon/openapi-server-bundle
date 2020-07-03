@@ -37,17 +37,17 @@ class ResponseDtoEvent extends Event
         $this->specification = $specification;
     }
 
-    public function getResponseDto() : ?ResponseDto
+    public function getResponseDto(): ?ResponseDto
     {
         return $this->responseDto;
     }
 
-    public function getOperationId() : string
+    public function getOperationId(): string
     {
         return $this->operationId;
     }
 
-    public function getSpecification() : Specification
+    public function getSpecification(): Specification
     {
         return $this->specification;
     }

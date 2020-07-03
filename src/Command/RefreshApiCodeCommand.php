@@ -11,6 +11,7 @@ use Symfony\Component\Console\Output\ConsoleOutputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Question\ConfirmationQuestion;
 use Symfony\Component\Process\Process;
+
 use function Safe\sprintf;
 
 class RefreshApiCodeCommand extends Command
@@ -30,12 +31,12 @@ class RefreshApiCodeCommand extends Command
      */
     protected static $defaultName = 'open-api:refresh';
 
-    protected function configure() : void
+    protected function configure(): void
     {
         $this->setDescription('Refreshes API server code');
     }
 
-    protected function execute(InputInterface $input, OutputInterface $output) : int
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
         if (! $this->isConfirmed($input, $output)) {
             return 0;
@@ -49,7 +50,7 @@ class RefreshApiCodeCommand extends Command
             1;
     }
 
-    private function isConfirmed(InputInterface $input, OutputInterface $output) : bool
+    private function isConfirmed(InputInterface $input, OutputInterface $output): bool
     {
         /** @var QuestionHelper $questionHelper */
         $questionHelper = $this->getHelper('question');
@@ -64,9 +65,9 @@ class RefreshApiCodeCommand extends Command
         return (bool) $questionHelper->ask($input, $output, $question);
     }
 
-    private function processOutputHandler(OutputInterface $output) : callable
+    private function processOutputHandler(OutputInterface $output): callable
     {
-        return static function (string $type, string $data) use ($output) : void {
+        return static function (string $type, string $data) use ($output): void {
             if ($type === Process::ERR && $output instanceof ConsoleOutputInterface) {
                 $output->getErrorOutput()->writeln($data);
 

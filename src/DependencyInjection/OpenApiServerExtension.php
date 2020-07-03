@@ -11,6 +11,7 @@ use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Extension\Extension;
 use Symfony\Component\DependencyInjection\Extension\ExtensionInterface;
 use Symfony\Component\DependencyInjection\Loader\XmlFileLoader;
+
 use function Safe\preg_match;
 use function Safe\preg_replace;
 use function str_replace;
@@ -20,7 +21,7 @@ class OpenApiServerExtension extends Extension implements ExtensionInterface
     /**
      * @param mixed[] $configs
      */
-    public function load(array $configs, ContainerBuilder $container) : void
+    public function load(array $configs, ContainerBuilder $container): void
     {
         $loader = new XmlFileLoader($container, new FileLocator(__DIR__ . '/../Resources/config'));
         $loader->load('services.xml');
@@ -52,10 +53,11 @@ class OpenApiServerExtension extends Extension implements ExtensionInterface
                 'using App namespace for generated code.');
             }
 
+            /** @var string $rootPath */
             $rootPath = preg_replace('|^App\\\\|', '%kernel.project_dir%/src/', $rootNameSpace);
             $rootPath = str_replace('\\', '/', $rootPath);
         } else {
-            $rootPath = $config['root_path'];
+            $rootPath = $config['root_path']; // @phpstan-ignore-line
         }
 
         $container->setParameter('openapi.generated.code.root.path', $rootPath);

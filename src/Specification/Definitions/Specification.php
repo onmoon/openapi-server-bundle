@@ -31,17 +31,17 @@ class Specification
      *
      * @psalm-return array<string, Operation>
      */
-    public function getOperations() : array
+    public function getOperations(): array
     {
         return $this->operations;
     }
 
-    public function getOperation(string $id) : Operation
+    public function getOperation(string $id): Operation
     {
         return $this->operations[$id];
     }
 
-    public function getOpenApi() : OpenApi
+    public function getOpenApi(): OpenApi
     {
         return $this->openApi;
     }

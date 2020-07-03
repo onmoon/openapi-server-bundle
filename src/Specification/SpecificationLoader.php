@@ -12,6 +12,7 @@ use OnMoon\OpenApiServerBundle\Specification\Definitions\SpecificationConfig;
 use Symfony\Component\Config\FileLocatorInterface;
 use Symfony\Contracts\Cache\ItemInterface;
 use Symfony\Contracts\Cache\TagAwareCacheInterface;
+
 use function array_keys;
 use function file_exists;
 use function implode;
@@ -19,6 +20,7 @@ use function is_string;
 use function pathinfo;
 use function Safe\sprintf;
 use function stream_is_local;
+
 use const PATHINFO_EXTENSION;
 
 class SpecificationLoader
@@ -45,7 +47,7 @@ class SpecificationLoader
     /**
      * @param string[] $spec
      */
-    public function registerSpec(string $name, array $spec) : void
+    public function registerSpec(string $name, array $spec): void
     {
         $this->specs[$name] = new SpecificationConfig(
             $spec['path'],
@@ -60,12 +62,12 @@ class SpecificationLoader
      *
      * @psalm-return array<string, SpecificationConfig>
      */
-    public function list() : array
+    public function list(): array
     {
         return $this->specs;
     }
 
-    public function get(string $name) : SpecificationConfig
+    public function get(string $name): SpecificationConfig
     {
         if (empty($this->specs[$name])) {
             throw new Exception('OpenApi spec "' . $name . '" is not registered in bundle config, ' .
@@ -75,12 +77,12 @@ class SpecificationLoader
         return $this->specs[$name];
     }
 
-    public function load(string $name) : Specification
+    public function load(string $name): Specification
     {
         /** @var Specification $parsedSpecification */
         $parsedSpecification = $this->cache->get(
             self::CACHE_KEY_PREFIX . $name,
-            function (ItemInterface $cacheItem) use ($name) : Specification {
+            function (ItemInterface $cacheItem) use ($name): Specification {
                 $cacheItem->tag(self::CACHE_TAG);
 
                 return $this->parseSpecification($name, $this->get($name));
@@ -90,7 +92,7 @@ class SpecificationLoader
         return $parsedSpecification;
     }
 
-    private function parseSpecification(string $specificationName, SpecificationConfig $specificationConfig) : Specification
+    private function parseSpecification(string $specificationName, SpecificationConfig $specificationConfig): Specification
     {
         $specPath = $this->locator->locate($specificationConfig->getPath());
 

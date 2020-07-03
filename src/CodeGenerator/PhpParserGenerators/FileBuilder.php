@@ -10,6 +10,7 @@ use PhpParser\Builder\Namespace_;
 use PhpParser\Builder\Use_;
 use PhpParser\Node;
 use PhpParser\Node\Stmt\Use_ as UseStmt;
+
 use function array_search;
 use function Safe\preg_match;
 use function Safe\preg_replace;
@@ -29,7 +30,7 @@ class FileBuilder
         $this->namespace = new Namespace_($definition->getNamespace());
     }
 
-    public function getReference(ClassDefinition $class) : string
+    public function getReference(ClassDefinition $class): string
     {
         $fullName = $class->getFQCN();
 
@@ -62,7 +63,7 @@ class FileBuilder
      * @psalm-suppress PossiblyNullArrayAccess
      * @psalm-suppress InvalidReturnStatement
      */
-    private function rename(string $class) : string
+    private function rename(string $class): string
     {
         if (substr($class, -1) === '_') {
             return $class . '1';
@@ -71,7 +72,7 @@ class FileBuilder
         if (preg_match('"_(\d+)$"', $class, $match)) {
             $oldNumber = (int) $match[1];
 
-            return preg_replace('"_\d+$"', '_' . ($oldNumber+1), $class);
+            return preg_replace('"_\d+$"', '_' . ($oldNumber + 1), $class);
         }
 
         return $class . '_';
@@ -84,14 +85,14 @@ class FileBuilder
      *
      * @return $this The builder instance (for fluid interface)
      */
-    public function addStmt($stmt) : self
+    public function addStmt($stmt): self
     {
         $this->namespace->addStmt($stmt);
 
         return $this;
     }
 
-    public function getNamespace() : Namespace_
+    public function getNamespace(): Namespace_
     {
         return $this->namespace;
     }

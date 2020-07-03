@@ -13,6 +13,7 @@ use OnMoon\OpenApiServerBundle\Interfaces\ApiLoader;
 use OnMoon\OpenApiServerBundle\Interfaces\Dto;
 use OnMoon\OpenApiServerBundle\Interfaces\RequestHandler;
 use OnMoon\OpenApiServerBundle\Interfaces\ResponseDto;
+
 use function count;
 
 class InterfaceGenerator
@@ -28,7 +29,7 @@ class InterfaceGenerator
         $this->defaultHandler     = ClassDefinition::fromFQCN(RequestHandler::class);
     }
 
-    public function setAllInterfaces(GraphDefinition $graph) : void
+    public function setAllInterfaces(GraphDefinition $graph): void
     {
         $graph->getServiceSubscriber()->setImplements([
             ClassDefinition::fromFQCN(ApiLoader::class),
@@ -73,7 +74,7 @@ class InterfaceGenerator
         }
     }
 
-    public function setChildrenRecursive(DtoDefinition $root, ClassDefinition $implements) : void
+    public function setChildrenRecursive(DtoDefinition $root, ClassDefinition $implements): void
     {
         foreach ($root->getProperties() as $property) {
             $objectDefinition = $property->getObjectTypeDefinition();

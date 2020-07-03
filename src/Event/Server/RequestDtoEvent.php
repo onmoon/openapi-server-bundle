@@ -35,17 +35,17 @@ class RequestDtoEvent extends Event
         $this->specification = $specification;
     }
 
-    public function getRequestDto() : ?Dto
+    public function getRequestDto(): ?Dto
     {
         return $this->requestDto;
     }
 
-    public function getOperationId() : string
+    public function getOperationId(): string
     {
         return $this->operationId;
     }
 
-    public function getSpecification() : Specification
+    public function getSpecification(): Specification
     {
         return $this->specification;
     }

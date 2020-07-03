@@ -26,7 +26,7 @@ class ClassGraphReadyEvent extends Event
         $this->graph = $graph;
     }
 
-    public function graph() : GraphDefinition
+    public function graph(): GraphDefinition
     {
         return $this->graph;
     }

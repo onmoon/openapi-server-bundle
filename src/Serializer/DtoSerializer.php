@@ -18,8 +18,8 @@ interface DtoSerializer
         Request $request,
         Operation $operation,
         string $inputDtoFQCN
-    ) : Dto;
+    ): Dto;
 
     /** @return mixed[] */
-    public function createResponseFromDto(ResponseDto $responseDto, Operation $operation) : array;
+    public function createResponseFromDto(ResponseDto $responseDto, Operation $operation): array;
 }

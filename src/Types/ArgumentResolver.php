@@ -6,6 +6,7 @@ namespace OnMoon\OpenApiServerBundle\Types;
 
 use Exception;
 use OnMoon\OpenApiServerBundle\Specification\Definitions\ObjectType;
+
 use function Safe\preg_match;
 
 class ArgumentResolver
@@ -18,7 +19,7 @@ class ArgumentResolver
     }
 
     /** @return string[] */
-    public function resolveArgumentPatterns(ObjectType $pathParameters) : array
+    public function resolveArgumentPatterns(ObjectType $pathParameters): array
     {
         $patterns = [];
 
@@ -31,7 +32,8 @@ class ArgumentResolver
             $schemaPattern = $parameter->getPattern();
             $pattern       = $this->typesResolver->getPattern($type);
 
-            if ($schemaPattern !== null &&
+            if (
+                $schemaPattern !== null &&
                 preg_match('/^\^(.*)\$$/', $schemaPattern, $matches)
             ) {
                 /** @psalm-suppress PossiblyNullArrayAccess */
