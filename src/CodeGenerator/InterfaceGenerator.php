@@ -37,7 +37,6 @@ class InterfaceGenerator
 
         foreach ($graph->getSpecifications() as $specificationDefinition) {
             foreach ($specificationDefinition->getOperations() as $operation) {
-                $makersInterface = null;
                 /** @var ClassDefinition|null $responseClass */
                 $responseClass = null;
                 $responses     = $operation->getResponses();

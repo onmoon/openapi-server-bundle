@@ -44,6 +44,7 @@ class ClassDefinition
     public static function fromFQCN(string $className): ClassDefinition
     {
         $lastPart = strrpos($className, '\\');
+
         if ($lastPart !== false) {
             $namespace = substr($className, 0, $lastPart);
             $name      = substr($className, $lastPart + 1);

@@ -112,7 +112,7 @@ class ScalarTypesResolver
 
     public function getPhpType(int $id): string
     {
-        return (string) $this->scalarTypes[$id]['phpType'];
+        return $this->scalarTypes[$id]['phpType'];
     }
 
     public function isDateTime(int $id): bool

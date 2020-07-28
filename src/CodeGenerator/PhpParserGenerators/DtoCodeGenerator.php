@@ -188,7 +188,7 @@ class DtoCodeGenerator extends CodeGenerator
             );
         }
 
-        if (count($docCommentLines)) {
+        if (count($docCommentLines) > 0) {
             $property->setDocComment($this->getDocComment($docCommentLines));
         }
 

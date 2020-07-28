@@ -1,5 +1,10 @@
 # Symfony OpenApi Server Bundle
 
+[![Mutation testing badge](https://img.shields.io/endpoint?style=flat&url=https%3A%2F%2Fbadge-api.stryker-mutator.io%2Fgithub.com%2Fonmoon%2Fopenapi-server-bundle%2Fmaster)](https://dashboard.stryker-mutator.io/reports/github.com/onmoon/openapi-server-bundle/master)
+[![Type Coverage](https://shepherd.dev/github/onmoon/openapi-server-bundle/coverage.svg)](https://shepherd.dev/github/onmoon/openapi-server-bundle)
+[![Latest Stable Version](https://poser.pugx.org/onmoon/openapi-server-bundle/v/stable)](https://packagist.org/packages/onmoon/openapi-server-bundle)
+[![License](https://poser.pugx.org/onmoon/openapi-server-bundle/license)](https://packagist.org/packages/onmoon/openapi-server-bundle)
+
 ## About
 
 This bundle can generate most of the usual boilerplate code you write when implementing an API.
