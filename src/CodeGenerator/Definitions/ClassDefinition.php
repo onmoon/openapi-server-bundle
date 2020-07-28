@@ -12,7 +12,7 @@ class ClassDefinition
     private string $className;
     private string $namespace;
 
-    public function getClassName(): string
+    public function getClassName(): int
     {
         return $this->className;
     }
