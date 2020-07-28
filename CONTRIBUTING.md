@@ -2,6 +2,11 @@
 - Any contribution must provide tests for additional introduced conditions
 - Any un-confirmed issue needs a failing test case before being accepted
 - Pull requests must be sent from a new hotfix/feature branch, not from `master`.
+- If you start working on an existing issue, please leave a comment in the issue that you are working on it
+- Pull request description should reference the issue it closes e.g. `Closes #30`
+- All CI checks should pass for the pull request to be accepted. If you have an unresolvable
+issue with any of the CI checks (psalm/phpstan/phpcs/infection) and want to propose to ignore the error, describe
+your proposal in the pull request for the according CI error.
 
 ## Installation
 To install the project and run the tests, you need to clone it first:
