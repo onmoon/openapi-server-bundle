@@ -10,10 +10,6 @@
 >
     <projectFiles>
         <directory name="src" />
-        <directory name="test/unit" />
-        <ignoreFiles>
-            <directory name="vendor" />
-        </ignoreFiles>
     </projectFiles>
     <issueHandlers>
         <MixedMethodCall>

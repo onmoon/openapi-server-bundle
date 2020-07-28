@@ -42,4 +42,4 @@ jobs:
         if: ${{ matrix.dependencies == 'locked' }}
         run: "composer install --no-interaction --no-progress --no-suggest"
       - name: "psalm"
-        run: "vendor/bin/psalm --debug"
+        run: "vendor/bin/psalm --output-format=github --shepherd --stats"
