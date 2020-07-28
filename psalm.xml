@@ -24,5 +24,7 @@
             </errorLevel>
         </PossiblyUndefinedMethod>
         <PropertyNotSetInConstructor errorLevel="suppress"/>
+        <InternalClass errorLevel="suppress"/>
+        <InternalMethod errorLevel="suppress"/>
     </issueHandlers>
 </psalm>
