@@ -72,7 +72,7 @@ class FileBuilder
         if (preg_match('"_(\d+)$"', $class, $match)) {
             $oldNumber = (int) $match[1];
 
-            return preg_replace('"_\d+$"', '_' . ($oldNumber + 1), $class);
+            return preg_replace('"_\d+$"', '_' . (string) ($oldNumber + 1), $class);
         }
 
         return $class . '_';

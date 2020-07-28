@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace OnMoon\OpenApiServerBundle\Tests;
+namespace OnMoon\OpenApiServerBundle\Test;
 
 use PHPUnit\Framework\TestCase;
 

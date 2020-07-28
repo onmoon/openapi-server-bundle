@@ -9,6 +9,8 @@ use Symfony\Component\DependencyInjection\Compiler\CompilerPassInterface;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Reference;
 
+use function array_keys;
+
 class CompilerPass implements CompilerPassInterface
 {
     private string $tag;
@@ -29,7 +31,7 @@ class CompilerPass implements CompilerPassInterface
         /** @psalm-var array<string, array> $taggedServices */
         $taggedServices = $container->findTaggedServiceIds($this->tag);
 
-        foreach ($taggedServices as $id => $tags) {
+        foreach (array_keys($taggedServices) as $id) {
             $definition->addMethodCall('setApiLoader', [new Reference($id)]);
 
             break;

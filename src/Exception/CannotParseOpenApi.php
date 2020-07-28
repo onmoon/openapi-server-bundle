@@ -8,7 +8,7 @@ use function Safe\sprintf;
 
 final class CannotParseOpenApi extends OpenApiError
 {
-    /** @param string[] $context */
+    /** @param array{method:string,url:string,path:string} $context */
     public static function becauseNoOperationIdSpecified(array $context): self
     {
         return new self(
@@ -21,7 +21,7 @@ final class CannotParseOpenApi extends OpenApiError
         );
     }
 
-    /** @param string[] $context */
+    /** @param array{method:string,url:string,path:string} $context */
     public static function becauseDuplicateOperationId(string $id, array $context): self
     {
         return new self(
@@ -35,7 +35,7 @@ final class CannotParseOpenApi extends OpenApiError
         );
     }
 
-    /** @param string[] $context */
+    /** @param array{location:string,method:string,url:string,path:string} $context */
     public static function becauseRootIsNotObject(
         array $context,
         bool $isArray
@@ -57,7 +57,7 @@ final class CannotParseOpenApi extends OpenApiError
         );
     }
 
-    /** @param string[] $context */
+    /** @param array{location:string,method:string,url:string,path:string} $context */
     public static function becauseOnlyScalarAreAllowed(string $propertyName, array $context): self
     {
         return new self(
@@ -72,7 +72,7 @@ final class CannotParseOpenApi extends OpenApiError
         );
     }
 
-    /** @param string[] $context */
+    /** @param array{location:string,method:string,url:string,path:string} $context */
     public static function becauseArrayIsNotDescribed(string $propertyName, array $context): self
     {
         return new self(
@@ -87,7 +87,7 @@ final class CannotParseOpenApi extends OpenApiError
         );
     }
 
-    /** @param string[] $context */
+    /** @param array{location:string,method:string,url:string,path:string} $context */
     public static function becauseTypeNotSupported(string $propertyName, string $type, array $context): self
     {
         return new self(

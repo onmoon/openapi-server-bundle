@@ -1,5 +1,7 @@
 # Symfony OpenApi Server Bundle
 
+[![Type Coverage](https://shepherd.dev/github/onmoon/openapi-server-bundle/coverage.svg)](https://shepherd.dev/github/onmoon/openapi-server-bundle)
+
 ## About
 
 This bundle can generate most of the usual boilerplate code you write when implementing an API.

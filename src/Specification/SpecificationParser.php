@@ -75,21 +75,24 @@ class SpecificationParser
 
                 $requestSchema = $this->findByMediaType($operation->requestBody, $specificationConfig->getMediaType());
                 $requestBody   = null;
+
                 if ($requestSchema !== null) {
                     $requestBody = new ObjectDefinition(
                         $this->getPropertyGraph(
                             $requestSchema,
                             true,
                             true,
-                            array_merge($exceptionContext, ['location' => 'request body'])
+                            $exceptionContext + ['location' => 'request body']
                         )
                     );
                 }
 
                 $parameters        = $this->mergeParameters($pathItem, $operation);
                 $requestParameters = [];
+
                 foreach (['path', 'query'] as $in) {
-                    $params = $this->parseParameters($in, $parameters, array_merge($exceptionContext, ['location' => 'request ' . $in . ' parameters']));
+                    $params = $this->parseParameters($in, $parameters, $exceptionContext + ['location' => 'request ' . $in . ' parameters']);
+
                     if ($params === null) {
                         continue;
                     }
@@ -115,8 +118,8 @@ class SpecificationParser
     }
 
     /**
-     * @param Response[]|Responses|null $responses
-     * @param string[]                  $exceptionContext
+     * @param Response[]|Responses|null                                    $responses
+     * @param array{location?:string,method:string,url:string,path:string} $exceptionContext
      *
      * @return ObjectDefinition[]
      */
@@ -140,6 +143,7 @@ class SpecificationParser
          */
         foreach ($responses as $responseCode => $response) {
             $responseSchema = $this->findByMediaType($response, $specificationConfig->getMediaType());
+
             if ($responseSchema === null) {
                 continue;
             }
@@ -148,7 +152,7 @@ class SpecificationParser
                 $responseSchema,
                 false,
                 true,
-                array_merge($exceptionContext, ['location' => 'response (code "' . $responseCode . '")'])
+                $exceptionContext + ['location' => 'response (code "' . $responseCode . '")']
             );
             $responseDefinition                 = new ObjectDefinition($propertyDefinitions);
             $responseDefinitions[$responseCode] = $responseDefinition;
@@ -186,10 +190,8 @@ class SpecificationParser
      */
     private function filterParameters(array $parameters): array
     {
-        /** @var Parameter[] $parameters */
-        $parameters = array_filter($parameters, static fn ($parameter): bool => $parameter instanceof Parameter);
-
-        return $parameters;
+        /** @phpstan-ignore-next-line */
+        return array_filter($parameters, static fn ($parameter): bool => $parameter instanceof Parameter);
     }
 
     /**
@@ -229,8 +231,8 @@ class SpecificationParser
     }
 
     /**
-     * @param Parameter[] $parameters
-     * @param string[]    $exceptionContext
+     * @param Parameter[]                                                 $parameters
+     * @param array{location:string,method:string,url:string,path:string} $exceptionContext
      */
     private function parseParameters(string $in, array $parameters, array $exceptionContext): ?ObjectDefinition
     {
@@ -250,7 +252,7 @@ class SpecificationParser
     }
 
     /**
-     * @param string[] $exceptionContext
+     * @param array{location:string,method:string,url:string,path:string} $exceptionContext
      *
      * @return PropertyDefinition[]
      */
@@ -287,8 +289,8 @@ class SpecificationParser
     }
 
     /**
-     * @param Schema|Reference|null $property
-     * @param string[]              $exceptionContext
+     * @param Schema|Reference|null                                       $property
+     * @param array{location:string,method:string,url:string,path:string} $exceptionContext
      */
     private function getProperty(string $propertyName, $property, bool $isRequest, array $exceptionContext, bool $allowNonScalar = true): PropertyDefinition
     {
@@ -302,7 +304,6 @@ class SpecificationParser
         $propertyDefinition->setPattern($property->pattern);
 
         $scalarTypeId = null;
-        $objectType   = null;
         $isScalar     = true;
 
         if ($property->type === Type::ARRAY) {

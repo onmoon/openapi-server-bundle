@@ -45,7 +45,7 @@ class SpecificationLoader
     }
 
     /**
-     * @param string[] $spec
+     * @param array{path:string,type:string|null,name_space:string,media_type:string} $spec
      */
     public function registerSpec(string $name, array $spec): void
     {
