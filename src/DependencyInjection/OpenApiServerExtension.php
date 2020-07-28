@@ -47,8 +47,8 @@ class OpenApiServerExtension extends Extension implements ExtensionInterface
 
         $rootNameSpace = $config['root_name_space'];
 
-        if (empty($config['root_path'])) {
-            if (! preg_match('|^App\\\\|', $rootNameSpace)) {
+        if (! isset($config['root_path'])) {
+            if (preg_match('|^App\\\\|', $rootNameSpace) === 0) {
                 throw new Exception('Please specify "root_path" parameter in package config if you are not ' .
                 'using App namespace for generated code.');
             }
@@ -57,7 +57,7 @@ class OpenApiServerExtension extends Extension implements ExtensionInterface
             $rootPath = preg_replace('|^App\\\\|', '%kernel.project_dir%/src/', $rootNameSpace);
             $rootPath = str_replace('\\', '/', $rootPath);
         } else {
-            $rootPath = $config['root_path']; // @phpstan-ignore-line
+            $rootPath = $config['root_path'];
         }
 
         $container->setParameter('openapi.generated.code.root.path', $rootPath);

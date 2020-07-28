@@ -1,6 +1,35 @@
 parameters:
+    level: 8
+    paths:
+        - src
+        - test/unit
     checkMissingIterableValueType: false
+    treatPhpDocTypesAsCertain: false
     excludes_analyse:
         - 'src/DependencyInjection/Configuration.php'
+    ignoreErrors:
+        -
+            message: '#Variable method call on OnMoon\\OpenApiServerBundle\\Interfaces\\RequestHandler.#'
+            paths:
+                - %currentWorkingDirectory%/src/Controller/ApiController.php
+        -
+            message: '#Variable static method call on class-string<OnMoon\\OpenApiServerBundle\\Interfaces\\Dto>.#'
+            paths:
+                - %currentWorkingDirectory%/src/Serializer/ArrayDtoSerializer.php
+        -
+            message: '#Call to function is_array\(\) with array<string> will always evaluate to true.#'
+            paths:
+                - %currentWorkingDirectory%/src/Specification/SpecificationParser.php
+        -
+            message: '#Variable static method call on OnMoon\\OpenApiServerBundle\\Types\\TypeSerializer.#'
+            paths:
+                - %currentWorkingDirectory%/src/Types/ScalarTypesResolver.php
+        -
+            message: '#Call to static method PHPUnit\\Framework\\Assert::assertTrue\(\) with true will always evaluate to true.#'
+            paths:
+                - %currentWorkingDirectory%/test/unit/ExampleTest.php
 includes:
     - vendor/thecodingmachine/phpstan-safe-rule/phpstan-safe-rule.neon
+    - vendor/phpstan/phpstan-phpunit/extension.neon
+    - vendor/phpstan/phpstan-phpunit/rules.neon
+    - vendor/phpstan/phpstan-strict-rules/rules.neon

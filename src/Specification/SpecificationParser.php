@@ -281,7 +281,7 @@ class SpecificationParser
             /**
              * @psalm-suppress RedundantConditionGivenDocblockType
              */
-            $required              = is_array($schema->required) && in_array($propertyName, $schema->required);
+            $required              = is_array($schema->required) && in_array($propertyName, $schema->required, true);
             $propertyDefinitions[] = $this->getProperty($propertyName, $property, $isRequest, $exceptionContext)->setRequired($required);
         }
 

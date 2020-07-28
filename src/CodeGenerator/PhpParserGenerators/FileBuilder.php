@@ -40,7 +40,7 @@ class FileBuilder
 
         $reference = $class->getClassName();
         $rename    = false;
-        while (array_search($reference, $this->references) !== false) {
+        while (array_search($reference, $this->references, true) !== false) {
             $reference = $this->rename($reference);
             $rename    = true;
         }
@@ -69,7 +69,7 @@ class FileBuilder
             return $class . '1';
         }
 
-        if (preg_match('"_(\d+)$"', $class, $match)) {
+        if (preg_match('"_(\d+)$"', $class, $match) === 1) {
             $oldNumber = (int) $match[1];
 
             return preg_replace('"_\d+$"', '_' . (string) ($oldNumber + 1), $class);

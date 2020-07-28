@@ -52,7 +52,7 @@ class DeleteGeneratedCodeCommand extends Command
 
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
-        if (! $input->getOption('yes')) {
+        if (! (bool) $input->getOption('yes')) {
             /** @var QuestionHelper $questionHelper */
             $questionHelper = $this->getHelper('question');
             $question       = new ConfirmationQuestion(
@@ -63,7 +63,7 @@ class DeleteGeneratedCodeCommand extends Command
                 false
             );
 
-            if (! $questionHelper->ask($input, $output, $question)) {
+            if (! (bool) $questionHelper->ask($input, $output, $question)) {
                 return 0;
             }
         }

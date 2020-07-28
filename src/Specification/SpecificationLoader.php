@@ -69,7 +69,7 @@ class SpecificationLoader
 
     public function get(string $name): SpecificationConfig
     {
-        if (empty($this->specs[$name])) {
+        if (! isset($this->specs[$name])) {
             throw new Exception('OpenApi spec "' . $name . '" is not registered in bundle config, ' .
                 'Registered specs are: ' . implode(', ', array_keys($this->specs)) . '.');
         }

@@ -34,7 +34,7 @@ class ArgumentResolver
 
             if (
                 $schemaPattern !== null &&
-                preg_match('/^\^(.*)\$$/', $schemaPattern, $matches)
+                preg_match('/^\^(.*)\$$/', $schemaPattern, $matches) === 1
             ) {
                 /** @psalm-suppress PossiblyNullArrayAccess */
                 $patterns[$parameter->getName()] = (string) $matches[1];

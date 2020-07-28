@@ -62,7 +62,7 @@ class InterfaceCodeGenerator extends CodeGenerator
 
             $description = $definition->getMethodDescription();
             if ($description !== null) {
-                if (count($docBlocks)) {
+                if (count($docBlocks) > 0) {
                     $docBlocks = [$description, '', ...$docBlocks];
                 } else {
                     $docBlocks[] = $description;

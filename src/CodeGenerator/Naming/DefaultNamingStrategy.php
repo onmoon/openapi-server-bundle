@@ -40,7 +40,7 @@ class DefaultNamingStrategy implements NamingStrategy
 
     public function isAllowedPhpPropertyName(string $name): bool
     {
-        return ! preg_match('/^\d/', $name) && preg_match('/^[A-Za-z0-9_]+$/i', $name);
+        return preg_match('/^\d/', $name) === 0 && preg_match('/^[A-Za-z0-9_]+$/i', $name) === 1;
     }
 
     public function getInterfaceFQCN(string $apiNameSpace, string $operationId): string
@@ -124,6 +124,6 @@ class DefaultNamingStrategy implements NamingStrategy
 
     private function padStringStartingWithNumber(string $string): string
     {
-        return preg_match('/^\d/', $string) ? '_' . $string : $string;
+        return preg_match('/^\d/', $string) === 1 ? '_' . $string : $string;
     }
 }
