@@ -6,7 +6,7 @@ namespace OnMoon\OpenApiServerBundle\Test;
 
 use PHPUnit\Framework\TestCase;
 
-class ExampleTest extends TestCase
+final class ExampleTest extends TestCase
 {
     public function testExample() : void
     {
