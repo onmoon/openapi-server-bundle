@@ -2,6 +2,7 @@
 - Any contribution must provide tests for additional introduced conditions
 - Any un-confirmed issue needs a failing test case before being accepted
 - Pull requests must be sent from a new hotfix/feature branch, not from `master`.
+- Pull request branches must start from the latest commit on the master branch
 - If you start working on an existing issue, please leave a comment in the issue that you are working on it
 - Pull request description should reference the issue it closes e.g. `Closes #30`
 - All CI checks should pass for the pull request to be accepted. If you have an unresolvable
