@@ -11,6 +11,9 @@ use PHPUnit\Framework\TestCase;
 use Safe\Exceptions\DatetimeException;
 use Throwable;
 
+/**
+ * @covers \OnMoon\OpenApiServerBundle\Types\TypeSerializer
+ */
 class TypeSerializerTest extends TestCase
 {
     public function testDeserializeDateReturnsDateTime(): void
@@ -61,7 +64,7 @@ class TypeSerializerTest extends TestCase
         Assert::assertSame($expectedSerializedDate, $serializedDate);
     }
 
-    public function testDeserializeByteReturnsDesirializedString(): void
+    public function testDeserializeByteReturnsDeserializedString(): void
     {
         $encodedString         = 'VGhpcyBpcyBhbiBlbmNvZGVkIHN0cmluZw==';
         $expectedDecodedString = 'This is an encoded string';
@@ -69,7 +72,7 @@ class TypeSerializerTest extends TestCase
         Assert::assertSame($expectedDecodedString, $decodedString);
     }
 
-    public function testSerializeByteReturnsSirializedString(): void
+    public function testSerializeByteReturnsSerializedString(): void
     {
         $decodedString         = 'This is an encoded string';
         $expectedEncodedString = 'VGhpcyBpcyBhbiBlbmNvZGVkIHN0cmluZw==';
