@@ -50,6 +50,7 @@
         "phpstan/phpstan-phpunit": "^0.12.13",
         "phpstan/phpstan-strict-rules": "^0.12.4",
         "phpunit/phpunit": "^9.2.6",
+        "sensiolabs/security-checker": "^6.0",
         "squizlabs/php_codesniffer": "^3.5.5",
         "thecodingmachine/phpstan-safe-rule": "^1.0.0",
         "vimeo/psalm": "^3.12.2"
@@ -80,6 +81,6 @@
         "sec": "security-checker security:check",
         "unit": "phpunit",
         "mutation": "infection --only-covered",
-        "all": "composer psalm && composer stan && composer test && composer cs && composer sec"
+        "all": "composer psalm && composer stan && composer unit && composer mutation && composer cs && composer sec"
     }
 }
