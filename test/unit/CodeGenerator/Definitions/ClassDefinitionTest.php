@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace OnMoon\OpenApiServerBundle\Test\CodeGenerator\Definitions;
+namespace OnMoon\OpenApiServerBundle\Test\Unit\CodeGenerator\Definitions;
 
 use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\ClassDefinition;
 use PHPUnit\Framework\Assert;

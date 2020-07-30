@@ -70,7 +70,8 @@
     },
     "autoload-dev": {
         "psr-4": {
-            "OnMoon\\OpenApiServerBundle\\Test\\": "test/unit"
+            "OnMoon\\OpenApiServerBundle\\Test\\Unit\\": "test/unit",
+            "OnMoon\\OpenApiServerBundle\\Test\\Functional\\": "test/functional"
         }
     },
     "scripts": {
@@ -79,8 +80,8 @@
         "psalm": "psalm",
         "stan": "phpstan analyse --memory-limit=-1",
         "sec": "security-checker security:check",
-        "unit": "phpunit",
+        "tests": "phpunit",
         "mutation": "infection --only-covered",
-        "all": "composer psalm && composer stan && composer unit && composer mutation && composer cs && composer sec"
+        "all": "composer psalm && composer stan && composer tests && composer mutation && composer cs && composer sec"
     }
 }
