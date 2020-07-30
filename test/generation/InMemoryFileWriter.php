@@ -8,7 +8,9 @@ use InvalidArgumentException;
 use OnMoon\OpenApiServerBundle\CodeGenerator\Filesystem\FileWriter;
 
 use function array_key_exists;
+use function ltrim;
 use function rtrim;
+use function str_replace;
 
 use const DIRECTORY_SEPARATOR;
 
