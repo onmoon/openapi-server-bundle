@@ -1,0 +1,20 @@
+openapi: 3.0.0
+info:
+  version: 0.0.1
+  title: 'Test API'
+paths:
+  /test/:
+    get:
+      operationId: "GetTest"
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - string_property
+                properties:
+                  string_property:
+                    type: string
