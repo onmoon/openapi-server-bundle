@@ -12,6 +12,9 @@
         <testsuite name="functional">
             <directory>./test/functional</directory>
         </testsuite>
+        <testsuite name="generation">
+            <directory>./test/generation</directory>
+        </testsuite>
     </testsuites>
     <filter>
         <whitelist processUncoveredFilesFromWhitelist="true">

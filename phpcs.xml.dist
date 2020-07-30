@@ -11,7 +11,7 @@
     <arg value="np"/>
 
     <file>./src</file>
-    <file>./test/unit</file>
+    <file>./test</file>
 
     <rule ref="Doctrine">
         <exclude name="SlevomatCodingStandard.PHP.RequireExplicitAssertion.RequiredExplicitAssertion" />
