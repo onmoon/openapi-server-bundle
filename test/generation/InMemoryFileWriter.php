@@ -27,6 +27,8 @@ final class InMemoryFileWriter implements FileWriter
 
     public function getContentsByFullPath(string $fullPath): string
     {
+        $fullPath = '/' . ltrim(str_replace('/', DIRECTORY_SEPARATOR, $fullPath), '\\/');
+
         if (! array_key_exists($fullPath, $this->files)) {
             throw new InvalidArgumentException('No file was generated with path: ' . $fullPath);
         }
