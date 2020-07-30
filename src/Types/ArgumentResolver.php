@@ -37,7 +37,7 @@ class ArgumentResolver
                 preg_match('/^\^(.*)\$$/', $schemaPattern, $matches) === 1
             ) {
                 /** @psalm-suppress PossiblyNullArrayAccess */
-                $patterns[$parameter->getName()] = (string) $matches[1];
+                $patterns[$parameter->getName()] = $matches[1];
             } elseif ($pattern !== null) {
                 $patterns[$parameter->getName()] = $pattern;
             }
