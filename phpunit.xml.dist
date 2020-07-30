@@ -9,6 +9,9 @@
         <testsuite name="unit">
             <directory>./test/unit</directory>
         </testsuite>
+        <testsuite name="functional">
+            <directory>./test/functional</directory>
+        </testsuite>
     </testsuites>
     <filter>
         <whitelist processUncoveredFilesFromWhitelist="true">

@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace OnMoon\OpenApiServerBundle\Test\Event\Server;
+namespace OnMoon\OpenApiServerBundle\Test\Unit\Event\Server;
 
 use OnMoon\OpenApiServerBundle\Event\Server\RequestDtoEvent;
 use OnMoon\OpenApiServerBundle\Interfaces\Dto;

@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace OnMoon\OpenApiServerBundle\Test\Types;
+namespace OnMoon\OpenApiServerBundle\Test\Unit\Types;
 
 use OnMoon\OpenApiServerBundle\Specification\Definitions\ObjectType;
 use OnMoon\OpenApiServerBundle\Specification\Definitions\Property;
