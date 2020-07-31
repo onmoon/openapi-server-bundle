@@ -12,6 +12,7 @@ use OnMoon\OpenApiServerBundle\Specification\Definitions\Specification;
 use OnMoon\OpenApiServerBundle\Specification\SpecificationLoader;
 use OnMoon\OpenApiServerBundle\Types\ArgumentResolver;
 use PHPUnit\Framework\Assert;
+use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Throwable;
 
@@ -21,10 +22,17 @@ final class RouteLoaderTest extends TestCase
 {
     private const SPECIFICATION_DEFAULT_NAME = 'CustomSpecification';
 
-    private SpecificationLoader $specificationLoaderMock;
-    private ArgumentResolver $argumentResolverMock;
-    private Specification $specificationMock;
-    private Operation $operationMock;
+    /** @var SpecificationLoader|MockObject */
+    private $specificationLoaderMock;
+
+    /** @var ArgumentResolver|MockObject */
+    private $argumentResolverMock;
+
+    /** @var Specification|MockObject */
+    private $specificationMock;
+
+    /** @var Operation|MockObject */
+    private $operationMock;
 
     public function setUp(): void
     {
@@ -37,34 +45,47 @@ final class RouteLoaderTest extends TestCase
     }
 
     /**
-     * @return string[]
+     * @return mixed[]
      */
     public function loadProvider(): array
     {
         return [
-            ['type' => null],
-            ['type' => ''],
             [
+                'resource' => 1,
                 'type' => RouteLoader::OPENAPI_TYPE,
             ],
             [
+                'resource' => self::SPECIFICATION_DEFAULT_NAME,
+                'type' => null,
+            ],
+            [
+                'resource' => self::SPECIFICATION_DEFAULT_NAME,
+                'type' => '',
+            ],
+            [
+                'resource' => self::SPECIFICATION_DEFAULT_NAME,
+                'type' => RouteLoader::OPENAPI_TYPE,
+            ],
+            [
+                'resource' => self::SPECIFICATION_DEFAULT_NAME,
                 'type' => RouteLoader::OPENAPI_SPEC,
             ],
             [
+                'resource' => self::SPECIFICATION_DEFAULT_NAME,
                 'type' => RouteLoader::OPENAPI_OPERATION,
             ],
         ];
     }
 
     /**
+     * @param mixed $resource
+     *
      * @throws Throwable
      *
      * @dataProvider loadProvider
      */
-    public function testLoad(?string $type = null): void
+    public function testLoad($resource, ?string $type = null): void
     {
-        $resource = self::SPECIFICATION_DEFAULT_NAME;
-
         $operations = [
             'first' => $this->operationMock,
             'second' => $this->operationMock,
@@ -81,33 +102,33 @@ final class RouteLoaderTest extends TestCase
         $expectedOperationsCount = count($operations);
 
         $this->specificationLoaderMock
-            ->expects($this->once())
+            ->expects(self::once())
             ->method('load')
             ->willReturn($this->specificationMock);
 
         $this->specificationMock
-            ->expects($this->once())
+            ->expects(self::once())
             ->method('getOperations')
             ->willReturn($operations);
 
         $this->operationMock
-            ->expects($this->exactly($expectedOperationsCount))
+            ->expects(self::exactly($expectedOperationsCount))
             ->method('getRequestParameters')
             ->willReturn($requestParameters);
 
         $this->argumentResolverMock
-            ->expects($this->exactly($expectedOperationsCount))
+            ->expects(self::exactly($expectedOperationsCount))
             ->method('resolveArgumentPatterns')
             ->with($requestParameters['path'])
             ->willReturn($requirements);
 
         $this->operationMock
-            ->expects($this->exactly($expectedOperationsCount))
+            ->expects(self::exactly($expectedOperationsCount))
             ->method('getUrl')
             ->willReturn($operationUrl);
 
         $this->operationMock
-            ->expects($this->exactly($expectedOperationsCount))
+            ->expects(self::exactly($expectedOperationsCount))
             ->method('getMethod')
             ->willReturn($operationMethod);
 
@@ -118,11 +139,32 @@ final class RouteLoaderTest extends TestCase
 
         $routeCollection = $routeLoader->load($resource, $type);
 
+        foreach ($operations as $operationId => $operation) {
+            $route = $routeCollection->get($operationId);
+
+            if ($route === null) {
+                continue;
+            }
+
+            Assert::assertSame(
+                'OnMoon\OpenApiServerBundle\Controller\ApiController::handle',
+                $route->getDefault('_controller')
+            );
+            Assert::assertSame(
+                (string) $resource,
+                $route->getOption(RouteLoader::OPENAPI_SPEC)
+            );
+            Assert::assertSame(
+                $operationId,
+                $route->getOption(RouteLoader::OPENAPI_OPERATION)
+            );
+        }
+
         Assert::assertCount(count($operations), $routeCollection);
     }
 
     /**
-     * @return string[]
+     * @return mixed[]
      */
     public function supportsProvider(): array
     {
