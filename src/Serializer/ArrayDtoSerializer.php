@@ -28,6 +28,9 @@ final class ArrayDtoSerializer implements DtoSerializer
         $this->sendNotRequiredNullableNulls = $sendNulls;
     }
 
+    /**
+     * @throws Exception
+     */
     public function createRequestDto(
         Request $request,
         Operation $operation,

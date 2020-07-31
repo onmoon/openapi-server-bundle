@@ -15,5 +15,6 @@
 
     <rule ref="Doctrine">
         <exclude name="SlevomatCodingStandard.PHP.RequireExplicitAssertion.RequiredExplicitAssertion" />
+        <exclude name="PSR2.Methods.MethodDeclaration.Underscore" />
     </rule>
 </ruleset>
