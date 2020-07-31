@@ -16,6 +16,8 @@ use PHPUnit\Framework\TestCase;
 use Symfony\Component\HttpFoundation\Request;
 use Throwable;
 
+use stdClass;
+
 class ArrayDtoSerializerTest extends TestCase
 {
     /** @var ScalarTypesResolver|MockObject */
@@ -54,10 +56,17 @@ class ArrayDtoSerializerTest extends TestCase
      */
     public function testCreateRequestDto($bodyParameter): void
     {
+        $routeParams = new stdClass();
+        $routeParams->customParam = 'customValue';
+
+        $requestAttributes = [
+            '_route_params' => $routeParams,
+        ];
+
         $request = new Request(
             [],
             [],
-            [],
+            $requestAttributes,
             [],
             [],
             [],
@@ -67,9 +76,14 @@ class ArrayDtoSerializerTest extends TestCase
         $sendNotRequiredNullableNulls = true;
         $inputDtoFQCN                 = RequestDto::class;
 
+        $queryProperty = new Property('query');
+        $queryProperty->setDefaultValue('query-string');
+        $pathProperty = new Property('path');
+        $pathProperty->setDefaultValue('path/string');
+
         $requestParameters = [
-            'query' => new ObjectType([new Property('query')]),
-            'path' => new ObjectType([new Property('path')]),
+            'query' => new ObjectType([$queryProperty]),
+            'path' => new ObjectType([$pathProperty]),
         ];
 
         $requestContent = null; // false|null|resource|string
@@ -95,7 +109,7 @@ class ArrayDtoSerializerTest extends TestCase
             $sendNotRequiredNullableNulls
         );
 
-        $arrayDtoSerializer->createRequestDto(
+        $requestDto = $arrayDtoSerializer->createRequestDto(
             $request,
             $this->operationMock,
             $inputDtoFQCN
