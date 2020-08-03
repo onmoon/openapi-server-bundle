@@ -5,7 +5,12 @@ declare(strict_types=1);
 namespace OnMoon\OpenApiServerBundle\Test\Unit\CodeGenerator\Filesystem;
 
 use OnMoon\OpenApiServerBundle\CodeGenerator\Filesystem\FilePutContentsFileWriter;
+use PHPUnit\Framework\Assert;
 use PHPUnit\Framework\TestCase;
+
+use function Safe\unlink;
+
+use const DIRECTORY_SEPARATOR;
 
 /**
  * @covers \OnMoon\OpenApiServerBundle\Test\Unit\CodeGenerator\Filesystem\FilePutContentsFileWriter
@@ -20,9 +25,9 @@ final class FilePutContentsFileWriterTest extends TestCase
 
         $fileWriter = new FilePutContentsFileWriter(0755);
 
-        $this->assertFileDoesNotExist($fullPath);
+        Assert::assertFileDoesNotExist($fullPath);
         $fileWriter->write($path, $filename, 'SomeContents');
-        $this->assertFileExists($fullPath);
+        Assert::assertFileExists($fullPath);
         unlink($fullPath);
     }
 }
