@@ -7,6 +7,8 @@ namespace OnMoon\OpenApiServerBundle\Test\Unit\Exception;
 use OnMoon\OpenApiServerBundle\Exception\CannotParseOpenApi;
 use PHPUnit\Framework\TestCase;
 
+use function Safe\sprintf;
+
 /**
  * @covers \OnMoon\OpenApiServerBundle\Exception\CannotParseOpenApi
  */
@@ -133,13 +135,12 @@ final class CannotParseOpenApiTest extends TestCase
         $this->expectExceptionMessage($exceptionMessage);
 
         throw CannotParseOpenApi::becauseArrayIsNotDescribed($propertyName, $context);
-
     }
 
     public function testBecauseTypeNotSupportedShowsCorrectErrorMessage(): void
     {
         $propertyName = 'someRandomName';
-        $type = 'someRandomType';
+        $type         = 'someRandomType';
 
         $context = [
             'location' => 'http://example.com',
@@ -162,6 +163,5 @@ final class CannotParseOpenApiTest extends TestCase
         $this->expectExceptionMessage($exceptionMessage);
 
         throw CannotParseOpenApi::becauseTypeNotSupported($propertyName, $type, $context);
-
     }
 }
