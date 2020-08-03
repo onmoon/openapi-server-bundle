@@ -19,7 +19,7 @@ use Throwable;
 use function count;
 
 /**
- * @covers RouteLoader
+ * @covers \OnMoon\OpenApiServerBundle\Router\RouteLoader
  */
 final class RouteLoaderTest extends TestCase
 {
