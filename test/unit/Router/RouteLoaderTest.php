@@ -18,6 +18,9 @@ use Throwable;
 
 use function count;
 
+/**
+ * @covers RouteLoader
+ */
 final class RouteLoaderTest extends TestCase
 {
     private const SPECIFICATION_DEFAULT_NAME = 'CustomSpecification';
@@ -31,9 +34,6 @@ final class RouteLoaderTest extends TestCase
     /** @var Specification|MockObject */
     private $specificationMock;
 
-    /** @var Operation|MockObject */
-    private $operationMock;
-
     public function setUp(): void
     {
         parent::setUp();
@@ -41,7 +41,17 @@ final class RouteLoaderTest extends TestCase
         $this->specificationLoaderMock = $this->createMock(SpecificationLoader::class);
         $this->argumentResolverMock    = $this->createMock(ArgumentResolver::class);
         $this->specificationMock       = $this->createMock(Specification::class);
-        $this->operationMock           = $this->createMock(Operation::class);
+    }
+
+    protected function tearDown(): void
+    {
+        unset(
+            $this->specificationLoaderMock,
+            $this->argumentResolverMock,
+            $this->specificationMock
+        );
+
+        parent::tearDown();
     }
 
     /**
@@ -86,24 +96,32 @@ final class RouteLoaderTest extends TestCase
      */
     public function testLoad($resource, ?string $type = null): void
     {
-        $operations = [
-            'first' => $this->operationMock,
-            'second' => $this->operationMock,
-        ];
-
-        $requestParameters = [
+        $operationUrl                = '/some/example/path';
+        $operationMethod             = 'GET';
+        $operationRequestHandlerName = 'RequestHandlerExample';
+        $operationRequestParameters  = [
             'path' => new ObjectType([new Property('path')]),
         ];
 
-        $operationUrl    = 'https://custom.local';
-        $operationMethod = 'customAction';
-        $requirements    = [];
+        $requirements = [];
+
+        $operations = [
+            'first' => new Operation(
+                $operationUrl,
+                $operationMethod,
+                $operationRequestHandlerName,
+                null,
+                null,
+                $operationRequestParameters
+            ),
+        ];
 
         $expectedOperationsCount = count($operations);
 
         $this->specificationLoaderMock
             ->expects(self::once())
             ->method('load')
+            ->with($resource)
             ->willReturn($this->specificationMock);
 
         $this->specificationMock
@@ -111,26 +129,11 @@ final class RouteLoaderTest extends TestCase
             ->method('getOperations')
             ->willReturn($operations);
 
-        $this->operationMock
-            ->expects(self::exactly($expectedOperationsCount))
-            ->method('getRequestParameters')
-            ->willReturn($requestParameters);
-
         $this->argumentResolverMock
             ->expects(self::exactly($expectedOperationsCount))
             ->method('resolveArgumentPatterns')
-            ->with($requestParameters['path'])
+            ->with($operationRequestParameters['path'])
             ->willReturn($requirements);
-
-        $this->operationMock
-            ->expects(self::exactly($expectedOperationsCount))
-            ->method('getUrl')
-            ->willReturn($operationUrl);
-
-        $this->operationMock
-            ->expects(self::exactly($expectedOperationsCount))
-            ->method('getMethod')
-            ->willReturn($operationMethod);
 
         $routeLoader = new RouteLoader(
             $this->specificationLoaderMock,
@@ -142,10 +145,7 @@ final class RouteLoaderTest extends TestCase
         foreach ($operations as $operationId => $operation) {
             $route = $routeCollection->get($operationId);
 
-            if ($route === null) {
-                continue;
-            }
-
+            Assert::assertNotNull($route);
             Assert::assertSame(
                 'OnMoon\OpenApiServerBundle\Controller\ApiController::handle',
                 $route->getDefault('_controller')
@@ -158,6 +158,12 @@ final class RouteLoaderTest extends TestCase
                 $operationId,
                 $route->getOption(RouteLoader::OPENAPI_OPERATION)
             );
+
+            Assert::assertSame($route->getPath(), $operationUrl);
+            Assert::assertSame($route->getRequirements(), $requirements);
+            Assert::assertEmpty($route->getSchemes());
+            Assert::assertEmpty($route->getHost());
+            Assert::assertSame($route->getMethods(), [$operationMethod]);
         }
 
         Assert::assertCount(count($operations), $routeCollection);

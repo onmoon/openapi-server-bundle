@@ -9,19 +9,19 @@ class Operation
     private string $url;
     private string $method;
     private string $requestHandlerName;
-    private ?string $summary         = null;
-    private ?ObjectType $requestBody = null;
+    private ?string $summary;
+    private ?ObjectType $requestBody;
 
     /**
      * @var ObjectType[]
      * @psalm-var array<string, ObjectType>
      */
-    private array $requestParameters = [];
+    private array $requestParameters;
     /**
      * @var ObjectType[]
      * @psalm-var array<string|int, ObjectType>
      */
-    private array $responses = [];
+    private array $responses;
 
     /**
      * @param ObjectType[] $requestParameters
@@ -30,8 +30,15 @@ class Operation
      * @psalm-param array<string, ObjectType> $requestParameters
      * @psalm-param array<string|int, ObjectType> $responses
      */
-    public function __construct(string $url, string $method, string $requestHandlerName, ?string $summary, ?ObjectType $requestBody, array $requestParameters, array $responses)
-    {
+    public function __construct(
+        string $url,
+        string $method,
+        string $requestHandlerName,
+        ?string $summary = null,
+        ?ObjectType $requestBody = null,
+        array $requestParameters = [],
+        array $responses = []
+    ) {
         $this->url                = $url;
         $this->method             = $method;
         $this->requestHandlerName = $requestHandlerName;
