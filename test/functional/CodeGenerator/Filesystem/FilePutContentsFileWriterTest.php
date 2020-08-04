@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace OnMoon\OpenApiServerBundle\Test\Unit\CodeGenerator\Filesystem;
+namespace OnMoon\OpenApiServerBundle\Test\Functional\CodeGenerator\Filesystem;
 
 use OnMoon\OpenApiServerBundle\CodeGenerator\Filesystem\FilePutContentsFileWriter;
 use PHPUnit\Framework\Assert;
