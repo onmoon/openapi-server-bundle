@@ -4,139 +4,172 @@ declare(strict_types=1);
 
 namespace OnMoon\OpenApiServerBundle\Test\Unit\Serializer;
 
-use OnMoon\OpenApiServerBundle\Dto\Example\Request as RequestDto;
-use OnMoon\OpenApiServerBundle\Dto\Example\Response as ResponseDto;
+use OnMoon\OpenApiServerBundle\Apis\Example\PostWithPath\Dto\Request\PostWithPathRequestDto;
+use OnMoon\OpenApiServerBundle\Apis\Example\PostWithPath\Dto\Response\OK\PostWithPathOKDto;
 use OnMoon\OpenApiServerBundle\Serializer\ArrayDtoSerializer;
 use OnMoon\OpenApiServerBundle\Specification\Definitions\ObjectType;
 use OnMoon\OpenApiServerBundle\Specification\Definitions\Operation;
 use OnMoon\OpenApiServerBundle\Specification\Definitions\Property;
 use OnMoon\OpenApiServerBundle\Types\ScalarTypesResolver;
+use PHPUnit\Framework\Assert;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\HttpFoundation\Request;
 use Throwable;
 
-use stdClass;
-
+/**
+ * @covers \OnMoon\OpenApiServerBundle\Serializer\ArrayDtoSerializer
+ */
 class ArrayDtoSerializerTest extends TestCase
 {
     /** @var ScalarTypesResolver|MockObject */
     private $resolverMock;
 
-    /** @var Operation|MockObject */
-    private $operationMock;
-
     public function setUp(): void
     {
         parent::setUp();
 
-        $this->resolverMock  = $this->createMock(ScalarTypesResolver::class);
-        $this->operationMock = $this->createMock(Operation::class);
+        $this->resolverMock = $this->createMock(ScalarTypesResolver::class);
+    }
+
+    public function tearDown(): void
+    {
+        unset($this->resolverMock);
+
+        parent::tearDown();
     }
 
     /**
      * @return mixed[]
      */
-    public function createRequestDtoProvider(): array
+    public function createRequestDtoWithPathProvider(): array
     {
+        $queryProperties               = [];
+        $queryProperties['queryParam'] = new Property('queryParam');
+        $queryProperties['queryParam']->setDefaultValue('e55e57d3b65ff510b257025746ffb6e1');
+
+        $query = new ObjectType($queryProperties);
+
+        $pathProperties              = [];
+        $pathProperties['pathParam'] = new Property('pathParam');
+        $pathProperties['pathParam']->setDefaultValue('e55e57d3b65ff510b257025746ffb6e1');
+
+        $path = new ObjectType($pathProperties);
+
+        $bodyProperties         = [];
+        $bodyProperties['name'] = new Property('name');
+        $bodyProperties['name']->setDefaultValue('bodyName');
+        $bodyProperties['value'] = new Property('value');
+        $bodyProperties['value']->setDefaultValue('bodyValue');
+
+        $requestBody = new ObjectType($bodyProperties);
+
         return [
-            ['bodyParameter' => null],
             [
-                'bodyParameter' => new ObjectType([new Property('body')]),
+                'requestQuery' => $query,
+                'requestPath'  => $path,
+                'requestBody' => $requestBody,
             ],
         ];
     }
 
     /**
-     * @param mixed $bodyParameter
-     *
      * @throws Throwable
      *
-     * @dataProvider createRequestDtoProvider
+     * @dataProvider createRequestDtoWithPathProvider
      */
-    public function testCreateRequestDto($bodyParameter): void
+    public function testCreateRequestDtoWithPath(ObjectType $requestQuery, ObjectType $requestPath, ObjectType $requestBody): void
     {
-        $routeParams = new stdClass();
-        $routeParams->customParam = 'customValue';
-
-        $requestAttributes = [
-            '_route_params' => $routeParams,
-        ];
-
         $request = new Request(
             [],
             [],
-            $requestAttributes,
+            ['_route_params' => (object) ['customParam' => 'customParam']],
             [],
             [],
             [],
             '{}'
         );
 
-        $sendNotRequiredNullableNulls = true;
-        $inputDtoFQCN                 = RequestDto::class;
-
-        $queryProperty = new Property('query');
-        $queryProperty->setDefaultValue('query-string');
-        $pathProperty = new Property('path');
-        $pathProperty->setDefaultValue('path/string');
-
-        $requestParameters = [
-            'query' => new ObjectType([$queryProperty]),
-            'path' => new ObjectType([$pathProperty]),
-        ];
-
-        $requestContent = null; // false|null|resource|string
-
-        $resolverConvertResult = null; // bool|mixed|null
-
-        $this->operationMock
-            ->expects(self::once())
-            ->method('getRequestParameters')
-            ->willReturn($requestParameters);
-
-        $this->operationMock
-            ->expects(self::once())
-            ->method('getRequestBody')
-            ->willReturn($bodyParameter);
+        $operation = new Operation(
+            '/example/path',
+            'POST',
+            'PostRequest',
+            null,
+            $requestBody,
+            ['query' => $requestQuery, 'path' => $requestPath],
+            []
+        );
 
         $this->resolverMock
             ->method('convert')
-            ->willReturn($resolverConvertResult);
+            ->willReturn(null);
 
         $arrayDtoSerializer = new ArrayDtoSerializer(
             $this->resolverMock,
-            $sendNotRequiredNullableNulls
+            true
         );
 
+        /** @var PostWithPathRequestDto $requestDto */
         $requestDto = $arrayDtoSerializer->createRequestDto(
             $request,
-            $this->operationMock,
-            $inputDtoFQCN
+            $operation,
+            PostWithPathRequestDto::class
+        );
+
+        Assert::assertSame(
+            $requestQuery->getProperties()['queryParam']->getDefaultValue(),
+            $requestDto->getQueryParameters()->getQueryParam()
+        );
+        Assert::assertSame(
+            $requestPath->getProperties()['pathParam']->getDefaultValue(),
+            $requestDto->getPathParameters()->getPathParam()
+        );
+        Assert::assertSame(
+            $requestBody->getProperties()['name']->getDefaultValue(),
+            $requestDto->getBody()->getName()
+        );
+        Assert::assertSame(
+            $requestBody->getProperties()['value']->getDefaultValue(),
+            $requestDto->getBody()->getValue()
         );
     }
 
     public function testCreateResponseFromDto(): void
     {
-        $sendNotRequiredNullableNulls = true;
+        $responseDto = PostWithPathOKDto::fromArray(['result' => 'e55e57d3b65ff510b257025746ffb6e1']);
 
-        $responseDto = ResponseDto::fromArray(['query' => null]);
+        $responseProperties           = [];
+        $responseProperties['result'] = new Property('result');
+        $responseProperties['result']->setDefaultValue('e55e57d3b65ff510b257025746ffb6e1');
 
-        $responseParameter = new ObjectType([new Property('query')]);
+        $responseParameters = [
+            PostWithPathOKDto::_getResponseCode() => new ObjectType($responseProperties),
+        ];
 
-        $this->operationMock
-            ->expects(self::once())
-            ->method('getResponse')
-            ->willReturn($responseParameter);
+        $operation = new Operation(
+            '/example/path',
+            'POST',
+            'PostRequest',
+            null,
+            null,
+            [],
+            $responseParameters
+        );
+
+        $this->resolverMock
+            ->method('convert')
+            ->willReturn(null);
 
         $arrayDtoSerializer = new ArrayDtoSerializer(
             $this->resolverMock,
-            $sendNotRequiredNullableNulls
+            true
         );
 
-        $arrayDtoSerializer->createResponseFromDto(
+        $response = $arrayDtoSerializer->createResponseFromDto(
             $responseDto,
-            $this->operationMock
+            $operation
         );
+
+        Assert::assertNull($response['result']);
     }
 }
