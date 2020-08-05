@@ -7,6 +7,8 @@ namespace OnMoon\OpenApiServerBundle\Test\Unit\Exception;
 use OnMoon\OpenApiServerBundle\Exception\ApiCallFailed;
 use PHPUnit\Framework\TestCase;
 
+use function Safe\sprintf;
+
 /**
  * @covers \OnMoon\OpenApiServerBundle\Exception\ApiCallFailed
  */
@@ -24,7 +26,7 @@ final class ApiCallFailedTest extends TestCase
 
     public function testApiCallFailedBecauseNotImplementedPrintsInterface(): void
     {
-        $interface = 'TestInterfaceName';
+        $interface                = 'TestInterfaceName';
         $expectedExceptionMessage = sprintf(
             'Api call implementation not found. Please implement "%s" interface',
             $interface
