@@ -8,13 +8,12 @@ use OnMoon\OpenApiServerBundle\Controller\ApiController;
 use OnMoon\OpenApiServerBundle\Specification\SpecificationLoader;
 use OnMoon\OpenApiServerBundle\Types\ArgumentResolver;
 use Symfony\Component\Config\Loader\Loader;
-use Symfony\Component\Config\Loader\LoaderInterface;
 use Symfony\Component\Routing\Route;
 use Symfony\Component\Routing\RouteCollection;
 
 use function array_key_exists;
 
-class RouteLoader extends Loader implements LoaderInterface
+class RouteLoader extends Loader
 {
     private SpecificationLoader $loader;
     private ArgumentResolver $argumentResolver;
@@ -64,7 +63,7 @@ class RouteLoader extends Loader implements LoaderInterface
     /**
      * @inheritDoc
      */
-    public function supports($resource, ?string $type = null)
+    public function supports($resource, ?string $type = null): bool
     {
         return $type === self::OPENAPI_TYPE;
     }
