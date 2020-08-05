@@ -1,0 +1,71 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "GameMoney Payment Card API",
+    "version": "1.0"
+  },
+  "paths": {
+    "/sessions/{sessionId}": {
+      "get": {
+        "operationId": "getSession",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/SessionIdParam"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SessionResponseSchema"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "SessionResponseSchema": {
+        "title": "Session Response",
+        "type": "object",
+        "properties": {
+          "result": {
+            "type": "string",
+            "enum": [
+              "new",
+              "fail",
+              "redirect",
+              "message"
+            ]
+          },
+          "warnings": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "result"
+        ]
+      }
+    },
+    "parameters": {
+      "SessionIdParam": {
+        "name": "sessionId",
+        "in": "path",
+        "required": true,
+        "schema": {
+          "type": "string"
+        },
+        "description": "Session ID",
+        "example": "e55e57d3b65ff510b257025746ffb6e1"
+      }
+    }
+  }
+}
