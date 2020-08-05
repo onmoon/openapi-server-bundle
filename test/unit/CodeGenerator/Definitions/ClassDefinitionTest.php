@@ -51,7 +51,7 @@ final class ClassDefinitionTest extends TestCase
         Assert::assertSame($otherClassName, $classDefinition->getClassName());
     }
 
-    public function testSetNamesapceChangesNamespace(): void
+    public function testSetNamespaceChangesNamespace(): void
     {
         $fqcn = 'NamespaceOne\NamespaceTwo\ClassName';
 
