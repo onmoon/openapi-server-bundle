@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace OnMoon\OpenApiServerBundle\Test\Unit\Validator;
 
 use cebe\openapi\spec\OpenApi;
+use League\OpenAPIValidation\PSR7\OperationAddress;
 use League\OpenAPIValidation\PSR7\RoutedServerRequestValidator;
 use League\OpenAPIValidation\PSR7\ValidatorBuilder;
 use OnMoon\OpenApiServerBundle\Specification\Definitions\Operation;
@@ -29,10 +30,12 @@ class LeaguePSR7RequestSchemaValidatorTest extends TestCase
         $operation = $this->createMock(Operation::class);
         $operation
             ->expects(self::once())
-            ->method('getUrl');
+            ->method('getUrl')
+            ->willReturn('test_url');
         $operation
             ->expects(self::once())
-            ->method('getMethod');
+            ->method('getMethod')
+            ->willReturn('test_method');
 
         $specification = $this->createMock(Specification::class);
         $specification
@@ -50,6 +53,7 @@ class LeaguePSR7RequestSchemaValidatorTest extends TestCase
         $validatorBuilderMock
             ->expects(self::once())
             ->method('fromSchema')
+            ->with($openApi)
             ->willReturn($validatorBuilderMock);
 
         $routedServerRequestValidator = $this->createMock(RoutedServerRequestValidator::class);
@@ -70,7 +74,8 @@ class LeaguePSR7RequestSchemaValidatorTest extends TestCase
 
         $routedServerRequestValidator
             ->expects(self::once())
-            ->method('validate');
+            ->method('validate')
+            ->with(new OperationAddress('test_url', 'test_method'));
 
         $leaguePSR7RequestSchemaValidator = new LeaguePSR7RequestSchemaValidator($validatorBuilderMock, $psrHttpFactory);
         $leaguePSR7RequestSchemaValidator->validate($request, $specification, $operationId);
