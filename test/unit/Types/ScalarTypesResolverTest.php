@@ -55,23 +55,71 @@ class ScalarTypesResolverTest extends TestCase
                 'value' => 'VGhpcyBpcyBhbiBlbmNvZGVkIHN0cmluZw==',
                 'expectedValue' => 'This is an encoded string',
             ],
-            'deserialize_php_type_bool' => [
+            'deserialize_string' => [
+                'deserialize' => true,
+                'id' => 4,
+                'value' => '123',
+                'expectedValue' => '123',
+            ],
+            'deserialize_number_php_type_float' => [
+                'deserialize' => true,
+                'id' => 5,
+                'value' => 12,
+                'expectedValue' => 12.0,
+            ],
+            'deserialize_number_php_type_float_format_float' => [
+                'deserialize' => true,
+                'id' => 6,
+                'value' => 12,
+                'expectedValue' => 12.0,
+            ],
+            'deserialize_number_php_type_float_format_double' => [
+                'deserialize' => true,
+                'id' => 7,
+                'value' => 12,
+                'expectedValue' => 12.0,
+            ],
+            'deserialize_number_php_type_int_format_int32' => [
+                'deserialize' => true,
+                'id' => 8,
+                'value' => 12.3,
+                'expectedValue' => 12,
+            ],
+            'deserialize_number_php_type_int_format_int64' => [
+                'deserialize' => true,
+                'id' => 9,
+                'value' => 12.3,
+                'expectedValue' => 12,
+            ],
+            'deserialize_integer' => [
+                'deserialize' => true,
+                'id' => 10,
+                'value' => 12.3,
+                'expectedValue' => 12,
+            ],
+            'deserialize_php_type_bool_empty_string' => [
                 'deserialize' => true,
                 'id' => 11,
                 'value' => '',
                 'expectedValue' => false,
             ],
-            'deserialize_php_type_float' => [
+            'deserialize_php_type_bool_true_string' => [
                 'deserialize' => true,
-                'id' => 5,
-                'value' => '1.1qwerty',
-                'expectedValue' => 1.1,
+                'id' => 11,
+                'value' => 'true',
+                'expectedValue' => true,
             ],
-            'deserialize_php_type_int' => [
+            'deserialize_php_type_bool_false_boolean' => [
                 'deserialize' => true,
-                'id' => 10,
-                'value' => 'q1werty',
-                'expectedValue' => 0,
+                'id' => 11,
+                'value' => false,
+                'expectedValue' => false,
+            ],
+            'deserialize_php_type_bool_true_boolean' => [
+                'deserialize' => true,
+                'id' => 11,
+                'value' => true,
+                'expectedValue' => true,
             ],
         ];
     }
@@ -120,11 +168,71 @@ class ScalarTypesResolverTest extends TestCase
                 'value' => 'This is an encoded string',
                 'expectedValue' => 'VGhpcyBpcyBhbiBlbmNvZGVkIHN0cmluZw==',
             ],
-            'serialize_value_without_serializer_function' => [
+            'serialize_string' => [
+                'deserialize' => false,
+                'id' => 4,
+                'value' => 'test',
+                'expectedValue' => 'test',
+            ],
+            'serialize_number_php_type_float' => [
+                'deserialize' => false,
+                'id' => 5,
+                'value' => '5.5',
+                'expectedValue' => '5.5',
+            ],
+            'serialize_number_php_type_float_format_float' => [
+                'deserialize' => false,
+                'id' => 6,
+                'value' => '5',
+                'expectedValue' => '5',
+            ],
+            'serialize_number_php_type_float_format_double' => [
+                'deserialize' => false,
+                'id' => 7,
+                'value' => '7E-10',
+                'expectedValue' => '7E-10',
+            ],
+            'serialize_number_php_type_int_format_int32' => [
+                'deserialize' => false,
+                'id' => 8,
+                'value' => 123,
+                'expectedValue' => 123,
+            ],
+            'serialize_number_php_type_int_format_int64' => [
+                'deserialize' => false,
+                'id' => 9,
+                'value' => 123,
+                'expectedValue' => 123,
+            ],
+            'serialize_integer' => [
+                'deserialize' => false,
+                'id' => 10,
+                'value' => 123,
+                'expectedValue' => 123,
+            ],
+            'serialize_php_type_bool_empty_string' => [
                 'deserialize' => false,
                 'id' => 11,
-                'value' => 'q1werty',
-                'expectedValue' => 'q1werty',
+                'value' => 'false',
+                'expectedValue' => 'false',
+            ],
+            'serialize_php_type_bool_true_string' => [
+                'deserialize' => false,
+                'id' => 11,
+                'value' => 'true',
+                'expectedValue' => 'true',
+            ],
+            'serialize_php_type_bool_false_boolean' => [
+                'deserialize' => false,
+                'id' => 11,
+                'value' => false,
+                'expectedValue' => false,
+            ],
+            'serialize_php_type_bool_true_boolean' => [
+                'deserialize' => false,
+                'id' => 11,
+                'value' => true,
+                'expectedValue' => true,
             ],
         ];
     }
@@ -138,10 +246,10 @@ class ScalarTypesResolverTest extends TestCase
     public function testConvertSerializesValue(bool $deserialize, int $id, $value, $expectedValue): void
     {
         $convertedValue = $this->scalarTypeResolver->convert($deserialize, $id, $value);
-        Assert::assertEquals($expectedValue, $convertedValue);
+        Assert::assertSame($expectedValue, $convertedValue);
     }
 
-    public function testGetPatternReturnsNull(): void
+    public function testGetTypeWithoutPatternReturnsNull(): void
     {
         $pattern = $this->scalarTypeResolver->getPattern(0);
         Assert::assertNull($pattern);
@@ -161,26 +269,26 @@ class ScalarTypesResolverTest extends TestCase
         Assert::assertSame($expectedPhpType, $phpType);
     }
 
-    public function testIsDateTimeReturnsTrue(): void
+    public function testIsDateTimeReturnsFalseForNonDatetimeType(): void
     {
         $isDateTime = $this->scalarTypeResolver->isDateTime(0);
         Assert::assertFalse($isDateTime);
     }
 
-    public function testIsDateTimeReturnsFalse(): void
+    public function testIsDateTimeReturnsTrueForDatetimeType(): void
     {
         $isDateTime = $this->scalarTypeResolver->isDateTime(1);
         Assert::assertTrue($isDateTime);
     }
 
-    public function testFindScalarTypeTypeIsNullReturnsZero(): void
+    public function testFindScalarTypeTypeIsNullReturnsStringTypeId(): void
     {
         $scalarType         = $this->scalarTypeResolver->findScalarType(null, '');
         $expectedScalarType = 0;
         Assert::assertSame($expectedScalarType, $scalarType);
     }
 
-    public function testFindScalarTypeFormatNotSetReturnsZero(): void
+    public function testFindScalarTypeFormatNotSetReturnsStringTypeId(): void
     {
         $scalarType         = $this->scalarTypeResolver->findScalarType(Type::STRING, '');
         $expectedScalarType = 0;
@@ -206,5 +314,11 @@ class ScalarTypesResolverTest extends TestCase
         $scalarType         = $this->scalarTypeResolver->findScalarType(Type::NUMBER, '');
         $expectedScalarType = 5;
         Assert::assertSame($expectedScalarType, $scalarType);
+    }
+
+    public function tearDown(): void
+    {
+        unset($this->scalarTypeResolver);
+        parent::tearDown();
     }
 }
