@@ -12,11 +12,27 @@ use PHPUnit\Framework\TestCase;
  */
 final class ApiCallFailedTest extends TestCase
 {
+    public function testBecauseApiLoaderNotFoundPrintsCorrectMessage(): void
+    {
+        $expectedExceptionMessage = 'ApiLoader not found. Try re-generating code';
+
+        $this->expectException(ApiCallFailed::class);
+        $this->expectExceptionMessage($expectedExceptionMessage);
+
+        throw ApiCallFailed::becauseApiLoaderNotFound();
+    }
+
     public function testApiCallFailedBecauseNotImplementedPrintsInterface(): void
     {
-        $this->expectException(ApiCallFailed::class);
-        $this->expectExceptionMessage('testInterfaceName');
+        $interface = 'TestInterfaceName';
+        $expectedExceptionMessage = sprintf(
+            'Api call implementation not found. Please implement "%s" interface',
+            $interface
+        );
 
-        throw ApiCallFailed::becauseNotImplemented('testInterfaceName');
+        $this->expectException(ApiCallFailed::class);
+        $this->expectExceptionMessage($expectedExceptionMessage);
+
+        throw ApiCallFailed::becauseNotImplemented($interface);
     }
 }
