@@ -39,20 +39,8 @@ class ObjectTypeTest extends TestCase
             ->setRequired($propertyData['required'])
             ->setScalarTypeId($propertyData['scalarTypeId']);
 
-        $properties = [$property];
+        $objectType = new ObjectType([$property]);
 
-        $objectType = new ObjectType($properties);
-
-        foreach ($objectType->getProperties() as $index => $objectTypeProperty) {
-            Assert::assertSame($objectTypeProperty->getName(), $properties[$index]->getName());
-            Assert::assertSame($objectTypeProperty->getDefaultValue(), $properties[$index]->getDefaultValue());
-            Assert::assertSame($objectTypeProperty->isArray(), $properties[$index]->isArray());
-            Assert::assertSame($objectTypeProperty->getDescription(), $properties[$index]->getDescription());
-            Assert::assertSame($objectTypeProperty->isNullable(), $properties[$index]->isNullable());
-            Assert::assertSame($objectTypeProperty->getObjectTypeDefinition(), $properties[$index]->getObjectTypeDefinition());
-            Assert::assertSame($objectTypeProperty->getPattern(), $properties[$index]->getPattern());
-            Assert::assertSame($objectTypeProperty->isRequired(), $properties[$index]->isRequired());
-            Assert::assertSame($objectTypeProperty->getScalarTypeId(), $properties[$index]->getScalarTypeId());
-        }
+        Assert::assertSame([$property], $objectType->getProperties());
     }
 }
