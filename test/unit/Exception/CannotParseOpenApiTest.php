@@ -14,7 +14,7 @@ use function Safe\sprintf;
  */
 final class CannotParseOpenApiTest extends TestCase
 {
-    public function tesBecauseNoOperationIdSpecifiedShowsCorrectErrorMessage(): void
+    public function testBecauseNoOperationIdSpecifiedShowsCorrectErrorMessage(): void
     {
         $context = [
             'method' => 'testMethod',
