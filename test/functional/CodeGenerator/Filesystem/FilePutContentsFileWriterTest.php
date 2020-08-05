@@ -15,7 +15,7 @@ use function Safe\unlink;
 use const DIRECTORY_SEPARATOR;
 
 /**
- * @covers \OnMoon\OpenApiServerBundle\Test\Unit\CodeGenerator\Filesystem\FilePutContentsFileWriter
+ * @covers \OnMoon\OpenApiServerBundle\CodeGenerator\Filesystem\FilePutContentsFileWriter
  */
 final class FilePutContentsFileWriterTest extends TestCase
 {
