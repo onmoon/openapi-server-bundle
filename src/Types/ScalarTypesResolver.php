@@ -9,7 +9,7 @@ use cebe\openapi\spec\Type;
 use function is_string;
 use function Safe\settype;
 
-class ScalarTypesResolver
+final class ScalarTypesResolver
 {
     /**
      * @psalm-var list<array{
