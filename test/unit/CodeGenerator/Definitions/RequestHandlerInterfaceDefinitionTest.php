@@ -57,7 +57,7 @@ final class RequestHandlerInterfaceDefinitionTest extends TestCase
         /** @var ClassDefinition|MockObject $responseTypeClassDefinitionMock */
         $responseTypeClassDefinitionMock = $this->createMock(ClassDefinition::class);
 
-        $payload['requestType'] = (bool) $conditions['hasRequestType'] ? $requestTypeClassDefinitionMock : null;
+        $payload['requestType']  = (bool) $conditions['hasRequestType'] ? $requestTypeClassDefinitionMock : null;
         $payload['responseType'] = (bool) $conditions['hasResponseType'] ? $responseTypeClassDefinitionMock : null;
 
         $requestHandlerInterfaceDefinition = new RequestHandlerInterfaceDefinition();

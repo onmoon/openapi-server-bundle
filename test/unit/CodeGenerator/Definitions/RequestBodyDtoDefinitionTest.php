@@ -22,14 +22,10 @@ final class RequestBodyDtoDefinitionTest extends TestCase
     {
         return [
             [
-                'conditions' => [
-                    'hasProperties' => false,
-                ],
+                'conditions' => ['hasProperties' => false],
             ],
             [
-                'conditions' => [
-                    'hasProperties' => true,
-                ],
+                'conditions' => ['hasProperties' => true],
             ],
         ];
     }

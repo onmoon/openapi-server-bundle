@@ -23,14 +23,10 @@ final class SpecificationDefinitionTest extends TestCase
     {
         return [
             [
-                'conditions' => [
-                    'hasOperations' => false,
-                ],
+                'conditions' => ['hasOperations' => false],
             ],
             [
-                'conditions' => [
-                    'hasOperations' => true,
-                ],
+                'conditions' => ['hasOperations' => true],
             ],
         ];
     }
@@ -47,9 +43,9 @@ final class SpecificationDefinitionTest extends TestCase
         /** @var OperationDefinition|MockObject $operationDefinitionMock */
         $operationDefinitionMock = $this->createMock(OperationDefinition::class);
 
-        $payload = [];
+        $payload                  = [];
         $payload['specification'] = $specificationConfigMock;
-        $payload['operations'] = (bool) $conditions['hasOperations'] ? [$operationDefinitionMock] : [];
+        $payload['operations']    = (bool) $conditions['hasOperations'] ? [$operationDefinitionMock] : [];
 
         $specificationDefinition = new SpecificationDefinition(
             $payload['specification'],

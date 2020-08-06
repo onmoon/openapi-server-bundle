@@ -22,14 +22,10 @@ final class ServiceSubscriberDefinitionTest extends TestCase
     {
         return [
             [
-                'conditions' => [
-                    'hasImplements' => false,
-                ],
+                'conditions' => ['hasImplements' => false],
             ],
             [
-                'conditions' => [
-                    'hasImplements' => true,
-                ],
+                'conditions' => ['hasImplements' => true],
             ],
         ];
     }
@@ -44,7 +40,7 @@ final class ServiceSubscriberDefinitionTest extends TestCase
         /** @var ClassDefinition|MockObject $classDefinitionMock */
         $classDefinitionMock = $this->createMock(ClassDefinition::class);
 
-        $payload = [];
+        $payload               = [];
         $payload['implements'] = (bool) $conditions['hasImplements'] ? [$classDefinitionMock] : [];
 
         $serviceSubscriberDefinition = new ServiceSubscriberDefinition();

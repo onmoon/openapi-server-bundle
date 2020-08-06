@@ -22,15 +22,11 @@ final class RequestParametersDtoDefinitionTest extends TestCase
     {
         return [
             [
-                'conditions' => [
-                    'hasProperties' => false,
-                ],
+                'conditions' => ['hasProperties' => false],
                 'expected' => ['isEmpty' => true],
             ],
             [
-                'conditions' => [
-                    'hasProperties' => true,
-                ],
+                'conditions' => ['hasProperties' => true],
                 'expected' => ['isEmpty' => false],
             ],
         ];
@@ -47,8 +43,8 @@ final class RequestParametersDtoDefinitionTest extends TestCase
         /** @var PropertyDefinition|MockObject $propertyDefinitionMock */
         $propertyDefinitionMock = $this->createMock(PropertyDefinition::class);
 
-        $payload = [];
-        $payload['properties'] = (bool)$conditions['hasProperties'] ? [$propertyDefinitionMock] : [];
+        $payload               = [];
+        $payload['properties'] = (bool) $conditions['hasProperties'] ? [$propertyDefinitionMock] : [];
 
         $requestParametersDtoDefinition = new RequestParametersDtoDefinition($payload['properties']);
 

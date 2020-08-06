@@ -28,9 +28,7 @@ final class RequestDtoDefinitionTest extends TestCase
                     'hasQueryParameters' => false,
                     'hasPathParameters' => false,
                 ],
-                'expected' => [
-                    'isEmpty' => true,
-                ],
+                'expected' => ['isEmpty' => true],
             ],
             [
                 'conditions' => [
@@ -38,9 +36,7 @@ final class RequestDtoDefinitionTest extends TestCase
                     'hasQueryParameters' => false,
                     'hasPathParameters' => true,
                 ],
-                'expected' => [
-                    'isEmpty' => false,
-                ],
+                'expected' => ['isEmpty' => false],
             ],
             [
                 'conditions' => [
@@ -48,9 +44,7 @@ final class RequestDtoDefinitionTest extends TestCase
                     'hasQueryParameters' => true,
                     'hasPathParameters' => false,
                 ],
-                'expected' => [
-                    'isEmpty' => false,
-                ],
+                'expected' => ['isEmpty' => false],
             ],
             [
                 'conditions' => [
@@ -58,9 +52,7 @@ final class RequestDtoDefinitionTest extends TestCase
                     'hasQueryParameters' => false,
                     'hasPathParameters' => false,
                 ],
-                'expected' => [
-                    'isEmpty' => false,
-                ],
+                'expected' => ['isEmpty' => false],
             ],
             [
                 'conditions' => [
@@ -68,9 +60,7 @@ final class RequestDtoDefinitionTest extends TestCase
                     'hasQueryParameters' => true,
                     'hasPathParameters' => false,
                 ],
-                'expected' => [
-                    'isEmpty' => false,
-                ],
+                'expected' => ['isEmpty' => false],
             ],
             [
                 'conditions' => [
@@ -78,9 +68,7 @@ final class RequestDtoDefinitionTest extends TestCase
                     'hasQueryParameters' => false,
                     'hasPathParameters' => true,
                 ],
-                'expected' => [
-                    'isEmpty' => false,
-                ],
+                'expected' => ['isEmpty' => false],
             ],
             [
                 'conditions' => [
@@ -88,9 +76,7 @@ final class RequestDtoDefinitionTest extends TestCase
                     'hasQueryParameters' => true,
                     'hasPathParameters' => true,
                 ],
-                'expected' => [
-                    'isEmpty' => false,
-                ],
+                'expected' => ['isEmpty' => false],
             ],
             [
                 'conditions' => [
@@ -98,9 +84,7 @@ final class RequestDtoDefinitionTest extends TestCase
                     'hasQueryParameters' => true,
                     'hasPathParameters' => true,
                 ],
-                'expected' => [
-                    'isEmpty' => false,
-                ],
+                'expected' => ['isEmpty' => false],
             ],
         ];
     }
@@ -120,10 +104,10 @@ final class RequestDtoDefinitionTest extends TestCase
         /** @var RequestParametersDtoDefinition|MockObject $pathParametersMock */
         $pathParametersMock = $this->createMock(RequestParametersDtoDefinition::class);
 
-        $payload = [];
+        $payload                      = [];
         $payload['bodyDtoDefinition'] = (bool) $conditions['hasBodyDtoDefinition'] ? $bodyDtoDefinitionMock : null;
-        $payload['queryParameters'] = (bool) $conditions['hasQueryParameters'] ? $queryParametersMock : null;
-        $payload['pathParameters'] = (bool) $conditions['hasPathParameters'] ? $pathParametersMock : null;
+        $payload['queryParameters']   = (bool) $conditions['hasQueryParameters'] ? $queryParametersMock : null;
+        $payload['pathParameters']    = (bool) $conditions['hasPathParameters'] ? $pathParametersMock : null;
 
         $requestDtoDefinition = new RequestDtoDefinition(
             $payload['bodyDtoDefinition'],
