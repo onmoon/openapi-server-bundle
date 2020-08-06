@@ -1,0 +1,59 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Test API",
+    "version": "1.0"
+  },
+  "paths": {
+    "/goods/{goodId}": {
+      "get": {
+        "operationId": "getGood",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/GoodIdParam"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GoodResponseSchema"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "GoodResponseSchema": {
+        "title": "Good Response",
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "title"
+        ]
+      }
+    },
+    "parameters": {
+      "GoodIdParam": {
+        "name": "goodId",
+        "in": "path",
+        "required": true,
+        "schema": {
+          "type": "string"
+        },
+        "description": "Session ID",
+        "example": "e55e57d3b65ff510b257025746ffb6e1"
+      }
+    }
+  }
+}
