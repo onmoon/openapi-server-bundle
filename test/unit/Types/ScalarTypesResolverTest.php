@@ -23,6 +23,12 @@ class ScalarTypesResolverTest extends TestCase
         $this->scalarTypeResolver = new ScalarTypesResolver();
     }
 
+    public function tearDown(): void
+    {
+        unset($this->scalarTypeResolver);
+        parent::tearDown();
+    }
+
     /**
      * @return array|mixed[]
      *
@@ -314,11 +320,5 @@ class ScalarTypesResolverTest extends TestCase
         $scalarType         = $this->scalarTypeResolver->findScalarType(Type::NUMBER, '');
         $expectedScalarType = 5;
         Assert::assertSame($expectedScalarType, $scalarType);
-    }
-
-    public function tearDown(): void
-    {
-        unset($this->scalarTypeResolver);
-        parent::tearDown();
     }
 }
