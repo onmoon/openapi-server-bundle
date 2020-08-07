@@ -23,5 +23,9 @@
     </filter>
     <php>
         <ini name="error_reporting" value="E_ALL"/>
+        <env name="APP_ENV" value="test" />
+        <env name="KERNEL_CLASS" value="OnMoon\OpenApiServerBundle\Test\Functional\TestKernel" />
+        <env name="APP_DEBUG" value="1" />
+        <env name="APP_SECRET" value="s$cretf0rt3st" />
     </php>
 </phpunit>
