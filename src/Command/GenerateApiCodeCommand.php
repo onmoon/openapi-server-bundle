@@ -13,7 +13,7 @@ use Symfony\Contracts\Cache\TagAwareCacheInterface;
 
 use function Safe\sprintf;
 
-class GenerateApiCodeCommand extends Command
+final class GenerateApiCodeCommand extends Command
 {
     public const COMMAND = 'open-api:generate';
 

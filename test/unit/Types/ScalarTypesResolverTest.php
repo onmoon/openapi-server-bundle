@@ -12,7 +12,7 @@ use Safe\DateTime;
 use Safe\Exceptions\DatetimeException;
 
 /**
- * @covers  \OnMoon\OpenApiServerBundle\Types\ScalarTypesResolver
+ * @covers \OnMoon\OpenApiServerBundle\Types\ScalarTypesResolver
  */
 class ScalarTypesResolverTest extends TestCase
 {
@@ -139,6 +139,13 @@ class ScalarTypesResolverTest extends TestCase
     public function testConvertDeserializesValue(bool $deserialize, int $id, $value, $expectedValue): void
     {
         $convertedValue = $this->scalarTypeResolver->convert($deserialize, $id, $value);
+
+        if ($expectedValue instanceof DateTime && $convertedValue instanceof DateTime) {
+            Assert::assertEqualsWithDelta($expectedValue->getTimestamp(), $convertedValue->getTimestamp(), 5);
+
+            return;
+        }
+
         Assert::assertEquals($expectedValue, $convertedValue);
     }
 

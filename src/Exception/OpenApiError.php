@@ -6,6 +6,6 @@ namespace OnMoon\OpenApiServerBundle\Exception;
 
 use Exception;
 
-class OpenApiError extends Exception
+abstract class OpenApiError extends Exception
 {
 }

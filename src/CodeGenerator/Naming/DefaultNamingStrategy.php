@@ -22,7 +22,7 @@ use function ucwords;
 
 use const DIRECTORY_SEPARATOR;
 
-class DefaultNamingStrategy implements NamingStrategy
+final class DefaultNamingStrategy implements NamingStrategy
 {
     private ReservedWords $reservedWords;
     private string $rootNamespace;

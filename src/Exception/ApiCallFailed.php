@@ -6,7 +6,7 @@ namespace OnMoon\OpenApiServerBundle\Exception;
 
 use function Safe\sprintf;
 
-class ApiCallFailed extends OpenApiError
+final class ApiCallFailed extends OpenApiError
 {
     public static function becauseApiLoaderNotFound(): self
     {

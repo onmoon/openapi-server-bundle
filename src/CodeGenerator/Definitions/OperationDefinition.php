@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace OnMoon\OpenApiServerBundle\CodeGenerator\Definitions;
 
-class OperationDefinition
+final class OperationDefinition
 {
     private string $url;
     private string $method;
