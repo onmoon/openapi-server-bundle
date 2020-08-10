@@ -17,7 +17,7 @@ use Symfony\Contracts\EventDispatcher\Event;
  * * Property attributes, getters and setters,
  * * Base interfaces and classes.
  */
-class ClassGraphReadyEvent extends Event
+final class ClassGraphReadyEvent extends Event
 {
     private GraphDefinition $graph;
 

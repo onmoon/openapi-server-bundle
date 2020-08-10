@@ -15,7 +15,7 @@ use Symfony\Contracts\EventDispatcher\Event;
  * This event allows you to modify the Response object before
  * the server will emit it to the client
  */
-class ResponseEvent extends Event
+final class ResponseEvent extends Event
 {
     private Response $response;
     private string $operationId;
