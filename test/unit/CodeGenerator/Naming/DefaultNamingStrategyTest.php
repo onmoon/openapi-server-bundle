@@ -10,19 +10,25 @@ use OnMoon\OpenApiServerBundle\CodeGenerator\Naming\DefaultNamingStrategy;
 use PHPUnit\Framework\TestCase;
 use sspat\ReservedWords\ReservedWords;
 
-use function Safe\sprintf;
+use const DIRECTORY_SEPARATOR;
 
 /**
  * @covers \OnMoon\OpenApiServerBundle\CodeGenerator\Naming\DefaultNamingStrategy
  */
 class DefaultNamingStrategyTest extends TestCase
 {
+    private DefaultNamingStrategy $defaultNamingStrategy;
+
     public function setUp(): void
     {
-        $reservedWords = new ReservedWords(['SomeReservedWord']);
+        $someReservedWords           = ['key' => 'SomeReservedWord'];
+        $reservedWords               = new ReservedWords(['keySome' => $someReservedWords]);
         $this->defaultNamingStrategy = new DefaultNamingStrategy($reservedWords, 'NameSpace', '0');
     }
 
+    /**
+     * @return array<int, array<int, bool|string>>
+     */
     public function isAllowedPhpPropertyNameDataProvider(): array
     {
         return [
@@ -36,14 +42,16 @@ class DefaultNamingStrategyTest extends TestCase
     /**
      * @dataProvider isAllowedPhpPropertyNameDataProvider
      */
-    public function testIsAllowedPhpPropertyName($name, $expectedResult): void
+    public function testIsAllowedPhpPropertyName(string $name, bool $expectedResult): void
     {
         $actualResult = $this->defaultNamingStrategy->isAllowedPhpPropertyName($name);
 
-        $this->assertEquals($expectedResult, $actualResult);
+        TestCase::assertEquals($expectedResult, $actualResult);
     }
 
-
+    /**
+     * @return array<int, array<int, bool|string>>
+     */
     public function stringToMethodNameDataProvider(): array
     {
         return [
@@ -58,9 +66,9 @@ class DefaultNamingStrategyTest extends TestCase
     /**
      * @dataProvider stringToMethodNameDataProvider
      */
-    public function testStringToMethodNameData($string, $expectedOutput): void
+    public function testStringToMethodNameData(string $string, string $expectedOutput): void
     {
-        $actualOutput  = $this->defaultNamingStrategy->stringToMethodName($string);
+        $actualOutput = $this->defaultNamingStrategy->stringToMethodName($string);
 
         TestCase::assertEquals($actualOutput, $expectedOutput);
     }
@@ -76,7 +84,7 @@ class DefaultNamingStrategyTest extends TestCase
     public function testStringToNamespace(): void
     {
         $expectedOutput = 'SomeRandomString';
-        $actualOutput = $this->defaultNamingStrategy->stringToNamespace('SomeRandomString');
+        $actualOutput   = $this->defaultNamingStrategy->stringToNamespace('SomeRandomString');
 
         TestCase::assertEquals($expectedOutput, $actualOutput);
     }
@@ -84,7 +92,7 @@ class DefaultNamingStrategyTest extends TestCase
     public function testStringToNamespaceThrowsExceptionIfEmptyString(): void
     {
         $this->expectException(CannotCreateNamespace::class);
-        $this->expectExceptionMessage("Cannot create namespace from text: . Text contains no characters that can be used.");
+        $this->expectExceptionMessage('Cannot create namespace from text: . Text contains no characters that can be used.');
 
         $this->defaultNamingStrategy->stringToNamespace('');
     }
@@ -92,7 +100,7 @@ class DefaultNamingStrategyTest extends TestCase
     public function testStringToMethodName(): void
     {
         $expectedOutput = 'someRandomString';
-        $actualOutput = $this->defaultNamingStrategy->stringToMethodName('SomeRandomString');
+        $actualOutput   = $this->defaultNamingStrategy->stringToMethodName('SomeRandomString');
 
         TestCase::assertEquals($expectedOutput, $actualOutput);
     }
@@ -100,7 +108,7 @@ class DefaultNamingStrategyTest extends TestCase
     public function testStringToMethodNameThrowsExceptionIfEmptyString(): void
     {
         $this->expectException(CannotCreatePropertyName::class);
-        $this->expectExceptionMessage("Cannot create property name from text: . Text contains no characters that can be used.");
+        $this->expectExceptionMessage('Cannot create property name from text: . Text contains no characters that can be used.');
 
         $this->defaultNamingStrategy->stringToMethodName('');
     }

@@ -16,7 +16,7 @@ class CannotCreateNamespaceTest extends TestCase
 {
     public function testBecauseTestContainsNoValidSymbolsShowCorrectError(): void
     {
-        $text = "Some random text";
+        $text = 'Some random text';
 
         $exceptionMessage = sprintf(
             'Cannot create namespace from text: %s. Text contains no characters that can be used.',

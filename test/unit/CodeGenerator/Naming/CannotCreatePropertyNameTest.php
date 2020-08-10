@@ -16,7 +16,7 @@ final class CannotCreatePropertyNameTest extends TestCase
 {
     public function testBecauseTextContainsNoValidSymbolsShowsCorrectError(): void
     {
-        $text = "Some random text";
+        $text = 'Some random text';
 
         $exceptionMessage = sprintf(
             'Cannot create property name from text: %s. Text contains no characters that can be used.',
@@ -31,7 +31,7 @@ final class CannotCreatePropertyNameTest extends TestCase
 
     public function testBecauseIsNotValidPhpPropertyNameShowsCorrectError(): void
     {
-        $text = "Some random text";
+        $text = 'Some random text';
 
         $exceptionMessage = sprintf(
             'Cannot create property name from: %s. String is not a valid PHP property name.',
