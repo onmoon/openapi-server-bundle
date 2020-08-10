@@ -6,13 +6,24 @@ namespace OnMoon\OpenApiServerBundle\Test\Functional\Command;
 
 use OnMoon\OpenApiServerBundle\Command\GenerateApiCodeCommand;
 use PHPUnit\Framework\Assert;
+use Symfony\Component\Console\Tester\CommandTester;
 use Symfony\Component\Filesystem\Filesystem;
 
 use function Safe\sprintf;
 use function ucfirst;
 
+/**
+ * @covers \OnMoon\OpenApiServerBundle\Command\GenerateApiCodeCommand
+ */
 class GenerateApiCodeCommandTest extends CommandTestCase
 {
+    public function setUp(): void
+    {
+        parent::setUp();
+        $command             = $this->application->find(GenerateApiCodeCommand::COMMAND);
+        $this->commandTester = new CommandTester($command);
+    }
+
     public function tearDown(): void
     {
         $filesystem = new Filesystem();

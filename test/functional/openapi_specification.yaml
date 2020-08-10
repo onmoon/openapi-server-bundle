@@ -33,4 +33,4 @@ components:
       schema:
         type: string
       description: Good ID
-      example: e55e57d3b65ff510b257025746ffb6e1
+      example: 136

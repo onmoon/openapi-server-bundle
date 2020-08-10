@@ -16,8 +16,8 @@ class TestKernel extends BaseKernel
 {
     use MicroKernelTrait;
 
-    public static string $rootPath      = '';
-    public static string $rootNamespace = '';
+    public static string $bundleRootPath = __DIR__ . '/Generated';
+    public static string $bundleRootNamespace = __NAMESPACE__ . '\Generated';
 
     protected function build(ContainerBuilder $container): void
     {
@@ -29,14 +29,19 @@ class TestKernel extends BaseKernel
             'media_type' => 'application/json',
         ];
         $container->prependExtensionConfig('open_api_server', [
-            'root_path' => static::$rootPath,
-            'root_name_space' => static::$rootNamespace,
+            'root_path' => static::$bundleRootPath,
+            'root_name_space' => static::$bundleRootNamespace,
             'language_level' => '7.4.0',
             'generated_dir_permissions' => 0755,
             'full_doc_blocks' => false,
             'send_nulls' => false,
             'specs' => [$specificationName => $specification],
         ]);
+
+        $container->prependExtensionConfig(
+            'framework',
+            ['test' => true]
+        );
     }
 
     protected function configureContainer(ContainerConfigurator $container): void
@@ -45,6 +50,7 @@ class TestKernel extends BaseKernel
 
     protected function configureRoutes(RoutingConfigurator $routes): void
     {
+        $routes->import(__DIR__ . '/routes.yaml');
     }
 
     /**
