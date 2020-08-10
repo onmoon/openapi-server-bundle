@@ -10,8 +10,8 @@ use Symfony\Component\Console\Tester\CommandTester;
 use Symfony\Component\Filesystem\Filesystem;
 
 use function Safe\file_put_contents;
-use function Safe\sprintf;
 use function Safe\mkdir;
+use function Safe\sprintf;
 
 /**
  * @covers \OnMoon\OpenApiServerBundle\Command\DeleteGeneratedCodeCommand

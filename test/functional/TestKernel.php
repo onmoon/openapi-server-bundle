@@ -16,7 +16,7 @@ class TestKernel extends BaseKernel
 {
     use MicroKernelTrait;
 
-    public static string $bundleRootPath = __DIR__ . '/Generated';
+    public static string $bundleRootPath      = __DIR__ . '/Generated';
     public static string $bundleRootNamespace = __NAMESPACE__ . '\Generated';
 
     protected function build(ContainerBuilder $container): void
