@@ -16,7 +16,7 @@ use function Safe\preg_match;
 use function Safe\preg_replace;
 use function str_replace;
 
-class OpenApiServerExtension extends Extension implements ExtensionInterface
+final class OpenApiServerExtension extends Extension implements ExtensionInterface
 {
     /**
      * @param mixed[] $configs

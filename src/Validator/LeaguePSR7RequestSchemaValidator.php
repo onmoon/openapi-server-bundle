@@ -10,7 +10,7 @@ use OnMoon\OpenApiServerBundle\Specification\Definitions\Specification;
 use Symfony\Bridge\PsrHttpMessage\Factory\PsrHttpFactory;
 use Symfony\Component\HttpFoundation\Request;
 
-class LeaguePSR7RequestSchemaValidator implements RequestSchemaValidator
+final class LeaguePSR7RequestSchemaValidator implements RequestSchemaValidator
 {
     private ValidatorBuilder $validatorBuilder;
     private PsrHttpFactory $httpFactory;

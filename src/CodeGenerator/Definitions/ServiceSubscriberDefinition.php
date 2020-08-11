@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace OnMoon\OpenApiServerBundle\CodeGenerator\Definitions;
 
-class ServiceSubscriberDefinition extends GeneratedClassDefinition
+final class ServiceSubscriberDefinition extends GeneratedClassDefinition
 {
     /** @var ClassDefinition[] */
     private array $implements = [];

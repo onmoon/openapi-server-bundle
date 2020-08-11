@@ -17,7 +17,7 @@ use function array_map;
 use function is_resource;
 use function Safe\json_decode;
 
-class ArrayDtoSerializer implements DtoSerializer
+final class ArrayDtoSerializer implements DtoSerializer
 {
     private ScalarTypesResolver $resolver;
     private bool $sendNotRequiredNullableNulls;

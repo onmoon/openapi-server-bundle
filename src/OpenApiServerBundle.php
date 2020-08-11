@@ -9,7 +9,7 @@ use OnMoon\OpenApiServerBundle\Interfaces\ApiLoader;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\HttpKernel\Bundle\Bundle;
 
-class OpenApiServerBundle extends Bundle
+final class OpenApiServerBundle extends Bundle
 {
     public const API_LOADER_TAG = 'openapi.api_loader';
 

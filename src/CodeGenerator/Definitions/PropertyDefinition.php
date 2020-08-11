@@ -6,7 +6,7 @@ namespace OnMoon\OpenApiServerBundle\CodeGenerator\Definitions;
 
 use OnMoon\OpenApiServerBundle\Specification\Definitions\Property;
 
-class PropertyDefinition
+final class PropertyDefinition
 {
     private Property $specProperty;
     private string $classPropertyName;
