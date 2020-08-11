@@ -191,8 +191,8 @@ class SpecificationLoaderTest extends TestCase
             $this->cache
         );
 
-        $specificationFileName       = 'specification.json';
-        $specificationArray          = $this->getSpecificationArray($specificationFileName);
+        $specificationFileName = 'specification.json';
+        $specificationArray    = $this->getSpecificationArray($specificationFileName);
         $specificationLoader->registerSpec(self::SPECIFICATION_NAME, $specificationArray);
 
         /**
@@ -200,7 +200,7 @@ class SpecificationLoaderTest extends TestCase
          */
         $this->expectException(Exception::class);
         $this->expectExceptionMessage(sprintf('OpenApi spec "%s" is not registered in bundle config, ' .
-            'Registered specs are: %s.',$specificationName,self::SPECIFICATION_NAME));
+            'Registered specs are: %s.', $specificationName, self::SPECIFICATION_NAME));
 
         $specificationLoader->get($specificationName);
     }
