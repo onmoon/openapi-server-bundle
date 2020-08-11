@@ -11,7 +11,10 @@ use Symfony\Component\Console\Tester\CommandTester;
 
 abstract class CommandTestCase extends KernelTestCase
 {
-    /** @var string  */
+    /**
+     * phpcs:disable SlevomatCodingStandard.TypeHints.PropertyTypeHint.MissingNativeTypeHint
+     * @var string $class
+     */
     protected static $class = TestKernel::class;
 
     protected string $openapiNamespace   = 'PetStore';

@@ -7,6 +7,7 @@ parameters:
     treatPhpDocTypesAsCertain: false
     excludes_analyse:
         - 'src/DependencyInjection/Configuration.php'
+        - 'test/functional/Generated/GetGoodImpl.php'
     ignoreErrors:
         -
             message: '#Variable method call on OnMoon\\OpenApiServerBundle\\Interfaces\\RequestHandler.#'

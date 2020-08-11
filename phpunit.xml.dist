@@ -24,5 +24,6 @@
     <php>
         <ini name="error_reporting" value="E_ALL"/>
         <env name="APP_ENV" value="test" />
+        <env name="APP_DEBUG" value="false" />
     </php>
 </phpunit>
