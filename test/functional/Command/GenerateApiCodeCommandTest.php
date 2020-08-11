@@ -9,6 +9,7 @@ use PHPUnit\Framework\Assert;
 use Symfony\Component\Console\Tester\CommandTester;
 use Symfony\Component\Filesystem\Filesystem;
 
+use function rtrim;
 use function Safe\sprintf;
 use function ucfirst;
 
@@ -38,7 +39,7 @@ class GenerateApiCodeCommandTest extends CommandTestCase
         ]);
 
         $output = $this->commandTester->getDisplay();
-        Assert::assertEquals(sprintf('API server code generated in: %s', $this->pathForFileGeneration . "\n"), $output);
+        Assert::assertEquals(sprintf('API server code generated in: %s', $this->pathForFileGeneration), rtrim($output));
 
         Assert::assertDirectoryExists($this->pathForFileGeneration);
         Assert::assertDirectoryIsReadable($this->pathForFileGeneration);

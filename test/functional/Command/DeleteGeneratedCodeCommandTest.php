@@ -9,6 +9,7 @@ use PHPUnit\Framework\Assert;
 use Symfony\Component\Console\Tester\CommandTester;
 use Symfony\Component\Filesystem\Filesystem;
 
+use function rtrim;
 use function Safe\file_put_contents;
 use function Safe\mkdir;
 use function Safe\sprintf;
@@ -46,7 +47,7 @@ class DeleteGeneratedCodeCommandTest extends CommandTestCase
         ]);
 
         $output = $this->commandTester->getDisplay();
-        Assert::assertEquals(sprintf('Delete all contents of the directory %1$s? (y/n): All contents of directory were deleted: %1$s' . "\n", $this->pathForFileGeneration), $output);
+        Assert::assertEquals(sprintf('Delete all contents of the directory %1$s? (y/n): All contents of directory were deleted: %1$s', $this->pathForFileGeneration), rtrim($output));
         Assert::assertFileDoesNotExist($this->pathForFileGeneration . '/test.txt');
     }
 
@@ -59,7 +60,7 @@ class DeleteGeneratedCodeCommandTest extends CommandTestCase
         ]);
 
         $output = $this->commandTester->getDisplay();
-        Assert::assertEquals(sprintf('Delete all contents of the directory %1$s? (y/n): ', $this->pathForFileGeneration), $output);
+        Assert::assertEquals(sprintf('Delete all contents of the directory %1$s? (y/n):', $this->pathForFileGeneration), rtrim($output));
         Assert::assertDirectoryExists($this->pathForFileGeneration);
         Assert::assertFileExists($this->pathForFileGeneration . '/test.txt');
     }
