@@ -14,7 +14,7 @@ use Symfony\Contracts\EventDispatcher\Event;
  * This event allows you to modify generated files content,
  * e.g. change code style.
  */
-class FilesReadyEvent extends Event
+final class FilesReadyEvent extends Event
 {
     /** @var GeneratedFileDefinition[] */
     private array $files;

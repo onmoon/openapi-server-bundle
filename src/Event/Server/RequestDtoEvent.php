@@ -22,7 +22,7 @@ use Symfony\Contracts\EventDispatcher\Event;
  *
  * @see \Symfony\Component\HttpKernel\Event\RequestEvent
  */
-class RequestDtoEvent extends Event
+final class RequestDtoEvent extends Event
 {
     private ?Dto $requestDto;
     private string $operationId;

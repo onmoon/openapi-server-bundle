@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace OnMoon\OpenApiServerBundle\Test\Unit\Event\Server;
 
+use cebe\openapi\spec\OpenApi;
 use OnMoon\OpenApiServerBundle\Event\Server\RequestDtoEvent;
 use OnMoon\OpenApiServerBundle\Interfaces\Dto;
 use OnMoon\OpenApiServerBundle\Specification\Definitions\Specification;
@@ -17,14 +18,30 @@ final class RequestDtoEventTest extends TestCase
 {
     public function testRequestDtoEventGettersReturnCorrectValues(): void
     {
-        $requestDtoMock    = $this->createMock(Dto::class);
-        $operationId       = '12345';
-        $specificationMock = $this->createMock(Specification::class);
+        $requestDto    = new class () implements Dto {
+            /**
+             * @return mixed[]
+             */
+            public function toArray(): array
+            {
+                return [];
+            }
 
-        $requestDtoEvent = new RequestDtoEvent($requestDtoMock, $operationId, $specificationMock);
+            /**
+             * @param mixed[] $data
+             */
+            public static function fromArray(array $data): Dto
+            {
+                return new self();
+            }
+        };
+        $operationId   = '12345';
+        $specification = new Specification([], new OpenApi([]));
 
-        Assert::assertEquals($requestDtoMock, $requestDtoEvent->getRequestDto());
+        $requestDtoEvent = new RequestDtoEvent($requestDto, $operationId, $specification);
+
+        Assert::assertEquals($requestDto, $requestDtoEvent->getRequestDto());
         Assert::assertEquals($operationId, $requestDtoEvent->getOperationId());
-        Assert::assertEquals($specificationMock, $requestDtoEvent->getSpecification());
+        Assert::assertEquals($specification, $requestDtoEvent->getSpecification());
     }
 }

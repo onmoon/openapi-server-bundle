@@ -20,7 +20,7 @@ class DtoDefinition extends GeneratedClassDefinition
         $this->properties = $properties;
     }
 
-    public function isEmpty(): bool
+    final public function isEmpty(): bool
     {
         return count($this->properties) === 0;
     }
@@ -28,12 +28,12 @@ class DtoDefinition extends GeneratedClassDefinition
     /**
      * @return PropertyDefinition[]
      */
-    public function getProperties(): array
+    final public function getProperties(): array
     {
         return $this->properties;
     }
 
-    public function getImplements(): ?ClassDefinition
+    final public function getImplements(): ?ClassDefinition
     {
         return $this->implements;
     }
@@ -41,7 +41,7 @@ class DtoDefinition extends GeneratedClassDefinition
     /**
      * @return DtoDefinition
      */
-    public function setImplements(?ClassDefinition $implements): self
+    final public function setImplements(?ClassDefinition $implements): self
     {
         $this->implements = $implements;
 

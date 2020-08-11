@@ -6,7 +6,7 @@ namespace OnMoon\OpenApiServerBundle\Specification\Definitions;
 
 use cebe\openapi\spec\OpenApi;
 
-class Specification
+final class Specification
 {
     /**
      * @var Operation[]

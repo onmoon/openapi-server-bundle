@@ -27,27 +27,8 @@ class LeaguePSR7RequestSchemaValidatorTest extends TestCase
         $openApi     = new OpenApi([]);
         $request     = new Request();
 
-        $operation = $this->createMock(Operation::class);
-        $operation
-            ->expects(self::once())
-            ->method('getUrl')
-            ->willReturn('test_url');
-        $operation
-            ->expects(self::once())
-            ->method('getMethod')
-            ->willReturn('test_method');
-
-        $specification = $this->createMock(Specification::class);
-        $specification
-            ->expects(self::once())
-            ->method('getOperation')
-            ->with($operationId)
-            ->willReturn($operation);
-
-        $specification
-            ->expects(self::once())
-            ->method('getOpenApi')
-            ->willReturn($openApi);
+        $operation     = new Operation('test_url', 'test_method', 'RequestHandler');
+        $specification = new Specification([$operationId => $operation], $openApi);
 
         $validatorBuilderMock = $this->createMock(ValidatorBuilder::class);
         $validatorBuilderMock

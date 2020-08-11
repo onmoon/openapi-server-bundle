@@ -11,7 +11,7 @@ use Symfony\Component\DependencyInjection\Reference;
 
 use function array_keys;
 
-class CompilerPass implements CompilerPassInterface
+final class CompilerPass implements CompilerPassInterface
 {
     private string $tag;
 

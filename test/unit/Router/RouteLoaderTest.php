@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace OnMoon\OpenApiServerBundle\Test\Unit\Router;
 
+use cebe\openapi\spec\OpenApi;
 use OnMoon\OpenApiServerBundle\Router\RouteLoader;
 use OnMoon\OpenApiServerBundle\Specification\Definitions\ObjectType;
 use OnMoon\OpenApiServerBundle\Specification\Definitions\Operation;
@@ -27,12 +28,8 @@ final class RouteLoaderTest extends TestCase
 
     /** @var SpecificationLoader|MockObject */
     private $specificationLoaderMock;
-
     /** @var ArgumentResolver|MockObject */
     private $argumentResolverMock;
-
-    /** @var Specification|MockObject */
-    private $specificationMock;
 
     public function setUp(): void
     {
@@ -40,15 +37,13 @@ final class RouteLoaderTest extends TestCase
 
         $this->specificationLoaderMock = $this->createMock(SpecificationLoader::class);
         $this->argumentResolverMock    = $this->createMock(ArgumentResolver::class);
-        $this->specificationMock       = $this->createMock(Specification::class);
     }
 
     protected function tearDown(): void
     {
         unset(
             $this->specificationLoaderMock,
-            $this->argumentResolverMock,
-            $this->specificationMock
+            $this->argumentResolverMock
         );
 
         parent::tearDown();
@@ -118,16 +113,13 @@ final class RouteLoaderTest extends TestCase
 
         $expectedOperationsCount = count($operations);
 
+        $specification = new Specification($operations, new OpenApi([]));
+
         $this->specificationLoaderMock
             ->expects(self::once())
             ->method('load')
             ->with($resource)
-            ->willReturn($this->specificationMock);
-
-        $this->specificationMock
-            ->expects(self::once())
-            ->method('getOperations')
-            ->willReturn($operations);
+            ->willReturn($specification);
 
         $this->argumentResolverMock
             ->expects(self::exactly($expectedOperationsCount))

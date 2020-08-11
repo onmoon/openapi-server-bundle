@@ -6,7 +6,7 @@ namespace OnMoon\OpenApiServerBundle\CodeGenerator\Definitions;
 
 use OnMoon\OpenApiServerBundle\Specification\Definitions\SpecificationConfig;
 
-class SpecificationDefinition
+final class SpecificationDefinition
 {
     private SpecificationConfig $specification;
     /** @var OperationDefinition[] */

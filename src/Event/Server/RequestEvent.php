@@ -16,7 +16,7 @@ use Symfony\Contracts\EventDispatcher\Event;
  * objects prior to performing the validation and processing
  * the request
  */
-class RequestEvent extends Event
+final class RequestEvent extends Event
 {
     private Request $request;
     private string $operationId;

@@ -24,7 +24,7 @@ use Symfony\Contracts\EventDispatcher\Event;
  *
  * @see \Symfony\Component\HttpKernel\Event\ResponseEvent
  */
-class ResponseDtoEvent extends Event
+final class ResponseDtoEvent extends Event
 {
     private ?ResponseDto $responseDto;
     private string $operationId;

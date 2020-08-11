@@ -20,7 +20,7 @@ use function Safe\rmdir;
 use function Safe\sprintf;
 use function Safe\unlink;
 
-class DeleteGeneratedCodeCommand extends Command
+final class DeleteGeneratedCodeCommand extends Command
 {
     public const COMMAND = 'open-api:delete';
 

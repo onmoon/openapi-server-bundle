@@ -14,7 +14,7 @@ use Symfony\Component\Process\Process;
 
 use function Safe\sprintf;
 
-class RefreshApiCodeCommand extends Command
+final class RefreshApiCodeCommand extends Command
 {
     private string $rootPath;
 

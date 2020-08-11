@@ -42,7 +42,7 @@ use const JSON_PRETTY_PRINT;
 use const JSON_THROW_ON_ERROR;
 use const JSON_UNESCAPED_UNICODE;
 
-class ApiController
+final class ApiController
 {
     private ?ApiLoader $apiLoader = null;
     private SpecificationLoader $specificationLoader;

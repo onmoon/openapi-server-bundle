@@ -12,36 +12,36 @@ class ClassDefinition
     private string $className;
     private string $namespace;
 
-    public function getClassName(): string
+    final public function getClassName(): string
     {
         return $this->className;
     }
 
-    public function setClassName(string $className): self
+    final public function setClassName(string $className): self
     {
         $this->className = $className;
 
         return $this;
     }
 
-    public function getNamespace(): string
+    final public function getNamespace(): string
     {
         return $this->namespace;
     }
 
-    public function setNamespace(string $namespace): self
+    final public function setNamespace(string $namespace): self
     {
         $this->namespace = $namespace;
 
         return $this;
     }
 
-    public function getFQCN(): string
+    final public function getFQCN(): string
     {
         return $this->namespace . '\\' . $this->className;
     }
 
-    public static function fromFQCN(string $className): ClassDefinition
+    final public static function fromFQCN(string $className): ClassDefinition
     {
         $lastPart = strrpos($className, '\\');
 

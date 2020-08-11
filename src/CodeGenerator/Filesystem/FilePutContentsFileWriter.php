@@ -10,7 +10,7 @@ use function Safe\mkdir;
 
 use const DIRECTORY_SEPARATOR;
 
-class FilePutContentsFileWriter implements FileWriter
+final class FilePutContentsFileWriter implements FileWriter
 {
     private int $dirPemissions;
 
