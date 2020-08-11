@@ -28,6 +28,8 @@ use function array_map;
 use function array_merge;
 use function count;
 
+use const DIRECTORY_SEPARATOR;
+
 /**
  * @covers \OnMoon\OpenApiServerBundle\CodeGenerator\NameGenerator
  */
@@ -306,7 +308,7 @@ final class NameGeneratorTest extends TestCase
             $graphDefinition->getServiceSubscriber()->getFileName()
         );
         Assert::assertSame(
-            '/Some/Custom/Path/ServiceSubscriber',
+            '/Some/Custom/Path' . DIRECTORY_SEPARATOR . 'ServiceSubscriber',
             $graphDefinition->getServiceSubscriber()->getFilePath()
         );
         Assert::assertSame(
@@ -496,7 +498,7 @@ final class NameGeneratorTest extends TestCase
         );
 
         Assert::assertSame('CustomNameRequestDto.php', $root->getFileName());
-        Assert::assertSame('Custom/Path/Dto/Request', $root->getFilePath());
+        Assert::assertSame('Custom/Path' . DIRECTORY_SEPARATOR . 'Dto' . DIRECTORY_SEPARATOR . 'Request', $root->getFilePath());
         Assert::assertSame('CustomNameRequestDto', $root->getClassName());
         Assert::assertSame('Custom\Namespace\Dto\Request', $root->getNamespace());
     }
@@ -511,7 +513,7 @@ final class NameGeneratorTest extends TestCase
                 'additionalPayload' => ['statusCode' => '200'],
                 'expected' => [
                     'fileName' => 'CustomClassNameOKDto.php',
-                    'filePath' => '/CustomPath/OK',
+                    'filePath' => '/CustomPath' . DIRECTORY_SEPARATOR . 'OK',
                     'className' => 'CustomClassNameOKDto',
                     'namespace' => 'CustomNamespace\OK',
                 ],
@@ -520,7 +522,7 @@ final class NameGeneratorTest extends TestCase
                 'additionalPayload' => ['statusCode' => 'BadStatusCode'],
                 'expected' => [
                     'fileName' => 'CustomClassNameBadStatusCodeDto.php',
-                    'filePath' => '/CustomPath/BadStatusCode',
+                    'filePath' => '/CustomPath' . DIRECTORY_SEPARATOR . 'BadStatusCode',
                     'className' => 'CustomClassNameBadStatusCodeDto',
                     'namespace' => 'CustomNamespace\BadStatusCode',
                 ],
@@ -627,7 +629,7 @@ final class NameGeneratorTest extends TestCase
         }
 
         Assert::assertSame('SomeCustomClassPropertyDto.php', $rootSubDefinition->getFileName());
-        Assert::assertSame('/CustomPath/SomeCustomClassProperty', $rootSubDefinition->getFilePath());
+        Assert::assertSame('/CustomPath' . DIRECTORY_SEPARATOR . 'SomeCustomClassProperty', $rootSubDefinition->getFilePath());
         Assert::assertSame('SomeCustomClassPropertyDto', $rootSubDefinition->getClassName());
         Assert::assertSame('CustomNamespace\SomeCustomClassProperty', $rootSubDefinition->getNamespace());
     }
