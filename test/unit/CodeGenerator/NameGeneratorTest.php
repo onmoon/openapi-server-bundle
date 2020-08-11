@@ -116,7 +116,7 @@ final class NameGeneratorTest extends TestCase
                                                     'methodName' => 'someCustomOperationId',
                                                     'methodDescription' => null,
                                                     'fileName' => 'SomeCustomOperationId.php',
-                                                    'filePath' => '/Some/Custom/Path/Apis/SomeCustomNamespace/SomeCustomOperationId',
+                                                    'filePath' => '/Some/Custom/Path' . DIRECTORY_SEPARATOR . 'Apis' . DIRECTORY_SEPARATOR . 'SomeCustomNamespace' . DIRECTORY_SEPARATOR . 'SomeCustomOperationId',
                                                     'namespace' => 'Some\Custom\Namespace\Apis\SomeCustomNamespace\SomeCustomOperationId',
                                                     'className' => 'SomeCustomOperationId',
                                                 ],
