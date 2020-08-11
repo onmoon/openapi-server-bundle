@@ -4,18 +4,20 @@ declare(strict_types=1);
 
 namespace OnMoon\OpenApiServerBundle\Test\Functional\Specification;
 
+use cebe\openapi\spec\OpenApi;
+use Exception;
 use OnMoon\OpenApiServerBundle\Specification\Definitions\Specification;
 use OnMoon\OpenApiServerBundle\Specification\Definitions\SpecificationConfig;
 use OnMoon\OpenApiServerBundle\Specification\SpecificationLoader;
 use OnMoon\OpenApiServerBundle\Specification\SpecificationParser;
 use OnMoon\OpenApiServerBundle\Types\ScalarTypesResolver;
 use PHPUnit\Framework\Assert;
+use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\Config\FileLocatorInterface;
 use Symfony\Contracts\Cache\ItemInterface;
 use Symfony\Contracts\Cache\TagAwareCacheInterface;
-use Throwable;
 
 use function array_pop;
 use function Safe\sprintf;
@@ -25,9 +27,9 @@ use function Safe\sprintf;
  */
 class SpecificationLoaderTest extends TestCase
 {
-    /** @var mixed $specificationParser */
+    /** @var SpecificationParser|MockObject $specificationParser */
     private $specificationParser;
-    /** @var mixed $fileLocator  */
+    /** @var FileLocatorInterface|MockObject $fileLocator  */
     private $fileLocator;
     /** @var mixed $cache  */
     private $cache;
@@ -189,9 +191,16 @@ class SpecificationLoaderTest extends TestCase
             $this->cache
         );
 
-        $this->expectException(Throwable::class);
-        $this->expectExceptionMessage(sprintf('OpenApi spec "' . $specificationName . '" is not registered in bundle config, ' .
-            'Registered specs are: .'));
+        $specificationFileName       = 'specification.json';
+        $specificationArray          = $this->getSpecificationArray($specificationFileName);
+        $specificationLoader->registerSpec(self::SPECIFICATION_NAME, $specificationArray);
+
+        /**
+         * phpcs:disable SlevomatCodingStandard.Exceptions.ReferenceThrowableOnly
+         */
+        $this->expectException(Exception::class);
+        $this->expectExceptionMessage(sprintf('OpenApi spec "%s" is not registered in bundle config, ' .
+            'Registered specs are: %s.',$specificationName,self::SPECIFICATION_NAME));
 
         $specificationLoader->get($specificationName);
     }
@@ -232,7 +241,7 @@ class SpecificationLoaderTest extends TestCase
         $specificationArray  = $this->getSpecificationArray($specificationFileName);
 
         $specificationLoader->registerSpec(self::SPECIFICATION_NAME, $specificationArray);
-        $this->expectException(Throwable::class);
+        $this->expectException(Exception::class);
         $this->expectExceptionMessage(sprintf('More than one file path found for specification "%s".', __DIR__ . '/' . $specificationFileName));
 
         $specificationLoader->load(self::SPECIFICATION_NAME);
@@ -252,7 +261,7 @@ class SpecificationLoaderTest extends TestCase
         $specificationArray  = $this->getSpecificationArray($specificationFileName);
 
         $specificationLoader->registerSpec(self::SPECIFICATION_NAME, $specificationArray);
-        $this->expectException(Throwable::class);
+        $this->expectException(Exception::class);
         $this->expectExceptionMessage(sprintf('This is not a local file "%s".', $specificationFileName));
 
         $specificationLoader->load(self::SPECIFICATION_NAME);
@@ -272,7 +281,7 @@ class SpecificationLoaderTest extends TestCase
         $specificationArray  = $this->getSpecificationArray($specificationFileName);
 
         $specificationLoader->registerSpec(self::SPECIFICATION_NAME, $specificationArray);
-        $this->expectException(Throwable::class);
+        $this->expectException(Exception::class);
         $this->expectExceptionMessage(sprintf('File "%s" not found', $specificationFileName));
 
         $specificationLoader->load(self::SPECIFICATION_NAME);
@@ -316,7 +325,7 @@ class SpecificationLoaderTest extends TestCase
 
         $specificationLoader->registerSpec(self::SPECIFICATION_NAME, $specificationArray);
         $cacheKey            = 'openapi-server-bundle-specification-' . self::SPECIFICATION_NAME;
-        $cachedSpecification = $this->createMock(Specification::class);
+        $cachedSpecification = new Specification([], new OpenApi([]));
         $this->cache->set($cacheKey, $cachedSpecification);
 
         $loadedSpecification = $specificationLoader->load(self::SPECIFICATION_NAME);
@@ -335,7 +344,7 @@ class SpecificationLoaderTest extends TestCase
         $specificationArray    = $this->getSpecificationArray($specificationFileName);
 
         $specificationLoader->registerSpec(self::SPECIFICATION_NAME, $specificationArray);
-        $this->expectException(Throwable::class);
+        $this->expectException(Exception::class);
         $this->expectExceptionMessage(sprintf('Failed to determine spec type for "%s".
                     Try specifying "type" parameter in bundle config with either "yaml" or "json" value', __DIR__ . '/' . $specificationFileName));
         $specificationLoader->load(self::SPECIFICATION_NAME);
