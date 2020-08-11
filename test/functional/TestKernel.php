@@ -50,7 +50,7 @@ class TestKernel extends BaseKernel
 
     protected function configureRoutes(RoutingConfigurator $routes): void
     {
-        $routes->import(__DIR__ . '/routes.yaml');
+        $routes->import(__DIR__ . '/openapi_routes.yaml');
     }
 
     /**
