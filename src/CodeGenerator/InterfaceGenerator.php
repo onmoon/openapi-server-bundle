@@ -73,7 +73,7 @@ class InterfaceGenerator
         }
     }
 
-    public function setChildrenRecursive(DtoDefinition $root, ClassDefinition $implements): void
+    private function setChildrenRecursive(DtoDefinition $root, ClassDefinition $implements): void
     {
         foreach ($root->getProperties() as $property) {
             $objectDefinition = $property->getObjectTypeDefinition();
