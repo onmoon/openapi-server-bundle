@@ -14,7 +14,7 @@ use function array_key_exists;
 /**
  * @covers \OnMoon\OpenApiServerBundle\Specification\Definitions\Property
  */
-class PropertyTest extends TestCase
+final class PropertyTest extends TestCase
 {
     /**
      * @return mixed[]

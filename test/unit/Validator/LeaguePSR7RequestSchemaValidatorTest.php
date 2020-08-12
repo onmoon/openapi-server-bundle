@@ -19,7 +19,7 @@ use Symfony\Component\HttpFoundation\Request;
 /**
  * @covers \OnMoon\OpenApiServerBundle\Validator\LeaguePSR7RequestSchemaValidator
  */
-class LeaguePSR7RequestSchemaValidatorTest extends TestCase
+final class LeaguePSR7RequestSchemaValidatorTest extends TestCase
 {
     public function testValidate(): void
     {

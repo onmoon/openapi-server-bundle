@@ -15,7 +15,7 @@ use const DIRECTORY_SEPARATOR;
 /**
  * @covers \OnMoon\OpenApiServerBundle\CodeGenerator\Naming\DefaultNamingStrategy
  */
-class DefaultNamingStrategyTest extends TestCase
+final class DefaultNamingStrategyTest extends TestCase
 {
     private DefaultNamingStrategy $defaultNamingStrategy;
 
@@ -83,8 +83,8 @@ class DefaultNamingStrategyTest extends TestCase
 
     public function testStringToNamespace(): void
     {
-        $expectedOutput = 'SomeRandomString';
-        $actualOutput   = $this->defaultNamingStrategy->stringToNamespace('SomeRandomString');
+        $expectedOutput = '_1someRandomString';
+        $actualOutput   = $this->defaultNamingStrategy->stringToNamespace('1some random string');
 
         TestCase::assertEquals($expectedOutput, $actualOutput);
     }
@@ -116,7 +116,7 @@ class DefaultNamingStrategyTest extends TestCase
     public function testBuildNamespaceReturnsCorrectNamespace(): void
     {
         $expectedOutput = 'hello\world';
-        $actualOutput   = $this->defaultNamingStrategy->buildNamespace('hello', 'world');
+        $actualOutput   = $this->defaultNamingStrategy->buildNamespace('\hello', 'world');
 
         TestCase::assertEquals($expectedOutput, $actualOutput);
     }
@@ -124,7 +124,7 @@ class DefaultNamingStrategyTest extends TestCase
     public function testBuildPathReturnsCorrectPath(): void
     {
         $expectedOutput = 'hello' . DIRECTORY_SEPARATOR . 'world';
-        $actualOutput   = $this->defaultNamingStrategy->buildPath('hello', 'world');
+        $actualOutput   = $this->defaultNamingStrategy->buildPath('hello', 'world' . DIRECTORY_SEPARATOR);
 
         TestCase::assertEquals($expectedOutput, $actualOutput);
     }

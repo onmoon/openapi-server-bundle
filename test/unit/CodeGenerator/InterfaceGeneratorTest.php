@@ -17,6 +17,7 @@ use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\ResponseDtoDefinition;
 use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\ServiceSubscriberDefinition;
 use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\SpecificationDefinition;
 use OnMoon\OpenApiServerBundle\CodeGenerator\InterfaceGenerator;
+use OnMoon\OpenApiServerBundle\Interfaces\ApiLoader;
 use OnMoon\OpenApiServerBundle\Interfaces\Dto;
 use OnMoon\OpenApiServerBundle\Interfaces\RequestHandler;
 use OnMoon\OpenApiServerBundle\Interfaces\ResponseDto;
@@ -28,8 +29,43 @@ use PHPUnit\Framework\TestCase;
 /**
  * @covers \OnMoon\OpenApiServerBundle\CodeGenerator\InterfaceGenerator
  */
-class InterfaceGeneratorTest extends TestCase
+final class InterfaceGeneratorTest extends TestCase
 {
+    public function testSetAllInterfacesSetsServiceSubsciber(): void
+    {
+        $request                      = null;
+        $propertyObjectTypeDefinition = new DtoDefinition([]);
+        $propertyDefinition           = new PropertyDefinition(new Property(''));
+        $propertyDefinition->setObjectTypeDefinition($propertyObjectTypeDefinition);
+        $responseDtoDefinition = new ResponseDtoDefinition('200', [$propertyDefinition]);
+        $operationDefinition   = new OperationDefinition(
+            '/',
+            'get',
+            'test',
+            '',
+            null,
+            $request,
+            [$responseDtoDefinition]
+        );
+        $graphDefinition       = new GraphDefinition(
+            [
+                new SpecificationDefinition(
+                    new SpecificationConfig('/', null, '/', 'application/json'),
+                    [$operationDefinition]
+                ),
+            ],
+            new ServiceSubscriberDefinition()
+        );
+
+        $interfaceGenerator = new InterfaceGenerator();
+        $interfaceGenerator->setAllInterfaces($graphDefinition);
+
+        Assert::assertSame(
+            ApiLoader::class,
+            $graphDefinition->getServiceSubscriber()->getImplements()[0]->getFQCN()
+        );
+    }
+
     public function testSetAllInterfacesForOneResponseSetsResponse(): void
     {
         $request                      = null;
@@ -157,5 +193,57 @@ class InterfaceGeneratorTest extends TestCase
         $expectedRequestBodyDtoDefinitionImplements = ClassDefinition::fromFQCN(Dto::class);
         $requestBodyDtoDefinitionImplements         = $requestBodyDtoDefinition->getImplements();
         Assert::assertEquals($expectedRequestBodyDtoDefinitionImplements, $requestBodyDtoDefinitionImplements);
+    }
+
+    public function testSetAllInterfacesSetsNestedObjects(): void
+    {
+        $request               = null;
+        $responseDtoDefinition = new ResponseDtoDefinition(
+            '200',
+            [
+                (new PropertyDefinition(new Property('property')))
+                    ->setObjectTypeDefinition(
+                        new DtoDefinition([
+                            (new PropertyDefinition(new Property('property')))
+                                ->setObjectTypeDefinition(new DtoDefinition([])),
+                        ])
+                    ),
+            ]
+        );
+        $operationDefinition   = new OperationDefinition(
+            '/',
+            'get',
+            'test',
+            '',
+            null,
+            $request,
+            [$responseDtoDefinition]
+        );
+        $graphDefinition       = new GraphDefinition(
+            [
+                new SpecificationDefinition(
+                    new SpecificationConfig('/', null, '/', 'application/json'),
+                    [$operationDefinition]
+                ),
+            ],
+            new ServiceSubscriberDefinition()
+        );
+
+        $interfaceGenerator = new InterfaceGenerator();
+        $interfaceGenerator->setAllInterfaces($graphDefinition);
+
+        $expectedNestedResponseObjectImplements = ClassDefinition::fromFQCN(Dto::class);
+        /** @var DtoDefinition $responsePropertyObjectTypeDefinition */
+        $responsePropertyObjectTypeDefinition = $responseDtoDefinition
+            ->getProperties()[0]
+            ->getObjectTypeDefinition();
+        /** @var DtoDefinition $responsePropertyNestedObjectTypeDefinition */
+        $responsePropertyNestedObjectTypeDefinition = $responsePropertyObjectTypeDefinition
+            ->getProperties()[0]
+            ->getObjectTypeDefinition();
+        Assert::assertEquals(
+            $expectedNestedResponseObjectImplements,
+            $responsePropertyNestedObjectTypeDefinition->getImplements()
+        );
     }
 }

@@ -12,7 +12,7 @@ use function Safe\sprintf;
 /**
  * @covers  \OnMoon\OpenApiServerBundle\CodeGenerator\Naming\CannotCreateNamespace
  */
-class CannotCreateNamespaceTest extends TestCase
+final class CannotCreateNamespaceTest extends TestCase
 {
     public function testBecauseTestContainsNoValidSymbolsShowCorrectError(): void
     {
