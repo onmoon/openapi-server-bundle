@@ -46,4 +46,4 @@ jobs:
         if: ${{ matrix.dependencies == 'locked' }}
         run: "composer install --no-interaction --no-progress --no-suggest"
       - name: "Tests"
-        run: "vendor/bin/phpunit"
+        run: "vendor/bin/phpunit --fail-on-warning"
