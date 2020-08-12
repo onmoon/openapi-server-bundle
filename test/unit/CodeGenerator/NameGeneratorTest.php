@@ -27,6 +27,7 @@ use sspat\ReservedWords\ReservedWords;
 use function array_map;
 use function array_merge;
 use function count;
+use function str_replace;
 
 use const DIRECTORY_SEPARATOR;
 
@@ -42,7 +43,7 @@ final class NameGeneratorTest extends TestCase
     {
         return [
             'rootNamespace' => 'Some\\Custom\\Namespace',
-            'rootPath' => '/Some/Custom/Path',
+            'rootPath' => str_replace(['/', '\\'], DIRECTORY_SEPARATOR, '/Some/Custom/Path'),
             'namingStrategy' => [
                 'rootNamespace' => 'Some\\Custom\\Root\\Namespace',
                 'languageLevel' => 'some-custom-language-level',
@@ -77,7 +78,7 @@ final class NameGeneratorTest extends TestCase
                             'specifications' => [
                                 [
                                     'specificationConfig' => [
-                                        'path' => '/some/custom/specification/path',
+                                        'path' => str_replace(['/', '\\'], DIRECTORY_SEPARATOR, '/some/custom/specification/path'),
                                         'type' => null,
                                         'namespace' => 'Some\\Custom\\Namespace',
                                         'mediaType' => 'custom/media-type',
@@ -97,7 +98,7 @@ final class NameGeneratorTest extends TestCase
                             'specifications' => [
                                 [
                                     'specificationConfig' => [
-                                        'path' => '/some/custom/specification/path',
+                                        'path' => str_replace(['/', '\\'], DIRECTORY_SEPARATOR, '/some/custom/specification/path'),
                                         'type' => 'some-custom-type',
                                         'namespace' => 'Some\\Custom\\Namespace',
                                         'mediaType' => 'custom/media-type',
@@ -116,7 +117,7 @@ final class NameGeneratorTest extends TestCase
                                                     'methodName' => 'someCustomOperationId',
                                                     'methodDescription' => null,
                                                     'fileName' => 'SomeCustomOperationId.php',
-                                                    'filePath' => '/Some/Custom/Path' . DIRECTORY_SEPARATOR . 'Apis' . DIRECTORY_SEPARATOR . 'SomeCustomNamespace' . DIRECTORY_SEPARATOR . 'SomeCustomOperationId',
+                                                    'filePath' => str_replace(['/', '\\'], DIRECTORY_SEPARATOR, '/Some/Custom/Path/Apis/SomeCustomNamespace/SomeCustomOperationId'),
                                                     'namespace' => 'Some\Custom\Namespace\Apis\SomeCustomNamespace\SomeCustomOperationId',
                                                     'className' => 'SomeCustomOperationId',
                                                 ],
@@ -136,7 +137,7 @@ final class NameGeneratorTest extends TestCase
                                                             'name' => 'someCustomRequestSpecProperty',
                                                             'requestNames' => [
                                                                 'fileName' => 'BodyDto.php',
-                                                                'filePath' => '/Some/Custom/Path/Apis/SomeCustomNamespace/SomeCustomOperationId/Dto/Request/Body',
+                                                                'filePath' => str_replace(['/', '\\'], DIRECTORY_SEPARATOR, '/Some/Custom/Path/Apis/SomeCustomNamespace/SomeCustomOperationId/Dto/Request/Body'),
                                                                 'className' => 'BodyDto',
                                                                 'namespace' => 'Some\Custom\Namespace\Apis\SomeCustomNamespace\SomeCustomOperationId\Dto\Request\Body',
                                                             ],
@@ -147,7 +148,7 @@ final class NameGeneratorTest extends TestCase
                                                     ],
                                                     'requestNames' => [
                                                         'fileName' => 'SomeCustomOperationIdRequestDto.php',
-                                                        'filePath' => '/Some/Custom/Path/Apis/SomeCustomNamespace/SomeCustomOperationId/Dto/Request',
+                                                        'filePath' => str_replace(['/', '\\'], DIRECTORY_SEPARATOR, '/Some/Custom/Path/Apis/SomeCustomNamespace/SomeCustomOperationId/Dto/Request'),
                                                         'className' => 'SomeCustomOperationIdRequestDto',
                                                         'namespace' => 'Some\Custom\Namespace\Apis\SomeCustomNamespace\SomeCustomOperationId\Dto\Request',
                                                     ],
@@ -169,7 +170,7 @@ final class NameGeneratorTest extends TestCase
                                                     ],
                                                     'responseNames' => [
                                                         'fileName' => 'SomeCustomOperationIdOKDto.php',
-                                                        'filePath' => '/Some/Custom/Path/Apis/SomeCustomNamespace/SomeCustomOperationId/Dto/Response/OK',
+                                                        'filePath' => str_replace(['/', '\\'], DIRECTORY_SEPARATOR, '/Some/Custom/Path/Apis/SomeCustomNamespace/SomeCustomOperationId/Dto/Response/OK'),
                                                         'className' => 'SomeCustomOperationIdOKDto',
                                                         'namespace' => 'Some\Custom\Namespace\Apis\SomeCustomNamespace\SomeCustomOperationId\Dto\Response\OK',
                                                     ],
@@ -177,7 +178,7 @@ final class NameGeneratorTest extends TestCase
                                                     'responseMarkersInterfaceNames' => [
                                                         'extends' => null,
                                                         'fileName' => 'SomeCustomOperationIdResponse.php',
-                                                        'filePath' => '/Some/Custom/Path/Apis/SomeCustomNamespace/SomeCustomOperationId/Dto/Response',
+                                                        'filePath' => str_replace(['/', '\\'], DIRECTORY_SEPARATOR, '/Some/Custom/Path/Apis/SomeCustomNamespace/SomeCustomOperationId/Dto/Response'),
                                                         'className' => 'SomeCustomOperationIdResponse',
                                                         'namespace' => 'Some\Custom\Namespace\Apis\SomeCustomNamespace\SomeCustomOperationId\Dto\Response',
                                                     ],
@@ -188,7 +189,7 @@ final class NameGeneratorTest extends TestCase
                                                     'methodName' => 'someCustomOperationId',
                                                     'methodDescription' => 'SomeCustomSummary',
                                                     'fileName' => 'SomeCustomOperationId.php',
-                                                    'filePath' => '/Some/Custom/Path/Apis/SomeCustomNamespace/SomeCustomOperationId',
+                                                    'filePath' => str_replace(['/', '\\'], DIRECTORY_SEPARATOR, '/Some/Custom/Path/Apis/SomeCustomNamespace/SomeCustomOperationId'),
                                                     'namespace' => 'Some\Custom\Namespace\Apis\SomeCustomNamespace\SomeCustomOperationId',
                                                     'className' => 'SomeCustomOperationId',
                                                 ],
@@ -308,7 +309,7 @@ final class NameGeneratorTest extends TestCase
             $graphDefinition->getServiceSubscriber()->getFileName()
         );
         Assert::assertSame(
-            '/Some/Custom/Path' . DIRECTORY_SEPARATOR . 'ServiceSubscriber',
+            str_replace(['/', '\\'], DIRECTORY_SEPARATOR, '/Some/Custom/Path/ServiceSubscriber'),
             $graphDefinition->getServiceSubscriber()->getFilePath()
         );
         Assert::assertSame(
@@ -472,7 +473,7 @@ final class NameGeneratorTest extends TestCase
 
         $operationNamespace = 'Custom\Namespace';
         $operationName      = 'CustomName';
-        $operationPath      = 'Custom/Path';
+        $operationPath      = str_replace(['/', '\\'], DIRECTORY_SEPARATOR, 'Custom/Path');
 
         $namingStrategy = new DefaultNamingStrategy(
             new ReservedWords(),
@@ -498,7 +499,7 @@ final class NameGeneratorTest extends TestCase
         );
 
         Assert::assertSame('CustomNameRequestDto.php', $root->getFileName());
-        Assert::assertSame('Custom/Path' . DIRECTORY_SEPARATOR . 'Dto' . DIRECTORY_SEPARATOR . 'Request', $root->getFilePath());
+        Assert::assertSame(str_replace(['/', '\\'], DIRECTORY_SEPARATOR, 'Custom/Path/Dto/Request'), $root->getFilePath());
         Assert::assertSame('CustomNameRequestDto', $root->getClassName());
         Assert::assertSame('Custom\Namespace\Dto\Request', $root->getNamespace());
     }
@@ -513,7 +514,7 @@ final class NameGeneratorTest extends TestCase
                 'additionalPayload' => ['statusCode' => '200'],
                 'expected' => [
                     'fileName' => 'CustomClassNameOKDto.php',
-                    'filePath' => '/CustomPath' . DIRECTORY_SEPARATOR . 'OK',
+                    'filePath' => str_replace(['/', '\\'], DIRECTORY_SEPARATOR, '/CustomPath/OK'),
                     'className' => 'CustomClassNameOKDto',
                     'namespace' => 'CustomNamespace\OK',
                 ],
@@ -522,7 +523,7 @@ final class NameGeneratorTest extends TestCase
                 'additionalPayload' => ['statusCode' => 'BadStatusCode'],
                 'expected' => [
                     'fileName' => 'CustomClassNameBadStatusCodeDto.php',
-                    'filePath' => '/CustomPath' . DIRECTORY_SEPARATOR . 'BadStatusCode',
+                    'filePath' => str_replace(['/', '\\'], DIRECTORY_SEPARATOR, '/CustomPath/BadStatusCode'),
                     'className' => 'CustomClassNameBadStatusCodeDto',
                     'namespace' => 'CustomNamespace\BadStatusCode',
                 ],
@@ -542,7 +543,7 @@ final class NameGeneratorTest extends TestCase
 
         $namespace = '\CustomNamespace';
         $className = 'CustomClassName';
-        $path      = '/CustomPath';
+        $path      = str_replace(['/', '\\'], DIRECTORY_SEPARATOR, '/CustomPath');
 
         $namingStrategy = new DefaultNamingStrategy(
             new ReservedWords(),
@@ -579,7 +580,7 @@ final class NameGeneratorTest extends TestCase
 
         $namespace = '\CustomNamespace';
         $className = 'CustomClassName';
-        $path      = '/CustomPath';
+        $path      = str_replace(['/', '\\'], DIRECTORY_SEPARATOR, '/CustomPath');
 
         $namingStrategy = new DefaultNamingStrategy(
             new ReservedWords(),
@@ -619,7 +620,7 @@ final class NameGeneratorTest extends TestCase
         );
 
         Assert::assertSame('CustomClassName.php', $root->getFileName());
-        Assert::assertSame('/CustomPath', $root->getFilePath());
+        Assert::assertSame(str_replace(['/', '\\'], DIRECTORY_SEPARATOR, '/CustomPath'), $root->getFilePath());
         Assert::assertSame('CustomClassName', $root->getClassName());
         Assert::assertSame('\CustomNamespace', $root->getNamespace());
 
@@ -629,7 +630,7 @@ final class NameGeneratorTest extends TestCase
         }
 
         Assert::assertSame('SomeCustomClassPropertyDto.php', $rootSubDefinition->getFileName());
-        Assert::assertSame('/CustomPath' . DIRECTORY_SEPARATOR . 'SomeCustomClassProperty', $rootSubDefinition->getFilePath());
+        Assert::assertSame(str_replace(['/', '\\'], DIRECTORY_SEPARATOR, '/CustomPath/SomeCustomClassProperty'), $rootSubDefinition->getFilePath());
         Assert::assertSame('SomeCustomClassPropertyDto', $rootSubDefinition->getClassName());
         Assert::assertSame('CustomNamespace\SomeCustomClassProperty', $rootSubDefinition->getNamespace());
     }
