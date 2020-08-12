@@ -10,7 +10,6 @@ use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\RequestDtoDefinition;
 use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\RequestHandlerInterfaceDefinition;
 use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\ResponseDtoDefinition;
 use PHPUnit\Framework\Assert;
-use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -18,30 +17,6 @@ use PHPUnit\Framework\TestCase;
  */
 final class OperationDefinitionTest extends TestCase
 {
-    /** @var RequestDtoDefinition|MockObject $requestDtoDefinitionMock */
-    private $requestDtoDefinitionMock;
-
-    /** @var ResponseDtoDefinition|MockObject $responseDtoDefinitionMock */
-    private $responseDtoDefinitionMock;
-
-    public function setUp(): void
-    {
-        parent::setUp();
-
-        $this->requestDtoDefinitionMock  = $this->createMock(RequestDtoDefinition::class);
-        $this->responseDtoDefinitionMock = $this->createMock(ResponseDtoDefinition::class);
-    }
-
-    protected function tearDown(): void
-    {
-        unset(
-            $this->requestDtoDefinitionMock,
-            $this->responseDtoDefinitionMock
-        );
-
-        parent::tearDown();
-    }
-
     /**
      * @return mixed[]
      */
@@ -57,8 +32,8 @@ final class OperationDefinitionTest extends TestCase
                     'summary' => null,
                 ],
                 'conditions' => [
-                    'hasRequestDtoDefinitionMock' => false,
-                    'hasResponseDtoDefinitionMock' => false,
+                    'hasRequestDtoDefinition' => false,
+                    'hasResponseDtoDefinition' => false,
                 ],
             ],
             [
@@ -70,8 +45,8 @@ final class OperationDefinitionTest extends TestCase
                     'summary' => 'SomeCustomSummary',
                 ],
                 'conditions' => [
-                    'hasRequestDtoDefinitionMock' => true,
-                    'hasResponseDtoDefinitionMock' => true,
+                    'hasRequestDtoDefinition' => true,
+                    'hasResponseDtoDefinition' => true,
                 ],
             ],
         ];
@@ -85,8 +60,12 @@ final class OperationDefinitionTest extends TestCase
      */
     public function testOperationDefinition(array $payload, array $conditions): void
     {
-        $payload['request']   = (bool) $conditions['hasRequestDtoDefinitionMock'] ? $this->requestDtoDefinitionMock : null;
-        $payload['responses'] = (bool) $conditions['hasResponseDtoDefinitionMock'] ? [$this->responseDtoDefinitionMock] : [];
+        $payload['request']   = (bool) $conditions['hasRequestDtoDefinition']
+            ? new RequestDtoDefinition()
+            : null;
+        $payload['responses'] = (bool) $conditions['hasResponseDtoDefinition']
+            ? [new ResponseDtoDefinition('200', [])]
+            : [];
 
         $generatedInterfaceDefinition = new OperationDefinition(
             $payload['url'],
@@ -109,17 +88,10 @@ final class OperationDefinitionTest extends TestCase
 
     public function testOperationDefinitionChanged(): void
     {
-        /** @var ClassDefinition|MockObject $classDefinitionMock */
-        $classDefinitionMock = $this->createMock(ClassDefinition::class);
-
-        /** @var RequestHandlerInterfaceDefinition|MockObject $requestHandlerInterfaceMock */
-        $requestHandlerInterfaceMock = $this->createMock(RequestHandlerInterfaceDefinition::class);
-
-        /** @var ClassDefinition|MockObject $changedClassDefinitionMock */
-        $changedClassDefinitionMock = $this->createMock(ClassDefinition::class);
-
-        /** @var RequestHandlerInterfaceDefinition|MockObject $changedRequestHandlerInterfaceMock */
-        $changedRequestHandlerInterfaceMock = $this->createMock(RequestHandlerInterfaceDefinition::class);
+        $classDefinition                = new ClassDefinition();
+        $requestHandlerInterface        = new RequestHandlerInterfaceDefinition();
+        $changedClassDefinition         = new ClassDefinition();
+        $changedRequestHandlerInterface = new RequestHandlerInterfaceDefinition();
 
         $payload = [
             'url' => '/some/custom/relative/url',
@@ -141,17 +113,17 @@ final class OperationDefinitionTest extends TestCase
             $payload['responses']
         );
 
-        $generatedInterfaceDefinition->setMarkersInterface($classDefinitionMock);
-        $generatedInterfaceDefinition->setRequestHandlerInterface($requestHandlerInterfaceMock);
+        $generatedInterfaceDefinition->setMarkersInterface($classDefinition);
+        $generatedInterfaceDefinition->setRequestHandlerInterface($requestHandlerInterface);
 
-        Assert::assertSame($classDefinitionMock, $generatedInterfaceDefinition->getMarkersInterface());
-        Assert::assertSame($requestHandlerInterfaceMock, $generatedInterfaceDefinition->getRequestHandlerInterface());
+        Assert::assertSame($classDefinition, $generatedInterfaceDefinition->getMarkersInterface());
+        Assert::assertSame($requestHandlerInterface, $generatedInterfaceDefinition->getRequestHandlerInterface());
 
         $generatedInterfaceDefinition
-            ->setMarkersInterface($changedClassDefinitionMock)
-            ->setRequestHandlerInterface($changedRequestHandlerInterfaceMock);
+            ->setMarkersInterface($changedClassDefinition)
+            ->setRequestHandlerInterface($changedRequestHandlerInterface);
 
-        Assert::assertSame($changedClassDefinitionMock, $generatedInterfaceDefinition->getMarkersInterface());
-        Assert::assertSame($changedRequestHandlerInterfaceMock, $generatedInterfaceDefinition->getRequestHandlerInterface());
+        Assert::assertSame($changedClassDefinition, $generatedInterfaceDefinition->getMarkersInterface());
+        Assert::assertSame($changedRequestHandlerInterface, $generatedInterfaceDefinition->getRequestHandlerInterface());
     }
 }

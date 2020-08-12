@@ -8,7 +8,6 @@ use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\RequestBodyDtoDefinitio
 use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\RequestDtoDefinition;
 use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\RequestParametersDtoDefinition;
 use PHPUnit\Framework\Assert;
-use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -97,17 +96,14 @@ final class RequestDtoDefinitionTest extends TestCase
      */
     public function testRequestDtoDefinition(array $conditions, array $expected): void
     {
-        /** @var RequestBodyDtoDefinition|MockObject $bodyDtoDefinitionMock */
-        $bodyDtoDefinitionMock = $this->createMock(RequestBodyDtoDefinition::class);
-        /** @var RequestParametersDtoDefinition|MockObject $queryParametersMock */
-        $queryParametersMock = $this->createMock(RequestParametersDtoDefinition::class);
-        /** @var RequestParametersDtoDefinition|MockObject $pathParametersMock */
-        $pathParametersMock = $this->createMock(RequestParametersDtoDefinition::class);
+        $bodyDtoDefinition = new RequestBodyDtoDefinition([]);
+        $queryParameters   = new RequestParametersDtoDefinition([]);
+        $pathParameters    = new RequestParametersDtoDefinition([]);
 
         $payload                      = [];
-        $payload['bodyDtoDefinition'] = (bool) $conditions['hasBodyDtoDefinition'] ? $bodyDtoDefinitionMock : null;
-        $payload['queryParameters']   = (bool) $conditions['hasQueryParameters'] ? $queryParametersMock : null;
-        $payload['pathParameters']    = (bool) $conditions['hasPathParameters'] ? $pathParametersMock : null;
+        $payload['bodyDtoDefinition'] = (bool) $conditions['hasBodyDtoDefinition'] ? $bodyDtoDefinition : null;
+        $payload['queryParameters']   = (bool) $conditions['hasQueryParameters'] ? $queryParameters : null;
+        $payload['pathParameters']    = (bool) $conditions['hasPathParameters'] ? $pathParameters : null;
 
         $requestDtoDefinition = new RequestDtoDefinition(
             $payload['bodyDtoDefinition'],

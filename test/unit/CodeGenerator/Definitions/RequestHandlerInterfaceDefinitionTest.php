@@ -7,7 +7,6 @@ namespace OnMoon\OpenApiServerBundle\Test\Unit\CodeGenerator\Definitions;
 use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\ClassDefinition;
 use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\RequestHandlerInterfaceDefinition;
 use PHPUnit\Framework\Assert;
-use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -52,13 +51,8 @@ final class RequestHandlerInterfaceDefinitionTest extends TestCase
      */
     public function testRequestHandlerInterfaceDefinition(array $payload, array $conditions): void
     {
-        /** @var ClassDefinition|MockObject $requestTypeClassDefinitionMock */
-        $requestTypeClassDefinitionMock = $this->createMock(ClassDefinition::class);
-        /** @var ClassDefinition|MockObject $responseTypeClassDefinitionMock */
-        $responseTypeClassDefinitionMock = $this->createMock(ClassDefinition::class);
-
-        $payload['requestType']  = (bool) $conditions['hasRequestType'] ? $requestTypeClassDefinitionMock : null;
-        $payload['responseType'] = (bool) $conditions['hasResponseType'] ? $responseTypeClassDefinitionMock : null;
+        $payload['requestType']  = (bool) $conditions['hasRequestType'] ? new ClassDefinition() : null;
+        $payload['responseType'] = (bool) $conditions['hasResponseType'] ? new ClassDefinition() : null;
 
         $requestHandlerInterfaceDefinition = new RequestHandlerInterfaceDefinition();
         $requestHandlerInterfaceDefinition

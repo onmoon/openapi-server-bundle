@@ -6,8 +6,8 @@ namespace OnMoon\OpenApiServerBundle\Test\Unit\CodeGenerator\Definitions;
 
 use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\PropertyDefinition;
 use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\RequestParametersDtoDefinition;
+use OnMoon\OpenApiServerBundle\Specification\Definitions\Property;
 use PHPUnit\Framework\Assert;
-use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -40,11 +40,12 @@ final class RequestParametersDtoDefinitionTest extends TestCase
      */
     public function testRequestParametersDtoDefinition(array $conditions, array $expected): void
     {
-        /** @var PropertyDefinition|MockObject $propertyDefinitionMock */
-        $propertyDefinitionMock = $this->createMock(PropertyDefinition::class);
+        $propertyDefinition = new PropertyDefinition(
+            new Property('SomeCustomProperty')
+        );
 
         $payload               = [];
-        $payload['properties'] = (bool) $conditions['hasProperties'] ? [$propertyDefinitionMock] : [];
+        $payload['properties'] = (bool) $conditions['hasProperties'] ? [$propertyDefinition] : [];
 
         $requestParametersDtoDefinition = new RequestParametersDtoDefinition($payload['properties']);
 

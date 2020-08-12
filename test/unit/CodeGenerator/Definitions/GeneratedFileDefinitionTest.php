@@ -7,7 +7,6 @@ namespace OnMoon\OpenApiServerBundle\Test\Unit\CodeGenerator\Definitions;
 use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\GeneratedClassDefinition;
 use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\GeneratedFileDefinition;
 use PHPUnit\Framework\Assert;
-use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -17,18 +16,17 @@ final class GeneratedFileDefinitionTest extends TestCase
 {
     public function testGeneratedFileDefinition(): void
     {
-        /** @var GeneratedClassDefinition|MockObject $generatedClassDefinitionMock */
-        $generatedClassDefinitionMock = $this->createMock(GeneratedClassDefinition::class);
+        $generatedClassDefinition = new GeneratedClassDefinition();
 
         $fileContents        = 'Some file contents';
         $changedFileContents = 'Some changed file contents';
 
         $generatedFileDefinition = new GeneratedFileDefinition(
-            $generatedClassDefinitionMock,
+            $generatedClassDefinition,
             $fileContents
         );
 
-        Assert::assertSame($generatedClassDefinitionMock, $generatedFileDefinition->getClass());
+        Assert::assertSame($generatedClassDefinition, $generatedFileDefinition->getClass());
         Assert::assertSame($fileContents, $generatedFileDefinition->getFileContents());
 
         $generatedFileDefinition->setFileContents($changedFileContents);

@@ -7,7 +7,6 @@ namespace OnMoon\OpenApiServerBundle\Test\Unit\CodeGenerator\Definitions;
 use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\ClassDefinition;
 use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\GeneratedInterfaceDefinition;
 use PHPUnit\Framework\Assert;
-use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -37,11 +36,8 @@ final class GeneratedInterfaceDefinitionTest extends TestCase
      */
     public function testGeneratedInterfaceDefinition(array $conditions): void
     {
-        /** @var ClassDefinition|MockObject $classDefinitionMock */
-        $classDefinitionMock = $this->createMock(ClassDefinition::class);
-
         $payload            = [];
-        $payload['extends'] = (bool) $conditions['hasExtends'] ? $classDefinitionMock : null;
+        $payload['extends'] = (bool) $conditions['hasExtends'] ? new ClassDefinition() : null;
 
         $generatedInterfaceDefinition = new GeneratedInterfaceDefinition();
 

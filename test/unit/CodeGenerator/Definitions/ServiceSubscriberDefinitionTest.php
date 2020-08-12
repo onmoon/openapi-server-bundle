@@ -7,7 +7,6 @@ namespace OnMoon\OpenApiServerBundle\Test\Unit\CodeGenerator\Definitions;
 use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\ClassDefinition;
 use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\ServiceSubscriberDefinition;
 use PHPUnit\Framework\Assert;
-use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -37,11 +36,10 @@ final class ServiceSubscriberDefinitionTest extends TestCase
      */
     public function testServiceSubscriberDefinition(array $conditions): void
     {
-        /** @var ClassDefinition|MockObject $classDefinitionMock */
-        $classDefinitionMock = $this->createMock(ClassDefinition::class);
+        $classDefinition = new ClassDefinition();
 
         $payload               = [];
-        $payload['implements'] = (bool) $conditions['hasImplements'] ? [$classDefinitionMock] : [];
+        $payload['implements'] = (bool) $conditions['hasImplements'] ? [$classDefinition] : [];
 
         $serviceSubscriberDefinition = new ServiceSubscriberDefinition();
         $serviceSubscriberDefinition->setImplements($payload['implements']);

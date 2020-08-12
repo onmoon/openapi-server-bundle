@@ -8,7 +8,6 @@ use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\DtoDefinition;
 use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\PropertyDefinition;
 use OnMoon\OpenApiServerBundle\Specification\Definitions\Property;
 use PHPUnit\Framework\Assert;
-use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -72,29 +71,14 @@ final class PropertyDefinitionTest extends TestCase
      */
     public function testPropertyDefinition(array $payload, array $conditions, array $expected): void
     {
-        /** @var Property|MockObject $specPropertyMock */
-        $specPropertyMock = $this->createMock(Property::class);
-        /** @var DtoDefinition|MockObject $dtoDefinitionMock */
-        $dtoDefinitionMock = $this->createMock(DtoDefinition::class);
+        $specProperty  = (new Property($expected['specProperty']['name']))
+            ->setArray($expected['specProperty']['isArray'])
+            ->setScalarTypeId($expected['specProperty']['scalarTypeId']);
+        $dtoDefinition = new DtoDefinition([]);
 
-        $payload['objectTypeDefinition'] = (bool) $conditions['hasObjectTypeDefinition'] ? $dtoDefinitionMock : null;
+        $payload['objectTypeDefinition'] = (bool) $conditions['hasObjectTypeDefinition'] ? $dtoDefinition : null;
 
-        $specPropertyMock
-            ->expects(self::once())
-            ->method('getName')
-            ->willReturn($expected['specProperty']['name']);
-
-        $specPropertyMock
-            ->expects(self::once())
-            ->method('isArray')
-            ->willReturn($expected['specProperty']['isArray']);
-
-        $specPropertyMock
-            ->expects(self::once())
-            ->method('getScalarTypeId')
-            ->willReturn($expected['specProperty']['scalarTypeId']);
-
-        $propertyDefinition = new PropertyDefinition($specPropertyMock);
+        $propertyDefinition = new PropertyDefinition($specProperty);
 
         $propertyDefinition
             ->setClassPropertyName($payload['classPropertyName'])
@@ -106,7 +90,7 @@ final class PropertyDefinitionTest extends TestCase
             ->setHasSetter($payload['hasSetter'])
             ->setInConstructor($payload['inConstructor']);
 
-        Assert::assertSame($specPropertyMock, $propertyDefinition->getSpecProperty());
+        Assert::assertSame($specProperty, $propertyDefinition->getSpecProperty());
         Assert::assertSame($payload['classPropertyName'], $propertyDefinition->getClassPropertyName());
         Assert::assertSame($payload['objectTypeDefinition'], $propertyDefinition->getObjectTypeDefinition());
         Assert::assertSame($payload['nullable'], $propertyDefinition->isNullable());

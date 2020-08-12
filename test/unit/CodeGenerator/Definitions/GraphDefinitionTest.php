@@ -7,9 +7,13 @@ namespace OnMoon\OpenApiServerBundle\Test\Unit\CodeGenerator\Definitions;
 use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\GraphDefinition;
 use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\ServiceSubscriberDefinition;
 use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\SpecificationDefinition;
+use OnMoon\OpenApiServerBundle\Specification\Definitions\SpecificationConfig;
 use PHPUnit\Framework\Assert;
-use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
+
+use function str_replace;
+
+use const DIRECTORY_SEPARATOR;
 
 /**
  * @covers \OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\GraphDefinition
@@ -38,14 +42,20 @@ final class GraphDefinitionTest extends TestCase
      */
     public function testGraphDefinition(array $conditions): void
     {
-        /** @var SpecificationDefinition|MockObject $specificationDefinitionMock */
-        $specificationDefinitionMock = $this->createMock(SpecificationDefinition::class);
-        /** @var ServiceSubscriberDefinition|MockObject $serviceSubscriberDefinitionMock */
-        $serviceSubscriberDefinitionMock = $this->createMock(ServiceSubscriberDefinition::class);
+        $specificationDefinition     = new SpecificationDefinition(
+            new SpecificationConfig(
+                str_replace(['/', '\\'], DIRECTORY_SEPARATOR, '/path'),
+                null,
+                'Some\Namespace',
+                'some/media-type'
+            ),
+            []
+        );
+        $serviceSubscriberDefinition = new ServiceSubscriberDefinition();
 
         $payload                      = [];
-        $payload['specifications']    = (bool) $conditions['hasSpecifications'] ? [$specificationDefinitionMock] : [];
-        $payload['serviceSubscriber'] = $serviceSubscriberDefinitionMock;
+        $payload['specifications']    = (bool) $conditions['hasSpecifications'] ? [$specificationDefinition] : [];
+        $payload['serviceSubscriber'] = $serviceSubscriberDefinition;
 
         $generatedInterfaceDefinition = new GraphDefinition(
             $payload['specifications'],

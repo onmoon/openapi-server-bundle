@@ -8,8 +8,11 @@ use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\OperationDefinition;
 use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\SpecificationDefinition;
 use OnMoon\OpenApiServerBundle\Specification\Definitions\SpecificationConfig;
 use PHPUnit\Framework\Assert;
-use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
+
+use function str_replace;
+
+use const DIRECTORY_SEPARATOR;
 
 /**
  * @covers \OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\SpecificationDefinition
@@ -38,14 +41,35 @@ final class SpecificationDefinitionTest extends TestCase
      */
     public function testSpecificationDefinition(array $conditions): void
     {
-        /** @var SpecificationConfig|MockObject $specificationConfigMock */
-        $specificationConfigMock = $this->createMock(SpecificationConfig::class);
-        /** @var OperationDefinition|MockObject $operationDefinitionMock */
-        $operationDefinitionMock = $this->createMock(OperationDefinition::class);
+        $payload = [
+            'url' => '/some/custom/relative/url',
+            'method' => 'GET',
+            'operationId' => '',
+            'requestHandlerName' => 'SomeCustomRequestHandlerName',
+            'summary' => null,
+            'request' => null,
+            'responses' => [],
+        ];
+
+        $specificationConfig = new SpecificationConfig(
+            str_replace(['/', '\\'], DIRECTORY_SEPARATOR, '/path'),
+            null,
+            'Some\Namespace',
+            'some/media-type'
+        );
+        $operationDefinition = new OperationDefinition(
+            $payload['url'],
+            $payload['method'],
+            $payload['operationId'],
+            $payload['requestHandlerName'],
+            $payload['summary'],
+            $payload['request'],
+            $payload['responses']
+        );
 
         $payload                  = [];
-        $payload['specification'] = $specificationConfigMock;
-        $payload['operations']    = (bool) $conditions['hasOperations'] ? [$operationDefinitionMock] : [];
+        $payload['specification'] = $specificationConfig;
+        $payload['operations']    = (bool) $conditions['hasOperations'] ? [$operationDefinition] : [];
 
         $specificationDefinition = new SpecificationDefinition(
             $payload['specification'],

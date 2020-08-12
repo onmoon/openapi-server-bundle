@@ -7,8 +7,8 @@ namespace OnMoon\OpenApiServerBundle\Test\Unit\CodeGenerator\Definitions;
 use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\ClassDefinition;
 use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\DtoDefinition;
 use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\PropertyDefinition;
+use OnMoon\OpenApiServerBundle\Specification\Definitions\Property;
 use PHPUnit\Framework\Assert;
-use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -47,14 +47,14 @@ final class DtoDefinitionTest extends TestCase
      */
     public function testDtoDefinition(array $conditions, array $expected): void
     {
-        /** @var PropertyDefinition|MockObject $propertyDefinitionMock */
-        $propertyDefinitionMock = $this->createMock(PropertyDefinition::class);
-        /** @var ClassDefinition|MockObject $classDefinitionMock */
-        $classDefinitionMock = $this->createMock(ClassDefinition::class);
+        $propertyDefinition = new PropertyDefinition(
+            new Property('SomeProperty')
+        );
+        $classDefinition    = new ClassDefinition();
 
         $payload               = [];
-        $payload['properties'] = (bool) $conditions['hasProperties'] ? [$propertyDefinitionMock] : [];
-        $payload['implements'] = (bool) $conditions['hasImplements'] ? $classDefinitionMock : null;
+        $payload['properties'] = (bool) $conditions['hasProperties'] ? [$propertyDefinition] : [];
+        $payload['implements'] = (bool) $conditions['hasImplements'] ? $classDefinition : null;
 
         $dtoDefinition = new DtoDefinition($payload['properties']);
         $dtoDefinition->setImplements($payload['implements']);
