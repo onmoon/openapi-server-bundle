@@ -11,7 +11,7 @@ use PHPUnit\Framework\Assert;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 
-class OpenApiServerBundleTest extends TestCase
+final class OpenApiServerBundleTest extends TestCase
 {
     public function testBuild(): void
     {

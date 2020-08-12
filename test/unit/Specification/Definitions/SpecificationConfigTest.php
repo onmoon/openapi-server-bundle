@@ -11,7 +11,7 @@ use PHPUnit\Framework\TestCase;
 /**
  * @covers \OnMoon\OpenApiServerBundle\Specification\Definitions\SpecificationConfig
  */
-class SpecificationConfigTest extends TestCase
+final class SpecificationConfigTest extends TestCase
 {
     /**
      * @return mixed[]
