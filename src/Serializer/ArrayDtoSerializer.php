@@ -10,10 +10,13 @@ use OnMoon\OpenApiServerBundle\Interfaces\ResponseDto;
 use OnMoon\OpenApiServerBundle\Specification\Definitions\ObjectType;
 use OnMoon\OpenApiServerBundle\Specification\Definitions\Operation;
 use OnMoon\OpenApiServerBundle\Types\ScalarTypesResolver;
+use Safe\Exceptions\JsonException;
 use Symfony\Component\HttpFoundation\Request;
 
 use function array_key_exists;
 use function array_map;
+use function call_user_func;
+use function is_callable;
 use function is_resource;
 use function Safe\json_decode;
 
@@ -29,12 +32,14 @@ final class ArrayDtoSerializer implements DtoSerializer
     }
 
     /**
-     * @throws Exception
+     * @param Dto|string $inputDtoFQCN
+     *
+     * @throws JsonException
      */
     public function createRequestDto(
         Request $request,
         Operation $operation,
-        string $inputDtoFQCN
+        $inputDtoFQCN
     ): Dto {
         /** @var mixed[] $input */
         $input  = [];
@@ -63,10 +68,13 @@ final class ArrayDtoSerializer implements DtoSerializer
             $input['body'] = $this->convert(true, $rawBody, $bodyType);
         }
 
-        /**
-         * @var Dto $inputDto
-         */
-        $inputDto = $inputDtoFQCN::{'fromArray'}($input);
+        $callable = [$inputDtoFQCN, 'fromArray'];
+        if (! is_callable($callable)) {
+            throw new Exception('Method not found');
+        }
+
+        /** @var Dto $inputDto */
+        $inputDto = call_user_func($callable, $input);
 
         return $inputDto;
     }

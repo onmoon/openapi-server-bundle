@@ -13,6 +13,10 @@ use OnMoon\OpenApiServerBundle\Specification\Definitions\Property;
 use OnMoon\OpenApiServerBundle\Types\ScalarTypesResolver;
 use PHPUnit\Framework\Assert;
 use PHPUnit\Framework\TestCase;
+use Symfony\Component\HttpFoundation\Request;
+use Throwable;
+
+use function Safe\json_encode;
 
 /**
  * @covers \OnMoon\OpenApiServerBundle\Serializer\ArrayDtoSerializer
@@ -27,52 +31,108 @@ class ArrayDtoSerializerTest extends TestCase
      */
     public function createRequestDtoWithPathProvider(): array
     {
-        $queryProperties               = [];
-        $queryProperties['queryParam'] = new Property('queryParam');
-        $queryProperties['queryParam']->setDefaultValue('e55e57d3b65ff510b257025746ffb6e1');
-
-        $query = new ObjectType($queryProperties);
-
-        $pathProperties              = [];
-        $pathProperties['pathParam'] = new Property('pathParam');
-        $pathProperties['pathParam']->setDefaultValue('e55e57d3b65ff510b257025746ffb6e1');
-
-        $path = new ObjectType($pathProperties);
-
-        $bodyProperties         = [];
-        $bodyProperties['name'] = new Property('name');
-        $bodyProperties['name']->setDefaultValue('bodyName');
-        $bodyProperties['value'] = new Property('value');
-        $bodyProperties['value']->setDefaultValue('bodyValue');
-
-        $requestBody = new ObjectType($bodyProperties);
-
         return [
             [
-                'requestQuery' => $query,
-                'requestPath'  => $path,
-                'requestBody' => $requestBody,
+                'payload' => [
+                    'queryParams' => [],
+                    'pathParams' => [],
+                    'bodyParams' => [],
+                ],
+                'expected' => [
+                    'queryParams' => ['firstParam' => 'SomeDefaultQueryParam'],
+                    'pathParams' => ['firstParam' => 'SomeDefaultPathParam'],
+                    'bodyParams' => [
+                        'firstParam' => 'SomeDefaultFirstBodyParam',
+                        'secondParam' => 0,
+                    ],
+                ],
+            ],
+            [
+                'payload' => [
+                    'queryParams' => [],
+                    'pathParams' => 'BadPathParams',
+                    'bodyParams' => [],
+                ],
+                'expected' => [
+                    'queryParams' => ['firstParam' => 'SomeDefaultQueryParam'],
+                    'pathParams' => ['firstParam' => 'SomeDefaultPathParam'],
+                    'bodyParams' => [
+                        'firstParam' => 'SomeDefaultFirstBodyParam',
+                        'secondParam' => 0,
+                    ],
+                ],
+            ],
+            [
+                'payload' => [
+                    'queryParams' => ['firstParam' => 'SomeCustomFirstQueryParam'],
+                    'pathParams' => ['firstParam' => 'SomeCustomFirstPathParam'],
+                    'bodyParams' => [
+                        'firstParam' => 'SomeCustomFirstBodyParam',
+                        'secondParam' => 1000,
+                    ],
+                ],
+                'expected' => [
+                    'queryParams' => ['firstParam' => 'SomeCustomFirstQueryParam'],
+                    'pathParams' => ['firstParam' => 'SomeCustomFirstPathParam'],
+                    'bodyParams' => [
+                        'firstParam' => 'SomeCustomFirstBodyParam',
+                        'secondParam' => 1000,
+                    ],
+                ],
+            ],
+            [
+                'payload' => [
+                    'queryParams' => [],
+                    'pathParams' => [],
+                    'bodyParams' => ['secondParam' => 1000],
+                ],
+                'expected' => [
+                    'queryParams' => ['firstParam' => 'SomeDefaultQueryParam'],
+                    'pathParams' => ['firstParam' => 'SomeDefaultPathParam'],
+                    'bodyParams' => [
+                        'firstParam' => 'SomeDefaultFirstBodyParam',
+                        'secondParam' => 1000,
+                    ],
+                ],
             ],
         ];
     }
 
     /**
+     * @param mixed[] $payload
+     * @param mixed[] $expected
+     *
+     * @throws Throwable
+     *
      * @dataProvider createRequestDtoWithPathProvider
      */
-    public function testCreateRequestDtoWithPath(
-        ObjectType $requestQuery,
-        ObjectType $requestPath,
-        ObjectType $requestBody
-    ): void {
+    public function testCreateRequestDtoWithPath(array $payload, array $expected): void
+    {
         $request = new Request(
+            $payload['queryParams'],
+            [],
+            ['_route_params' => $payload['pathParams']],
             [],
             [],
-            ['_route_params' => (object) ['customParam' => 'customParam']],
             [],
-            [],
-            [],
-            '{}'
+            json_encode($payload['bodyParams'])
         );
+
+        $requestQuery = new ObjectType([
+            (new Property('firstParam'))
+                ->setDefaultValue('SomeDefaultQueryParam'),
+        ]);
+        $requestPath  = new ObjectType([
+            (new Property('firstParam'))
+                ->setDefaultValue('SomeDefaultPathParam'),
+        ]);
+        $requestBody  = new ObjectType([
+            (new Property('firstParam'))
+                ->setDefaultValue('SomeDefaultFirstBodyParam'),
+            (new Property('secondParam'))
+                ->setDefaultValue(0)
+                ->setScalarTypeId(10),
+        ]);
 
         $operation = new Operation(
             '/example/path',
@@ -80,40 +140,176 @@ class ArrayDtoSerializerTest extends TestCase
             'PostRequest',
             null,
             $requestBody,
-            ['query' => $requestQuery, 'path' => $requestPath],
+            [
+                'query' => $requestQuery,
+                'path' => $requestPath,
+            ],
             []
         );
 
-        $resolver = new ScalarTypesResolver();
-
         $arrayDtoSerializer = new ArrayDtoSerializer(
-            $resolver,
+            new ScalarTypesResolver(),
             true
         );
 
-        /** @var Dto $requestDto */
+        /** @var Dto|mixed $requestDto */
         $requestDto = $arrayDtoSerializer->createRequestDto(
             $request,
             $operation,
-            Dto::class
+            $this->makeRequestDtoFCQN()
         );
 
-//        Assert::assertSame(
-//            $requestQuery->getProperties()['queryParam']->getDefaultValue(),
-//            $requestDto->getQueryParameters()->getQueryParam()
-//        );
-//        Assert::assertSame(
-//            $requestPath->getProperties()['pathParam']->getDefaultValue(),
-//            $requestDto->getPathParameters()->getPathParam()
-//        );
-//        Assert::assertSame(
-//            $requestBody->getProperties()['name']->getDefaultValue(),
-//            $requestDto->getBody()->getName()
-//        );
-//        Assert::assertSame(
-//            $requestBody->getProperties()['value']->getDefaultValue(),
-//            $requestDto->getBody()->getValue()
-//        );
+        Assert::assertSame(
+            $expected['queryParams']['firstParam'],
+            $requestDto->getQueryParameters()->getFirstParam()
+        );
+        Assert::assertSame(
+            $expected['pathParams']['firstParam'],
+            $requestDto->getPathParameters()->getFirstParam()
+        );
+        Assert::assertSame(
+            $expected['bodyParams']['firstParam'],
+            $requestDto->getBody()->getFirstParam()
+        );
+        Assert::assertSame(
+            $expected['bodyParams']['secondParam'],
+            $requestDto->getBody()->getSecondParam()
+        );
+    }
+
+    private function makeRequestDtoFCQN(): Dto
+    {
+        return new class () implements Dto
+        {
+            private Dto $pathParameters;
+            private Dto $queryParameters;
+            private Dto $body;
+
+            public function getPathParameters(): Dto
+            {
+                return $this->pathParameters;
+            }
+
+            public function getQueryParameters(): Dto
+            {
+                return $this->queryParameters;
+            }
+
+            public function getBody(): Dto
+            {
+                return $this->body;
+            }
+
+            /** @inheritDoc */
+            public function toArray(): array
+            {
+                return [
+                    'pathParameters' => $this->pathParameters->toArray(),
+                    'queryParameters' => $this->queryParameters->toArray(),
+                    'body' => $this->body->toArray(),
+                ];
+            }
+
+            /** @inheritDoc */
+            public static function fromArray(array $data): self
+            {
+                $pathDto = new class () implements Dto
+                {
+                    private ?string $firstParam = null;
+
+                    public function getFirstParam(): ?string
+                    {
+                        return $this->firstParam;
+                    }
+
+                    /** @inheritDoc */
+                    public function toArray(): array
+                    {
+                        return [
+                            'firstParam' => $this->firstParam,
+                        ];
+                    }
+
+                    /** @inheritDoc */
+                    public static function fromArray(array $data): self
+                    {
+                        $dto             = new self();
+                        $dto->firstParam = $data['firstParam'];
+
+                        return $dto;
+                    }
+                };
+
+                $queryDto = new class () implements Dto
+                {
+                    private ?string $firstParam = null;
+
+                    public function getFirstParam(): ?string
+                    {
+                        return $this->firstParam;
+                    }
+
+                    /** @inheritDoc */
+                    public function toArray(): array
+                    {
+                        return [
+                            'firstParam' => $this->firstParam,
+                        ];
+                    }
+
+                    /** @inheritDoc */
+                    public static function fromArray(array $data): self
+                    {
+                        $dto             = new self();
+                        $dto->firstParam = $data['firstParam'];
+
+                        return $dto;
+                    }
+                };
+
+                $bodyDto = new class () implements Dto
+                {
+                    private ?string $firstParam = null;
+                    private ?int $secondParam   = null;
+
+                    public function getFirstParam(): ?string
+                    {
+                        return $this->firstParam;
+                    }
+
+                    public function getSecondParam(): ?int
+                    {
+                        return $this->secondParam;
+                    }
+
+                    /** @inheritDoc */
+                    public function toArray(): array
+                    {
+                        return [
+                            'firstParam' => $this->firstParam,
+                            'secondParam' => $this->secondParam,
+                        ];
+                    }
+
+                    /** @inheritDoc */
+                    public static function fromArray(array $data): self
+                    {
+                        $dto              = new self();
+                        $dto->firstParam  = $data['firstParam'];
+                        $dto->secondParam = $data['secondParam'];
+
+                        return $dto;
+                    }
+                };
+
+                $dto                  = new self();
+                $dto->pathParameters  = $pathDto::fromArray($data['pathParameters']);
+                $dto->queryParameters = $queryDto::fromArray($data['queryParameters']);
+                $dto->body            = $bodyDto::fromArray($data['body']);
+
+                return $dto;
+            }
+        };
     }
 
     /**
@@ -223,15 +419,47 @@ class ArrayDtoSerializerTest extends TestCase
         Assert::assertSame($expectedResult, $result);
     }
 
-    public function testCreateResponseFromDtoManyPropertyIsNull(): void
+    /**
+     * @return mixed[]
+     */
+    public function createResponseFromDtoMultiplePropertiesProvider(): array
+    {
+        return [
+            [
+                'properties' => [
+                    self::OK_RESPONSE_DTO_FIRST_PROP => null,
+                    self::OK_RESPONSE_DTO_SECOND_PROP => null,
+                ],
+                'expected' => [
+                    self::OK_RESPONSE_DTO_FIRST_PROP => 'SomeFirstDefaultValue',
+                    self::OK_RESPONSE_DTO_SECOND_PROP => 'SomeSecondDefaultValue',
+                ],
+            ],
+            [
+                'properties' => [
+                    self::OK_RESPONSE_DTO_FIRST_PROP => 'SomeFirstNotNullValue',
+                    self::OK_RESPONSE_DTO_SECOND_PROP => 'SomeSecondNotNullValue',
+                ],
+                'expected' => [
+                    self::OK_RESPONSE_DTO_FIRST_PROP => 'SomeFirstNotNullValue',
+                    self::OK_RESPONSE_DTO_SECOND_PROP => 'SomeSecondNotNullValue',
+                ],
+            ],
+        ];
+    }
+
+    /**
+     * @param mixed[] $properties
+     * @param mixed[] $expected
+     *
+     * @dataProvider createResponseFromDtoMultiplePropertiesProvider
+     */
+    public function testCreateResponseFromDtoMultipleProperties(array $properties, array $expected): void
     {
         $okResponseDtoFQCN = $this->makeOKResponseDtoFCQN();
 
         /** @var ResponseDto $okResponseDto */
-        $okResponseDto = $okResponseDtoFQCN::fromArray([
-            self::OK_RESPONSE_DTO_FIRST_PROP => null,
-            self::OK_RESPONSE_DTO_SECOND_PROP => null,
-        ]);
+        $okResponseDto = $okResponseDtoFQCN::fromArray($properties);
 
         $arrayDtoSerializer = new ArrayDtoSerializer(new ScalarTypesResolver(), false);
 
@@ -255,66 +483,7 @@ class ArrayDtoSerializerTest extends TestCase
             )
         );
 
-        Assert::assertSame([
-            self::OK_RESPONSE_DTO_FIRST_PROP => 'SomeFirstDefaultValue',
-            self::OK_RESPONSE_DTO_SECOND_PROP => 'SomeSecondDefaultValue',
-        ], $result);
-    }
-
-    private function makeRequestDtoFCQN(): ResponseDto
-    {
-        return new class () implements ResponseDto {
-            private ?string $firstProp  = null;
-            private ?string $secondProp = null;
-
-            public function getFirstProp(): ?string
-            {
-                return $this->firstProp;
-            }
-
-            public function setFirstProp(?string $firstProp): self
-            {
-                $this->firstProp = $firstProp;
-
-                return $this;
-            }
-
-            public function getSecondProp(): ?string
-            {
-                return $this->secondProp;
-            }
-
-            public function setSecondProp(?string $secondProp): self
-            {
-                $this->secondProp = $secondProp;
-
-                return $this;
-            }
-
-            public static function _getResponseCode(): string
-            {
-                return '200';
-            }
-
-            /** @inheritDoc */
-            public function toArray(): array
-            {
-                return [
-                    'firstProp' => $this->firstProp,
-                    'secondProp' => $this->secondProp,
-                ];
-            }
-
-            /** @inheritDoc */
-            public static function fromArray(array $data): self
-            {
-                $dto             = new self();
-                $dto->firstProp  = $data['firstProp'];
-                $dto->secondProp = $data['secondProp'];
-
-                return $dto;
-            }
-        };
+        Assert::assertSame($expected, $result);
     }
 
     private function makeOKResponseDtoFCQN(): ResponseDto
@@ -372,53 +541,4 @@ class ArrayDtoSerializerTest extends TestCase
             }
         };
     }
-
-//    public function testCreateResponseFromDtoPropertyIsNotNull(): void
-//    {
-//        $okResponseDtoFQCN = $this->makeOKResponseDtoFCQN();
-//
-//        $arrayDtoSerializer = new ArrayDtoSerializer(new ScalarTypesResolver(), false);
-//
-//        $result = $arrayDtoSerializer->createResponseFromDto(
-//            $okResponseDtoFQCN::fromArray([
-//                self::OK_RESPONSE_DTO_FIRST_PROP => 'SomeFirstNotNullValue',
-//                self::OK_RESPONSE_DTO_SECOND_PROP => null,
-////                self::OK_RESPONSE_DTO_SECOND_PROP => [
-////                    self::OK_RESPONSE_DTO_FIRST_PROP => null,
-////                    self::OK_RESPONSE_DTO_SECOND_PROP => null,
-////                ],
-//            ]),
-//            new Operation(
-//                '/example/path',
-//                'POST',
-//                'PostRequestHandler',
-//                null,
-//                null,
-//                [],
-//                [
-//                    $okResponseDtoFQCN::_getResponseCode() => new ObjectType([
-//                        (new Property(self::OK_RESPONSE_DTO_FIRST_PROP))
-//                            ->setDefaultValue('SomeFirstDefaultValue')
-////                            ->setScalarTypeId(1)
-//                            ->setObjectTypeDefinition(
-//                                new ObjectType([
-//                                    (new Property(self::OK_RESPONSE_DTO_FIRST_PROP))
-//                                        ->setDefaultValue('SomeFirstDefaultSubValue')
-//                                ])
-//                            ),
-////                        (new Property(self::OK_RESPONSE_DTO_SECOND_PROP))
-////                            ->setDefaultValue('SomeSecondDefaultValue')
-////                            ->setArray(true),
-//                    ]),
-//                ]
-//            )
-//        );
-//
-//        dump($result);exit;
-//
-//        Assert::assertSame([
-//            self::OK_RESPONSE_DTO_FIRST_PROP => 'SomeNotNullValue',
-//            self::OK_RESPONSE_DTO_SECOND_PROP => 'SomeNotNullValue',
-//        ], $result);
-//    }
 }
