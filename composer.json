@@ -46,6 +46,8 @@
     "require-dev": {
         "doctrine/coding-standard": "^8.1.0",
         "infection/infection": "^0.16.4",
+        "matthiasnoback/symfony-config-test": "^4.2",
+        "matthiasnoback/symfony-dependency-injection-test": "^4.1",
         "phpstan/phpstan": "^0.12.33",
         "phpstan/phpstan-phpunit": "^0.12.13",
         "phpstan/phpstan-strict-rules": "^0.12.4",
