@@ -46,7 +46,7 @@ final class NameGeneratorTest extends TestCase
             'rootPath' => str_replace(['/', '\\'], DIRECTORY_SEPARATOR, '/Some/Custom/Path'),
             'namingStrategy' => [
                 'rootNamespace' => 'Some\\Custom\\Root\\Namespace',
-                'languageLevel' => 'some-custom-language-level',
+                'languageLevel' => '7.4.0',
             ],
             'httpStatus' => [
                 'statusArray' => [200 => 'OK'],
@@ -221,73 +221,7 @@ final class NameGeneratorTest extends TestCase
 
         $httpStatus = new Httpstatus($payload['httpStatus']['statusArray']);
 
-        /** @var SpecificationDefinition[]|array $specifications */
-        $specifications = array_map(static function (array $payload): SpecificationDefinition {
-            $specificationConfig = new SpecificationConfig(
-                $payload['specificationConfig']['path'],
-                $payload['specificationConfig']['type'],
-                $payload['specificationConfig']['namespace'],
-                $payload['specificationConfig']['mediaType']
-            );
-
-            /** @var OperationDefinition[]|array $operations */
-            $operations = array_map(static function (array $payload): OperationDefinition {
-                if ($payload['request'] !== null) {
-                    $requestProperties = [];
-                    if (count($payload['request']['body']['properties']) > 0) {
-                        $requestProperties[] = new PropertyDefinition(
-                            new Property($payload['request']['body']['properties'][0]['name'])
-                        );
-                    }
-
-                    $request = new RequestDtoDefinition(
-                        new RequestBodyDtoDefinition($requestProperties)
-                    );
-                } else {
-                    $request = null;
-                }
-
-                /** @var ResponseDtoDefinition[]|array $responses */
-                $responses = array_map(static function (array $payload): ResponseDtoDefinition {
-                    $responseProperties = [];
-                    if (count($payload['properties']) > 0) {
-                        $responseProperties[] = new PropertyDefinition(
-                            new Property($payload['properties'][0]['name'])
-                        );
-                    }
-
-                    return new ResponseDtoDefinition(
-                        $payload['statusCode'],
-                        $responseProperties
-                    );
-                }, $payload['responses']);
-
-                $operationDefinition = new OperationDefinition(
-                    $payload['url'],
-                    $payload['method'],
-                    $payload['operationId'],
-                    $payload['requestHandlerName'],
-                    $payload['summary'],
-                    $request,
-                    $responses
-                );
-
-                $operationDefinition->setMarkersInterface(
-                    (bool) $payload['hasMakersInterface'] ? new GeneratedInterfaceDefinition() : null
-                );
-
-                $requestHandlerInterfaceDefinition = new RequestHandlerInterfaceDefinition();
-
-                $operationDefinition->setRequestHandlerInterface($requestHandlerInterfaceDefinition);
-
-                return $operationDefinition;
-            }, $payload['operations']);
-
-            return new SpecificationDefinition(
-                $specificationConfig,
-                $operations
-            );
-        }, $payload['graph']['specifications']);
+        $specifications = $this->getSpecificationsByPayload($payload);
 
         $serviceSubscriberDefinition = new ServiceSubscriberDefinition();
 
@@ -465,6 +399,81 @@ final class NameGeneratorTest extends TestCase
                 );
             }
         }
+    }
+
+    /**
+     * @param mixed[] $payload
+     *
+     * @return SpecificationDefinition[]
+     */
+    private function getSpecificationsByPayload(array $payload): array
+    {
+        return array_map(static function (array $payload): SpecificationDefinition {
+            $specificationConfig = new SpecificationConfig(
+                $payload['specificationConfig']['path'],
+                $payload['specificationConfig']['type'],
+                $payload['specificationConfig']['namespace'],
+                $payload['specificationConfig']['mediaType']
+            );
+
+            /** @var OperationDefinition[]|array $operations */
+            $operations = array_map(static function (array $payload): OperationDefinition {
+                if ($payload['request'] !== null) {
+                    $requestProperties = [];
+                    if (count($payload['request']['body']['properties']) > 0) {
+                        $requestProperties[] = new PropertyDefinition(
+                            new Property($payload['request']['body']['properties'][0]['name'])
+                        );
+                    }
+
+                    $request = new RequestDtoDefinition(
+                        new RequestBodyDtoDefinition($requestProperties)
+                    );
+                } else {
+                    $request = null;
+                }
+
+                /** @var ResponseDtoDefinition[]|array $responses */
+                $responses = array_map(static function (array $payload): ResponseDtoDefinition {
+                    $responseProperties = [];
+                    if (count($payload['properties']) > 0) {
+                        $responseProperties[] = new PropertyDefinition(
+                            new Property($payload['properties'][0]['name'])
+                        );
+                    }
+
+                    return new ResponseDtoDefinition(
+                        $payload['statusCode'],
+                        $responseProperties
+                    );
+                }, $payload['responses']);
+
+                $operationDefinition = new OperationDefinition(
+                    $payload['url'],
+                    $payload['method'],
+                    $payload['operationId'],
+                    $payload['requestHandlerName'],
+                    $payload['summary'],
+                    $request,
+                    $responses
+                );
+
+                $operationDefinition->setMarkersInterface(
+                    (bool) $payload['hasMakersInterface'] ? new GeneratedInterfaceDefinition() : null
+                );
+
+                $requestHandlerInterfaceDefinition = new RequestHandlerInterfaceDefinition();
+
+                $operationDefinition->setRequestHandlerInterface($requestHandlerInterfaceDefinition);
+
+                return $operationDefinition;
+            }, $payload['operations']);
+
+            return new SpecificationDefinition(
+                $specificationConfig,
+                $operations
+            );
+        }, $payload['graph']['specifications']);
     }
 
     public function testSetRequestNames(): void
