@@ -14,7 +14,7 @@ use Safe\Exceptions\DatetimeException;
 /**
  * @covers \OnMoon\OpenApiServerBundle\Types\ScalarTypesResolver
  */
-class ScalarTypesResolverTest extends TestCase
+final class ScalarTypesResolverTest extends TestCase
 {
     private ScalarTypesResolver $scalarTypeResolver;
 
