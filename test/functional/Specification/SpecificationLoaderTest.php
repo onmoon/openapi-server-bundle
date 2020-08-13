@@ -291,7 +291,8 @@ class SpecificationLoaderTest extends TestCase
     {
         $this->specificationParser
             ->expects(self::once())
-            ->method('parseOpenApi');
+            ->method('parseOpenApi')
+            ->willReturn(new Specification([],new OpenApi([])));
 
         $specificationLoader   = new SpecificationLoader(
             $this->specificationParser,
