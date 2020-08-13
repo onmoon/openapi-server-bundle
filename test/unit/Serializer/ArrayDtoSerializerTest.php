@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace OnMoon\OpenApiServerBundle\Test\Unit\Serializer;
 
-use OnMoon\OpenApiServerBundle\Interfaces\Dto;
-use OnMoon\OpenApiServerBundle\Interfaces\ResponseDto;
 use OnMoon\OpenApiServerBundle\Serializer\ArrayDtoSerializer;
 use OnMoon\OpenApiServerBundle\Specification\Definitions\ObjectType;
 use OnMoon\OpenApiServerBundle\Specification\Definitions\Operation;
 use OnMoon\OpenApiServerBundle\Specification\Definitions\Property;
+use OnMoon\OpenApiServerBundle\Test\Unit\Serializer\ArrayDtoSerializer\RequestDto;
+use OnMoon\OpenApiServerBundle\Test\Unit\Serializer\ArrayDtoSerializer\ResponseDto;
 use OnMoon\OpenApiServerBundle\Types\ScalarTypesResolver;
 use PHPUnit\Framework\Assert;
 use PHPUnit\Framework\TestCase;
@@ -152,11 +152,11 @@ class ArrayDtoSerializerTest extends TestCase
             true
         );
 
-        /** @var Dto|mixed $requestDto */
+        /** @var RequestDto $requestDto */
         $requestDto = $arrayDtoSerializer->createRequestDto(
             $request,
             $operation,
-            $this->makeRequestDtoFCQN()
+            RequestDto::class
         );
 
         Assert::assertSame(
@@ -175,141 +175,6 @@ class ArrayDtoSerializerTest extends TestCase
             $expected['bodyParams']['secondParam'],
             $requestDto->getBody()->getSecondParam()
         );
-    }
-
-    private function makeRequestDtoFCQN(): Dto
-    {
-        return new class () implements Dto
-        {
-            private Dto $pathParameters;
-            private Dto $queryParameters;
-            private Dto $body;
-
-            public function getPathParameters(): Dto
-            {
-                return $this->pathParameters;
-            }
-
-            public function getQueryParameters(): Dto
-            {
-                return $this->queryParameters;
-            }
-
-            public function getBody(): Dto
-            {
-                return $this->body;
-            }
-
-            /** @inheritDoc */
-            public function toArray(): array
-            {
-                return [
-                    'pathParameters' => $this->pathParameters->toArray(),
-                    'queryParameters' => $this->queryParameters->toArray(),
-                    'body' => $this->body->toArray(),
-                ];
-            }
-
-            /** @inheritDoc */
-            public static function fromArray(array $data): self
-            {
-                $pathDto = new class () implements Dto
-                {
-                    private ?string $firstParam = null;
-
-                    public function getFirstParam(): ?string
-                    {
-                        return $this->firstParam;
-                    }
-
-                    /** @inheritDoc */
-                    public function toArray(): array
-                    {
-                        return [
-                            'firstParam' => $this->firstParam,
-                        ];
-                    }
-
-                    /** @inheritDoc */
-                    public static function fromArray(array $data): self
-                    {
-                        $dto             = new self();
-                        $dto->firstParam = $data['firstParam'];
-
-                        return $dto;
-                    }
-                };
-
-                $queryDto = new class () implements Dto
-                {
-                    private ?string $firstParam = null;
-
-                    public function getFirstParam(): ?string
-                    {
-                        return $this->firstParam;
-                    }
-
-                    /** @inheritDoc */
-                    public function toArray(): array
-                    {
-                        return [
-                            'firstParam' => $this->firstParam,
-                        ];
-                    }
-
-                    /** @inheritDoc */
-                    public static function fromArray(array $data): self
-                    {
-                        $dto             = new self();
-                        $dto->firstParam = $data['firstParam'];
-
-                        return $dto;
-                    }
-                };
-
-                $bodyDto = new class () implements Dto
-                {
-                    private ?string $firstParam = null;
-                    private ?int $secondParam   = null;
-
-                    public function getFirstParam(): ?string
-                    {
-                        return $this->firstParam;
-                    }
-
-                    public function getSecondParam(): ?int
-                    {
-                        return $this->secondParam;
-                    }
-
-                    /** @inheritDoc */
-                    public function toArray(): array
-                    {
-                        return [
-                            'firstParam' => $this->firstParam,
-                            'secondParam' => $this->secondParam,
-                        ];
-                    }
-
-                    /** @inheritDoc */
-                    public static function fromArray(array $data): self
-                    {
-                        $dto              = new self();
-                        $dto->firstParam  = $data['firstParam'];
-                        $dto->secondParam = $data['secondParam'];
-
-                        return $dto;
-                    }
-                };
-
-                $dto                  = new self();
-                $dto->pathParameters  = $pathDto::fromArray($data['pathParameters']);
-                $dto->queryParameters = $queryDto::fromArray($data['queryParameters']);
-                $dto->body            = $bodyDto::fromArray($data['body']);
-
-                return $dto;
-            }
-        };
     }
 
     /**
@@ -386,10 +251,7 @@ class ArrayDtoSerializerTest extends TestCase
         bool $sendNotRequiredNullableNulls,
         array $expectedResult
     ): void {
-        $okResponseDtoFQCN = $this->makeOKResponseDtoFCQN();
-
-        /** @var ResponseDto $okResponseDto */
-        $okResponseDto = $okResponseDtoFQCN::fromArray([
+        $okResponseDto = ResponseDto::fromArray([
             self::OK_RESPONSE_DTO_FIRST_PROP => null,
             self::OK_RESPONSE_DTO_SECOND_PROP => null,
         ]);
@@ -406,7 +268,7 @@ class ArrayDtoSerializerTest extends TestCase
                 null,
                 [],
                 [
-                    $okResponseDtoFQCN::_getResponseCode() => new ObjectType([
+                    ResponseDto::_getResponseCode() => new ObjectType([
                         (new Property(self::OK_RESPONSE_DTO_FIRST_PROP))
                             ->setDefaultValue($propertyConditions['defaultValue'])
                             ->setRequired($propertyConditions['isRequired'])
@@ -456,10 +318,7 @@ class ArrayDtoSerializerTest extends TestCase
      */
     public function testCreateResponseFromDtoMultipleProperties(array $properties, array $expected): void
     {
-        $okResponseDtoFQCN = $this->makeOKResponseDtoFCQN();
-
-        /** @var ResponseDto $okResponseDto */
-        $okResponseDto = $okResponseDtoFQCN::fromArray($properties);
+        $okResponseDto = ResponseDto::fromArray($properties);
 
         $arrayDtoSerializer = new ArrayDtoSerializer(new ScalarTypesResolver(), false);
 
@@ -473,7 +332,7 @@ class ArrayDtoSerializerTest extends TestCase
                 null,
                 [],
                 [
-                    $okResponseDtoFQCN::_getResponseCode() => new ObjectType([
+                    ResponseDto::_getResponseCode() => new ObjectType([
                         (new Property(self::OK_RESPONSE_DTO_FIRST_PROP))
                             ->setDefaultValue('SomeFirstDefaultValue'),
                         (new Property(self::OK_RESPONSE_DTO_SECOND_PROP))
@@ -484,61 +343,5 @@ class ArrayDtoSerializerTest extends TestCase
         );
 
         Assert::assertSame($expected, $result);
-    }
-
-    private function makeOKResponseDtoFCQN(): ResponseDto
-    {
-        return new class () implements ResponseDto {
-            private ?string $firstProp  = null;
-            private ?string $secondProp = null;
-
-            public function getFirstProp(): ?string
-            {
-                return $this->firstProp;
-            }
-
-            public function setFirstProp(?string $firstProp): self
-            {
-                $this->firstProp = $firstProp;
-
-                return $this;
-            }
-
-            public function getSecondProp(): ?string
-            {
-                return $this->secondProp;
-            }
-
-            public function setSecondProp(?string $secondProp): self
-            {
-                $this->secondProp = $secondProp;
-
-                return $this;
-            }
-
-            public static function _getResponseCode(): string
-            {
-                return '200';
-            }
-
-            /** @inheritDoc */
-            public function toArray(): array
-            {
-                return [
-                    'firstProp' => $this->firstProp,
-                    'secondProp' => $this->secondProp,
-                ];
-            }
-
-            /** @inheritDoc */
-            public static function fromArray(array $data): self
-            {
-                $dto             = new self();
-                $dto->firstProp  = $data['firstProp'];
-                $dto->secondProp = $data['secondProp'];
-
-                return $dto;
-            }
-        };
     }
 }
