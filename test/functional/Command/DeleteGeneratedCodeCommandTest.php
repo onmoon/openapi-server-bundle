@@ -7,7 +7,6 @@ namespace OnMoon\OpenApiServerBundle\Test\Functional\Command;
 use OnMoon\OpenApiServerBundle\Command\DeleteGeneratedCodeCommand;
 use PHPUnit\Framework\Assert;
 use Symfony\Component\Console\Tester\CommandTester;
-use Symfony\Component\Filesystem\Filesystem;
 
 use function rtrim;
 use function Safe\file_put_contents;
@@ -26,16 +25,8 @@ class DeleteGeneratedCodeCommandTest extends CommandTestCase
         $command             = $this->application->find(DeleteGeneratedCodeCommand::COMMAND);
         $this->commandTester = new CommandTester($command);
 
-        mkdir($this->pathForFileGeneration);
-        file_put_contents($this->pathForFileGeneration . '/test.txt', '');
-    }
-
-    public function tearDown(): void
-    {
-        $filesystem = new Filesystem();
-        $filesystem->remove([$this->pathForFileGeneration]);
-
-        parent::tearDown();
+        mkdir(CommandTestKernel::$bundleRootPath);
+        file_put_contents(CommandTestKernel::$bundleRootPath . '/test.txt', '');
     }
 
     public function testDeletion(): void
@@ -47,8 +38,9 @@ class DeleteGeneratedCodeCommandTest extends CommandTestCase
         ]);
 
         $output = $this->commandTester->getDisplay();
-        Assert::assertEquals(sprintf('Delete all contents of the directory %1$s? (y/n): All contents of directory were deleted: %1$s', $this->pathForFileGeneration), rtrim($output));
-        Assert::assertFileDoesNotExist($this->pathForFileGeneration . '/test.txt');
+        Assert::assertEquals(sprintf('Delete all contents of the directory %1$s? (y/n): All contents of directory were deleted: %1$s', CommandTestKernel::$bundleRootPath), rtrim($output));
+        Assert::assertSame(0, $this->commandTester->getStatusCode());
+        Assert::assertFileDoesNotExist(CommandTestKernel::$bundleRootPath . '/test.txt');
     }
 
     public function testDeletionCancel(): void
@@ -60,8 +52,9 @@ class DeleteGeneratedCodeCommandTest extends CommandTestCase
         ]);
 
         $output = $this->commandTester->getDisplay();
-        Assert::assertEquals(sprintf('Delete all contents of the directory %1$s? (y/n):', $this->pathForFileGeneration), rtrim($output));
-        Assert::assertDirectoryExists($this->pathForFileGeneration);
-        Assert::assertFileExists($this->pathForFileGeneration . '/test.txt');
+        Assert::assertEquals(sprintf('Delete all contents of the directory %1$s? (y/n):', CommandTestKernel::$bundleRootPath), rtrim($output));
+        Assert::assertSame(0, $this->commandTester->getStatusCode());
+        Assert::assertDirectoryExists(CommandTestKernel::$bundleRootPath);
+        Assert::assertFileExists(CommandTestKernel::$bundleRootPath . '/test.txt');
     }
 }

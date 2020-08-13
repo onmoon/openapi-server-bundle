@@ -7,7 +7,6 @@ namespace OnMoon\OpenApiServerBundle\Test\Functional\Command;
 use OnMoon\OpenApiServerBundle\Command\GenerateApiCodeCommand;
 use PHPUnit\Framework\Assert;
 use Symfony\Component\Console\Tester\CommandTester;
-use Symfony\Component\Filesystem\Filesystem;
 
 use function rtrim;
 use function Safe\sprintf;
@@ -25,13 +24,6 @@ class GenerateApiCodeCommandTest extends CommandTestCase
         $this->commandTester = new CommandTester($command);
     }
 
-    public function tearDown(): void
-    {
-        $filesystem = new Filesystem();
-        $filesystem->remove([$this->pathForFileGeneration]);
-        parent::tearDown();
-    }
-
     public function testGeneration(): void
     {
         $this->commandTester->execute([
@@ -39,14 +31,14 @@ class GenerateApiCodeCommandTest extends CommandTestCase
         ]);
 
         $output = $this->commandTester->getDisplay();
-        Assert::assertEquals(sprintf('API server code generated in: %s', $this->pathForFileGeneration), rtrim($output));
-
-        Assert::assertDirectoryExists($this->pathForFileGeneration);
-        Assert::assertDirectoryIsReadable($this->pathForFileGeneration);
-        Assert::assertFileExists($this->pathForFileGeneration . '/ServiceSubscriber/ApiServiceLoaderServiceSubscriber.php');
-        Assert::assertFileExists($this->pathForFileGeneration . '/Apis/' . $this->openapiNamespace . '/' . ucfirst($this->openapiOperationId) . '/' . ucfirst($this->openapiOperationId) . '.php');
-        Assert::assertFileExists($this->pathForFileGeneration . '/Apis/' . $this->openapiNamespace . '/' . ucfirst($this->openapiOperationId) . '/Dto/Request/' . ucfirst($this->openapiOperationId) . 'RequestDto.php');
-        Assert::assertFileExists($this->pathForFileGeneration . '/Apis/' . $this->openapiNamespace . '/' . ucfirst($this->openapiOperationId) . '/Dto/Request/PathParameters/PathParametersDto.php');
-        Assert::assertFileExists($this->pathForFileGeneration . '/Apis/' . $this->openapiNamespace . '/' . ucfirst($this->openapiOperationId) . '/Dto/Response/OK/' . ucfirst($this->openapiOperationId) . 'OKDto.php');
+        Assert::assertEquals(sprintf('API server code generated in: %s', CommandTestKernel::$bundleRootPath), rtrim($output));
+        Assert::assertSame(0, $this->commandTester->getStatusCode());
+        Assert::assertDirectoryExists(CommandTestKernel::$bundleRootPath);
+        Assert::assertDirectoryIsReadable(CommandTestKernel::$bundleRootPath);
+        Assert::assertFileExists(CommandTestKernel::$bundleRootPath . '/ServiceSubscriber/ApiServiceLoaderServiceSubscriber.php');
+        Assert::assertFileExists(CommandTestKernel::$bundleRootPath . '/Apis/' . $this->openapiNamespace . '/' . ucfirst($this->openapiOperationId) . '/' . ucfirst($this->openapiOperationId) . '.php');
+        Assert::assertFileExists(CommandTestKernel::$bundleRootPath . '/Apis/' . $this->openapiNamespace . '/' . ucfirst($this->openapiOperationId) . '/Dto/Request/' . ucfirst($this->openapiOperationId) . 'RequestDto.php');
+        Assert::assertFileExists(CommandTestKernel::$bundleRootPath . '/Apis/' . $this->openapiNamespace . '/' . ucfirst($this->openapiOperationId) . '/Dto/Request/PathParameters/PathParametersDto.php');
+        Assert::assertFileExists(CommandTestKernel::$bundleRootPath . '/Apis/' . $this->openapiNamespace . '/' . ucfirst($this->openapiOperationId) . '/Dto/Response/OK/' . ucfirst($this->openapiOperationId) . 'OKDto.php');
     }
 }

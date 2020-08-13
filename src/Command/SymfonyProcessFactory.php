@@ -6,7 +6,7 @@ namespace OnMoon\OpenApiServerBundle\Command;
 
 use Symfony\Component\Process\Process;
 
-final class DefaultProcessFactory implements ProcessFactory
+final class SymfonyProcessFactory implements ProcessFactory
 {
     /**
      * @param string[] $arguments

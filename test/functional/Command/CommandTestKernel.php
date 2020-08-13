@@ -2,17 +2,18 @@
 
 declare(strict_types=1);
 
-namespace OnMoon\OpenApiServerBundle\Test\Functional;
+namespace OnMoon\OpenApiServerBundle\Test\Functional\Command;
 
 use OnMoon\OpenApiServerBundle\OpenApiServerBundle;
 use Symfony\Bundle\FrameworkBundle\FrameworkBundle;
 use Symfony\Bundle\FrameworkBundle\Kernel\MicroKernelTrait;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Loader\Configurator\ContainerConfigurator;
+use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\HttpKernel\Kernel as BaseKernel;
 use Symfony\Component\Routing\Loader\Configurator\RoutingConfigurator;
 
-class TestKernel extends BaseKernel
+class CommandTestKernel extends BaseKernel
 {
     use MicroKernelTrait;
 
@@ -23,7 +24,7 @@ class TestKernel extends BaseKernel
     {
         $specificationName = 'petstore';
         $specification     = [
-            'path' => '%kernel.project_dir%/test/functional/openapi_specification.yaml',
+            'path' => __DIR__ . '/openapi_specification.yaml',
             'type' => 'yaml',
             'name_space' => 'PetStore',
             'media_type' => 'application/json',
@@ -44,13 +45,28 @@ class TestKernel extends BaseKernel
         );
     }
 
+    /**
+     * {@inheritdoc}
+     */
+    public function getCacheDir()
+    {
+        return __DIR__ . '/var/cache';
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function getLogDir()
+    {
+        return __DIR__ . '/var/log';
+    }
+
     protected function configureContainer(ContainerConfigurator $container): void
     {
     }
 
     protected function configureRoutes(RoutingConfigurator $routes): void
     {
-        $routes->import(__DIR__ . '/openapi_routes.yaml');
     }
 
     /**
@@ -69,5 +85,13 @@ class TestKernel extends BaseKernel
 
             yield new $class();
         }
+    }
+
+    public function shutdown(): void
+    {
+        $filesystem = new Filesystem();
+        $filesystem->remove([__DIR__ . '/var']);
+
+        parent::shutdown();
     }
 }

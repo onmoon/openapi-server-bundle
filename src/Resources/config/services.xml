@@ -52,10 +52,9 @@
         <service id="OnMoon\OpenApiServerBundle\Command\DeleteGeneratedCodeCommand">
             <argument key="$rootPath">%openapi.generated.code.root.path%</argument>
         </service>
-        <service id="OnMoon\OpenApiServerBundle\Command\ProcessFactory" class="OnMoon\OpenApiServerBundle\Command\DefaultProcessFactory" />
+        <service id="OnMoon\OpenApiServerBundle\Command\ProcessFactory" class="OnMoon\OpenApiServerBundle\Command\SymfonyProcessFactory" />
         <service id="OnMoon\OpenApiServerBundle\Command\RefreshApiCodeCommand">
             <argument key="$rootPath">%openapi.generated.code.root.path%</argument>
-            <argument key="$processFactory" type="service" id="OnMoon\OpenApiServerBundle\Command\ProcessFactory" />
         </service>
         <service id="OnMoon\OpenApiServerBundle\Serializer\DtoSerializer" class="OnMoon\OpenApiServerBundle\Serializer\ArrayDtoSerializer">
             <argument key="$sendNulls">%openapi.send.nulls%</argument>
