@@ -24,6 +24,11 @@ parameters:
             message: '#Variable static method call on OnMoon\\OpenApiServerBundle\\Types\\TypeSerializer.#'
             paths:
                 - %currentWorkingDirectory%/src/Types/ScalarTypesResolver.php
+        -
+            message: '#Access to an undefined property PhpParser\\Node::*#'
+            paths:
+                - %currentWorkingDirectory%/test/unit/CodeGenerator/PhpParserGenerators/FileBuilderTest.php
+
 includes:
     - vendor/thecodingmachine/phpstan-safe-rule/phpstan-safe-rule.neon
     - vendor/phpstan/phpstan-phpunit/extension.neon
