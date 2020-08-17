@@ -16,6 +16,8 @@ use PHPUnit\Framework\Assert;
 use PHPUnit\Framework\TestCase;
 use Throwable;
 
+use const PHP_EOL;
+
 /**
  * @covers \OnMoon\OpenApiServerBundle\CodeGenerator\PhpParserGenerators\CodeGenerator;
  */
@@ -114,9 +116,9 @@ class CodeGeneratorTest extends TestCase
     public function testGetDocCommentManyLines(): void
     {
         $docComment         = $this->codeGenerator->getDocComment(['@param mixed[]', ' @return string']);
-        $expectedDocComment = '/**'.PHP_EOL.
-            ' * @param mixed[]'.PHP_EOL.
-            ' * @return string'.PHP_EOL.
+        $expectedDocComment = '/**' . PHP_EOL .
+            ' * @param mixed[]' . PHP_EOL .
+            ' * @return string' . PHP_EOL .
             ' */';
         Assert::assertEquals($expectedDocComment, $docComment);
     }
