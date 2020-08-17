@@ -332,7 +332,7 @@ class SpecificationParser
         /** @var string|int|float|bool|null $schemaDefaultValue */
         $schemaDefaultValue = $itemProperty->default;
 
-        if ($schemaDefaultValue !== null && $isScalar && $scalarTypeId !== null) {
+        if ($schemaDefaultValue !== null && $isScalar) {
             if ($this->typeResolver->isDateTime($scalarTypeId)) {
                 // Symfony Yaml parses fields that looks like datetime into unix timestamp
                 // however leaves strings untouched. We need to make types more solid
