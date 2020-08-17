@@ -114,12 +114,10 @@ class CodeGeneratorTest extends TestCase
     public function testGetDocCommentManyLines(): void
     {
         $docComment         = $this->codeGenerator->getDocComment(['@param mixed[]', ' @return string']);
-        $expectedDocComment = <<<'EOD'
-/**
- * @param mixed[]
- * @return string
- */
-EOD;
+        $expectedDocComment = '/**'.PHP_EOL.
+            ' * @param mixed[]'.PHP_EOL.
+            ' * @return string'.PHP_EOL.
+            ' */';
         Assert::assertEquals($expectedDocComment, $docComment);
     }
 
