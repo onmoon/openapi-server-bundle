@@ -16,7 +16,7 @@ use function count;
 /**
  * @covers \OnMoon\OpenApiServerBundle\Specification\Definitions\Specification
  */
-class SpecificationTest extends TestCase
+final class SpecificationTest extends TestCase
 {
     /**
      * @return mixed[]

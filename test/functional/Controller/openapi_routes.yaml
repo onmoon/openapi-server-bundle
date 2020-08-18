@@ -1,0 +1,5 @@
+petstore-api:
+  resource: 'petstore' # This should be same as in specs section of /config/packages/open_api_server.yaml
+  type: open_api
+  prefix: '/api' # Add this standard parameter to add base path to all paths in api
+  name_prefix: 'petstore_' # This will add a prefix to route names

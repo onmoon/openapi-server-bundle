@@ -17,7 +17,6 @@ use function Safe\preg_match;
 use function Safe\preg_replace;
 use function str_replace;
 use function trim;
-use function ucfirst;
 use function ucwords;
 
 use const DIRECTORY_SEPARATOR;
@@ -61,9 +60,7 @@ final class DefaultNamingStrategy implements NamingStrategy
     {
         $namespace = $this->padStringThatIsReservedNamespaceName(
             $this->padStringStartingWithNumber(
-                ucfirst(
-                    $this->prepareTextForPhp($text)
-                )
+                $this->prepareTextForPhp($text)
             )
         );
 
