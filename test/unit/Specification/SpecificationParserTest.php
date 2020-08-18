@@ -186,7 +186,7 @@ final class SpecificationParserTest extends TestCase
                                 'schema' => new Schema([
                                     'type' => Type::INTEGER,
                                     'default' => 'SomeDefaultValue2',
-                                ])
+                                ]),
                             ]),
                             new Parameter([
                                 'name' => 'pathParam',
@@ -194,7 +194,7 @@ final class SpecificationParserTest extends TestCase
                                 'schema' => new Schema([
                                     'type' => Type::INTEGER,
                                     'default' => 'SomeDefaultValue2',
-                                ])
+                                ]),
                             ]),
                             [
                                 '$ref' => 'SomeCustomQueryParamReference',
@@ -203,7 +203,7 @@ final class SpecificationParserTest extends TestCase
                                 'schema' => new Schema([
                                     'type' => Type::INTEGER,
                                     'default' => 'SomeDefaultValue3',
-                                ])
+                                ]),
                             ],
                             new Parameter([
                                 'name' => 'undefinedParam',
@@ -211,9 +211,9 @@ final class SpecificationParserTest extends TestCase
                                 'schema' => new Schema([
                                     'type' => Type::INTEGER,
                                     'default' => 'SomeDefaultValue3',
-                                ])
+                                ]),
                             ]),
-                        ]
+                        ],
                     ]),
                     'parameters' => [
                         new Parameter([
@@ -222,9 +222,9 @@ final class SpecificationParserTest extends TestCase
                             'schema' => new Schema([
                                 'type' => Type::INTEGER,
                                 'default' => 'SomeDefaultValue',
-                            ])
+                            ]),
                         ]),
-                    ]
+                    ],
                 ],
             ]),
         ]);
@@ -499,10 +499,10 @@ final class SpecificationParserTest extends TestCase
     /**
      * @param mixed[] $payload
      *
-     * @dataProvider parseOpenApiSuccessDefaultValueProvider
-     *
      * @throws CannotParseOpenApi
      * @throws TypeErrorException
+     *
+     * @dataProvider parseOpenApiSuccessDefaultValueProvider
      */
     public function testParseOpenApiSuccessDefaultValue(array $payload): void
     {
@@ -572,6 +572,7 @@ final class SpecificationParserTest extends TestCase
 
     /**
      * @return Operation[][][][]
+     *
      * @throws TypeErrorException
      */
     public function parseOpenApiThrowCannotParseOpenApiProvider(): array
@@ -589,15 +590,13 @@ final class SpecificationParserTest extends TestCase
                                     'schema' => new Schema([
                                         'type' => Type::OBJECT,
                                         'default' => 'SomeDefaultValue',
-                                    ])
+                                    ]),
                                 ]),
-                            ]
+                            ],
                         ]),
                     ],
                 ],
-                'expected' => [
-                    'exceptionMessage' => null,
-                ],
+                'expected' => ['exceptionMessage' => null],
             ],
             [
                 'paths' => [
@@ -617,9 +616,7 @@ final class SpecificationParserTest extends TestCase
                         ]),
                     ],
                 ],
-                'expected' => [
-                    'exceptionMessage' => null,
-                ],
+                'expected' => ['exceptionMessage' => null],
             ],
             [
                 'paths' => [
@@ -641,9 +638,7 @@ final class SpecificationParserTest extends TestCase
                         ]),
                     ],
                 ],
-                'expected' => [
-                    'exceptionMessage' => null,
-                ],
+                'expected' => ['exceptionMessage' => null],
             ],
             [
                 'paths' => [
@@ -665,21 +660,19 @@ final class SpecificationParserTest extends TestCase
                         ]),
                     ],
                 ],
-                'expected' => [
-                    'exceptionMessage' => 'Only object is allowed as root in response (code "200") (array as root is insecure, see https://haacked.com/archive/2009/06/25/json-hijacking.aspx/) for operation: "post" of path: "/some/custom/url" in specification file: "/some/custom/specification/path".',
-                ],
+                'expected' => ['exceptionMessage' => 'Only object is allowed as root in response (code "200") (array as root is insecure, see https://haacked.com/archive/2009/06/25/json-hijacking.aspx/) for operation: "post" of path: "/some/custom/url" in specification file: "/some/custom/specification/path".'],
             ],
         ];
     }
 
     /**
      * @param Operation[][][][] $paths
-     * @param mixed[] $expected
-     *
-     * @dataProvider parseOpenApiThrowCannotParseOpenApiProvider
+     * @param mixed[]           $expected
      *
      * @throws CannotParseOpenApi
      * @throws TypeErrorException
+     *
+     * @dataProvider parseOpenApiThrowCannotParseOpenApiProvider
      */
     public function testParseOpenApiThrowCannotParseOpenApi(array $paths, array $expected): void
     {
