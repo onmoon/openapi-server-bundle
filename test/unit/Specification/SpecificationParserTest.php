@@ -10,6 +10,7 @@ use cebe\openapi\spec\OpenApi;
 use cebe\openapi\spec\Operation;
 use cebe\openapi\spec\Parameter;
 use cebe\openapi\spec\Paths;
+use cebe\openapi\spec\RequestBody;
 use cebe\openapi\spec\Response;
 use cebe\openapi\spec\Responses;
 use cebe\openapi\spec\Schema;
@@ -47,7 +48,7 @@ final class SpecificationParserTest extends TestCase
      * @throws CannotParseOpenApi
      * @throws TypeErrorException
      */
-    public function testParseOpenApiSuccessDefault(): void
+    public function testParseOpenApiSuccessBasic(): void
     {
         $specificationName   = 'SomeCustomSpecification';
         $specificationConfig = new SpecificationConfig(
@@ -58,67 +59,9 @@ final class SpecificationParserTest extends TestCase
         );
         $parsedSpecification = new OpenApi([
             'paths' => new Paths([
-                '/some/custom/first/url' => [
-                    'get' => new Operation(['operationId' => 'SomeCustomFirstGetOperation']),
-                ],
-                '/some/custom/second/url' => [
-                    'get' => new Operation(['operationId' => 'SomeCustomSecondGetOperation']),
-                    'post' => new Operation(['operationId' => 'SomeCustomSecondPostOperation']),
-                ],
-                '/some/custom/third/url' => [
-                    'post' => new Operation([
-                        'operationId' => 'SomeCustomThirdPostOperation',
-                        'responses' => new Responses([
-                            '200' => new Response([
-                                'description' => 'SomeCustomResponseParam',
-                                'content' => [
-                                    'application/json' => new MediaType([
-                                        'schema' => new Schema([
-                                            'type' => Type::OBJECT,
-                                            'properties' => [
-                                                'someProperty' => new Schema([
-                                                    'type' => Type::INTEGER,
-                                                    'default' => 'SomeDefaultValue',
-                                                    'readOnly' => true,
-                                                    'writeOnly' => false,
-                                                    'required' => true,
-                                                ]),
-                                            ],
-                                            'required' => false,
-                                        ]),
-                                    ]),
-                                ],
-                            ]),
-//                            '201' => new Response([
-//                                'description' => 'SomeCustomResponseParam',
-//                                'content' => [
-//                                    'application/json' => new MediaType([
-//                                        'schema' => new Schema([
-//                                            'type' => Type::INTEGER,
-//                                        ]),
-//                                    ]),
-//                                ],
-//                            ]),
-                        ]),
-                        'parameters' => [
-                            new Parameter([
-                                'name' => 'firstParam',
-                                'in' => 'query',
-                                'schema' => new Schema([
-                                    'type' => Type::INTEGER,
-                                    'default' => 'SomeDefaultValue2',
-                                ])
-                            ]),
-                            new Parameter([
-                                'name' => 'firstParam',
-                                'in' => 'path',
-                                'schema' => new Schema([
-                                    'type' => Type::INTEGER,
-                                    'default' => 'SomeDefaultValue2',
-                                ])
-                            ]),
-                        ]
-                    ]),
+                '/some/custom/url' => [
+                    'get' => new Operation(['operationId' => 'SomeUrlGetBasic']),
+                    'post' => new Operation(['operationId' => 'SomeUrlPostBasic']),
                 ],
             ]),
         ]);
@@ -132,29 +75,346 @@ final class SpecificationParserTest extends TestCase
         );
 
         Assert::assertSame(
-            '/some/custom/first/url',
-            $specification->getOperation('SomeCustomFirstGetOperation')->getUrl()
+            '/some/custom/url',
+            $specification->getOperation('SomeUrlGetBasic')->getUrl()
         );
         Assert::assertSame(
-            '/some/custom/second/url',
-            $specification->getOperation('SomeCustomSecondGetOperation')->getUrl()
+            '/some/custom/url',
+            $specification->getOperation('SomeUrlPostBasic')->getUrl()
+        );
+    }
+
+    /**
+     * @throws CannotParseOpenApi
+     * @throws TypeErrorException
+     */
+    public function testParseOpenApiSuccess(): void
+    {
+        $specificationName   = 'SomeCustomSpecification';
+        $specificationConfig = new SpecificationConfig(
+            '/some/custom/specification/path',
+            null,
+            '\\Some\\Custom\\Namespace',
+            'application/json',
+        );
+        $parsedSpecification = new OpenApi([
+            'paths' => new Paths([
+                '/some/custom/url' => [
+                    'post' => new Operation([
+                        'operationId' => 'SomeCustomOperationWithRequestAndResponses',
+                        'requestBody' => new RequestBody([
+                            'description' => 'SomeCustomRequestParam',
+                            'content' => [
+                                'application/json' => new MediaType([
+                                    'schema' => new Schema([
+                                        'type' => Type::OBJECT,
+                                        'properties' => [
+                                            'someProperty1' => new Schema([
+                                                'type' => Type::STRING,
+                                                'default' => 'SomeDefaultValue',
+                                                'readOnly' => false,
+                                                'writeOnly' => true,
+                                                'description' => 'SomeCustomDescription',
+                                                'nullable' => true,
+                                                'pattern' => 'SomeCustomPattern',
+                                            ]),
+                                            'someProperty2' => new Schema([
+                                                'type' => Type::INTEGER,
+                                                'default' => 1000,
+                                                'readOnly' => false,
+                                            ]),
+                                            'someReadOnlyProperty' => new Schema([
+                                                'type' => Type::STRING,
+                                                'default' => 'SomeDefaultValue',
+                                                'readOnly' => true,
+                                            ]),
+                                            'someProperty3' => new Schema([
+                                                'type' => Type::OBJECT,
+                                                'readOnly' => false,
+                                                'properties' => [
+                                                    'someSubProperty1' => new Schema([
+                                                        'type' => Type::INTEGER,
+                                                    ]),
+                                                    'someSubProperty2' => new Schema([
+                                                        'type' => Type::INTEGER,
+                                                    ]),
+                                                ],
+                                            ]),
+                                        ],
+                                    ]),
+                                ]),
+                            ],
+                        ]),
+                        'responses' => new Responses([
+                            '200' => new Response([
+                                'description' => 'SomeCustomResponseParam200',
+                                'content' => [
+                                    'application/json' => new MediaType([
+                                        'schema' => new Schema([
+                                            'type' => Type::OBJECT,
+                                            'properties' => [
+                                                'someProperty' => new Schema([
+                                                    'type' => Type::STRING,
+                                                    'default' => 'SomeDefaultValue',
+                                                    'writeOnly' => false,
+                                                ]),
+                                                'someWriteOnlyProperty' => new Schema([
+                                                    'type' => Type::STRING,
+                                                    'default' => 'SomeDefaultValue',
+                                                    'writeOnly' => true,
+                                                ]),
+                                            ],
+                                        ]),
+                                    ]),
+                                ],
+                            ]),
+                            '201' => new Response([
+                                'description' => 'SomeCustomResponseParam201',
+                                'content' => [
+                                    'application/json' => new MediaType([
+                                        'schema' => new Schema([
+                                            'type' => Type::OBJECT,
+                                        ]),
+                                    ]),
+                                ],
+                            ]),
+                        ]),
+                        'parameters' => [
+                            new Parameter([
+                                'name' => 'queryParam',
+                                'in' => 'query',
+                                'schema' => new Schema([
+                                    'type' => Type::INTEGER,
+                                    'default' => 'SomeDefaultValue2',
+                                ])
+                            ]),
+                            new Parameter([
+                                'name' => 'pathParam',
+                                'in' => 'path',
+                                'schema' => new Schema([
+                                    'type' => Type::INTEGER,
+                                    'default' => 'SomeDefaultValue2',
+                                ])
+                            ]),
+                            [
+                                '$ref' => 'SomeCustomQueryParamReference',
+                                'name' => 'secondQueryParam',
+                                'in' => 'query',
+                                'schema' => new Schema([
+                                    'type' => Type::INTEGER,
+                                    'default' => 'SomeDefaultValue3',
+                                ])
+                            ],
+                            new Parameter([
+                                'name' => 'undefinedParam',
+                                'in' => 'undefined',
+                                'schema' => new Schema([
+                                    'type' => Type::INTEGER,
+                                    'default' => 'SomeDefaultValue3',
+                                ])
+                            ]),
+                        ]
+                    ]),
+                    'parameters' => [
+                        new Parameter([
+                            'name' => 'pathItemQueryParam',
+                            'in' => 'query',
+                            'schema' => new Schema([
+                                'type' => Type::INTEGER,
+                                'default' => 'SomeDefaultValue',
+                            ])
+                        ]),
+                    ]
+                ],
+            ]),
+        ]);
+
+        $specificationParser = new SpecificationParser($this->typeResolver);
+
+        $specification = $specificationParser->parseOpenApi(
+            $specificationName,
+            $specificationConfig,
+            $parsedSpecification
+        );
+
+        $requestProperties = $specification
+            ->getOperation('SomeCustomOperationWithRequestAndResponses')
+            ->getRequestBody()
+            ->getProperties();
+
+        Assert::assertSame('someProperty1', $requestProperties[0]->getName());
+        Assert::assertSame('SomeCustomDescription', $requestProperties[0]->getDescription());
+        Assert::assertTrue($requestProperties[0]->isNullable());
+        Assert::assertSame('SomeCustomPattern', $requestProperties[0]->getPattern());
+
+        Assert::assertSame('someProperty2', $requestProperties[1]->getName());
+        Assert::assertSame(10, $requestProperties[1]->getScalarTypeId());
+
+        Assert::assertSame('someProperty3', $requestProperties[2]->getName());
+        Assert::assertCount(2, $requestProperties[2]->getObjectTypeDefinition()->getProperties());
+
+        foreach (
+            $specification->getOperation('SomeCustomOperationWithRequestAndResponses')
+                ->getRequestBody()
+                ->getProperties() as $property
+        ) {
+            Assert::assertNotContains($property->getName(), ['someReadOnlyProperty']);
+        }
+
+        foreach (
+            $specification->getOperation('SomeCustomOperationWithRequestAndResponses')
+                ->getResponse('200')
+                ->getProperties() as $property
+        ) {
+            Assert::assertContains($property->getName(), ['someProperty']);
+            Assert::assertNotContains($property->getName(), ['someWriteOnlyProperty']);
+        }
+
+        foreach (['200', '201'] as $code) {
+            Assert::assertArrayHasKey(
+                $code,
+                $specification
+                    ->getOperation('SomeCustomOperationWithRequestAndResponses')
+                    ->getResponses()
+            );
+        }
+
+        Assert::assertSame(
+            'pathItemQueryParam',
+            $specification->getOperation('SomeCustomOperationWithRequestAndResponses')
+                ->getRequestParameters()['query']
+                ->getProperties()[0]
+                ->getName()
         );
         Assert::assertSame(
-            '/some/custom/second/url',
-            $specification->getOperation('SomeCustomSecondPostOperation')->getUrl()
+            'queryParam',
+            $specification->getOperation('SomeCustomOperationWithRequestAndResponses')
+                ->getRequestParameters()['query']
+                ->getProperties()[1]
+                ->getName()
         );
-        Assert::assertSame(
-            '/some/custom/third/url',
-            $specification->getOperation('SomeCustomThirdPostOperation')->getUrl()
+
+        Assert::assertArrayNotHasKey(
+            2,
+            $specification->getOperation('SomeCustomOperationWithRequestAndResponses')
+                ->getRequestParameters()['query']
+                ->getProperties()
         );
 
         Assert::assertSame(
-            'firstParam',
-            $specification->getOperation('SomeCustomThirdPostOperation')->getRequestParameters()['path']->getProperties()[1]->getName()
+            'pathParam',
+            $specification->getOperation('SomeCustomOperationWithRequestAndResponses')
+                ->getRequestParameters()['path']
+                ->getProperties()[2]
+                ->getName()
         );
-        Assert::assertSame(
-            'firstParam',
-            $specification->getOperation('SomeCustomThirdPostOperation')->getRequestParameters()['query']->getProperties()[0]->getName()
+    }
+
+    /**
+     * @throws CannotParseOpenApi
+     * @throws TypeErrorException
+     */
+    public function testParseOpenApiSuccessRequestBadMediaType(): void
+    {
+        $specificationName   = 'SomeCustomSpecification';
+        $specificationConfig = new SpecificationConfig(
+            '/some/custom/specification/path',
+            null,
+            '\\Some\\Custom\\Namespace',
+            'application/json',
+        );
+        $parsedSpecification = new OpenApi([
+            'paths' => new Paths([
+                '/some/custom/bad-media-type/url' => [
+                    'post' => new Operation([
+                        'operationId' => 'SomeCustomOperationRequestBadMediaType',
+                        'requestBody' => new RequestBody([
+                            'description' => 'SomeCustomRequestParam',
+                            'content' => [
+                                'application/bad-media-type' => new MediaType([
+                                    'schema' => new Schema([
+                                        'type' => Type::OBJECT,
+                                    ]),
+                                ]),
+                                'application/json' => [
+                                    '$ref' => 'SomeCustomRequestParamReference',
+                                    'schema' => new Schema([
+                                        'type' => Type::OBJECT,
+                                    ]),
+                                ],
+                            ],
+                        ]),
+                    ]),
+                ],
+            ]),
+        ]);
+
+        $specificationParser = new SpecificationParser($this->typeResolver);
+
+        $specification = $specificationParser->parseOpenApi(
+            $specificationName,
+            $specificationConfig,
+            $parsedSpecification
+        );
+
+        Assert::assertNull(
+            $specification
+                ->getOperation('SomeCustomOperationRequestBadMediaType')
+                ->getRequestBody()
+        );
+    }
+
+    /**
+     * @throws CannotParseOpenApi
+     * @throws TypeErrorException
+     */
+    public function testParseOpenApiSuccessRequestBadAndGoodMediaType(): void
+    {
+        $specificationName   = 'SomeCustomSpecification';
+        $specificationConfig = new SpecificationConfig(
+            '/some/custom/specification/path',
+            null,
+            '\\Some\\Custom\\Namespace',
+            'application/json',
+        );
+        $parsedSpecification = new OpenApi([
+            'paths' => new Paths([
+                '/some/custom/bad-media-type/url' => [
+                    'post' => new Operation([
+                        'operationId' => 'SomeCustomOperationRequestBadMediaType',
+                        'requestBody' => new RequestBody([
+                            'description' => 'SomeCustomRequestParam',
+                            'content' => [
+                                'application/bad-media-type' => new MediaType([
+                                    'schema' => new Schema([
+                                        'type' => Type::OBJECT,
+                                    ]),
+                                ]),
+                                'application/json' => new MediaType([
+                                    'schema' => new Schema([
+                                        'type' => Type::OBJECT,
+                                    ]),
+                                ]),
+                            ],
+                        ]),
+                    ]),
+                ],
+            ]),
+        ]);
+
+        $specificationParser = new SpecificationParser($this->typeResolver);
+
+        $specification = $specificationParser->parseOpenApi(
+            $specificationName,
+            $specificationConfig,
+            $parsedSpecification
+        );
+
+        Assert::assertInstanceOf(
+            ObjectType::class,
+            $specification
+                ->getOperation('SomeCustomOperationRequestBadMediaType')
+                ->getRequestBody()
         );
     }
 
@@ -295,8 +555,6 @@ final class SpecificationParserTest extends TestCase
             $parsedSpecification
         );
 
-//        dump($specification->getOperation('SomeCustomThirdPostOperation')->getResponse('200')->getProperties());exit;
-
         foreach ($specification->getOperation('SomeCustomThirdPostOperation')->getResponse('200')->getProperties() as $propertyName => $property) {
             if ($payload['responseProperties'][$property->getName()]['expected']['objectTypeDefinitionInstance'] !== null) {
                 Assert::assertInstanceOf(
@@ -321,12 +579,12 @@ final class SpecificationParserTest extends TestCase
         return [
             [
                 'paths' => [
-                    '/some/custom/first/url' => [
+                    '/some/custom/url' => [
                         'get' => new Operation([
-                            'operationId' => 'SomeCustomFirstGetOperation',
+                            'operationId' => 'SomeCustomOperation',
                             'parameters' => [
                                 new Parameter([
-                                    'name' => 'firstParam',
+                                    'name' => 'NotScalarQueryParam',
                                     'in' => 'query',
                                     'schema' => new Schema([
                                         'type' => Type::OBJECT,
@@ -337,14 +595,39 @@ final class SpecificationParserTest extends TestCase
                         ]),
                     ],
                 ],
+                'expected' => [
+                    'exceptionMessage' => null,
+                ],
             ],
             [
                 'paths' => [
-                    '/some/custom/third/url' => [
+                    '/some/custom/url' => [
                         'post' => new Operation([
-                            'operationId' => 'SomeCustomThirdPostOperation',
+                            'operationId' => 'SomeCustomOperation',
+                            'requestBody' => new RequestBody([
+                                'description' => 'SomeCustomRequestParam',
+                                'content' => [
+                                    'application/json' => new MediaType([
+                                        'schema' => new Schema([
+                                            'type' => Type::INTEGER,
+                                        ]),
+                                    ]),
+                                ],
+                            ]),
+                        ]),
+                    ],
+                ],
+                'expected' => [
+                    'exceptionMessage' => null,
+                ],
+            ],
+            [
+                'paths' => [
+                    '/some/custom/url' => [
+                        'post' => new Operation([
+                            'operationId' => 'SomeCustomOperation',
                             'responses' => new Responses([
-                                '201' => new Response([
+                                '200' => new Response([
                                     'description' => 'SomeCustomResponseParam',
                                     'content' => [
                                         'application/json' => new MediaType([
@@ -358,19 +641,47 @@ final class SpecificationParserTest extends TestCase
                         ]),
                     ],
                 ],
+                'expected' => [
+                    'exceptionMessage' => null,
+                ],
+            ],
+            [
+                'paths' => [
+                    '/some/custom/url' => [
+                        'post' => new Operation([
+                            'operationId' => 'SomeCustomOperationWithException',
+                            'responses' => new Responses([
+                                '200' => new Response([
+                                    'description' => 'SomeCustomResponseParam',
+                                    'content' => [
+                                        'application/json' => new MediaType([
+                                            'schema' => new Schema([
+                                                'type' => Type::ARRAY,
+                                            ]),
+                                        ]),
+                                    ],
+                                ]),
+                            ]),
+                        ]),
+                    ],
+                ],
+                'expected' => [
+                    'exceptionMessage' => 'Only object is allowed as root in response (code "200") (array as root is insecure, see https://haacked.com/archive/2009/06/25/json-hijacking.aspx/) for operation: "post" of path: "/some/custom/url" in specification file: "/some/custom/specification/path".',
+                ],
             ],
         ];
     }
 
     /**
      * @param Operation[][][][] $paths
+     * @param mixed[] $expected
      *
      * @dataProvider parseOpenApiThrowCannotParseOpenApiProvider
      *
      * @throws CannotParseOpenApi
      * @throws TypeErrorException
      */
-    public function testParseOpenApiThrowCannotParseOpenApi(array $paths): void
+    public function testParseOpenApiThrowCannotParseOpenApi(array $paths, array $expected): void
     {
         $specificationName   = 'SomeCustomSpecification';
         $specificationConfig = new SpecificationConfig(
@@ -385,7 +696,11 @@ final class SpecificationParserTest extends TestCase
 
         $specificationParser = new SpecificationParser($this->typeResolver);
 
-        $this->expectException(CannotParseOpenApi::class);
+        if ($expected['exceptionMessage'] === null) {
+            $this->expectException(CannotParseOpenApi::class);
+        } else {
+            $this->expectExceptionMessage($expected['exceptionMessage']);
+        }
 
         $specificationParser->parseOpenApi(
             $specificationName,

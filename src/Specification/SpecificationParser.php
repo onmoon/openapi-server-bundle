@@ -322,6 +322,7 @@ class SpecificationParser
             $scalarTypeId = $this->typeResolver->findScalarType($itemProperty->type, $itemProperty->format);
             $propertyDefinition->setScalarTypeId($scalarTypeId);
         } elseif ($itemProperty->type === Type::OBJECT) {
+            // REMARK: It can't be tested by Exception here, because type is always OBJECT.
             $objectType = new ObjectDefinition($this->getPropertyGraph($itemProperty, $isRequest, false, $exceptionContext));
             $propertyDefinition->setObjectTypeDefinition($objectType);
             $isScalar = false;
