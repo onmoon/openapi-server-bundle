@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace OnMoon\OpenApiServerBundle\Test\Unit\Types;
+namespace OnMoon\OpenApiServerBundle\Test\Functional\DependencyInjection;
 
 use Matthias\SymfonyDependencyInjectionTest\PhpUnit\AbstractCompilerPassTestCase;
 use OnMoon\OpenApiServerBundle\Controller\ApiController;
@@ -11,7 +11,8 @@ use PHPUnit\Framework\Assert;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Definition;
 use Symfony\Component\DependencyInjection\Reference;
-use Symfony\Component\HttpKernel\Controller\ErrorController;
+
+use function get_class;
 
 /**
  * @covers \OnMoon\OpenApiServerBundle\DependencyInjection\CompilerPass
@@ -29,9 +30,10 @@ class CompilerPassTest extends AbstractCompilerPassTestCase
         $apiController->addTag('test');
         $this->setDefinition(ApiController::class, $apiController);
 
-        $errorController = new Definition(ErrorController::class);
-        $errorController->addTag('test');
-        $this->setDefinition(ErrorController::class, $errorController);
+        $someRandomClass = new Definition(get_class(new class () {
+        }));
+        $someRandomClass->addTag('test');
+        $this->setDefinition('some_random_class', $someRandomClass);
 
         $this->compile();
 

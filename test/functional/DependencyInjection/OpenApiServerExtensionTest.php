@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace OnMoon\OpenApiServerBundle\Test\DependencyInjection;
+namespace OnMoon\OpenApiServerBundle\Test\Functional\DependencyInjection;
 
 use Matthias\SymfonyDependencyInjectionTest\PhpUnit\AbstractExtensionTestCase;
 use OnMoon\OpenApiServerBundle\DependencyInjection\OpenApiServerExtension;
@@ -26,7 +26,7 @@ class OpenApiServerExtensionTest extends AbstractExtensionTestCase
     }
 
     /**
-     * @return array<int, array<int, string|bool>>
+     * @return list<list<string|bool>>
      */
     public function parameterLoadedDataProvider(): array
     {

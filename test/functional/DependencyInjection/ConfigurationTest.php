@@ -2,19 +2,28 @@
 
 declare(strict_types=1);
 
-namespace OnMoon\OpenApiServerBundle\Test\DependencyInjection;
+namespace OnMoon\OpenApiServerBundle\Test\Functional\DependencyInjection;
 
-use OnMoon\OpenApiServerBundle\Test\Unit\ConfigurationTestCase;
+use Matthias\SymfonyConfigTest\PhpUnit\ConfigurationTestCaseTrait;
+use OnMoon\OpenApiServerBundle\DependencyInjection\Configuration;
+use PHPUnit\Framework\TestCase;
 
 use function Safe\sprintf;
 
 /**
  * @covers \OnMoon\OpenApiServerBundle\DependencyInjection\Configuration
  */
-class ConfigurationTest extends ConfigurationTestCase
+class ConfigurationTest extends TestCase
 {
+    use ConfigurationTestCaseTrait;
+
+    protected function getConfiguration(): Configuration
+    {
+        return new Configuration();
+    }
+
     /**
-     * @return array<int, array<int, array<string, array<int, array<string, string>>>|string>>
+     * @return list<list<array<string, list<array<string, string>>>|string>>
      */
     public function parametersIsRequiredDataProvider(): array
     {
@@ -26,7 +35,7 @@ class ConfigurationTest extends ConfigurationTestCase
     }
 
     /**
-     * @param array<int, array<int, array<string, array<int, array<string, string>>>|string>> $configuration
+     * @param list<list<array<string, list<array<string, string>>>|string>> $configuration
      *
      * @dataProvider parametersIsRequiredDataProvider
      */
@@ -39,7 +48,7 @@ class ConfigurationTest extends ConfigurationTestCase
     }
 
     /**
-     * @return array<int, array<int, array<string, array<int, array<string, string>>|string>|string>>
+     * @return list<list<array<string, list<array<string, string>>|string>|string>>
      */
     public function parametersCannotBeEmptyDataProvider(): array
     {
@@ -54,7 +63,7 @@ class ConfigurationTest extends ConfigurationTestCase
     }
 
     /**
-     * @param array<int, array<int, array<string, array<int, array<string, string>>>|string>> $configuration
+     * @param list<list<array<string, list<array<string, string>>>|string>> $configuration
      *
      * @dataProvider parametersCannotBeEmptyDataProvider
      */
@@ -64,7 +73,7 @@ class ConfigurationTest extends ConfigurationTestCase
     }
 
     /**
-     * @return array<int, array<int, array<string, array<int, array<string, string>>>|string>>
+     * @return list<list<array<string, list<array<string, string>>>|string>>
      */
     public function parametersEnumDataProvider(): array
     {
@@ -80,7 +89,7 @@ class ConfigurationTest extends ConfigurationTestCase
     }
 
     /**
-     * @param array<int, array<int, array<string, array<int, array<string, string>>>|string>> $configuration, string $parameterName
+     * @param list<list<array<string, list<array<string, string>>>|string>> $configuration, string $parameterName
      *
      * @dataProvider parametersEnumDataProvider
      */
