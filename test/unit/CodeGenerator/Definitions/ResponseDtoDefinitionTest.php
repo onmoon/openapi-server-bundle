@@ -23,22 +23,19 @@ final class ResponseDtoDefinitionTest extends TestCase
         return [
             [
                 'conditions' => ['hasProperties' => false],
-                'expected' => ['isEmpty' => true],
             ],
             [
                 'conditions' => ['hasProperties' => true],
-                'expected' => ['isEmpty' => false],
             ],
         ];
     }
 
     /**
      * @param mixed[] $conditions
-     * @param mixed[] $expected
      *
      * @dataProvider responseDtoDefinitionProvider
      */
-    public function testResponseDtoDefinition(array $conditions, array $expected): void
+    public function testResponseDtoDefinition(array $conditions): void
     {
         $propertyDefinition = new PropertyDefinition(
             new Property('SomeCustomName')
@@ -55,6 +52,5 @@ final class ResponseDtoDefinitionTest extends TestCase
 
         Assert::assertSame($payload['statusCode'], $responseDtoDefinition->getStatusCode());
         Assert::assertSame($payload['properties'], $responseDtoDefinition->getProperties());
-        Assert::assertSame($expected['isEmpty'], $responseDtoDefinition->isEmpty());
     }
 }
