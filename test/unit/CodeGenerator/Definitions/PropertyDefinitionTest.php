@@ -23,40 +23,42 @@ final class PropertyDefinitionTest extends TestCase
         return [
             [
                 'payload' => [
-                    'classPropertyName' => 'CustomClassProperty',
-                    'nullable' => false,
-                    'getterName' => null,
-                    'setterName' => null,
-                    'hasGetter' => false,
-                    'hasSetter' => false,
-                    'inConstructor' => false,
-                ],
-                'conditions' => ['hasObjectTypeDefinition' => true],
-                'expected' => [
+                    'property' => [
+                        'classPropertyName' => 'CustomClassProperty',
+                        'nullable' => false,
+                        'getterName' => null,
+                        'setterName' => null,
+                        'hasGetter' => false,
+                        'hasSetter' => false,
+                        'inConstructor' => false,
+                    ],
                     'specProperty' => [
                         'name' => 'CustomProperty',
+                        'description' => null,
                         'isArray' => false,
                         'scalarTypeId' => null,
                     ],
+                    'hasObjectTypeDefinition' => false,
                 ],
             ],
             [
                 'payload' => [
-                    'classPropertyName' => 'CustomClassProperty',
-                    'nullable' => true,
-                    'getterName' => 'customGetter',
-                    'setterName' => 'customSetter',
-                    'hasGetter' => true,
-                    'hasSetter' => true,
-                    'inConstructor' => true,
-                ],
-                'conditions' => ['hasObjectTypeDefinition' => true],
-                'expected' => [
+                    'property' => [
+                        'classPropertyName' => 'CustomClassProperty',
+                        'nullable' => true,
+                        'getterName' => 'customGetter',
+                        'setterName' => 'customSetter',
+                        'hasGetter' => true,
+                        'hasSetter' => true,
+                        'inConstructor' => true,
+                    ],
                     'specProperty' => [
                         'name' => 'CustomProperty',
+                        'description' => 'CustomDescription',
                         'isArray' => true,
                         'scalarTypeId' => 100,
                     ],
+                    'hasObjectTypeDefinition' => true,
                 ],
             ],
         ];
@@ -64,43 +66,41 @@ final class PropertyDefinitionTest extends TestCase
 
     /**
      * @param mixed[] $payload
-     * @param mixed[] $conditions
-     * @param mixed[] $expected
      *
      * @dataProvider propertyDefinitionProvider
      */
-    public function testPropertyDefinition(array $payload, array $conditions, array $expected): void
+    public function testPropertyDefinition(array $payload): void
     {
-        $specProperty  = (new Property($expected['specProperty']['name']))
-            ->setArray($expected['specProperty']['isArray'])
-            ->setScalarTypeId($expected['specProperty']['scalarTypeId']);
-        $dtoDefinition = new DtoDefinition([]);
+        $specProperty = (new Property($payload['specProperty']['name']))
+            ->setDescription($payload['specProperty']['description'])
+            ->setArray($payload['specProperty']['isArray'])
+            ->setScalarTypeId($payload['specProperty']['scalarTypeId']);
 
-        $payload['objectTypeDefinition'] = (bool) $conditions['hasObjectTypeDefinition'] ? $dtoDefinition : null;
+        $objectTypeDefinition = (bool) $payload['hasObjectTypeDefinition'] ? new DtoDefinition([]) : null;
 
-        $propertyDefinition = new PropertyDefinition($specProperty);
+        $propertyDefinition = (new PropertyDefinition($specProperty))
+            ->setClassPropertyName($payload['property']['classPropertyName'])
+            ->setObjectTypeDefinition($objectTypeDefinition)
+            ->setNullable($payload['property']['nullable'])
+            ->setGetterName($payload['property']['getterName'])
+            ->setSetterName($payload['property']['setterName'])
+            ->setHasGetter($payload['property']['hasGetter'])
+            ->setHasSetter($payload['property']['hasSetter'])
+            ->setInConstructor($payload['property']['inConstructor']);
 
-        $propertyDefinition
-            ->setClassPropertyName($payload['classPropertyName'])
-            ->setObjectTypeDefinition($payload['objectTypeDefinition'])
-            ->setNullable($payload['nullable'])
-            ->setGetterName($payload['getterName'])
-            ->setSetterName($payload['setterName'])
-            ->setHasGetter($payload['hasGetter'])
-            ->setHasSetter($payload['hasSetter'])
-            ->setInConstructor($payload['inConstructor']);
+        Assert::assertSame($payload['property']['classPropertyName'], $propertyDefinition->getClassPropertyName());
+        Assert::assertSame($objectTypeDefinition, $propertyDefinition->getObjectTypeDefinition());
+        Assert::assertSame($payload['property']['nullable'], $propertyDefinition->isNullable());
+        Assert::assertSame($payload['property']['getterName'], $propertyDefinition->getGetterName());
+        Assert::assertSame($payload['property']['setterName'], $propertyDefinition->getSetterName());
+        Assert::assertSame($payload['property']['hasGetter'], $propertyDefinition->hasGetter());
+        Assert::assertSame($payload['property']['hasSetter'], $propertyDefinition->hasSetter());
+        Assert::assertSame($payload['property']['inConstructor'], $propertyDefinition->isInConstructor());
 
         Assert::assertSame($specProperty, $propertyDefinition->getSpecProperty());
-        Assert::assertSame($payload['classPropertyName'], $propertyDefinition->getClassPropertyName());
-        Assert::assertSame($payload['objectTypeDefinition'], $propertyDefinition->getObjectTypeDefinition());
-        Assert::assertSame($payload['nullable'], $propertyDefinition->isNullable());
-        Assert::assertSame($payload['getterName'], $propertyDefinition->getGetterName());
-        Assert::assertSame($payload['setterName'], $propertyDefinition->getSetterName());
-        Assert::assertSame($payload['hasGetter'], $propertyDefinition->hasGetter());
-        Assert::assertSame($payload['hasSetter'], $propertyDefinition->hasSetter());
-        Assert::assertSame($payload['inConstructor'], $propertyDefinition->isInConstructor());
-        Assert::assertSame($expected['specProperty']['name'], $propertyDefinition->getSpecPropertyName());
-        Assert::assertSame($expected['specProperty']['isArray'], $propertyDefinition->isArray());
-        Assert::assertSame($expected['specProperty']['scalarTypeId'], $propertyDefinition->getScalarTypeId());
+        Assert::assertSame($payload['specProperty']['name'], $propertyDefinition->getSpecPropertyName());
+        Assert::assertSame($payload['specProperty']['isArray'], $propertyDefinition->isArray());
+        Assert::assertSame($payload['specProperty']['scalarTypeId'], $propertyDefinition->getScalarTypeId());
+        Assert::assertSame($payload['specProperty']['description'], $propertyDefinition->getDescription());
     }
 }
