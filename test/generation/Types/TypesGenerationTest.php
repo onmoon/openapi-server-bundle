@@ -4,30 +4,57 @@ declare(strict_types=1);
 
 namespace OnMoon\OpenApiServerBundle\Test\Generation\Types;
 
+use OnMoon\OpenApiServerBundle\Interfaces\RequestHandler;
+use OnMoon\OpenApiServerBundle\Interfaces\ResponseDto;
+use OnMoon\OpenApiServerBundle\Test\Generation\GeneratedClassAsserter;
 use OnMoon\OpenApiServerBundle\Test\Generation\GenerationTestCase;
-use PhpParser\Node;
-use PhpParser\Node\Identifier;
-use PhpParser\Node\Stmt\ClassMethod;
-use PHPUnit\Framework\Assert;
+use Psr\Container\ContainerInterface;
 
 final class TypesGenerationTest extends GenerationTestCase
 {
-    public function testStringTypeGeneration(): void
+    public function testGetTestOKDto(): void
     {
         $generatedFiles = $this->generateCodeFromSpec(__DIR__ . '/specification.yaml');
-        $responseDto    = $generatedFiles->getContentsByFullPath('/test/Apis/TestApi/GetTest/Dto/Response/OK/GetTestOKDto.php');
-        $statements     = $this->getStatements($responseDto);
 
-        /** @var ClassMethod $stringPropertyGetterMethod */
-        $stringPropertyGetterMethod = $this->nodeFinder()->findFirst(
-            $statements,
-            static fn (Node $node): bool => $node instanceof ClassMethod &&
-                $node->name->name === 'getStringProperty'
+        $okDtoAsserter = new GeneratedClassAsserter(
+            $generatedFiles,
+            '/test/Apis/TestApi/GetTest/Dto/Response/OK/GetTestOKDto.php',
         );
 
-        /** @var Identifier $stringPropertyGetterMethodReturnType */
-        $stringPropertyGetterMethodReturnType = $stringPropertyGetterMethod->returnType;
+        $okDtoAsserter->assertInNamespace('Test\Apis\TestApi\GetTest\Dto\Response\OK');
+        $okDtoAsserter->assertHasName('GetTestOKDto');
+        $okDtoAsserter->assertImplements(ResponseDto::class);
+        $okDtoAsserter->assertHasProperty('string_property', 'string', false);
+        $okDtoAsserter->assertHasUseStatement('OnMoon\OpenApiServerBundle\Interfaces\ResponseDto');
+        $okDtoAsserter->assertHasMethod('getStringProperty');
+        $okDtoAsserter->assertMethodDocblockContains('toArray', '/** @inheritDoc */');
+        $okDtoAsserter->assertMethodReturns('getStringProperty', 'string', false);
+        $okDtoAsserter->assertMethodHasArgument('__construct', 'string_property', 'string', false);
+    }
 
-        Assert::assertEquals('string', $stringPropertyGetterMethodReturnType->name);
+    public function testGetTest(): void
+    {
+        $generatedFiles = $this->generateCodeFromSpec(__DIR__ . '/specification.yaml');
+
+        $getTestAsserter = new GeneratedClassAsserter(
+            $generatedFiles,
+            '/test/Apis/TestApi/GetTest/GetTest.php',
+        );
+
+        $getTestAsserter->assertExtends(RequestHandler::class);
+        $getTestAsserter->assertHasMethod('getTest');
+        $getTestAsserter->assertMethodReturns('getTest', 'Test\Apis\TestApi\GetTest\Dto\Response\OK\GetTestOKDto', false);
+    }
+
+    public function testApiServiceLoaderServiceSubscriber(): void
+    {
+        $generatedFiles = $this->generateCodeFromSpec(__DIR__ . '/specification.yaml');
+
+        $subscriberServiceAsserter = new GeneratedClassAsserter(
+            $generatedFiles,
+            '/test/ServiceSubscriber/ApiServiceLoaderServiceSubscriber.php',
+        );
+
+        $subscriberServiceAsserter->assertMethodHasArgument('__construct', 'locator', ContainerInterface::class, false);
     }
 }
