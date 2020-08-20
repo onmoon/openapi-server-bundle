@@ -17,7 +17,10 @@ use Symfony\Component\HttpFoundation\Request;
 use Throwable;
 
 use function get_class;
+use function Safe\fopen;
+use function Safe\fwrite;
 use function Safe\json_encode;
+use function Safe\rewind;
 
 /**
  * @covers \OnMoon\OpenApiServerBundle\Serializer\ArrayDtoSerializer
@@ -49,6 +52,7 @@ class ArrayDtoSerializerTest extends TestCase
                         'thirdParam' => null,
                     ],
                 ],
+                'conditions' => ['bodyIsResource' => false],
             ],
             [
                 'payload' => [
@@ -65,6 +69,7 @@ class ArrayDtoSerializerTest extends TestCase
                         'thirdParam' => null,
                     ],
                 ],
+                'conditions' => ['bodyIsResource' => false],
             ],
             [
                 'payload' => [
@@ -84,6 +89,7 @@ class ArrayDtoSerializerTest extends TestCase
                         'thirdParam' => null,
                     ],
                 ],
+                'conditions' => ['bodyIsResource' => false],
             ],
             [
                 'payload' => [
@@ -100,6 +106,7 @@ class ArrayDtoSerializerTest extends TestCase
                         'thirdParam' => null,
                     ],
                 ],
+                'conditions' => ['bodyIsResource' => false],
             ],
             [
                 'payload' => [
@@ -118,6 +125,7 @@ class ArrayDtoSerializerTest extends TestCase
                         'thirdParam' => ['firstParam' => 'SomeDefaultFirstBodySubParam'],
                     ],
                 ],
+                'conditions' => ['bodyIsResource' => false],
             ],
             [
                 'payload' => [
@@ -136,6 +144,28 @@ class ArrayDtoSerializerTest extends TestCase
                         'thirdParam' => ['firstParam' => 'SomeCustomFirstBodySubParam'],
                     ],
                 ],
+                'conditions' => ['bodyIsResource' => false],
+            ],
+            [
+                'payload' => [
+                    'queryParams' => [],
+                    'pathParams' => [],
+                    'bodyParams' => [
+                        'firstParam' => 'SomeCustomFirstBodyParam',
+                        'secondParam' => 1000,
+                        'thirdParam' => ['firstParam' => 'SomeCustomFirstBodySubParam'],
+                    ],
+                ],
+                'expected' => [
+                    'queryParams' => ['firstParam' => 'SomeDefaultQueryParam'],
+                    'pathParams' => ['firstParam' => 'SomeDefaultPathParam'],
+                    'bodyParams' => [
+                        'firstParam' => 'SomeCustomFirstBodyParam',
+                        'secondParam' => 1000,
+                        'thirdParam' => ['firstParam' => 'SomeCustomFirstBodySubParam'],
+                    ],
+                ],
+                'conditions' => ['bodyIsResource' => true],
             ],
         ];
     }
@@ -143,13 +173,22 @@ class ArrayDtoSerializerTest extends TestCase
     /**
      * @param mixed[] $payload
      * @param mixed[] $expected
+     * @param mixed[] $conditions
      *
      * @throws Throwable
      *
      * @dataProvider createRequestDtoWithPathProvider
      */
-    public function testCreateRequestDtoWithPath(array $payload, array $expected): void
+    public function testCreateRequestDtoWithPath(array $payload, array $expected, array $conditions): void
     {
+        $requestContent = json_encode($payload['bodyParams']);
+        if ($conditions['bodyIsResource'] === true) {
+            $requestContentResource = fopen('php://temp', 'rb+');
+            fwrite($requestContentResource, $requestContent);
+            rewind($requestContentResource);
+            $requestContent = $requestContentResource;
+        }
+
         $request = new Request(
             $payload['queryParams'],
             [],
@@ -157,7 +196,7 @@ class ArrayDtoSerializerTest extends TestCase
             [],
             [],
             [],
-            json_encode($payload['bodyParams'])
+            $requestContent
         );
 
         $requestQuery = new ObjectType([
