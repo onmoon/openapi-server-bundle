@@ -26,6 +26,7 @@ class ArrayDtoSerializerTest extends TestCase
 {
     private const OK_RESPONSE_DTO_FIRST_PROP  = 'firstProp';
     private const OK_RESPONSE_DTO_SECOND_PROP = 'secondProp';
+    private const OK_RESPONSE_DTO_THIRD_PROP  = 'thirdProp';
 
     /**
      * @return mixed[]
@@ -45,6 +46,7 @@ class ArrayDtoSerializerTest extends TestCase
                     'bodyParams' => [
                         'firstParam' => 'SomeDefaultFirstBodyParam',
                         'secondParam' => 0,
+                        'thirdParam' => null,
                     ],
                 ],
             ],
@@ -60,6 +62,7 @@ class ArrayDtoSerializerTest extends TestCase
                     'bodyParams' => [
                         'firstParam' => 'SomeDefaultFirstBodyParam',
                         'secondParam' => 0,
+                        'thirdParam' => null,
                     ],
                 ],
             ],
@@ -78,6 +81,7 @@ class ArrayDtoSerializerTest extends TestCase
                     'bodyParams' => [
                         'firstParam' => 'SomeCustomFirstBodyParam',
                         'secondParam' => 1000,
+                        'thirdParam' => null,
                     ],
                 ],
             ],
@@ -93,6 +97,43 @@ class ArrayDtoSerializerTest extends TestCase
                     'bodyParams' => [
                         'firstParam' => 'SomeDefaultFirstBodyParam',
                         'secondParam' => 1000,
+                        'thirdParam' => null,
+                    ],
+                ],
+            ],
+            [
+                'payload' => [
+                    'queryParams' => [],
+                    'pathParams' => [],
+                    'bodyParams' => [
+                        'thirdParam' => [],
+                    ],
+                ],
+                'expected' => [
+                    'queryParams' => ['firstParam' => 'SomeDefaultQueryParam'],
+                    'pathParams' => ['firstParam' => 'SomeDefaultPathParam'],
+                    'bodyParams' => [
+                        'firstParam' => 'SomeDefaultFirstBodyParam',
+                        'secondParam' => 0,
+                        'thirdParam' => ['firstParam' => 'SomeDefaultFirstBodySubParam'],
+                    ],
+                ],
+            ],
+            [
+                'payload' => [
+                    'queryParams' => [],
+                    'pathParams' => [],
+                    'bodyParams' => [
+                        'thirdParam' => ['firstParam' => 'SomeCustomFirstBodySubParam'],
+                    ],
+                ],
+                'expected' => [
+                    'queryParams' => ['firstParam' => 'SomeDefaultQueryParam'],
+                    'pathParams' => ['firstParam' => 'SomeDefaultPathParam'],
+                    'bodyParams' => [
+                        'firstParam' => 'SomeDefaultFirstBodyParam',
+                        'secondParam' => 0,
+                        'thirdParam' => ['firstParam' => 'SomeCustomFirstBodySubParam'],
                     ],
                 ],
             ],
@@ -127,12 +168,24 @@ class ArrayDtoSerializerTest extends TestCase
             (new Property('firstParam'))
                 ->setDefaultValue('SomeDefaultPathParam'),
         ]);
-        $requestBody  = new ObjectType([
+
+        $requestBodyThirdParam = new Property('thirdParam');
+        if (isset($payload['bodyParams']['thirdParam'])) {
+            $requestBodyThirdParam->setObjectTypeDefinition(
+                new ObjectType([
+                    (new Property('firstParam'))
+                        ->setDefaultValue('SomeDefaultFirstBodySubParam'),
+                ])
+            );
+        }
+
+        $requestBody = new ObjectType([
             (new Property('firstParam'))
                 ->setDefaultValue('SomeDefaultFirstBodyParam'),
             (new Property('secondParam'))
                 ->setDefaultValue(0)
                 ->setScalarTypeId(10),
+            $requestBodyThirdParam,
         ]);
 
         $operation = new Operation(
@@ -176,6 +229,15 @@ class ArrayDtoSerializerTest extends TestCase
             $expected['bodyParams']['secondParam'],
             $requestDto->getBody()->getSecondParam()
         );
+
+        if (isset($expected['bodyParams']['thirdParam'])) {
+            Assert::assertSame(
+                $expected['bodyParams']['thirdParam']['firstParam'],
+                $requestDto->getBody()->getThirdParam()->getFirstParam()
+            );
+        } else {
+            Assert::assertNull($requestDto->getBody()->getThirdParam());
+        }
     }
 
     private function makeRequestDtoFCQN(): Dto
@@ -272,6 +334,7 @@ class ArrayDtoSerializerTest extends TestCase
                 {
                     private ?string $firstParam = null;
                     private ?int $secondParam   = null;
+                    private ?Dto $thirdParam    = null;
 
                     public function getFirstParam(): ?string
                     {
@@ -283,21 +346,59 @@ class ArrayDtoSerializerTest extends TestCase
                         return $this->secondParam;
                     }
 
+                    public function getThirdParam(): ?Dto
+                    {
+                        return $this->thirdParam;
+                    }
+
                     /** @inheritDoc */
                     public function toArray(): array
                     {
                         return [
                             'firstParam' => $this->firstParam,
                             'secondParam' => $this->secondParam,
+                            'thirdParam' => $this->thirdParam !== null
+                                ? $this->thirdParam->toArray()
+                                : null,
                         ];
                     }
 
                     /** @inheritDoc */
                     public static function fromArray(array $data): self
                     {
+                        $thirdParamDto = new class () implements Dto
+                        {
+                            private ?string $firstParam = null;
+
+                            public function getFirstParam(): ?string
+                            {
+                                return $this->firstParam;
+                            }
+
+                            /** @inheritDoc */
+                            public function toArray(): array
+                            {
+                                return [
+                                    'firstParam' => $this->firstParam,
+                                ];
+                            }
+
+                            /** @inheritDoc */
+                            public static function fromArray(array $data): self
+                            {
+                                $dto             = new self();
+                                $dto->firstParam = $data['firstParam'];
+
+                                return $dto;
+                            }
+                        };
+
                         $dto              = new self();
                         $dto->firstParam  = $data['firstParam'];
                         $dto->secondParam = $data['secondParam'];
+                        $dto->thirdParam  = isset($data['thirdParam'])
+                            ? $thirdParamDto::fromArray($data['thirdParam'])
+                            : null;
 
                         return $dto;
                     }
@@ -394,6 +495,7 @@ class ArrayDtoSerializerTest extends TestCase
         $okResponseDto = $okResponseDtoFQCN::fromArray([
             self::OK_RESPONSE_DTO_FIRST_PROP => null,
             self::OK_RESPONSE_DTO_SECOND_PROP => null,
+            self::OK_RESPONSE_DTO_THIRD_PROP => null,
         ]);
 
         $arrayDtoSerializer = new ArrayDtoSerializer(new ScalarTypesResolver(), $sendNotRequiredNullableNulls);
@@ -431,20 +533,36 @@ class ArrayDtoSerializerTest extends TestCase
                 'properties' => [
                     self::OK_RESPONSE_DTO_FIRST_PROP => null,
                     self::OK_RESPONSE_DTO_SECOND_PROP => null,
+                    self::OK_RESPONSE_DTO_THIRD_PROP => null,
                 ],
                 'expected' => [
                     self::OK_RESPONSE_DTO_FIRST_PROP => 'SomeFirstDefaultValue',
                     self::OK_RESPONSE_DTO_SECOND_PROP => 'SomeSecondDefaultValue',
+                    self::OK_RESPONSE_DTO_THIRD_PROP => null,
                 ],
             ],
             [
                 'properties' => [
                     self::OK_RESPONSE_DTO_FIRST_PROP => 'SomeFirstNotNullValue',
                     self::OK_RESPONSE_DTO_SECOND_PROP => 'SomeSecondNotNullValue',
+                    self::OK_RESPONSE_DTO_THIRD_PROP => ['firstParam' => null],
                 ],
                 'expected' => [
                     self::OK_RESPONSE_DTO_FIRST_PROP => 'SomeFirstNotNullValue',
                     self::OK_RESPONSE_DTO_SECOND_PROP => 'SomeSecondNotNullValue',
+                    self::OK_RESPONSE_DTO_THIRD_PROP => ['firstParam' => 'SomeDefaultFirstSubParam'],
+                ],
+            ],
+            [
+                'properties' => [
+                    self::OK_RESPONSE_DTO_FIRST_PROP => 'SomeFirstNotNullValue',
+                    self::OK_RESPONSE_DTO_SECOND_PROP => 'SomeSecondNotNullValue',
+                    self::OK_RESPONSE_DTO_THIRD_PROP => ['firstParam' => 'SomeCustomFirstSubParam'],
+                ],
+                'expected' => [
+                    self::OK_RESPONSE_DTO_FIRST_PROP => 'SomeFirstNotNullValue',
+                    self::OK_RESPONSE_DTO_SECOND_PROP => 'SomeSecondNotNullValue',
+                    self::OK_RESPONSE_DTO_THIRD_PROP => ['firstParam' => 'SomeCustomFirstSubParam'],
                 ],
             ],
         ];
@@ -466,6 +584,16 @@ class ArrayDtoSerializerTest extends TestCase
 
         $arrayDtoSerializer = new ArrayDtoSerializer(new ScalarTypesResolver(), false);
 
+        $responseThirdParam = new Property(self::OK_RESPONSE_DTO_THIRD_PROP);
+        if (isset($properties[self::OK_RESPONSE_DTO_THIRD_PROP])) {
+            $responseThirdParam->setObjectTypeDefinition(
+                new ObjectType([
+                    (new Property('firstParam'))
+                        ->setDefaultValue('SomeDefaultFirstSubParam'),
+                ])
+            );
+        }
+
         $result = $arrayDtoSerializer->createResponseFromDto(
             $okResponseDto,
             new Operation(
@@ -481,12 +609,29 @@ class ArrayDtoSerializerTest extends TestCase
                             ->setDefaultValue('SomeFirstDefaultValue'),
                         (new Property(self::OK_RESPONSE_DTO_SECOND_PROP))
                             ->setDefaultValue('SomeSecondDefaultValue'),
+                        $responseThirdParam,
                     ]),
                 ]
             )
         );
 
-        Assert::assertSame($expected, $result);
+        Assert::assertSame(
+            $expected[self::OK_RESPONSE_DTO_FIRST_PROP],
+            $result[self::OK_RESPONSE_DTO_FIRST_PROP]
+        );
+        Assert::assertSame(
+            $expected[self::OK_RESPONSE_DTO_SECOND_PROP],
+            $result[self::OK_RESPONSE_DTO_SECOND_PROP]
+        );
+
+        if (! isset($expected[self::OK_RESPONSE_DTO_THIRD_PROP])) {
+            return;
+        }
+
+        Assert::assertSame(
+            $expected[self::OK_RESPONSE_DTO_THIRD_PROP]['firstParam'],
+            $result[self::OK_RESPONSE_DTO_THIRD_PROP]['firstParam']
+        );
     }
 
     private function makeOKResponseDtoFCQN(): ResponseDto
@@ -494,6 +639,7 @@ class ArrayDtoSerializerTest extends TestCase
         return new class () implements ResponseDto {
             private ?string $firstProp  = null;
             private ?string $secondProp = null;
+            private ?Dto $thirdProp     = null;
 
             public function getFirstProp(): ?string
             {
@@ -519,6 +665,18 @@ class ArrayDtoSerializerTest extends TestCase
                 return $this;
             }
 
+            public function getThirdProp(): ?Dto
+            {
+                return $this->thirdProp;
+            }
+
+            public function setThirdProp(?Dto $thirdProp): self
+            {
+                $this->thirdProp = $thirdProp;
+
+                return $this;
+            }
+
             // phpcs:ignore PSR2.Methods.MethodDeclaration.Underscore
             public static function _getResponseCode(): string
             {
@@ -531,15 +689,48 @@ class ArrayDtoSerializerTest extends TestCase
                 return [
                     'firstProp' => $this->firstProp,
                     'secondProp' => $this->secondProp,
+                    'thirdProp' => $this->thirdProp !== null
+                        ? $this->thirdProp->toArray()
+                        : null,
                 ];
             }
 
             /** @inheritDoc */
             public static function fromArray(array $data): self
             {
+                $thirdParamDto = new class () implements Dto
+                {
+                    private ?string $firstParam = null;
+
+                    public function getFirstParam(): ?string
+                    {
+                        return $this->firstParam;
+                    }
+
+                    /** @inheritDoc */
+                    public function toArray(): array
+                    {
+                        return [
+                            'firstParam' => $this->firstParam,
+                        ];
+                    }
+
+                    /** @inheritDoc */
+                    public static function fromArray(array $data): self
+                    {
+                        $dto             = new self();
+                        $dto->firstParam = $data['firstParam'];
+
+                        return $dto;
+                    }
+                };
+
                 $dto             = new self();
                 $dto->firstProp  = $data['firstProp'];
                 $dto->secondProp = $data['secondProp'];
+                $dto->thirdProp  = isset($data['thirdProp'])
+                    ? $thirdParamDto::fromArray($data['thirdProp'])
+                    : null;
 
                 return $dto;
             }
