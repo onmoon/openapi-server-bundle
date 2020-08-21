@@ -236,6 +236,7 @@ class SpecificationParser
      */
     private function parseParameters(string $in, array $parameters, array $exceptionContext): ?ObjectDefinition
     {
+        // REMARK: It can't be tested by $isRequest in because "path" and "query" params could be scalar, not OBJECT.
         $properties = array_map(
             fn (Parameter $p) => $this
                 ->getProperty($p->name, $p->schema, true, $exceptionContext, false)
@@ -303,9 +304,6 @@ class SpecificationParser
         $propertyDefinition->setNullable($property->nullable);
         $propertyDefinition->setPattern($property->pattern);
 
-        $scalarTypeId = null;
-        $isScalar     = true;
-
         if ($property->type === Type::ARRAY) {
             if (! ($property->items instanceof Schema)) {
                 throw CannotParseOpenApi::becauseArrayIsNotDescribed($propertyName, $exceptionContext);
@@ -313,7 +311,6 @@ class SpecificationParser
 
             $propertyDefinition->setArray(true);
             $itemProperty = $property->items;
-            $isScalar     = false;
         } else {
             $itemProperty = $property;
         }
@@ -321,34 +318,33 @@ class SpecificationParser
         if (Type::isScalar($itemProperty->type)) {
             $scalarTypeId = $this->typeResolver->findScalarType($itemProperty->type, $itemProperty->format);
             $propertyDefinition->setScalarTypeId($scalarTypeId);
+
+            /** @var string|int|float|bool|null $schemaDefaultValue */
+            $schemaDefaultValue = $itemProperty->default;
+
+            if ($schemaDefaultValue !== null) {
+                if ($this->typeResolver->isDateTime($scalarTypeId)) {
+                    // Symfony Yaml parses fields that looks like datetime into unix timestamp
+                    // however leaves strings untouched. We need to make types more solid
+                    if (is_int($schemaDefaultValue)) {
+                        $datetime = (new DateTime())->setTimestamp($schemaDefaultValue);
+                        /** @var string $schemaDefaultValue */
+                        $schemaDefaultValue = $this->typeResolver->convert(false, $scalarTypeId, $datetime);
+                    }
+                }
+
+                $propertyDefinition->setDefaultValue($schemaDefaultValue);
+            }
         } elseif ($itemProperty->type === Type::OBJECT) {
             // REMARK: It can't be tested by Exception here, because type is always OBJECT.
             $objectType = new ObjectDefinition($this->getPropertyGraph($itemProperty, $isRequest, false, $exceptionContext));
             $propertyDefinition->setObjectTypeDefinition($objectType);
-            $isScalar = false;
+
+            if (! $allowNonScalar) {
+                throw CannotParseOpenApi::becauseOnlyScalarAreAllowed($propertyName, $exceptionContext);
+            }
         } else {
             throw CannotParseOpenApi::becauseTypeNotSupported($propertyName, $itemProperty->type, $exceptionContext);
-        }
-
-        /** @var string|int|float|bool|null $schemaDefaultValue */
-        $schemaDefaultValue = $itemProperty->default;
-
-        if ($schemaDefaultValue !== null && $isScalar) {
-            if ($this->typeResolver->isDateTime($scalarTypeId)) {
-                // Symfony Yaml parses fields that looks like datetime into unix timestamp
-                // however leaves strings untouched. We need to make types more solid
-                if (is_int($schemaDefaultValue)) {
-                    $datetime = (new DateTime())->setTimestamp($schemaDefaultValue);
-                    /** @var string $schemaDefaultValue */
-                    $schemaDefaultValue = $this->typeResolver->convert(false, $scalarTypeId, $datetime);
-                }
-            }
-
-            $propertyDefinition->setDefaultValue($schemaDefaultValue);
-        }
-
-        if (! $isScalar && ! $allowNonScalar) {
-            throw CannotParseOpenApi::becauseOnlyScalarAreAllowed($propertyName, $exceptionContext);
         }
 
         return $propertyDefinition;

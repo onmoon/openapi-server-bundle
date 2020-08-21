@@ -224,6 +224,14 @@ final class SpecificationParserTest extends TestCase
                                 'default' => 'SomeDefaultValue',
                             ]),
                         ]),
+                        new Parameter([
+                            'name' => 'queryParam',
+                            'in' => 'query',
+                            'schema' => new Schema([
+                                'type' => Type::INTEGER,
+                                'default' => 'SomeDefaultPathQueryValue',
+                            ]),
+                        ]),
                     ],
                 ],
             ]),
@@ -237,27 +245,26 @@ final class SpecificationParserTest extends TestCase
             $parsedSpecification
         );
 
-        $requestProperties = $specification
+        $requestBody = $specification
             ->getOperation('SomeCustomOperationWithRequestAndResponses')
-            ->getRequestBody()
-            ->getProperties();
+            ->getRequestBody();
+        Assert::assertNotNull($requestBody);
 
-        Assert::assertSame('someProperty1', $requestProperties[0]->getName());
-        Assert::assertSame('SomeCustomDescription', $requestProperties[0]->getDescription());
-        Assert::assertTrue($requestProperties[0]->isNullable());
-        Assert::assertSame('SomeCustomPattern', $requestProperties[0]->getPattern());
+        $requestBodyProperties = $requestBody->getProperties();
+        Assert::assertSame('someProperty1', $requestBodyProperties[0]->getName());
+        Assert::assertSame('SomeCustomDescription', $requestBodyProperties[0]->getDescription());
+        Assert::assertTrue($requestBodyProperties[0]->isNullable());
+        Assert::assertSame('SomeCustomPattern', $requestBodyProperties[0]->getPattern());
 
-        Assert::assertSame('someProperty2', $requestProperties[1]->getName());
-        Assert::assertSame(10, $requestProperties[1]->getScalarTypeId());
+        Assert::assertSame('someProperty2', $requestBodyProperties[1]->getName());
+        Assert::assertSame(10, $requestBodyProperties[1]->getScalarTypeId());
 
-        Assert::assertSame('someProperty3', $requestProperties[2]->getName());
-        Assert::assertCount(2, $requestProperties[2]->getObjectTypeDefinition()->getProperties());
+        Assert::assertSame('someProperty3', $requestBodyProperties[2]->getName());
 
-        foreach (
-            $specification->getOperation('SomeCustomOperationWithRequestAndResponses')
-                ->getRequestBody()
-                ->getProperties() as $property
-        ) {
+        Assert::assertNotNull($requestBodyProperties[2]->getObjectTypeDefinition());
+        Assert::assertCount(2, $requestBodyProperties[2]->getObjectTypeDefinition()->getProperties());
+
+        foreach ($requestBody->getProperties() as $property) {
             Assert::assertNotContains($property->getName(), ['someReadOnlyProperty']);
         }
 
@@ -279,34 +286,27 @@ final class SpecificationParserTest extends TestCase
             );
         }
 
+        $requestParams = $specification
+            ->getOperation('SomeCustomOperationWithRequestAndResponses')
+            ->getRequestParameters();
+
         Assert::assertSame(
             'pathItemQueryParam',
-            $specification->getOperation('SomeCustomOperationWithRequestAndResponses')
-                ->getRequestParameters()['query']
-                ->getProperties()[0]
-                ->getName()
+            $requestParams['query']->getProperties()[0]->getName()
         );
         Assert::assertSame(
             'queryParam',
-            $specification->getOperation('SomeCustomOperationWithRequestAndResponses')
-                ->getRequestParameters()['query']
-                ->getProperties()[1]
-                ->getName()
+            $requestParams['query']->getProperties()[1]->getName()
         );
 
         Assert::assertArrayNotHasKey(
             2,
-            $specification->getOperation('SomeCustomOperationWithRequestAndResponses')
-                ->getRequestParameters()['query']
-                ->getProperties()
+            $requestParams['query']->getProperties()
         );
 
         Assert::assertSame(
             'pathParam',
-            $specification->getOperation('SomeCustomOperationWithRequestAndResponses')
-                ->getRequestParameters()['path']
-                ->getProperties()[2]
-                ->getName()
+            $requestParams['path']->getProperties()[2]->getName()
         );
     }
 
@@ -432,7 +432,7 @@ final class SpecificationParserTest extends TestCase
                             'format' => null,
                             'default' => 'SomeDefaultValue',
                             'expected' => [
-                                'objectTypeDefinitionInstance' => null,
+                                'hasObjectTypeDefinitionInstance' => false,
                                 'default' => 'SomeDefaultValue',
                             ],
                         ],
@@ -441,7 +441,7 @@ final class SpecificationParserTest extends TestCase
                             'format' => null,
                             'default' => null,
                             'expected' => [
-                                'objectTypeDefinitionInstance' => null,
+                                'hasObjectTypeDefinitionInstance' => false,
                                 'default' => null,
                             ],
                         ],
@@ -450,7 +450,7 @@ final class SpecificationParserTest extends TestCase
                             'format' => 'int32',
                             'default' => 'SomeDefaultValue',
                             'expected' => [
-                                'objectTypeDefinitionInstance' => null,
+                                'hasObjectTypeDefinitionInstance' => false,
                                 'default' => 'SomeDefaultValue',
                             ],
                         ],
@@ -459,7 +459,7 @@ final class SpecificationParserTest extends TestCase
                             'format' => 'int32',
                             'default' => null,
                             'expected' => [
-                                'objectTypeDefinitionInstance' => null,
+                                'hasObjectTypeDefinitionInstance' => false,
                                 'default' => null,
                             ],
                         ],
@@ -468,7 +468,7 @@ final class SpecificationParserTest extends TestCase
                             'format' => null,
                             'default' => 'SomeDefaultValue',
                             'expected' => [
-                                'objectTypeDefinitionInstance' => ObjectType::class,
+                                'hasObjectTypeDefinitionInstance' => true,
                                 'default' => null,
                             ],
                         ],
@@ -477,7 +477,7 @@ final class SpecificationParserTest extends TestCase
                             'format' => null,
                             'default' => null,
                             'expected' => [
-                                'objectTypeDefinitionInstance' => ObjectType::class,
+                                'hasObjectTypeDefinitionInstance' => true,
                                 'default' => null,
                             ],
                         ],
@@ -486,7 +486,7 @@ final class SpecificationParserTest extends TestCase
                             'format' => 'undefinedFormat',
                             'default' => 'SomeDefaultValue',
                             'expected' => [
-                                'objectTypeDefinitionInstance' => null,
+                                'hasObjectTypeDefinitionInstance' => false,
                                 'default' => 'SomeDefaultValue',
                             ],
                         ],
@@ -556,11 +556,8 @@ final class SpecificationParserTest extends TestCase
         );
 
         foreach ($specification->getOperation('SomeCustomThirdPostOperation')->getResponse('200')->getProperties() as $propertyName => $property) {
-            if ($payload['responseProperties'][$property->getName()]['expected']['objectTypeDefinitionInstance'] !== null) {
-                Assert::assertInstanceOf(
-                    $payload['responseProperties'][$property->getName()]['expected']['objectTypeDefinitionInstance'],
-                    $property->getObjectTypeDefinition()
-                );
+            if ($payload['responseProperties'][$property->getName()]['expected']['hasObjectTypeDefinitionInstance']) {
+                Assert::assertInstanceOf(ObjectType::class, $property->getObjectTypeDefinition());
             }
 
             Assert::assertSame(
@@ -571,7 +568,7 @@ final class SpecificationParserTest extends TestCase
     }
 
     /**
-     * @return Operation[][][][]
+     * @return mixed[]
      *
      * @throws TypeErrorException
      */
