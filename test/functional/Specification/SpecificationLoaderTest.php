@@ -287,20 +287,33 @@ class SpecificationLoaderTest extends TestCase
         $specificationLoader->load(self::SPECIFICATION_NAME);
     }
 
-    public function testLoadSavesSpecificationInCache(): void
+    /**
+     * @return string[][]
+     */
+    public function specificationProvider(): array
+    {
+        return [
+            ['specificationFileName' => 'specification.yaml'],
+            ['specificationFileName' => 'specification.json'],
+        ];
+    }
+
+    /**
+     * @dataProvider specificationProvider
+     */
+    public function testLoadSavesSpecificationInCache(string $specificationFileName): void
     {
         $this->specificationParser
             ->expects(self::once())
             ->method('parseOpenApi')
             ->willReturn(new Specification([], new OpenApi([])));
 
-        $specificationLoader   = new SpecificationLoader(
+        $specificationLoader = new SpecificationLoader(
             $this->specificationParser,
             new FileLocator(),
             $this->cache
         );
-        $specificationFileName = 'specification.yaml';
-        $specificationArray    = $this->getSpecificationArray($specificationFileName);
+        $specificationArray  = $this->getSpecificationArray($specificationFileName);
 
         $specificationLoader->registerSpec(self::SPECIFICATION_NAME, $specificationArray);
         $specification        = $specificationLoader->load(self::SPECIFICATION_NAME);
