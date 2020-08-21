@@ -6,15 +6,18 @@ namespace OnMoon\OpenApiServerBundle\Test\Unit\CodeGenerator;
 
 use cebe\openapi\ReferenceContext;
 use cebe\openapi\spec\OpenApi;
+use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\DtoDefinition;
 use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\GraphDefinition;
 use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\OperationDefinition;
 use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\PropertyDefinition;
+use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\RequestBodyDtoDefinition;
 use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\RequestDtoDefinition;
 use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\RequestParametersDtoDefinition;
 use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\ResponseDtoDefinition;
 use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\ServiceSubscriberDefinition;
 use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\SpecificationDefinition;
 use OnMoon\OpenApiServerBundle\CodeGenerator\GraphGenerator;
+use OnMoon\OpenApiServerBundle\Specification\Definitions\ObjectType;
 use OnMoon\OpenApiServerBundle\Specification\Definitions\Property;
 use OnMoon\OpenApiServerBundle\Specification\Definitions\SpecificationConfig;
 use OnMoon\OpenApiServerBundle\Specification\SpecificationLoader;
@@ -46,13 +49,20 @@ class GraphGeneratorTest extends TestCase
         $specificationPath         = '/';
         $openApiSpecificationArray =
         [
-            'openapi' => '3.0.3',
             'paths' => [
                 '/goods/{goodId}' => [
                     'get' => [
                         'operationId' => 'getGood',
                         'parameters' => [
                             ['$ref' => '#/components/parameters/GoodIdParam'],
+                        ],
+                        'requestBody' => [
+                            'required' => true,
+                            'content' => [
+                                'application/json' => [
+                                    'schema' => ['$ref' => '#/components/schemas/GoodRequestSchema'],
+                                ],
+                            ],
                         ],
                         'responses' => [
                             '200' => [
@@ -81,8 +91,16 @@ class GraphGeneratorTest extends TestCase
                         'type' => 'object',
                         'properties' => [
                             'title' => ['type' => 'string'],
+                            'object_property' => ['type' => 'object'],
                         ],
-                        'required' => ['title'],
+                        'required' => ['title','object_property'],
+                    ],
+                    'GoodRequestSchema' => [
+                        'required' => true,
+                        'type' => 'object',
+                        'properties' => [
+                            'id' => ['type' => 'string'],
+                        ],
                     ],
                     'RedirectResponseSchema' => [
                         'type' => 'object',
@@ -129,13 +147,28 @@ class GraphGeneratorTest extends TestCase
             ->setRequired(true)
             ->setScalarTypeId(0);
         $requestParametersDtoDefinition = new RequestParametersDtoDefinition([new PropertyDefinition($requestProperty)]);
-        $requestDtoDefinition           = new RequestDtoDefinition(null, null, $requestParametersDtoDefinition);
+        $requestBodyProperty            = new Property('id');
+        $requestBodyProperty
+            ->setScalarTypeId(0);
+        $requestBodyDtoDefinition = new RequestBodyDtoDefinition([new PropertyDefinition($requestBodyProperty)]);
+        $requestDtoDefinition     = new RequestDtoDefinition($requestBodyDtoDefinition, null, $requestParametersDtoDefinition);
 
-        $responseProperty = new Property('title');
-        $responseProperty
+        $responseTitleProperty = new Property('title');
+        $responseTitleProperty
             ->setRequired(true)
             ->setScalarTypeId(0);
-        $responseDtoDefinition         = new ResponseDtoDefinition('200', [new PropertyDefinition($responseProperty)]);
+
+        $responseObjectProperty = new Property('object_property');
+        $responseObjectProperty
+            ->setRequired(true)
+            ->setObjectTypeDefinition(
+                new ObjectType([])
+            );
+        $responseObjectPropertyTypeDefinition = new PropertyDefinition($responseObjectProperty);
+        $responseObjectPropertyTypeDefinition->setObjectTypeDefinition(
+            new DtoDefinition([])
+        );
+        $responseDtoDefinition         = new ResponseDtoDefinition('200', [new PropertyDefinition($responseTitleProperty), $responseObjectPropertyTypeDefinition]);
         $redirectResponseDtoDefinition = new ResponseDtoDefinition('304', []);
 
         $operationDefinition     = new OperationDefinition('/goods/{goodId}', 'get', 'getGood', 'test.getGood', null, $requestDtoDefinition, [$responseDtoDefinition, $redirectResponseDtoDefinition]);
