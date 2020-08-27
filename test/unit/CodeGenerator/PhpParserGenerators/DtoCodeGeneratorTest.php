@@ -540,8 +540,8 @@ final class SomeCustomClass
 
         Assert::assertSame($definition, $generatedFileDefinition->getClass());
         Assert::assertSame(
-            preg_replace('/\r\n|\r|\n/', PHP_EOL, $expected),
-            $generatedFileDefinition->getFileContents()
+            $expected,
+            preg_replace('/\r\n|\r|\n/', PHP_EOL, $generatedFileDefinition->getFileContents())
         );
     }
 
