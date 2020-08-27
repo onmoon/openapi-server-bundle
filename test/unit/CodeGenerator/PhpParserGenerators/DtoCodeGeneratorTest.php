@@ -12,9 +12,13 @@ use OnMoon\OpenApiServerBundle\Types\ScalarTypesResolver;
 use PhpParser\BuilderFactory;
 use PHPUnit\Framework\Assert;
 use PHPUnit\Framework\TestCase;
+use Safe\Exceptions\PcreException;
 
 use function array_key_exists;
+use function Safe\preg_replace;
 use function ucfirst;
+
+use const PHP_EOL;
 
 /**
  * @covers \OnMoon\OpenApiServerBundle\CodeGenerator\PhpParserGenerators\DtoCodeGenerator
@@ -517,6 +521,8 @@ final class SomeCustomClass
     /**
      * @param mixed[] $payload
      *
+     * @throws PcreException
+     *
      * @dataProvider generateProvider
      */
     public function testGenerate(array $payload, string $expected): void
@@ -533,7 +539,10 @@ final class SomeCustomClass
         $generatedFileDefinition = $codeGenerator->generate($definition);
 
         Assert::assertSame($definition, $generatedFileDefinition->getClass());
-        Assert::assertSame($expected, $generatedFileDefinition->getFileContents());
+        Assert::assertSame(
+            preg_replace('/\r\n|\r|\n/', PHP_EOL, $expected),
+            $generatedFileDefinition->getFileContents()
+        );
     }
 
 //    /**
