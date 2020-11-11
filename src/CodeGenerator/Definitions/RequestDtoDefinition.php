@@ -9,9 +9,9 @@ use OnMoon\OpenApiServerBundle\Specification\Definitions\Property;
 class RequestDtoDefinition extends DtoDefinition
 {
     final public function __construct(
-        ?RequestBodyDtoDefinition $bodyDtoDefinition,
-        ?RequestParametersDtoDefinition $queryParameters,
-        ?RequestParametersDtoDefinition $pathParameters
+        ?RequestBodyDtoDefinition $bodyDtoDefinition = null,
+        ?RequestParametersDtoDefinition $queryParameters = null,
+        ?RequestParametersDtoDefinition $pathParameters = null
     ) {
         $fields = [
             'pathParameters' => $pathParameters,

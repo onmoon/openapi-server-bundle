@@ -52,6 +52,7 @@
         <service id="OnMoon\OpenApiServerBundle\Command\DeleteGeneratedCodeCommand">
             <argument key="$rootPath">%openapi.generated.code.root.path%</argument>
         </service>
+        <service id="OnMoon\OpenApiServerBundle\Command\ProcessFactory" class="OnMoon\OpenApiServerBundle\Command\SymfonyProcessFactory" />
         <service id="OnMoon\OpenApiServerBundle\Command\RefreshApiCodeCommand">
             <argument key="$rootPath">%openapi.generated.code.root.path%</argument>
         </service>
