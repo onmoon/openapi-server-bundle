@@ -350,9 +350,8 @@ class SpecificationParser
 
         if (
             $schemaDefaultValue !== null &&
-            $isScalar
             // @codeCoverageIgnoreStart
-            &&
+            $isScalar &&
             // @codeCoverageIgnoreEnd
             $scalarTypeId !== null
         ) {
