@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace OnMoon\OpenApiServerBundle\Test\Unit\Event\CodeGenerator;
+namespace OnMoon\OpenApiServerBundle\Test\Unit\CodeGenerator;
 
 use OnMoon\OpenApiServerBundle\CodeGenerator\AttributeGenerator;
 use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\DtoDefinition;
