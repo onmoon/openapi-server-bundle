@@ -26,7 +26,9 @@ class OpenApiServerExtensionTest extends AbstractExtensionTestCase
     }
 
     /**
-     * @return list<list<string|bool>>
+     * @return mixed[]
+     *
+     * @psalm-return list<list<string|bool>>
      */
     public function parameterLoadedDataProvider(): array
     {

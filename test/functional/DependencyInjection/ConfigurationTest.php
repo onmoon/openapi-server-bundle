@@ -23,7 +23,9 @@ class ConfigurationTest extends TestCase
     }
 
     /**
-     * @return list<list<array<string, list<array<string, string>>>|string>>
+     * @return mixed[]
+     *
+     * @psalm-return list<list<array<string, list<array<string, string>>>|string>>
      */
     public function parametersIsRequiredDataProvider(): array
     {
@@ -35,8 +37,9 @@ class ConfigurationTest extends TestCase
     }
 
     /**
-     * @param list<list<array<string, list<array<string, string>>>|string>> $configuration
+     * @param mixed[] $configuration
      *
+     * @psalm-param list<list<array<string, list<array<string, string>>>|string>> $configuration
      * @dataProvider parametersIsRequiredDataProvider
      */
     public function testParametersIsRequired(array $configuration, string $parameterName): void
@@ -48,7 +51,9 @@ class ConfigurationTest extends TestCase
     }
 
     /**
-     * @return list<list<array<string, list<array<string, string>>|string>|string>>
+     * @return mixed[]
+     *
+     * @psalm-return list<list<array<string, list<array<string, string>>|string>|string>>
      */
     public function parametersCannotBeEmptyDataProvider(): array
     {
@@ -63,8 +68,9 @@ class ConfigurationTest extends TestCase
     }
 
     /**
-     * @param list<list<array<string, list<array<string, string>>>|string>> $configuration
+     * @param mixed[] $configuration
      *
+     * @psalm-param list<list<array<string, list<array<string, string>>>|string>> $configuration
      * @dataProvider parametersCannotBeEmptyDataProvider
      */
     public function testParametersCannotBeEmpty(array $configuration, string $parameterName): void
@@ -73,7 +79,9 @@ class ConfigurationTest extends TestCase
     }
 
     /**
-     * @return list<list<array<string, list<array<string, string>>>|string>>
+     * @return mixed[]
+     *
+     * @psalm-return list<list<array<string, list<array<string, string>>>|string>>
      */
     public function parametersEnumDataProvider(): array
     {
@@ -89,8 +97,9 @@ class ConfigurationTest extends TestCase
     }
 
     /**
-     * @param list<list<array<string, list<array<string, string>>>|string>> $configuration, string $parameterName
+     * @param mixed[] $configuration
      *
+     * @psalm-param list<list<array<string, list<array<string, string>>>|string>> $configuration, string $parameterName
      * @dataProvider parametersEnumDataProvider
      */
     public function testParametersEnumDataProvider(
