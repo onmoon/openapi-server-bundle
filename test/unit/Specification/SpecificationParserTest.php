@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace OnMoon\OpenApiServerBundle\Test\Unit\Specification;
 
-use cebe\openapi\exceptions\TypeErrorException;
 use cebe\openapi\spec\MediaType;
 use cebe\openapi\spec\OpenApi;
 use cebe\openapi\spec\Operation;
 use cebe\openapi\spec\Parameter;
 use cebe\openapi\spec\Paths;
+use cebe\openapi\spec\Reference;
 use cebe\openapi\spec\RequestBody;
 use cebe\openapi\spec\Response;
 use cebe\openapi\spec\Responses;
@@ -23,71 +23,13 @@ use OnMoon\OpenApiServerBundle\Types\ScalarTypesResolver;
 use PHPUnit\Framework\Assert;
 use PHPUnit\Framework\TestCase;
 
+use function array_map;
+
 /**
  * @covers \OnMoon\OpenApiServerBundle\Specification\SpecificationParser
  */
 final class SpecificationParserTest extends TestCase
 {
-    private ScalarTypesResolver $typeResolver;
-
-    public function setUp(): void
-    {
-        parent::setUp();
-
-        $this->typeResolver = new ScalarTypesResolver();
-    }
-
-    public function tearDown(): void
-    {
-        unset($this->typeResolver);
-
-        parent::tearDown();
-    }
-
-    /**
-     * @throws CannotParseOpenApi
-     * @throws TypeErrorException
-     */
-    public function testParseOpenApiSuccessBasic(): void
-    {
-        $specificationName   = 'SomeCustomSpecification';
-        $specificationConfig = new SpecificationConfig(
-            '/some/custom/specification/path',
-            null,
-            '\\Some\\Custom\\Namespace',
-            'application/json',
-        );
-        $parsedSpecification = new OpenApi([
-            'paths' => new Paths([
-                '/some/custom/url' => [
-                    'get' => new Operation(['operationId' => 'SomeUrlGetBasic']),
-                    'post' => new Operation(['operationId' => 'SomeUrlPostBasic']),
-                ],
-            ]),
-        ]);
-
-        $specificationParser = new SpecificationParser($this->typeResolver);
-
-        $specification = $specificationParser->parseOpenApi(
-            $specificationName,
-            $specificationConfig,
-            $parsedSpecification
-        );
-
-        Assert::assertSame(
-            '/some/custom/url',
-            $specification->getOperation('SomeUrlGetBasic')->getUrl()
-        );
-        Assert::assertSame(
-            '/some/custom/url',
-            $specification->getOperation('SomeUrlPostBasic')->getUrl()
-        );
-    }
-
-    /**
-     * @throws CannotParseOpenApi
-     * @throws TypeErrorException
-     */
     public function testParseOpenApiSuccess(): void
     {
         $specificationName   = 'SomeCustomSpecification';
@@ -128,6 +70,11 @@ final class SpecificationParserTest extends TestCase
                                                 'default' => 'SomeDefaultValue',
                                                 'readOnly' => true,
                                             ]),
+                                            'someWriteOnlyProperty' => new Schema([
+                                                'type' => Type::STRING,
+                                                'default' => 'SomeDefaultValue',
+                                                'writeOnly' => true,
+                                            ]),
                                             'someProperty3' => new Schema([
                                                 'type' => Type::OBJECT,
                                                 'readOnly' => false,
@@ -137,6 +84,17 @@ final class SpecificationParserTest extends TestCase
                                                     ]),
                                                     'someSubProperty2' => new Schema([
                                                         'type' => Type::INTEGER,
+                                                    ]),
+                                                    'someArrayProperty' => new Schema([
+                                                        'type' => Type::ARRAY,
+                                                        'items' => new Schema([
+                                                            'type' => Type::INTEGER,
+                                                        ]),
+                                                    ]),
+                                                    'someDateTimeProperty' => new Schema([
+                                                        'type' => Type::STRING,
+                                                        'format' => 'date-time',
+                                                        'default' => 1605101247,
                                                     ]),
                                                 ],
                                             ]),
@@ -166,6 +124,12 @@ final class SpecificationParserTest extends TestCase
                                             ],
                                         ]),
                                     ]),
+                                ],
+                            ]),
+                            '404' => new Response([
+                                'description' => 'SomeCustomResponseParam404',
+                                'content' => [
+                                    'application/json' => new MediaType(['schema' => null]),
                                 ],
                             ]),
                             '201' => new Response([
@@ -237,7 +201,7 @@ final class SpecificationParserTest extends TestCase
             ]),
         ]);
 
-        $specificationParser = new SpecificationParser($this->typeResolver);
+        $specificationParser = new SpecificationParser(new ScalarTypesResolver());
 
         $specification = $specificationParser->parseOpenApi(
             $specificationName,
@@ -259,10 +223,19 @@ final class SpecificationParserTest extends TestCase
         Assert::assertSame('someProperty2', $requestBodyProperties[1]->getName());
         Assert::assertSame(10, $requestBodyProperties[1]->getScalarTypeId());
 
-        Assert::assertSame('someProperty3', $requestBodyProperties[2]->getName());
+        Assert::assertFalse($requestBodyProperties[1]->isRequired());
 
-        Assert::assertNotNull($requestBodyProperties[2]->getObjectTypeDefinition());
-        Assert::assertCount(2, $requestBodyProperties[2]->getObjectTypeDefinition()->getProperties());
+        Assert::assertSame('someProperty3', $requestBodyProperties[3]->getName());
+
+        /** @var ObjectType $objectTypeDefinition */
+        $objectTypeDefinition = $requestBodyProperties[3]->getObjectTypeDefinition();
+
+        Assert::assertTrue($objectTypeDefinition->getProperties()[2]->isArray());
+        Assert::assertSame('someDateTimeProperty', $objectTypeDefinition->getProperties()[3]->getName());
+        Assert::assertSame('2020-11-11T13:27:27+00:00', $objectTypeDefinition->getProperties()[3]->getDefaultValue());
+
+        Assert::assertNotNull($requestBodyProperties[3]->getObjectTypeDefinition());
+        Assert::assertCount(4, $requestBodyProperties[3]->getObjectTypeDefinition()->getProperties());
 
         foreach ($requestBody->getProperties() as $property) {
             Assert::assertNotContains($property->getName(), ['someReadOnlyProperty']);
@@ -310,10 +283,6 @@ final class SpecificationParserTest extends TestCase
         );
     }
 
-    /**
-     * @throws CannotParseOpenApi
-     * @throws TypeErrorException
-     */
     public function testParseOpenApiSuccessRequestBadMediaType(): void
     {
         $specificationName   = 'SomeCustomSpecification';
@@ -349,7 +318,7 @@ final class SpecificationParserTest extends TestCase
             ]),
         ]);
 
-        $specificationParser = new SpecificationParser($this->typeResolver);
+        $specificationParser = new SpecificationParser(new ScalarTypesResolver());
 
         $specification = $specificationParser->parseOpenApi(
             $specificationName,
@@ -364,10 +333,6 @@ final class SpecificationParserTest extends TestCase
         );
     }
 
-    /**
-     * @throws CannotParseOpenApi
-     * @throws TypeErrorException
-     */
     public function testParseOpenApiSuccessRequestBadAndGoodMediaType(): void
     {
         $specificationName   = 'SomeCustomSpecification';
@@ -402,7 +367,7 @@ final class SpecificationParserTest extends TestCase
             ]),
         ]);
 
-        $specificationParser = new SpecificationParser($this->typeResolver);
+        $specificationParser = new SpecificationParser(new ScalarTypesResolver());
 
         $specification = $specificationParser->parseOpenApi(
             $specificationName,
@@ -499,60 +464,50 @@ final class SpecificationParserTest extends TestCase
     /**
      * @param mixed[] $payload
      *
-     * @throws CannotParseOpenApi
-     * @throws TypeErrorException
-     *
      * @dataProvider parseOpenApiSuccessDefaultValueProvider
      */
     public function testParseOpenApiSuccessDefaultValue(array $payload): void
     {
-        $specificationName   = 'SomeCustomSpecification';
-        $specificationConfig = new SpecificationConfig(
-            '/some/custom/specification/path',
-            null,
-            '\\Some\\Custom\\Namespace',
-            'some/media-type',
-        );
-
-        $responseProperties = [];
-        foreach ($payload['responseProperties'] as $propertyName => $data) {
-            $responseProperties[$propertyName] = new Schema([
-                'type' => $data['type'],
-                'format' => $data['format'],
-                'default' => $data['default'],
-            ]);
-        }
-
-        $parsedSpecification = new OpenApi([
-            'paths' => new Paths([
-                '/some/custom/third/url' => [
-                    'post' => new Operation([
-                        'operationId' => 'SomeCustomThirdPostOperation',
-                        'responses' => new Responses([
-                            '200' => new Response([
-                                'description' => 'SomeCustomResponseParam',
-                                'content' => [
-                                    'some/media-type' => new MediaType([
-                                        'schema' => new Schema([
-                                            'type' => Type::OBJECT,
-                                            'properties' => $responseProperties,
-                                            'required' => false,
+        $specification = (new SpecificationParser(new ScalarTypesResolver()))->parseOpenApi(
+            'SomeCustomSpecification',
+            new SpecificationConfig(
+                '/some/custom/specification/path',
+                null,
+                '\\Some\\Custom\\Namespace',
+                'some/media-type',
+            ),
+            new OpenApi([
+                'paths' => new Paths([
+                    '/some/custom/third/url' => [
+                        'post' => new Operation([
+                            'operationId' => 'SomeCustomThirdPostOperation',
+                            'responses' => new Responses([
+                                '200' => new Response([
+                                    'description' => 'SomeCustomResponseParam',
+                                    'content' => [
+                                        'some/media-type' => new MediaType([
+                                            'schema' => new Schema([
+                                                'type' => Type::OBJECT,
+                                                'properties' => array_map(
+                                                    static function (array $data): Schema {
+                                                        return new Schema([
+                                                            'type' => $data['type'],
+                                                            'format' => $data['format'],
+                                                            'default' => $data['default'],
+                                                        ]);
+                                                    },
+                                                    $payload['responseProperties']
+                                                ),
+                                                'required' => false,
+                                            ]),
                                         ]),
-                                    ]),
-                                ],
+                                    ],
+                                ]),
                             ]),
                         ]),
-                    ]),
-                ],
-            ]),
-        ]);
-
-        $specificationParser = new SpecificationParser($this->typeResolver);
-
-        $specification = $specificationParser->parseOpenApi(
-            $specificationName,
-            $specificationConfig,
-            $parsedSpecification
+                    ],
+                ]),
+            ])
         );
 
         foreach ($specification->getOperation('SomeCustomThirdPostOperation')->getResponse('200')->getProperties() as $propertyName => $property) {
@@ -569,8 +524,6 @@ final class SpecificationParserTest extends TestCase
 
     /**
      * @return mixed[]
-     *
-     * @throws TypeErrorException
      */
     public function parseOpenApiThrowCannotParseOpenApiProvider(): array
     {
@@ -666,9 +619,6 @@ final class SpecificationParserTest extends TestCase
      * @param Operation[][][][] $paths
      * @param mixed[]           $expected
      *
-     * @throws CannotParseOpenApi
-     * @throws TypeErrorException
-     *
      * @dataProvider parseOpenApiThrowCannotParseOpenApiProvider
      */
     public function testParseOpenApiThrowCannotParseOpenApi(array $paths, array $expected): void
@@ -684,7 +634,7 @@ final class SpecificationParserTest extends TestCase
             'paths' => new Paths($paths),
         ]);
 
-        $specificationParser = new SpecificationParser($this->typeResolver);
+        $specificationParser = new SpecificationParser(new ScalarTypesResolver());
 
         if ($expected['exceptionMessage'] === null) {
             $this->expectException(CannotParseOpenApi::class);
@@ -699,10 +649,6 @@ final class SpecificationParserTest extends TestCase
         );
     }
 
-    /**
-     * @throws CannotParseOpenApi
-     * @throws TypeErrorException
-     */
     public function testParseOpenApiThrowExceptionNoOperationIdSpecified(): void
     {
         $specificationName   = 'SomeCustomSpecification';
@@ -720,7 +666,7 @@ final class SpecificationParserTest extends TestCase
             ]),
         ]);
 
-        $specificationParser = new SpecificationParser($this->typeResolver);
+        $specificationParser = new SpecificationParser(new ScalarTypesResolver());
 
         $this->expectException(CannotParseOpenApi::class);
 
@@ -731,10 +677,221 @@ final class SpecificationParserTest extends TestCase
         );
     }
 
-    /**
-     * @throws CannotParseOpenApi
-     * @throws TypeErrorException
-     */
+    public function testParseOpenApiThrowExceptionPropertyIsNotScheme(): void
+    {
+        $specificationName   = 'SomeCustomSpecification';
+        $specificationConfig = new SpecificationConfig(
+            '/some/custom/specification/path',
+            null,
+            '\\Some\\Custom\\Namespace',
+            'some/media-type',
+        );
+        $parsedSpecification = new OpenApi([
+            'paths' => new Paths([
+                '/some/custom/third/url' => [
+                    'post' => new Operation([
+                        'operationId' => 'SomeCustomThirdPostOperation',
+                        'responses' => new Responses([
+                            '200' => new Response([
+                                'description' => 'SomeCustomResponseParam',
+                                'content' => [
+                                    'some/media-type' => new MediaType([
+                                        'schema' => new Schema([
+                                            'type' => Type::OBJECT,
+                                            'properties' => [new Reference(['$ref' => 'some_reference'], null)],
+                                        ]),
+                                    ]),
+                                ],
+                            ]),
+                        ]),
+                    ]),
+                ],
+            ]),
+        ]);
+
+        $specificationParser = new SpecificationParser(new ScalarTypesResolver());
+
+        $this->expectException(CannotParseOpenApi::class);
+        $this->expectExceptionMessage('Property is not scheme');
+
+        $specificationParser->parseOpenApi(
+            $specificationName,
+            $specificationConfig,
+            $parsedSpecification
+        );
+    }
+
+    public function testParseOpenApiWithReferenceInParametersThrowExceptionPropertyIsNotScheme(): void
+    {
+        $specificationName   = 'SomeCustomSpecification';
+        $specificationConfig = new SpecificationConfig(
+            '/some/custom/specification/path',
+            null,
+            '\\Some\\Custom\\Namespace',
+            'some/media-type',
+        );
+        $parsedSpecification = new OpenApi([
+            'paths' => new Paths([
+                '/some/custom/third/url' => [
+                    'post' => new Operation([
+                        'operationId' => 'SomeCustomThirdPostOperation',
+                        'parameters' => [
+                            new Parameter([
+                                'name' => 'queryParam',
+                                'in' => 'query',
+                                'schema' => new Reference(['$ref' => 'some_reference'], null),
+                            ]),
+                        ],
+                    ]),
+                ],
+            ]),
+        ]);
+
+        $specificationParser = new SpecificationParser(new ScalarTypesResolver());
+
+        $this->expectException(CannotParseOpenApi::class);
+        $this->expectExceptionMessage('Property is not scheme');
+
+        $specificationParser->parseOpenApi(
+            $specificationName,
+            $specificationConfig,
+            $parsedSpecification
+        );
+    }
+
+    public function testParseOpenApiThrowExceptionArrayIsNotDescribed(): void
+    {
+        $specificationName   = 'SomeCustomSpecification';
+        $specificationConfig = new SpecificationConfig(
+            '/some/custom/specification/path',
+            null,
+            '\\Some\\Custom\\Namespace',
+            'some/media-type',
+        );
+        $parsedSpecification = new OpenApi([
+            'paths' => new Paths([
+                '/some/custom/third/url' => [
+                    'post' => new Operation([
+                        'operationId' => 'SomeCustomThirdPostOperation',
+                        'parameters' => [
+                            new Parameter([
+                                'name' => 'queryParam',
+                                'in' => 'query',
+                                'schema' => new Schema([
+                                    'type' => Type::ARRAY,
+                                ]),
+                            ]),
+                        ],
+                    ]),
+                ],
+            ]),
+        ]);
+
+        $specificationParser = new SpecificationParser(new ScalarTypesResolver());
+
+        $this->expectException(CannotParseOpenApi::class);
+        $this->expectExceptionMessage(
+            'Cannot generate property for DTO class, property "queryParam" is array without items description in ' .
+            'request query parameters for operation: "post" of path: "/some/custom/third/url" in specification file: ' .
+            '"/some/custom/specification/path".'
+        );
+
+        $specificationParser->parseOpenApi(
+            $specificationName,
+            $specificationConfig,
+            $parsedSpecification
+        );
+    }
+
+    public function testParseOpenApiThrowExceptionPropertyNotScalar(): void
+    {
+        $specificationName   = 'SomeCustomSpecification';
+        $specificationConfig = new SpecificationConfig(
+            '/some/custom/specification/path',
+            null,
+            '\\Some\\Custom\\Namespace',
+            'some/media-type',
+        );
+        $parsedSpecification = new OpenApi([
+            'paths' => new Paths([
+                '/some/custom/third/url' => [
+                    'post' => new Operation([
+                        'operationId' => 'SomeCustomThirdPostOperation',
+                        'parameters' => [
+                            new Parameter([
+                                'name' => 'queryParam',
+                                'in' => 'query',
+                                'schema' => new Schema([
+                                    'type' => Type::ARRAY,
+                                    'items' => new Schema([
+                                        'type' => Type::INTEGER,
+                                    ]),
+                                ]),
+                            ]),
+                        ],
+                    ]),
+                ],
+            ]),
+        ]);
+
+        $specificationParser = new SpecificationParser(new ScalarTypesResolver());
+
+        $this->expectException(CannotParseOpenApi::class);
+        $this->expectExceptionMessage(
+            'Cannot generate property for DTO class, property "queryParam" is not scalar in ' .
+            'request query parameters for operation: "post" of path: "/some/custom/third/url" in specification file: ' .
+            '"/some/custom/specification/path".'
+        );
+
+        $specificationParser->parseOpenApi(
+            $specificationName,
+            $specificationConfig,
+            $parsedSpecification
+        );
+    }
+
+    public function testParseOpenApiThrowExceptionTypeNotSupported(): void
+    {
+        $specificationName   = 'SomeCustomSpecification';
+        $specificationConfig = new SpecificationConfig(
+            '/some/custom/specification/path',
+            null,
+            '\\Some\\Custom\\Namespace',
+            'some/media-type',
+        );
+        $parsedSpecification = new OpenApi([
+            'paths' => new Paths([
+                '/some/custom/third/url' => [
+                    'post' => new Operation([
+                        'operationId' => 'SomeCustomThirdPostOperation',
+                        'parameters' => [
+                            new Parameter([
+                                'name' => 'queryParam',
+                                'in' => 'query',
+                                'schema' => new Schema(['type' => 'unsupported_type']),
+                            ]),
+                        ],
+                    ]),
+                ],
+            ]),
+        ]);
+
+        $specificationParser = new SpecificationParser(new ScalarTypesResolver());
+
+        $this->expectException(CannotParseOpenApi::class);
+        $this->expectExceptionMessage(
+            'Cannot generate property for DTO class, property "queryParam" type "unsupported_type" is not supported in ' .
+            'request query parameters for operation: "post" of path: "/some/custom/third/url" in specification file: ' .
+            '"/some/custom/specification/path".'
+        );
+
+        $specificationParser->parseOpenApi(
+            $specificationName,
+            $specificationConfig,
+            $parsedSpecification
+        );
+    }
+
     public function testParseOpenApiThrowExceptionDuplicateOperationId(): void
     {
         $specificationName   = 'SomeCustomSpecification';
@@ -755,7 +912,7 @@ final class SpecificationParserTest extends TestCase
             ]),
         ]);
 
-        $specificationParser = new SpecificationParser($this->typeResolver);
+        $specificationParser = new SpecificationParser(new ScalarTypesResolver());
 
         $this->expectException(CannotParseOpenApi::class);
 
