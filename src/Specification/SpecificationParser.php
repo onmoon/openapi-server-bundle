@@ -15,7 +15,6 @@ use cebe\openapi\spec\Response;
 use cebe\openapi\spec\Responses;
 use cebe\openapi\spec\Schema;
 use cebe\openapi\spec\Type;
-use Exception;
 use OnMoon\OpenApiServerBundle\Exception\CannotParseOpenApi;
 use OnMoon\OpenApiServerBundle\Specification\Definitions\ObjectType as ObjectDefinition;
 use OnMoon\OpenApiServerBundle\Specification\Definitions\Operation as OperationDefinition;
@@ -238,7 +237,15 @@ class SpecificationParser
     {
         $properties = array_map(
             fn (Parameter $p) => $this
-                ->getProperty($p->name, $p->schema, true, $exceptionContext, false)
+                ->getProperty(
+                    $p->name,
+                    $p->schema,
+                    // @codeCoverageIgnoreStart
+                    true,
+                    // @codeCoverageIgnoreEnd
+                    $exceptionContext,
+                    false
+                )
                 ->setRequired($p->required)
                 ->setDescription($p->description),
             $this->filterSupportedParameters($in, $parameters)
@@ -271,7 +278,7 @@ class SpecificationParser
          */
         foreach ($schema->properties as $propertyName => $property) {
             if (! ($property instanceof Schema)) {
-                throw new Exception('Property is not scheme');
+                throw CannotParseOpenApi::becausePropertyIsNotScheme();
             }
 
             if (($property->readOnly && $isRequest) || ($property->writeOnly && ! $isRequest)) {
@@ -295,7 +302,7 @@ class SpecificationParser
     private function getProperty(string $propertyName, $property, bool $isRequest, array $exceptionContext, bool $allowNonScalar = true): PropertyDefinition
     {
         if (! ($property instanceof Schema)) {
-            throw new Exception('Property is not scheme');
+            throw CannotParseOpenApi::becausePropertyIsNotScheme();
         }
 
         $propertyDefinition = new PropertyDefinition($propertyName);
@@ -322,7 +329,16 @@ class SpecificationParser
             $scalarTypeId = $this->typeResolver->findScalarType($itemProperty->type, $itemProperty->format);
             $propertyDefinition->setScalarTypeId($scalarTypeId);
         } elseif ($itemProperty->type === Type::OBJECT) {
-            $objectType = new ObjectDefinition($this->getPropertyGraph($itemProperty, $isRequest, false, $exceptionContext));
+            $objectType = new ObjectDefinition(
+                $this->getPropertyGraph(
+                    $itemProperty,
+                    $isRequest,
+                    // @codeCoverageIgnoreStart
+                    false,
+                    // @codeCoverageIgnoreEnd
+                    $exceptionContext
+                )
+            );
             $propertyDefinition->setObjectTypeDefinition($objectType);
             $isScalar = false;
         } else {
@@ -332,7 +348,13 @@ class SpecificationParser
         /** @var string|int|float|bool|null $schemaDefaultValue */
         $schemaDefaultValue = $itemProperty->default;
 
-        if ($schemaDefaultValue !== null && $isScalar && $scalarTypeId !== null) {
+        if (
+            // @codeCoverageIgnoreStart
+            $schemaDefaultValue !== null &&
+            $isScalar &&
+            $scalarTypeId !== null
+            // @codeCoverageIgnoreEnd
+        ) {
             if ($this->typeResolver->isDateTime($scalarTypeId)) {
                 // Symfony Yaml parses fields that looks like datetime into unix timestamp
                 // however leaves strings untouched. We need to make types more solid

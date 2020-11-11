@@ -21,6 +21,11 @@ final class CannotParseOpenApi extends OpenApiError
         );
     }
 
+    public static function becausePropertyIsNotScheme(): self
+    {
+        return new self('Property is not scheme');
+    }
+
     /** @param array{method:string,url:string,path:string} $context */
     public static function becauseDuplicateOperationId(string $id, array $context): self
     {

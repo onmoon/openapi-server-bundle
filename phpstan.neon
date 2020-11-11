@@ -28,7 +28,6 @@ parameters:
             message: '#Access to an undefined property PhpParser\\Node::*#'
             paths:
                 - %currentWorkingDirectory%/test/unit/CodeGenerator/PhpParserGenerators/FileBuilderTest.php
-
 includes:
     - vendor/thecodingmachine/phpstan-safe-rule/phpstan-safe-rule.neon
     - vendor/phpstan/phpstan-phpunit/extension.neon
