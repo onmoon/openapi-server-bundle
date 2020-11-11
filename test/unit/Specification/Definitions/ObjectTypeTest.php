@@ -12,7 +12,7 @@ use PHPUnit\Framework\TestCase;
 /**
  * @covers \OnMoon\OpenApiServerBundle\Specification\Definitions\ObjectType
  */
-class ObjectTypeTest extends TestCase
+final class ObjectTypeTest extends TestCase
 {
     public function testGetProperties(): void
     {

@@ -14,7 +14,7 @@ use Throwable;
 /**
  * @covers \OnMoon\OpenApiServerBundle\Types\TypeSerializer
  */
-class TypeSerializerTest extends TestCase
+final class TypeSerializerTest extends TestCase
 {
     public function testDeserializeDateReturnsDateTime(): void
     {

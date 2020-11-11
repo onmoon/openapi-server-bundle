@@ -25,7 +25,7 @@ use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 /**
  * @covers  \OnMoon\OpenApiServerBundle\CodeGenerator\ApiServerCodeGenerator
  */
-class ApiServerCodeGeneratorTest extends TestCase
+final class ApiServerCodeGeneratorTest extends TestCase
 {
     public function testGenerate(): void
     {

@@ -17,7 +17,5 @@ final class OpenApiServerBundle extends Bundle
     {
         $container->registerForAutoconfiguration(ApiLoader::class)->addTag(self::API_LOADER_TAG);
         $container->addCompilerPass(new CompilerPass(self::API_LOADER_TAG));
-
-        parent::build($container);
     }
 }

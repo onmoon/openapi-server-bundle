@@ -15,7 +15,7 @@ use Throwable;
 /**
  * @covers \OnMoon\OpenApiServerBundle\Types\ArgumentResolver
  */
-class ArgumentResolverTest extends TestCase
+final class ArgumentResolverTest extends TestCase
 {
     private ScalarTypesResolver $typeResolver;
     private Property $pathParameter;
