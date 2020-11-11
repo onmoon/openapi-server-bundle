@@ -349,11 +349,11 @@ class SpecificationParser
         $schemaDefaultValue = $itemProperty->default;
 
         if (
-            $schemaDefaultValue !== null &&
             // @codeCoverageIgnoreStart
+            $schemaDefaultValue !== null &&
             $isScalar &&
-            // @codeCoverageIgnoreEnd
             $scalarTypeId !== null
+            // @codeCoverageIgnoreEnd
         ) {
             if ($this->typeResolver->isDateTime($scalarTypeId)) {
                 // Symfony Yaml parses fields that looks like datetime into unix timestamp
