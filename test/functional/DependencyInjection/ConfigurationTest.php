@@ -7,8 +7,10 @@ namespace OnMoon\OpenApiServerBundle\Test\Functional\DependencyInjection;
 use Matthias\SymfonyConfigTest\PhpUnit\ConfigurationTestCaseTrait;
 use OnMoon\OpenApiServerBundle\DependencyInjection\Configuration;
 use PHPUnit\Framework\TestCase;
+use Symfony\Component\HttpKernel\Kernel;
 
 use function Safe\sprintf;
+use function version_compare;
 
 /**
  * @covers \OnMoon\OpenApiServerBundle\DependencyInjection\Configuration
@@ -44,9 +46,16 @@ class ConfigurationTest extends TestCase
      */
     public function testParametersIsRequired(array $configuration, string $parameterName): void
     {
+        /** @phpstan-ignore-next-line */
+        if (version_compare(Kernel::VERSION, '5.2.0', '>=')) {
+            $message = sprintf('The child config "%s" under "open_api_server.specs.0" must be configured.', $parameterName);
+        } else {
+            $message = sprintf('The child node "%s" at path "open_api_server.specs.0" must be configured.', $parameterName);
+        }
+
         $this->assertConfigurationIsInvalid(
             [$configuration],
-            sprintf('The child node "%s" at path "open_api_server.specs.0" must be configured.', $parameterName)
+            $message
         );
     }
 
