@@ -43,12 +43,6 @@ final class ScalarTypesResolverTest extends TestCase
                 'value' => null,
                 'expectedValue' => null,
             ],
-            'deserialize_date' => [
-                'deserialize' => true,
-                'id' => 1,
-                'value' => '2020-07-31',
-                'expectedValue' => DateTime::createFromFormat('Y-m-d', '2020-07-31'),
-            ],
             'deserialize_date_time' => [
                 'deserialize' => true,
                 'id' => 2,
@@ -126,6 +120,12 @@ final class ScalarTypesResolverTest extends TestCase
                 'id' => 11,
                 'value' => true,
                 'expectedValue' => true,
+            ],
+            'deserialize_date' => [
+                'deserialize' => true,
+                'id' => 1,
+                'value' => '2020-07-31',
+                'expectedValue' => DateTime::createFromFormat('Y-m-d', '2020-07-31'),
             ],
         ];
     }

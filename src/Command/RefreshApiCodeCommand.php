@@ -17,10 +17,12 @@ use function Safe\sprintf;
 final class RefreshApiCodeCommand extends Command
 {
     private string $rootPath;
+    private ProcessFactory $processFactory;
 
-    public function __construct(string $rootPath, ?string $name = null)
+    public function __construct(string $rootPath, ProcessFactory $processFactory, ?string $name = null)
     {
-        $this->rootPath = $rootPath;
+        $this->rootPath       = $rootPath;
+        $this->processFactory = $processFactory;
 
         parent::__construct($name);
     }
@@ -42,10 +44,11 @@ final class RefreshApiCodeCommand extends Command
             return 0;
         }
 
-        return (new Process(['php', 'bin/console', DeleteGeneratedCodeCommand::COMMAND, '-y']))
-                ->run($this->processOutputHandler($output)) === 0 &&
-               (new Process(['php', 'bin/console', GenerateApiCodeCommand::COMMAND]))
-                ->run($this->processOutputHandler($output)) === 0 ?
+        $deleteCommandProcess   = $this->processFactory->getProcess(['php', 'bin/console', DeleteGeneratedCodeCommand::COMMAND, '-y']);
+        $generateCommandProcess = $this->processFactory->getProcess(['php', 'bin/console', GenerateApiCodeCommand::COMMAND]);
+
+        return $deleteCommandProcess->run($this->processOutputHandler($output)) === 0 &&
+        $generateCommandProcess->run($this->processOutputHandler($output)) === 0 ?
             0 :
             1;
     }
