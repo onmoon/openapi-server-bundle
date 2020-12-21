@@ -69,7 +69,7 @@ final class ServiceSubscriberCodeGeneratorTest extends TestCase
             '/',
             'get',
             'test',
-            '',
+            'test',
             null,
             $request,
             [$responseDtoDefinition]
@@ -99,14 +99,43 @@ final class ServiceSubscriberCodeGeneratorTest extends TestCase
 
         self::assertEquals('NamespaceOne\NamespaceTwo', $result->getClass()->getNamespace());
         self::assertEquals('ClassName', $result->getClass()->getClassName());
-        self::assertStringContainsString('class ClassName implements ClassName, ClassName', $result->getFileContents());
-        self::assertStringContainsString('public static function getSubscribedServices()', $result->getFileContents());
-        self::assertStringContainsString("return array('' => '?' . ClassName::class);", $result->getFileContents());
-        self::assertStringContainsString('private ContainerInterface $locator;', $result->getFileContents());
-        self::assertStringContainsString('return $this->locator->get($interface);', $result->getFileContents());
-        self::assertStringContainsString('public function get(string $interface) : ?RequestHandler', $result->getFileContents());
-        self::assertStringContainsString('if (!$this->locator->has($interface)) {', $result->getFileContents());
-        self::assertStringContainsString('return null;', $result->getFileContents());
-        self::assertStringContainsString('return $this->locator->get($interface);', $result->getFileContents());
+
+        $expectedFileContent = <<<'EOD'
+<?php
+
+declare (strict_types=1);
+namespace NamespaceOne\NamespaceTwo;
+
+use Psr\Container\ContainerInterface;
+use OnMoon\OpenApiServerBundle\Interfaces\RequestHandler;
+/**
+ * This class was automatically generated
+ * You should not change it manually as it will be overwritten
+ */
+class ClassName implements ClassName, ClassName
+{
+    private ContainerInterface $locator;
+    public function __construct(ContainerInterface $locator)
+    {
+        $this->locator = $locator;
+    }
+    /**
+     * @inheritDoc
+     */
+    public static function getSubscribedServices()
+    {
+        return array('test' => '?' . ClassName::class);
+    }
+    public function get(string $interface) : ?RequestHandler
+    {
+        if (!$this->locator->has($interface)) {
+            return null;
+        }
+        return $this->locator->get($interface);
+    }
+}
+EOD;
+
+        self::assertEquals($expectedFileContent, $result->getFileContents());
     }
 }
