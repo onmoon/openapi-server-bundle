@@ -4,6 +4,7 @@
       "src"
     ]
   },
+  "timeout": 3,
   "logs": {
     "text": "php://stderr",
     "badge": {
