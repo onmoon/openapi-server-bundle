@@ -267,7 +267,7 @@ class ApiControllerTest extends TestCase
 
         $this->expectException(Throwable::class);
         $this->expectException(Throwable::class);
-        $this->expectExceptionMessage('"test_class" has 0 public methods, exactly one expected');
+        $this->expectExceptionMessage('"TestClass" has 0 public methods, exactly one expected');
 
         $request = new Request(
             [],
@@ -313,7 +313,7 @@ class ApiControllerTest extends TestCase
 
         $this->expectException(Throwable::class);
         $this->expectException(Throwable::class);
-        $this->expectExceptionMessage('Input parameter for test_class2 is not a named type');
+        $this->expectExceptionMessage('Input parameter for TestClass2 is not a named type');
 
         $request = new Request(
             [],
