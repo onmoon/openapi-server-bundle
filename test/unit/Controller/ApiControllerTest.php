@@ -16,6 +16,7 @@ use OnMoon\OpenApiServerBundle\Specification\Definitions\Operation;
 use OnMoon\OpenApiServerBundle\Specification\Definitions\Specification;
 use OnMoon\OpenApiServerBundle\Specification\SpecificationLoader;
 use OnMoon\OpenApiServerBundle\Validator\RequestSchemaValidator;
+use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Route;
@@ -24,17 +25,22 @@ use Symfony\Component\Routing\RouterInterface;
 use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 use Throwable;
 
-use function getcwd;
+use function Safe\getcwd;
 
 /**
  * @covers \OnMoon\OpenApiServerBundle\CodeGenerator\AttributeGenerator
  */
 class ApiControllerTest extends TestCase
 {
+    /** @var SpecificationLoader|MockObject  */
     private SpecificationLoader $specificationLoader;
+    /** @var RouterInterface|MockObject  */
     private RouterInterface $router;
+    /** @var DtoSerializer|MockObject  */
     private DtoSerializer $serializer;
+    /** @var EventDispatcherInterface|MockObject  */
     private EventDispatcherInterface $eventDispatcher;
+    /** @var RequestSchemaValidator|MockObject  */
     private RequestSchemaValidator $requestValidator;
 
     public function setUp(): void
