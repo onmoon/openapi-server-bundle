@@ -41,8 +41,6 @@ abstract class TestKernel extends BaseKernel
             'framework',
             ['test' => true]
         );
-
-        $container->setParameter('kernel.secret', 'secret');
     }
 
     /**

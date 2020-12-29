@@ -29,11 +29,6 @@ parameters:
             message: '#Access to an undefined property PhpParser\\Node::*#'
             paths:
                 - %currentWorkingDirectory%/test/unit/CodeGenerator/PhpParserGenerators/FileBuilderTest.php
-        -
-            message: '#Comparison operation "<" between \d and \d is always#'
-            paths:
-                - %currentWorkingDirectory%/test/functional/Command/CommandTestCase.php
-                - %currentWorkingDirectory%/test/functional/Controller/ApiControllerTest.php
 includes:
     - vendor/thecodingmachine/phpstan-safe-rule/phpstan-safe-rule.neon
     - vendor/phpstan/phpstan-phpunit/extension.neon

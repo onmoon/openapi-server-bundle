@@ -13,15 +13,11 @@ use Symfony\Bundle\FrameworkBundle\Console\Application;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 use Symfony\Component\BrowserKit\AbstractBrowser;
 use Symfony\Component\BrowserKit\HttpBrowser;
-use Symfony\Component\Config\Loader\LoaderInterface;
 use Symfony\Component\Console\Tester\CommandTester;
-use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Loader\Configurator\ContainerConfigurator;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpKernel\Kernel;
 use Symfony\Component\Routing\Loader\Configurator\RoutingConfigurator;
-use Symfony\Component\Routing\RouteCollectionBuilder;
 
 use function get_class;
 use function Safe\file_put_contents;
@@ -41,29 +37,16 @@ class ApiControllerTest extends WebTestCase
     {
         parent::__construct($name, $data, $dataName);
 
-        if (Kernel::MINOR_VERSION < 2) {
-            $kernelClass = new class ('test', true) extends TestKernel {
-                protected function configureContainer(ContainerBuilder $c, LoaderInterface $loader): void
-                {
-                }
+        $kernelClass = new class ('test', true) extends TestKernel {
+            protected function configureContainer(ContainerConfigurator $c): void
+            {
+            }
 
-                protected function configureRoutes(RouteCollectionBuilder $routes): void
-                {
-                    $routes->import(__DIR__ . '/openapi_routes.yaml');
-                }
-            };
-        } else {
-            $kernelClass = new class ('test', true) extends TestKernel {
-                protected function configureContainer(ContainerConfigurator $c): void
-                {
-                }
-
-                protected function configureRoutes(RoutingConfigurator $routes): void
-                {
-                    $routes->import(__DIR__ . '/openapi_routes.yaml');
-                }
-            };
-        }
+            protected function configureRoutes(RoutingConfigurator $routes): void
+            {
+                $routes->import(__DIR__ . '/openapi_routes.yaml');
+            }
+        };
 
         self::$class = get_class($kernelClass);
     }
