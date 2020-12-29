@@ -2,28 +2,23 @@
 
 declare(strict_types=1);
 
-namespace OnMoon\OpenApiServerBundle\Test\Functional\Controller;
+namespace OnMoon\OpenApiServerBundle\Test\Functional;
 
 use OnMoon\OpenApiServerBundle\OpenApiServerBundle;
 use Symfony\Bundle\FrameworkBundle\FrameworkBundle;
 use Symfony\Bundle\FrameworkBundle\Kernel\MicroKernelTrait;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
-use Symfony\Component\DependencyInjection\Loader\Configurator\ContainerConfigurator;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\HttpKernel\Kernel as BaseKernel;
-use Symfony\Component\Routing\Loader\Configurator\RoutingConfigurator;
 
-class ControllerTestKernel extends BaseKernel
+abstract class TestKernel extends BaseKernel
 {
     use MicroKernelTrait;
 
     public static string $bundleRootPath      = __DIR__ . '/Generated';
     public static string $bundleRootNamespace = __NAMESPACE__ . '\Generated';
 
-    /**
-     * @param ContainerBuilder|ContainerConfigurator $container
-     */
-    protected function build($container): void
+    protected function build(ContainerBuilder $container): void
     {
         $specificationName = 'petstore';
         $specification     = [
@@ -33,8 +28,8 @@ class ControllerTestKernel extends BaseKernel
             'media_type' => 'application/json',
         ];
         $container->prependExtensionConfig('open_api_server', [
-            'root_path' => static::$bundleRootPath,
-            'root_name_space' => static::$bundleRootNamespace,
+            'root_path' => self::$bundleRootPath,
+            'root_name_space' => self::$bundleRootNamespace,
             'language_level' => '7.4.0',
             'generated_dir_permissions' => 0755,
             'full_doc_blocks' => false,
@@ -46,10 +41,12 @@ class ControllerTestKernel extends BaseKernel
             'framework',
             ['test' => true]
         );
+
+        $container->setParameter('kernel.secret', 'secret');
     }
 
     /**
-     * @inheritDoc
+     * {@inheritdoc}
      */
     public function getCacheDir()
     {
@@ -57,23 +54,11 @@ class ControllerTestKernel extends BaseKernel
     }
 
     /**
-     * @inheritDoc
+     * {@inheritdoc}
      */
     public function getLogDir()
     {
         return __DIR__ . '/var/log';
-    }
-
-    /**
-     * @param ContainerBuilder|ContainerConfigurator $container
-     */
-    protected function configureContainer($container): void
-    {
-    }
-
-    protected function configureRoutes(RoutingConfigurator $routes): void
-    {
-        $routes->import(__DIR__ . '/openapi_routes.yaml');
     }
 
     /**
