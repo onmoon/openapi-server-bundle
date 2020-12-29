@@ -20,7 +20,10 @@ class CommandTestKernel extends BaseKernel
     public static string $bundleRootPath      = __DIR__ . '/Generated';
     public static string $bundleRootNamespace = __NAMESPACE__ . '\Generated';
 
-    protected function build(ContainerBuilder $container): void
+    /**
+     * @param ContainerBuilder|ContainerConfigurator $container
+     */
+    protected function build($container): void
     {
         $specificationName = 'petstore';
         $specification     = [
@@ -61,7 +64,10 @@ class CommandTestKernel extends BaseKernel
         return __DIR__ . '/var/log';
     }
 
-    protected function configureContainer(ContainerConfigurator $container): void
+    /**
+     * @param ContainerBuilder|ContainerConfigurator $container
+     */
+    protected function configureContainer($container): void
     {
     }
 
