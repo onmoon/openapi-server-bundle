@@ -6,6 +6,7 @@ namespace OnMoon\OpenApiServerBundle\Test\Functional\Command;
 
 use OnMoon\OpenApiServerBundle\Command\ProcessFactory;
 use OnMoon\OpenApiServerBundle\Command\RefreshApiCodeCommand;
+use OnMoon\OpenApiServerBundle\Test\Functional\TestKernel;
 use PHPUnit\Framework\Assert;
 use PHPUnit\Framework\MockObject\MockObject;
 use Symfony\Component\Console\Tester\CommandTester;
@@ -40,7 +41,7 @@ class RefreshApiCodeCommandTest extends CommandTestCase
             ->expects(self::atLeast(2))
             ->method('getProcess');
 
-        $command = new RefreshApiCodeCommand(CommandTestKernel::$bundleRootPath, $this->processFactory, self::COMMAND);
+        $command = new RefreshApiCodeCommand(TestKernel::$bundleRootPath, $this->processFactory, self::COMMAND);
         $this->application->add($command);
         $this->commandTester = new CommandTester($command);
 
@@ -51,7 +52,7 @@ class RefreshApiCodeCommandTest extends CommandTestCase
         ]);
 
         $output = $this->commandTester->getDisplay();
-        Assert::assertEquals(sprintf('Delete all contents of the directory %s? (y/n):', CommandTestKernel::$bundleRootPath), rtrim($output));
+        Assert::assertEquals(sprintf('Delete all contents of the directory %s? (y/n):', TestKernel::$bundleRootPath), rtrim($output));
         Assert::assertSame(0, $this->commandTester->getStatusCode());
     }
 
@@ -61,7 +62,7 @@ class RefreshApiCodeCommandTest extends CommandTestCase
             ->expects(self::never())
             ->method('getProcess');
 
-        $command = new RefreshApiCodeCommand(CommandTestKernel::$bundleRootPath, $this->processFactory, self::COMMAND);
+        $command = new RefreshApiCodeCommand(TestKernel::$bundleRootPath, $this->processFactory, self::COMMAND);
         $this->application->add($command);
         $this->commandTester = new CommandTester($command);
 
@@ -72,7 +73,7 @@ class RefreshApiCodeCommandTest extends CommandTestCase
         ]);
 
         $output = $this->commandTester->getDisplay();
-        Assert::assertEquals(sprintf('Delete all contents of the directory %s? (y/n):', CommandTestKernel::$bundleRootPath), rtrim($output));
+        Assert::assertEquals(sprintf('Delete all contents of the directory %s? (y/n):', TestKernel::$bundleRootPath), rtrim($output));
         Assert::assertSame(0, $this->commandTester->getStatusCode());
     }
 }

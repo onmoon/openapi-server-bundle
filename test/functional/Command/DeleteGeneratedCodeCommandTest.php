@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace OnMoon\OpenApiServerBundle\Test\Functional\Command;
 
 use OnMoon\OpenApiServerBundle\Command\DeleteGeneratedCodeCommand;
+use OnMoon\OpenApiServerBundle\Test\Functional\TestKernel;
 use PHPUnit\Framework\Assert;
 use Symfony\Component\Console\Tester\CommandTester;
 
@@ -25,8 +26,8 @@ class DeleteGeneratedCodeCommandTest extends CommandTestCase
         $command             = $this->application->find(DeleteGeneratedCodeCommand::COMMAND);
         $this->commandTester = new CommandTester($command);
 
-        mkdir(CommandTestKernel::$bundleRootPath);
-        file_put_contents(CommandTestKernel::$bundleRootPath . '/test.txt', '');
+        mkdir(TestKernel::$bundleRootPath);
+        file_put_contents(TestKernel::$bundleRootPath . '/test.txt', '');
     }
 
     public function testDeletion(): void
@@ -38,9 +39,9 @@ class DeleteGeneratedCodeCommandTest extends CommandTestCase
         ]);
 
         $output = $this->commandTester->getDisplay();
-        Assert::assertEquals(sprintf('Delete all contents of the directory %1$s? (y/n): All contents of directory were deleted: %1$s', CommandTestKernel::$bundleRootPath), rtrim($output));
+        Assert::assertEquals(sprintf('Delete all contents of the directory %1$s? (y/n): All contents of directory were deleted: %1$s', TestKernel::$bundleRootPath), rtrim($output));
         Assert::assertSame(0, $this->commandTester->getStatusCode());
-        Assert::assertFileDoesNotExist(CommandTestKernel::$bundleRootPath . '/test.txt');
+        Assert::assertFileDoesNotExist(TestKernel::$bundleRootPath . '/test.txt');
     }
 
     public function testDeletionCancel(): void
@@ -52,9 +53,9 @@ class DeleteGeneratedCodeCommandTest extends CommandTestCase
         ]);
 
         $output = $this->commandTester->getDisplay();
-        Assert::assertEquals(sprintf('Delete all contents of the directory %1$s? (y/n):', CommandTestKernel::$bundleRootPath), rtrim($output));
+        Assert::assertEquals(sprintf('Delete all contents of the directory %1$s? (y/n):', TestKernel::$bundleRootPath), rtrim($output));
         Assert::assertSame(0, $this->commandTester->getStatusCode());
-        Assert::assertDirectoryExists(CommandTestKernel::$bundleRootPath);
-        Assert::assertFileExists(CommandTestKernel::$bundleRootPath . '/test.txt');
+        Assert::assertDirectoryExists(TestKernel::$bundleRootPath);
+        Assert::assertFileExists(TestKernel::$bundleRootPath . '/test.txt');
     }
 }

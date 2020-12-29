@@ -19,7 +19,7 @@ use Throwable;
 use const PHP_EOL;
 
 /**
- * @covers \OnMoon\OpenApiServerBundle\CodeGenerator\PhpParserGenerators\CodeGenerator;
+ * @covers \OnMoon\OpenApiServerBundle\CodeGenerator\PhpParserGenerators\CodeGenerator
  */
 class CodeGeneratorTest extends TestCase
 {

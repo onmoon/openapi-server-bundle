@@ -7,15 +7,19 @@ namespace OnMoon\OpenApiServerBundle\Test\Functional\Controller;
 use OnMoon\OpenApiServerBundle\Command\GenerateApiCodeCommand;
 use OnMoon\OpenApiServerBundle\Controller\ApiController;
 use OnMoon\OpenApiServerBundle\Interfaces\ApiLoader;
+use OnMoon\OpenApiServerBundle\Test\Functional\TestKernel;
 use PHPUnit\Framework\Assert;
 use Symfony\Bundle\FrameworkBundle\Console\Application;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 use Symfony\Component\BrowserKit\AbstractBrowser;
 use Symfony\Component\BrowserKit\HttpBrowser;
 use Symfony\Component\Console\Tester\CommandTester;
+use Symfony\Component\DependencyInjection\Loader\Configurator\ContainerConfigurator;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Routing\Loader\Configurator\RoutingConfigurator;
 
+use function get_class;
 use function Safe\file_put_contents;
 use function Safe\json_decode;
 
@@ -24,14 +28,28 @@ use function Safe\json_decode;
  */
 class ApiControllerTest extends WebTestCase
 {
-    /**
-     * phpcs:disable SlevomatCodingStandard.TypeHints.PropertyTypeHint.MissingNativeTypeHint
-     * @var string $class
-     */
-    protected static $class = ControllerTestKernel::class;
-
-
     private AbstractBrowser $client;
+
+    /**
+     * @param mixed[] $data
+     */
+    public function __construct(?string $name = null, array $data = [], string $dataName = '')
+    {
+        parent::__construct($name, $data, $dataName);
+
+        $kernelClass = new class ('test', true) extends TestKernel {
+            protected function configureContainer(ContainerConfigurator $c): void
+            {
+            }
+
+            protected function configureRoutes(RoutingConfigurator $routes): void
+            {
+                $routes->import(__DIR__ . '/openapi_routes.yaml');
+            }
+        };
+
+        self::$class = get_class($kernelClass);
+    }
 
     public function setUp(): void
     {
@@ -47,7 +65,7 @@ class ApiControllerTest extends WebTestCase
 
         static::$container->set('petstore.getGood', new $getGoodImplClassName());
 
-        $apiLoaderClass = ControllerTestKernel::$bundleRootNamespace . '\ServiceSubscriber\ApiServiceLoaderServiceSubscriber';
+        $apiLoaderClass = TestKernel::$bundleRootNamespace . '\ServiceSubscriber\ApiServiceLoaderServiceSubscriber';
         /** @var ApiLoader $apiLoader */
         $apiLoader = new $apiLoaderClass(static::$container);
 
@@ -59,7 +77,7 @@ class ApiControllerTest extends WebTestCase
     public function tearDown(): void
     {
         $filesystem = new Filesystem();
-        $filesystem->remove([ControllerTestKernel::$bundleRootPath]);
+        $filesystem->remove([TestKernel::$bundleRootPath]);
         unset($this->client);
         parent::tearDown();
     }
@@ -89,11 +107,11 @@ class ApiControllerTest extends WebTestCase
 
 declare(strict_types=1);
 
-namespace OnMoon\OpenApiServerBundle\Test\Functional\Controller\Generated;
+namespace OnMoon\OpenApiServerBundle\Test\Functional\Generated;
 
-use OnMoon\OpenApiServerBundle\Test\Functional\Controller\Generated\Apis\PetStore\GetGood\Dto\Request\GetGoodRequestDto;
-use OnMoon\OpenApiServerBundle\Test\Functional\Controller\Generated\Apis\PetStore\GetGood\Dto\Response\OK\GetGoodOKDto;
-use OnMoon\OpenApiServerBundle\Test\Functional\Controller\Generated\Apis\PetStore\GetGood\GetGood;
+use OnMoon\OpenApiServerBundle\Test\Functional\Generated\Apis\PetStore\GetGood\Dto\Request\GetGoodRequestDto;
+use OnMoon\OpenApiServerBundle\Test\Functional\Generated\Apis\PetStore\GetGood\Dto\Response\OK\GetGoodOKDto;
+use OnMoon\OpenApiServerBundle\Test\Functional\Generated\Apis\PetStore\GetGood\GetGood;
 
 class GetGoodImpl implements GetGood
 {
@@ -104,8 +122,8 @@ class GetGoodImpl implements GetGood
 }
 EOD;
 
-        file_put_contents(ControllerTestKernel::$bundleRootPath . '/GetGoodImpl.php', $content);
+        file_put_contents(TestKernel::$bundleRootPath . '/GetGoodImpl.php', $content);
 
-        return ControllerTestKernel::$bundleRootNamespace . '\GetGoodImpl';
+        return TestKernel::$bundleRootNamespace . '\GetGoodImpl';
     }
 }
