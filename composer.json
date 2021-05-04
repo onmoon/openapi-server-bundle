@@ -87,7 +87,7 @@
         "stan": "phpstan analyse --memory-limit=-1",
         "sec": "security-checker security:check",
         "tests": "phpunit --fail-on-warning",
-        "mutation": "vendor/bin/roave-infection-static-analysis-plugin --only-covered --test-framework-options=\"--testsuite=unit\"",
+        "mutation": "vendor/bin/roave-infection-static-analysis-plugin --only-covered --test-framework-options=\"--testsuite=unit\" -j$(nproc)",
         "all": "composer psalm && composer stan && composer tests && composer mutation && composer cs && composer sec"
     }
 }
