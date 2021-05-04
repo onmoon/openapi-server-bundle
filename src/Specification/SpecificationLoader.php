@@ -59,7 +59,6 @@ class SpecificationLoader
 
     /**
      * @return SpecificationConfig[]
-     *
      * @psalm-return array<string, SpecificationConfig>
      */
     public function list(): array
