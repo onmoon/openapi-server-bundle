@@ -5,7 +5,7 @@ parameters:
         - test
     checkMissingIterableValueType: false
     treatPhpDocTypesAsCertain: false
-    excludes_analyse:
+    excludePaths:
         - 'src/DependencyInjection/Configuration.php'
         - 'test/functional/Command/var/*'
     ignoreErrors:
@@ -26,9 +26,9 @@ parameters:
             paths:
                 - %currentWorkingDirectory%/src/Types/ScalarTypesResolver.php
         -
-            message: '#Access to an undefined property PhpParser\\Node::*#'
+            message: '#Instanceof between cebe\\openapi\\spec\\MediaType and cebe\\openapi\\spec\\MediaType will always evaluate to true\.#'
             paths:
-                - %currentWorkingDirectory%/test/unit/CodeGenerator/PhpParserGenerators/FileBuilderTest.php
+                - %currentWorkingDirectory%/src/Specification/SpecificationParser.php
 includes:
     - vendor/thecodingmachine/phpstan-safe-rule/phpstan-safe-rule.neon
     - vendor/phpstan/phpstan-phpunit/extension.neon

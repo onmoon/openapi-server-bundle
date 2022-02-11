@@ -189,7 +189,6 @@ class SpecificationParser
      */
     private function filterParameters(array $parameters): array
     {
-        /** @phpstan-ignore-next-line */
         return array_filter($parameters, static fn ($parameter): bool => $parameter instanceof Parameter);
     }
 

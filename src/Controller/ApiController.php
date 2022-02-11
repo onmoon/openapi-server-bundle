@@ -147,8 +147,7 @@ final class ApiController
 
         $handlerName = $operation->getRequestHandlerName();
 
-        $requestHandlers = $this->apiLoader::getSubscribedServices();
-        /** @var string $requestHandlerSubscribedString */
+        $requestHandlers                = $this->apiLoader::getSubscribedServices();
         $requestHandlerSubscribedString = $requestHandlers[$handlerName];
         /** @psalm-var class-string<RequestHandler> $requestHandlerInterface */
         $requestHandlerInterface = ltrim($requestHandlerSubscribedString, '?');
@@ -196,7 +195,8 @@ final class ApiController
 
     private function getRoute(Request $request): Route
     {
-        $routeName = (string) $request->attributes->get('_route', '');
+        /** @var string $routeName */
+        $routeName = $request->attributes->get('_route', '');
         $route     = $this->router->getRouteCollection()->get($routeName);
 
         if ($route === null) {

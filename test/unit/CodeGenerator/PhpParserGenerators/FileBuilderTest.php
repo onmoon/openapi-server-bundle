@@ -7,7 +7,10 @@ namespace OnMoon\OpenApiServerBundle\Test\Unit\CodeGenerator\PhpParserGenerators
 use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\ClassDefinition;
 use OnMoon\OpenApiServerBundle\CodeGenerator\PhpParserGenerators\FileBuilder;
 use PhpParser\Builder\Use_;
+use PhpParser\Node\Identifier;
+use PhpParser\Node\Name;
 use PhpParser\Node\Stmt\Use_ as UseStmt;
+use PhpParser\Node\Stmt\UseUse;
 use PHPUnit\Framework\Assert;
 use PHPUnit\Framework\TestCase;
 
@@ -27,7 +30,11 @@ class FileBuilderTest extends TestCase
 
         $stmt = new Use_('test', UseStmt::TYPE_NORMAL);
         $this->fileBuilder->addStmt($stmt);
-        Assert::assertEquals('test', $this->fileBuilder->getNamespace()->getNode()->stmts[0]->uses[0]->name->parts[0]);
+
+        /** @var \PhpParser\Node\Stmt\Use_ $statementToCheck */
+        $statementToCheck = $this->fileBuilder->getNamespace()->getNode()->stmts[0];
+
+        Assert::assertEquals('test', $statementToCheck->uses[0]->name->parts[0]);
     }
 
     public function testReferenceWithNotMatching(): void
@@ -55,8 +62,11 @@ class FileBuilderTest extends TestCase
         $reference         = $this->fileBuilder->getReference($classDefinition);
         $namespace         = $this->fileBuilder->getNamespace();
 
-        Assert::assertEquals('NamespaceOne', $namespace->getNode()->name->parts[0]);
-        Assert::assertEquals('NamespaceTwo', $namespace->getNode()->name->parts[1]);
+        /** @var Name $nodeName */
+        $nodeName = $namespace->getNode()->name;
+
+        Assert::assertEquals('NamespaceOne', $nodeName->parts[0]);
+        Assert::assertEquals('NamespaceTwo', $nodeName->parts[1]);
 
         Assert::assertEquals('ClassDefinition', $reference);
     }
@@ -73,8 +83,15 @@ class FileBuilderTest extends TestCase
         $reference         = $this->fileBuilder->getReference($classDefinitionTwo);
         $namespace         = $this->fileBuilder->getNamespace();
 
+        /** @var \PhpParser\Node\Stmt\Use_ $useStmt */
+        $useStmt = $namespace->getNode()->stmts[0];
+        /** @var UseUse $useUseStmt */
+        $useUseStmt = $useStmt->uses[0];
+        /** @var Identifier $useUseStmtAlias */
+        $useUseStmtAlias = $useUseStmt->alias;
+
         Assert::assertCount(1, $namespace->getNode()->stmts);
-        Assert::assertEquals('ClassDefinition_', $namespace->getNode()->stmts[0]->uses[0]->alias->name);
+        Assert::assertEquals('ClassDefinition_', $useUseStmtAlias->name);
         Assert::assertEquals('ClassDefinition_', $reference);
     }
 
