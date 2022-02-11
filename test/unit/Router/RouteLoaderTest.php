@@ -195,7 +195,7 @@ final class RouteLoaderTest extends TestCase
      *
      * @dataProvider supportsProvider
      */
-    public function testSupports(?string $type = null, bool $expected): void
+    public function testSupports(?string $type, bool $expected): void
     {
         $resource = self::SPECIFICATION_DEFAULT_NAME;
 

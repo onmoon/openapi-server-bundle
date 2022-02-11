@@ -6,10 +6,7 @@
   },
   "timeout": 3,
   "logs": {
-    "text": "php://stderr",
-    "badge": {
-      "branch": "master"
-    }
+    "text": "php://stderr"
   },
   "mutators": {
     "@default": true,
