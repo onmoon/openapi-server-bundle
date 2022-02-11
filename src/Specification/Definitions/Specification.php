@@ -17,7 +17,6 @@ final class Specification
 
     /**
      * @param Operation[] $operations
-     *
      * @psalm-param array<string, Operation> $operations
      */
     public function __construct(array $operations, OpenApi $openApi)
@@ -28,7 +27,6 @@ final class Specification
 
     /**
      * @return Operation[]
-     *
      * @psalm-return array<string, Operation>
      */
     public function getOperations(): array

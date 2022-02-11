@@ -26,7 +26,6 @@ final class Operation
     /**
      * @param ObjectType[] $requestParameters
      * @param ObjectType[] $responses
-     *
      * @psalm-param array<string, ObjectType> $requestParameters
      * @psalm-param array<string|int, ObjectType> $responses
      */
@@ -75,7 +74,6 @@ final class Operation
 
     /**
      * @return ObjectType[]
-     *
      * @psalm-return array<string, ObjectType>
      */
     public function getRequestParameters(): array
@@ -85,7 +83,6 @@ final class Operation
 
     /**
      * @return ObjectType[]
-     *
      * @psalm-return array<string|int, ObjectType>
      */
     public function getResponses(): array

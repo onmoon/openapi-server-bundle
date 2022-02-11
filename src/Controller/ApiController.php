@@ -207,9 +207,9 @@ final class ApiController
     }
 
     /**
-     * @return array{0: string, 1: class-string<Dto>|null}
-     *
      * @psalm-param class-string<RequestHandler> $requestHandlerInterface
+     *
+     * @return array{0: string, 1: class-string<Dto>|null}
      */
     private function getMethodAndInputDtoFQCN(string $requestHandlerInterface): array
     {
