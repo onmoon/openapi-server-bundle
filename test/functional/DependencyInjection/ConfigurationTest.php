@@ -26,7 +26,6 @@ class ConfigurationTest extends TestCase
 
     /**
      * @return mixed[]
-     *
      * @psalm-return list<list<array<string, list<array<string, string>>>|string>>
      */
     public function parametersIsRequiredDataProvider(): array
@@ -40,8 +39,8 @@ class ConfigurationTest extends TestCase
 
     /**
      * @param mixed[] $configuration
-     *
      * @psalm-param list<list<array<string, list<array<string, string>>>|string>> $configuration
+     *
      * @dataProvider parametersIsRequiredDataProvider
      */
     public function testParametersIsRequired(array $configuration, string $parameterName): void
@@ -61,7 +60,6 @@ class ConfigurationTest extends TestCase
 
     /**
      * @return mixed[]
-     *
      * @psalm-return list<list<array<string, list<array<string, string>>|string>|string>>
      */
     public function parametersCannotBeEmptyDataProvider(): array
@@ -78,8 +76,8 @@ class ConfigurationTest extends TestCase
 
     /**
      * @param mixed[] $configuration
-     *
      * @psalm-param list<list<array<string, list<array<string, string>>>|string>> $configuration
+     *
      * @dataProvider parametersCannotBeEmptyDataProvider
      */
     public function testParametersCannotBeEmpty(array $configuration, string $parameterName): void
@@ -89,7 +87,6 @@ class ConfigurationTest extends TestCase
 
     /**
      * @return mixed[]
-     *
      * @psalm-return list<list<array<string, list<array<string, string>>>|string>>
      */
     public function parametersEnumDataProvider(): array
@@ -107,8 +104,8 @@ class ConfigurationTest extends TestCase
 
     /**
      * @param mixed[] $configuration
-     *
      * @psalm-param list<list<array<string, list<array<string, string>>>|string>> $configuration, string $parameterName
+     *
      * @dataProvider parametersEnumDataProvider
      */
     public function testParametersEnumDataProvider(

@@ -25,6 +25,8 @@ class RouteLoader extends Loader
     {
         $this->loader           = $loader;
         $this->argumentResolver = $argumentResolver;
+
+        parent::__construct();
     }
 
     /**

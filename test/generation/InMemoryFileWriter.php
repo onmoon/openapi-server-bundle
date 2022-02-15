@@ -40,7 +40,6 @@ final class InMemoryFileWriter implements FileWriter
 
     /**
      * @return string[]
-     *
      * @psalm-return array<string, string>
      */
     public function getAll(): array

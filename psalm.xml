@@ -3,10 +3,10 @@
     xmlns="https://getpsalm.org/schema/config"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:schemaLocation="https://getpsalm.org/schema/config vendor/vimeo/psalm/config.xsd"
-    allowPhpStormGenerics="true"
     strictBinaryOperands="true"
     findUnusedVariablesAndParams="true"
     ensureArrayStringOffsetsExist="true"
+    phpVersion="8.1"
 >
     <projectFiles>
         <directory name="src" />
@@ -25,5 +25,17 @@
         <PropertyNotSetInConstructor errorLevel="suppress"/>
         <InternalClass errorLevel="suppress"/>
         <InternalMethod errorLevel="suppress"/>
+        <DeprecatedFunction>
+            <errorLevel type="suppress">
+                <referencedFunction name="Safe\substr" />
+                <referencedFunction name="Safe\sprintf" />
+            </errorLevel>
+        </DeprecatedFunction>
+        <ReservedWord>
+            <errorLevel type="suppress">
+                <file name="src/Controller/ApiController.php" />
+                <file name="src/Serializer/ArrayDtoSerializer.php" />
+            </errorLevel>
+        </ReservedWord>
     </issueHandlers>
 </psalm>

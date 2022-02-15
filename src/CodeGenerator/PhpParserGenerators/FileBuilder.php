@@ -69,10 +69,11 @@ class FileBuilder
             return $class . '1';
         }
 
-        if (preg_match('"_(\d+)$"', $class, $match) === 1) {
+        if (preg_match('/_(\d+)$/', $class, $match) === 1) {
+            /** @psalm-var numeric-string $oldNumber */
             $oldNumber = $match[1];
 
-            return preg_replace('"_\d+$"', '_' . ($oldNumber + 1), $class);
+            return preg_replace('"_\d+$"', '_' . (string) ((int) $oldNumber + 1), $class);
         }
 
         return $class . '_';

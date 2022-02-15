@@ -26,9 +26,7 @@ final class CompilerPass implements CompilerPassInterface
             return;
         }
 
-        $definition = $container->findDefinition(ApiController::class);
-
-        /** @psalm-var array<string, array> $taggedServices */
+        $definition     = $container->findDefinition(ApiController::class);
         $taggedServices = $container->findTaggedServiceIds($this->tag);
 
         foreach (array_keys($taggedServices) as $id) {

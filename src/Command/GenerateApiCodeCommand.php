@@ -41,7 +41,7 @@ final class GenerateApiCodeCommand extends Command
 
     /**
      * phpcs:disable SlevomatCodingStandard.TypeHints.PropertyTypeHint.MissingNativeTypeHint
-     * @var string
+     * @var string|null
      */
     protected static $defaultName = self::COMMAND;
 

@@ -18,7 +18,10 @@ class ArgumentResolver
         $this->typesResolver = $typesResolver;
     }
 
-    /** @return string[] */
+    /**
+     * @return string[]
+     * @psalm-return array<string, (string|null)>
+     */
     public function resolveArgumentPatterns(ObjectType $pathParameters): array
     {
         $patterns = [];

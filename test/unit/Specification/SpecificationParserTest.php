@@ -209,6 +209,11 @@ final class SpecificationParserTest extends TestCase
             $parsedSpecification
         );
 
+        Assert::assertSame(
+            'SomeCustomSpecification.SomeCustomOperationWithRequestAndResponses',
+            $specification->getOperation('SomeCustomOperationWithRequestAndResponses')->getRequestHandlerName()
+        );
+
         $requestBody = $specification
             ->getOperation('SomeCustomOperationWithRequestAndResponses')
             ->getRequestBody();
@@ -511,7 +516,7 @@ final class SpecificationParserTest extends TestCase
         );
 
         foreach ($specification->getOperation('SomeCustomThirdPostOperation')->getResponse('200')->getProperties() as $propertyName => $property) {
-            if ($payload['responseProperties'][$property->getName()]['expected']['hasObjectTypeDefinitionInstance']) {
+            if ((bool) $payload['responseProperties'][$property->getName()]['expected']['hasObjectTypeDefinitionInstance']) {
                 Assert::assertInstanceOf(ObjectType::class, $property->getObjectTypeDefinition());
             }
 

@@ -29,7 +29,7 @@ final class RefreshApiCodeCommand extends Command
 
     /**
      * phpcs:disable SlevomatCodingStandard.TypeHints.PropertyTypeHint.MissingNativeTypeHint
-     * @var string
+     * @var string|null
      */
     protected static $defaultName = 'open-api:refresh';
 
