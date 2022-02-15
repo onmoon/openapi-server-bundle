@@ -1,6 +1,5 @@
 /.phpcs-cache
 /.phpunit.result.cache
-/phpcs.xml
 /phpunit.xml
 /composer.lock
 vendor/
