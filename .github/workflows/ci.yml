@@ -121,7 +121,7 @@ jobs:
       - name: "Install highest dependencies"
         run: "composer update --no-interaction --no-progress"
       - name: "Execute PhpCs"
-        run: "vendor/bin/phpcs --config-set php_version 7040 && vendor/bin/phpcs -q --report=checkstyle | cs2pr"
+        run: "phpcs --config-set php_version 7040 && phpcs -q --report=checkstyle | cs2pr"
   coverage:
     name: "Code coverage"
     runs-on: "ubuntu-latest"
