@@ -43,18 +43,12 @@ abstract class TestKernel extends BaseKernel
         );
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function getCacheDir()
+    public function getCacheDir(): string
     {
         return __DIR__ . '/var/cache';
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function getLogDir()
+    public function getLogDir(): string
     {
         return __DIR__ . '/var/log';
     }

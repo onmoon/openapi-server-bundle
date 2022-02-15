@@ -6,6 +6,7 @@
     strictBinaryOperands="true"
     findUnusedVariablesAndParams="true"
     ensureArrayStringOffsetsExist="true"
+    phpVersion="8.1"
 >
     <projectFiles>
         <directory name="src" />

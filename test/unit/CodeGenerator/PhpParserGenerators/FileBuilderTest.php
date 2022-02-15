@@ -109,6 +109,20 @@ class FileBuilderTest extends TestCase
         Assert::assertEquals('_124', $reference);
     }
 
+    public function testRenameNumericIncrementsWithUnderscore(): void
+    {
+        $fqcn            = 'NamespaceOne\NamespaceThree\_0123_345';
+        $classDefinition = ClassDefinition::fromFQCN($fqcn);
+
+        $fqcnTwo            = 'NamespaceOne\NamespaceTwo\_0123_345';
+        $classDefinitionTwo = ClassDefinition::fromFQCN($fqcnTwo);
+
+        $this->fileBuilder = new FileBuilder($classDefinition);
+        $reference         = $this->fileBuilder->getReference($classDefinitionTwo);
+
+        Assert::assertEquals('_0123_346', $reference);
+    }
+
     public function testRenameWithUnderscoreAtTheEnd(): void
     {
         $fqcn            = 'NamespaceOne\NamespaceThree\ClassDefinition_';

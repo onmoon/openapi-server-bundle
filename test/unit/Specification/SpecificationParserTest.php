@@ -209,6 +209,11 @@ final class SpecificationParserTest extends TestCase
             $parsedSpecification
         );
 
+        Assert::assertSame(
+            'SomeCustomSpecification.SomeCustomOperationWithRequestAndResponses',
+            $specification->getOperation('SomeCustomOperationWithRequestAndResponses')->getRequestHandlerName()
+        );
+
         $requestBody = $specification
             ->getOperation('SomeCustomOperationWithRequestAndResponses')
             ->getRequestBody();
