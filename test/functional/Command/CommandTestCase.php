@@ -53,4 +53,9 @@ abstract class CommandTestCase extends KernelTestCase
         unset($this->commandTester, $this->application);
         parent::tearDown();
     }
+
+    protected static function getKernelClass(): string
+    {
+        return self::class;
+    }
 }

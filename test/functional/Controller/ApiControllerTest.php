@@ -100,6 +100,11 @@ class ApiControllerTest extends WebTestCase
         Assert::assertEquals(['title' => 'test'], json_decode((string) $response->getContent(), true));
     }
 
+    protected static function getKernelClass(): string
+    {
+        return self::class;
+    }
+
     private function createGetGoodImpl(): string
     {
         $content = <<<EOD
