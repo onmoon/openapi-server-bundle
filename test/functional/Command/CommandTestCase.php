@@ -56,6 +56,6 @@ abstract class CommandTestCase extends KernelTestCase
 
     protected static function getKernelClass(): string
     {
-        return self::class;
+        return static::class;
     }
 }

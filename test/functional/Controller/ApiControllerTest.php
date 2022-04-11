@@ -102,7 +102,7 @@ class ApiControllerTest extends WebTestCase
 
     protected static function getKernelClass(): string
     {
-        return self::class;
+        return static::class;
     }
 
     private function createGetGoodImpl(): string
