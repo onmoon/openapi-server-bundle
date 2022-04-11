@@ -25,5 +25,6 @@
         <ini name="error_reporting" value="E_ALL"/>
         <env name="APP_ENV" value="test" />
         <env name="APP_DEBUG" value="false" />
+        <env name="KERNEL_CLASS" value="OnMoon\OpenApiServerBundle\Test\Functional\TestKernel" />
     </php>
 </phpunit>
