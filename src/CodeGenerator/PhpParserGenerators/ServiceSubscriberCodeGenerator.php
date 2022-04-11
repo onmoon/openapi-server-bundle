@@ -89,6 +89,7 @@ class ServiceSubscriberCodeGenerator extends CodeGenerator
             ->method('getSubscribedServices')
             ->makePublic()
             ->makeStatic()
+            ->setReturnType('array')
             ->setDocComment('/**
                                          * @inheritDoc
                                          */')
