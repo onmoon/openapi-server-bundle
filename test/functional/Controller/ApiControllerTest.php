@@ -17,9 +17,9 @@ use Symfony\Component\Console\Tester\CommandTester;
 use Symfony\Component\DependencyInjection\Loader\Configurator\ContainerConfigurator;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\KernelInterface;
 use Symfony\Component\Routing\Loader\Configurator\RoutingConfigurator;
 
-use function get_class;
 use function Safe\file_put_contents;
 use function Safe\json_decode;
 
@@ -29,27 +29,6 @@ use function Safe\json_decode;
 class ApiControllerTest extends WebTestCase
 {
     private AbstractBrowser $client;
-
-    /**
-     * @param mixed[] $data
-     */
-    public function __construct(?string $name = null, array $data = [], string $dataName = '')
-    {
-        parent::__construct($name, $data, $dataName);
-
-        $kernelClass = new class ('test', true) extends TestKernel {
-            protected function configureContainer(ContainerConfigurator $c): void
-            {
-            }
-
-            protected function configureRoutes(RoutingConfigurator $routes): void
-            {
-                $routes->import(__DIR__ . '/openapi_routes.yaml');
-            }
-        };
-
-        self::$class = get_class($kernelClass);
-    }
 
     public function setUp(): void
     {
@@ -100,9 +79,21 @@ class ApiControllerTest extends WebTestCase
         Assert::assertEquals(['title' => 'test'], json_decode((string) $response->getContent(), true));
     }
 
-    protected static function getKernelClass(): string
+    /**
+     * {@inheritDoc}
+     */
+    protected static function createKernel(array $options = []): KernelInterface
     {
-        return static::class;
+        return new class ('test', true) extends TestKernel {
+            protected function configureContainer(ContainerConfigurator $c): void
+            {
+            }
+
+            protected function configureRoutes(RoutingConfigurator $routes): void
+            {
+                $routes->import(__DIR__ . '/openapi_routes.yaml');
+            }
+        };
     }
 
     private function createGetGoodImpl(): string

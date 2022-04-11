@@ -10,9 +10,8 @@ use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Symfony\Component\Console\Tester\CommandTester;
 use Symfony\Component\DependencyInjection\Loader\Configurator\ContainerConfigurator;
 use Symfony\Component\Filesystem\Filesystem;
+use Symfony\Component\HttpKernel\KernelInterface;
 use Symfony\Component\Routing\Loader\Configurator\RoutingConfigurator;
-
-use function get_class;
 
 abstract class CommandTestCase extends KernelTestCase
 {
@@ -20,26 +19,6 @@ abstract class CommandTestCase extends KernelTestCase
     protected string $openapiOperationId = 'getGood';
     protected CommandTester $commandTester;
     protected Application $application;
-
-    /**
-     * @param mixed[] $data
-     */
-    public function __construct(?string $name = null, array $data = [], string $dataName = '')
-    {
-        parent::__construct($name, $data, $dataName);
-
-        $kernelClass = new class ('test', true) extends TestKernel {
-            protected function configureContainer(ContainerConfigurator $c): void
-            {
-            }
-
-            protected function configureRoutes(RoutingConfigurator $routes): void
-            {
-            }
-        };
-
-        self::$class = get_class($kernelClass);
-    }
 
     public function setUp(): void
     {
@@ -54,8 +33,19 @@ abstract class CommandTestCase extends KernelTestCase
         parent::tearDown();
     }
 
-    protected static function getKernelClass(): string
+    /**
+     * {@inheritDoc}
+     */
+    protected static function createKernel(array $options = []): KernelInterface
     {
-        return static::class;
+        return new class ('test', true) extends TestKernel {
+            protected function configureContainer(ContainerConfigurator $c): void
+            {
+            }
+
+            protected function configureRoutes(RoutingConfigurator $routes): void
+            {
+            }
+        };
     }
 }
