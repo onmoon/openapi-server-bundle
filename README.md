@@ -24,10 +24,23 @@ All you have to do is to implement the API call handler interfaces and return th
 
 The preferred way to install this extension is through [composer](http://getcomposer.org/download/).
 
+The following workaround with a forked version of `cebe/php-openapi` will be used until a version of it
+compatible with php 8.1 will be released:
+
+Add to your composer.json
+```
+"repositories": [
+    {
+        "type": "vcs",
+        "url": "https://github.com/onmoon/php-openapi"
+    }
+],
+```
+
 Run
 
 ```
-composer require onmoon/openapi-server-bundle
+composer require cebe/php-openapi:dev-php-81-compat onmoon/openapi-server-bundle 
 ```
 
 Then add the bundle class to your `config/bundles.php`:
