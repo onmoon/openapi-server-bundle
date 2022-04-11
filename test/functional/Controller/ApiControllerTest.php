@@ -42,14 +42,14 @@ class ApiControllerTest extends WebTestCase
         $commandTester->execute(['command' => GenerateApiCodeCommand::COMMAND]);
         $getGoodImplClassName = $this->createGetGoodImpl();
 
-        static::$container->set('petstore.getGood', new $getGoodImplClassName());
+        static::getContainer()->set('petstore.getGood', new $getGoodImplClassName());
 
         $apiLoaderClass = TestKernel::$bundleRootNamespace . '\ServiceSubscriber\ApiServiceLoaderServiceSubscriber';
         /** @var ApiLoader $apiLoader */
-        $apiLoader = new $apiLoaderClass(static::$container);
+        $apiLoader = new $apiLoaderClass(static::getContainer());
 
         /** @var ApiController $apiController */
-        $apiController = static::$container->get(ApiController::class);
+        $apiController = static::getContainer()->get(ApiController::class);
         $apiController->setApiLoader($apiLoader);
     }
 

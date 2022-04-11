@@ -29,10 +29,7 @@ class RouteLoader extends Loader
         parent::__construct();
     }
 
-    /**
-     * @inheritDoc
-     */
-    public function load($resource, ?string $type = null): RouteCollection
+    public function load(mixed $resource, ?string $type = null): RouteCollection
     {
         $specName      = (string) $resource;
         $specification = $this->loader->load($specName);
