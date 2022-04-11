@@ -122,7 +122,7 @@ class ClassName implements ClassName, ClassName
     /**
      * @inheritDoc
      */
-    public static function getSubscribedServices()
+    public static function getSubscribedServices() : array
     {
         return array('test' => '?' . ClassName::class);
     }
