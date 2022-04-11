@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace OnMoon\OpenApiServerBundle\Test\Functional\Specification;
 
 use cebe\openapi\spec\OpenApi;
+use DateInterval;
+use DateTimeInterface;
 use Exception;
 use OnMoon\OpenApiServerBundle\Specification\Definitions\Specification;
 use OnMoon\OpenApiServerBundle\Specification\Definitions\SpecificationConfig;
@@ -44,52 +46,34 @@ class SpecificationLoaderTest extends TestCase
             /** @var Specification[] $items  */
             private array $items = [];
 
-            /**
-             * {@inheritDoc}
-             */
-            public function get(string $key, callable $callback, ?float $beta = null, ?array &$metadata = null)
+            public function get(string $key, callable $callback, ?float $beta = null, ?array &$metadata = null): mixed
             {
                 if (isset($this->items[$key])) {
                     return $this->items[$key];
                 }
 
                 $item              = $callback(new class () implements ItemInterface {
-                    /**
-                     * {@inheritDoc}
-                     */
-                    public function getKey()
+                    public function getKey(): string
                     {
                         return '';
                     }
 
-                    /**
-                     * {@inheritDoc}
-                     */
-                    public function set($value)
+                    public function set(mixed $value): static
                     {
                         return $this;
                     }
 
-                    /**
-                     * {@inheritDoc}
-                     */
-                    public function expiresAfter($time)
+                    public function expiresAfter(int|DateInterval|null $time): static
                     {
                         return $this;
                     }
 
-                    /**
-                     * {@inheritDoc}
-                     */
-                    public function isHit()
+                    public function isHit(): bool
                     {
                         return true;
                     }
 
-                    /**
-                     * {@inheritDoc}
-                     */
-                    public function get()
+                    public function get(): mixed
                     {
                         return null;
                     }
@@ -102,18 +86,12 @@ class SpecificationLoaderTest extends TestCase
                         return [];
                     }
 
-                    /**
-                     * {@inheritDoc}
-                     */
-                    public function tag($tags): ItemInterface
+                    public function tag(string|iterable $tags): static
                     {
                         return $this;
                     }
 
-                    /**
-                     * {@inheritDoc}
-                     */
-                    public function expiresAt($expiration)
+                    public function expiresAt(?DateTimeInterface $expiration): static
                     {
                         return $this;
                     }
@@ -139,7 +117,7 @@ class SpecificationLoaderTest extends TestCase
             /**
              * {@inheritDoc}
              */
-            public function invalidateTags(array $tags)
+            public function invalidateTags(array $tags): bool
             {
                 return true;
             }
