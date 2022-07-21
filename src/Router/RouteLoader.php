@@ -7,6 +7,7 @@ namespace OnMoon\OpenApiServerBundle\Router;
 use OnMoon\OpenApiServerBundle\Controller\ApiController;
 use OnMoon\OpenApiServerBundle\Specification\SpecificationLoader;
 use OnMoon\OpenApiServerBundle\Types\ArgumentResolver;
+use Stringable;
 use Symfony\Component\Config\Loader\Loader;
 use Symfony\Component\Routing\Route;
 use Symfony\Component\Routing\RouteCollection;
@@ -37,10 +38,12 @@ class RouteLoader extends Loader
         $routes = new RouteCollection();
 
         foreach ($specification->getOperations() as $operationId => $operation) {
+            /** @psalm-var array<(string|Stringable)> $requirements */
             $requirements = [];
 
             $parameters = $operation->getRequestParameters();
             if (array_key_exists('path', $parameters)) {
+                /** @psalm-var array<(string|Stringable)> $requirements */
                 $requirements = $this->argumentResolver->resolveArgumentPatterns($parameters['path']);
             }
 
