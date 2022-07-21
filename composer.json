@@ -24,8 +24,8 @@
     "require": {
         "php": "^8.0",
         "ext-json": "*",
-        "cebe/php-openapi": "dev-php-81-compat",
-        "league/openapi-psr7-validator": "dev-use-forked-php-openapi",
+        "cebe/php-openapi": "^1.7",
+        "league/openapi-psr7-validator": "^0.18.0",
         "lukasoppermann/http-status": "^3.2",
         "nikic/php-parser": "^4.13",
         "nyholm/psr7": "^1.5",
@@ -60,16 +60,6 @@
         "thecodingmachine/phpstan-safe-rule": "^1.2",
         "vimeo/psalm": "^4.22"
     },
-    "repositories": [
-        {
-            "type": "vcs",
-            "url": "https://github.com/onmoon/php-openapi"
-        },
-        {
-            "type": "vcs",
-            "url": "https://github.com/onmoon/openapi-psr7-validator"
-        }
-    ],
     "minimum-stability": "dev",
     "prefer-stable": true,
     "config": {
