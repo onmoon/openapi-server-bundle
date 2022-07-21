@@ -26,8 +26,6 @@ class RouteLoader extends Loader
     {
         $this->loader           = $loader;
         $this->argumentResolver = $argumentResolver;
-
-        parent::__construct();
     }
 
     public function load(mixed $resource, ?string $type = null): RouteCollection
