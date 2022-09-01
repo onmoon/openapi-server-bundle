@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace OnMoon\OpenApiServerBundle\Event\Server;
 
 use OnMoon\OpenApiServerBundle\Interfaces\Dto;
+use OnMoon\OpenApiServerBundle\Interfaces\RequestHandler;
 use OnMoon\OpenApiServerBundle\Specification\Definitions\Specification;
 use Symfony\Contracts\EventDispatcher\Event;
 
@@ -27,12 +28,14 @@ final class RequestDtoEvent extends Event
     private ?Dto $requestDto;
     private string $operationId;
     private Specification $specification;
+    private RequestHandler $requestHandler;
 
-    public function __construct(?Dto $requestDto, string $operationId, Specification $specification)
+    public function __construct(?Dto $requestDto, string $operationId, Specification $specification, RequestHandler $requestHandler)
     {
-        $this->requestDto    = $requestDto;
-        $this->operationId   = $operationId;
-        $this->specification = $specification;
+        $this->requestDto     = $requestDto;
+        $this->operationId    = $operationId;
+        $this->specification  = $specification;
+        $this->requestHandler = $requestHandler;
     }
 
     public function getRequestDto(): ?Dto
@@ -48,5 +51,10 @@ final class RequestDtoEvent extends Event
     public function getSpecification(): Specification
     {
         return $this->specification;
+    }
+
+    public function getRequestHandler(): RequestHandler
+    {
+        return $this->requestHandler;
     }
 }
