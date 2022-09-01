@@ -66,6 +66,7 @@
         "preferred-install": {
             "*": "dist"
         },
+        "process-timeout": 14400,
         "sort-packages": true,
         "allow-plugins": {
             "dealerdirect/phpcodesniffer-composer-installer": true,

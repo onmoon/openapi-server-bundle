@@ -84,10 +84,12 @@ final class ApiController
         [$methodName, $inputDtoClass]               = $this->getMethodAndInputDtoFQCN($requestHandlerInterface);
 
         $requestDto = null;
+
         if ($inputDtoClass !== null) {
             $requestDto = $this->createRequestDto($request, $operation, $inputDtoClass);
-            $this->eventDispatcher->dispatch(new RequestDtoEvent($requestDto, $operationId, $specification));
         }
+
+        $this->eventDispatcher->dispatch(new RequestDtoEvent($requestDto, $operationId, $specification, $requestHandler));
 
         $responseDto = $this->executeRequestHandler($requestHandler, $methodName, $requestDto);
         $this->eventDispatcher->dispatch(new ResponseDtoEvent($responseDto, $operationId, $specification));
