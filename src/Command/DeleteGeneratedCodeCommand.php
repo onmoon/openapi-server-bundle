@@ -7,6 +7,7 @@ namespace OnMoon\OpenApiServerBundle\Command;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
 use SplFileInfo;
+use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Helper\QuestionHelper;
 use Symfony\Component\Console\Input\InputDefinition;
@@ -20,6 +21,7 @@ use function Safe\rmdir;
 use function Safe\sprintf;
 use function Safe\unlink;
 
+#[AsCommand(name: 'open-api:delete')]
 final class DeleteGeneratedCodeCommand extends Command
 {
     public const COMMAND = 'open-api:delete';
