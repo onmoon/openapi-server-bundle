@@ -6,6 +6,7 @@ namespace OnMoon\OpenApiServerBundle\Command;
 
 use OnMoon\OpenApiServerBundle\CodeGenerator\ApiServerCodeGenerator;
 use OnMoon\OpenApiServerBundle\Specification\SpecificationLoader;
+use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -13,6 +14,7 @@ use Symfony\Contracts\Cache\TagAwareCacheInterface;
 
 use function Safe\sprintf;
 
+#[AsCommand(name: 'open-api:generate')]
 final class GenerateApiCodeCommand extends Command
 {
     public const COMMAND = 'open-api:generate';

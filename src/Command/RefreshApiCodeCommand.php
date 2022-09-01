@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace OnMoon\OpenApiServerBundle\Command;
 
+use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Helper\QuestionHelper;
 use Symfony\Component\Console\Input\InputInterface;
@@ -14,6 +15,7 @@ use Symfony\Component\Process\Process;
 
 use function Safe\sprintf;
 
+#[AsCommand(name: 'open-api:refresh')]
 final class RefreshApiCodeCommand extends Command
 {
     private string $rootPath;
