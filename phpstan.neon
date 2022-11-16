@@ -30,14 +30,6 @@ parameters:
             paths:
                 - %currentWorkingDirectory%/src/Specification/SpecificationParser.php
         -
-            message: '#SpecificationLoaderTest\.php:55\)\) of method#'
-            paths:
-                - %currentWorkingDirectory%/test/functional/Specification/SpecificationLoaderTest.php
-        -
-            message: '#TestApiServerCodeGeneratorFactory\.php:55\)\) of method#'
-            paths:
-                - %currentWorkingDirectory%/test/generation/TestApiServerCodeGeneratorFactory.php
-        -
             message: '#OnMoon\\OpenApiServerBundle\\Router\\RouteLoader::__construct\(\) does not call parent constructor from Symfony\\Component\\Config\\Loader\\Loader\.#'
             paths:
                 - %currentWorkingDirectory%/src/Router/RouteLoader.php
