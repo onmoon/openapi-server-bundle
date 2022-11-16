@@ -89,7 +89,7 @@
         "cs": "phpcs --config-set php_version 7040 && phpcs",
         "csfix": "phpcs --config-set php_version 7040 && phpcbf",
         "psalm": "psalm",
-        "stan": "phpstan analyse --memory-limit=-1",
+        "stan": "phpstan analyse --memory-limit=-1 --xdebug",
         "tests": "phpunit --fail-on-warning",
         "mutation": "vendor/bin/roave-infection-static-analysis-plugin --only-covered --test-framework-options=\"--testsuite=unit\"",
         "all": "composer psalm && composer stan && composer tests && composer mutation && composer cs && composer security",
