@@ -11,6 +11,7 @@ use OnMoon\OpenApiServerBundle\Interfaces\RequestHandler;
 use OnMoon\OpenApiServerBundle\Specification\Definitions\Specification;
 use PHPUnit\Framework\Assert;
 use PHPUnit\Framework\TestCase;
+use Symfony\Component\HttpFoundation\Request;
 
 /**
  * @covers \OnMoon\OpenApiServerBundle\Event\Server\RequestDtoEvent
@@ -19,6 +20,7 @@ final class RequestDtoEventTest extends TestCase
 {
     public function testRequestDtoEventGettersReturnCorrectValues(): void
     {
+        $request        = new Request();
         $requestDto     = new class () implements Dto {
             /**
              * @return mixed[]
@@ -41,27 +43,30 @@ final class RequestDtoEventTest extends TestCase
         $requestHandler = new class () implements RequestHandler{
         };
 
-        $requestDtoEvent = new RequestDtoEvent($requestDto, $operationId, $specification, $requestHandler);
+        $requestDtoEvent = new RequestDtoEvent($requestDto, $operationId, $specification, $requestHandler, $request);
 
         Assert::assertEquals($requestDto, $requestDtoEvent->getRequestDto());
         Assert::assertEquals($operationId, $requestDtoEvent->getOperationId());
         Assert::assertEquals($specification, $requestDtoEvent->getSpecification());
         Assert::assertEquals($requestHandler, $requestDtoEvent->getRequestHandler());
+        Assert::assertEquals($request, $requestDtoEvent->getRequest());
     }
 
     public function testRequestDtoEventGettersWhenRequestDtoNull(): void
     {
+        $request        = new Request();
         $requestDto     = null;
         $operationId    = '12345';
         $specification  = new Specification([], new OpenApi([]));
         $requestHandler = new class () implements RequestHandler{
         };
 
-        $requestDtoEvent = new RequestDtoEvent($requestDto, $operationId, $specification, $requestHandler);
+        $requestDtoEvent = new RequestDtoEvent($requestDto, $operationId, $specification, $requestHandler, $request);
 
         Assert::assertNull($requestDtoEvent->getRequestDto());
         Assert::assertEquals($operationId, $requestDtoEvent->getOperationId());
         Assert::assertEquals($specification, $requestDtoEvent->getSpecification());
         Assert::assertEquals($requestHandler, $requestDtoEvent->getRequestHandler());
+        Assert::assertEquals($request, $requestDtoEvent->getRequest());
     }
 }
