@@ -78,7 +78,6 @@ class SpecificationLoader
 
     public function load(string $name): Specification
     {
-        $this->cache->delete(self::CACHE_KEY_PREFIX . $name);
         /** @var Specification $parsedSpecification */
         $parsedSpecification = $this->cache->get(
             self::CACHE_KEY_PREFIX . $name,
