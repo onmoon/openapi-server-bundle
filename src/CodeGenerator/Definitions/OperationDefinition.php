@@ -10,9 +10,8 @@ final class OperationDefinition
     private string $method;
     private string $operationId;
     private string $requestHandlerName;
-    private ?string $summary                   = null;
-    private ?RequestDtoDefinition $request     = null;
-    private ?ClassDefinition $markersInterface = null;
+    private ?string $summary;
+    private ?RequestDtoDefinition $request ;
     private RequestHandlerInterfaceDefinition $requestHandlerInterface;
 
     /** @var ResponseDtoDefinition[] */
@@ -68,18 +67,6 @@ final class OperationDefinition
     public function getResponses(): array
     {
         return $this->responses;
-    }
-
-    public function getMarkersInterface(): ?ClassDefinition
-    {
-        return $this->markersInterface;
-    }
-
-    public function setMarkersInterface(?ClassDefinition $markersInterface): self
-    {
-        $this->markersInterface = $markersInterface;
-
-        return $this;
     }
 
     public function getRequestHandlerInterface(): RequestHandlerInterfaceDefinition

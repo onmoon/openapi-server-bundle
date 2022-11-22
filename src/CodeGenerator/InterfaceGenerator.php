@@ -19,13 +19,11 @@ use function count;
 class InterfaceGenerator
 {
     private ClassDefinition $defaultDto;
-    private ClassDefinition $defaultResponseDto;
     private ClassDefinition $defaultHandler;
 
     public function __construct()
     {
         $this->defaultDto         = ClassDefinition::fromFQCN(Dto::class);
-        $this->defaultResponseDto = ClassDefinition::fromFQCN(ResponseDto::class);
         $this->defaultHandler     = ClassDefinition::fromFQCN(RequestHandler::class);
     }
 
@@ -37,35 +35,19 @@ class InterfaceGenerator
 
         foreach ($graph->getSpecifications() as $specificationDefinition) {
             foreach ($specificationDefinition->getOperations() as $operation) {
-                /** @var ClassDefinition|null $responseClass */
-                $responseClass = null;
                 $responses     = $operation->getResponses();
-                if (count($responses) > 1) {
-                    $makersInterface = new GeneratedInterfaceDefinition();
-                    $makersInterface->setExtends($this->defaultResponseDto);
-                    $operation->setMarkersInterface($makersInterface);
-                    $responseClass = $makersInterface;
-                } else {
-                    $makersInterface = $this->defaultResponseDto;
-                    if (count($responses) === 1) {
-                        $responseClass = $responses[0];
-                    }
-                }
-
                 foreach ($responses as $response) {
-                    $response->setImplements($makersInterface);
-                    $this->setChildrenRecursive($response, $this->defaultDto);
+                    $this->setDtoInterfaceRecursive($response);
                 }
 
                 $request = $operation->getRequest();
                 if ($request !== null) {
-                    $request->setImplements($this->defaultDto);
-                    $this->setChildrenRecursive($request, $this->defaultDto);
+                    $this->setDtoInterfaceRecursive($request);
                 }
 
                 $service = new RequestHandlerInterfaceDefinition();
                 $service
-                    ->setResponseType($responseClass)
+                    ->setResponseTypes($responses)
                     ->setRequestType($operation->getRequest())
                     ->setExtends($this->defaultHandler);
                 $operation->setRequestHandlerInterface($service);
@@ -73,16 +55,15 @@ class InterfaceGenerator
         }
     }
 
-    private function setChildrenRecursive(DtoDefinition $root, ClassDefinition $implements): void
+    private function setDtoInterfaceRecursive(DtoDefinition $root): void
     {
+        $root->setImplements($this->defaultDto);
         foreach ($root->getProperties() as $property) {
             $objectDefinition = $property->getObjectTypeDefinition();
             if ($objectDefinition === null) {
                 continue;
             }
-
-            $objectDefinition->setImplements($implements);
-            $this->setChildrenRecursive($objectDefinition, $implements);
+            $this->setDtoInterfaceRecursive($objectDefinition);
         }
     }
 }

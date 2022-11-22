@@ -57,12 +57,12 @@ final class RequestHandlerInterfaceDefinitionTest extends TestCase
         $requestHandlerInterfaceDefinition = new RequestHandlerInterfaceDefinition();
         $requestHandlerInterfaceDefinition
             ->setRequestType($payload['requestType'])
-            ->setResponseType($payload['responseType'])
+            ->setResponseTypes($payload['responseType'])
             ->setMethodName($payload['methodName'])
             ->setMethodDescription($payload['methodDescription']);
 
         Assert::assertSame($payload['requestType'], $requestHandlerInterfaceDefinition->getRequestType());
-        Assert::assertSame($payload['responseType'], $requestHandlerInterfaceDefinition->getResponseType());
+        Assert::assertSame($payload['responseType'], $requestHandlerInterfaceDefinition->getResponseTypes());
         Assert::assertSame($payload['methodName'], $requestHandlerInterfaceDefinition->getMethodName());
         Assert::assertSame($payload['methodDescription'], $requestHandlerInterfaceDefinition->getMethodDescription());
     }

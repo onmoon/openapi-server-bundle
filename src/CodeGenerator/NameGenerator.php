@@ -89,17 +89,6 @@ class NameGenerator
                     $this->setTreeGettersSetters($response);
                 }
 
-                $markersInterface = $operation->getMarkersInterface();
-                if (! ($markersInterface instanceof GeneratedInterfaceDefinition)) {
-                    continue;
-                }
-
-                $interfaceName = $this->naming->stringToNamespace($operationName . self::RESPONSE_SUFFIX);
-                $markersInterface
-                    ->setFileName($this->getFileName($interfaceName))
-                    ->setFilePath($responsePath)
-                    ->setClassName($interfaceName)
-                    ->setNamespace($responseNamespace);
             }
         }
     }

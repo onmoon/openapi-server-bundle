@@ -103,7 +103,7 @@ final class InterfaceGeneratorTest extends TestCase
 
         $expectedRequestHandler = new RequestHandlerInterfaceDefinition();
         $expectedRequestHandler
-            ->setResponseType($responseDtoDefinition)
+            ->setResponseTypes($responseDtoDefinition)
             ->setRequestType($request)
             ->setExtends(ClassDefinition::fromFQCN(RequestHandler::class));
         $requestHandler = $operationDefinition->getRequestHandlerInterface();
@@ -152,7 +152,7 @@ final class InterfaceGeneratorTest extends TestCase
 
         $expectedRequestHandler = new RequestHandlerInterfaceDefinition();
         $expectedRequestHandler
-            ->setResponseType($expectedMakersInterface)
+            ->setResponseTypes($expectedMakersInterface)
             ->setRequestType($request)
             ->setExtends(ClassDefinition::fromFQCN(RequestHandler::class));
         $requestHandler = $operationDefinition->getRequestHandlerInterface();

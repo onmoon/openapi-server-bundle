@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace OnMoon\OpenApiServerBundle\CodeGenerator\PhpParserGenerators;
 
+use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\ClassDefinition;
 use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\GeneratedFileDefinition;
-use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\GeneratedInterfaceDefinition;
 use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\RequestHandlerInterfaceDefinition;
 
 use function count;
@@ -13,7 +13,7 @@ use function Safe\sprintf;
 
 class InterfaceCodeGenerator extends CodeGenerator
 {
-    public function generate(GeneratedInterfaceDefinition $definition): GeneratedFileDefinition
+    public function generate(RequestHandlerInterfaceDefinition $definition): GeneratedFileDefinition
     {
         $fileBuilder = new FileBuilder($definition);
 
@@ -27,54 +27,53 @@ class InterfaceCodeGenerator extends CodeGenerator
             $interfaceBuilder->extend($fileBuilder->getReference($extends));
         }
 
-        if ($definition instanceof RequestHandlerInterfaceDefinition) {
-            $methodBuilder = $this->factory->method($definition->getMethodName())->makePublic();
-            $request       = $definition->getRequestType();
-            $docBlocks     = [];
+        $methodBuilder = $this->factory->method($definition->getMethodName())->makePublic();
+        $request       = $definition->getRequestType();
+        $docBlocks     = [];
 
-            if ($request !== null) {
-                $requestClass = $fileBuilder->getReference($request);
-                $methodBuilder->addParam(
-                    $this->factory->param('request')->setType($requestClass)
+        if ($request !== null) {
+            $requestClass = $fileBuilder->getReference($request);
+            $methodBuilder->addParam(
+                $this->factory->param('request')->setType($requestClass)
+            );
+            if ($this->fullDocs) {
+                $docBlocks[] = sprintf(
+                    '@param %s $%s',
+                    $requestClass,
+                    'request'
                 );
-                if ($this->fullDocs) {
-                    $docBlocks[] = sprintf(
-                        '@param %s $%s',
-                        $requestClass,
-                        'request'
-                    );
-                }
             }
-
-            $response = $definition->getResponseType();
-            if ($response !== null) {
-                $responseClass = $fileBuilder->getReference($response);
-                $methodBuilder->setReturnType($responseClass);
-                if ($this->fullDocs) {
-                    $docBlocks[] = sprintf(
-                        '@return %s',
-                        $responseClass
-                    );
-                }
-            } else {
-                $methodBuilder->setReturnType('void');
-            }
-
-            $description = $definition->getMethodDescription();
-            if ($description !== null) {
-                if (count($docBlocks) > 0) {
-                    $docBlocks = [$description, '', ...$docBlocks];
-                } else {
-                    $docBlocks[] = $description;
-                }
-            }
-
-            if (count($docBlocks) > 0) {
-                $methodBuilder->setDocComment($this->getDocComment($docBlocks));
-            }
-
-            $interfaceBuilder->addStmt($methodBuilder);
         }
+
+        $responses = $definition->getResponseTypes();
+        if (count($responses)) {
+            $responseClasses = array_map(static fn (ClassDefinition $response) => $fileBuilder->getReference($response), $responses);
+            $unionClass = implode("|", $responseClasses);
+            $methodBuilder->setReturnType($unionClass);
+            if ($this->fullDocs) {
+                $docBlocks[] = sprintf(
+                    '@return %s',
+                    $unionClass
+                );
+            }
+        } else {
+            $methodBuilder->setReturnType('void');
+        }
+
+        $description = $definition->getMethodDescription();
+        if ($description !== null) {
+            if (count($docBlocks) > 0) {
+                $docBlocks = [$description, '', ...$docBlocks];
+            } else {
+                $docBlocks[] = $description;
+            }
+        }
+
+        if (count($docBlocks) > 0) {
+            $methodBuilder->setDocComment($this->getDocComment($docBlocks));
+        }
+
+        $interfaceBuilder->addStmt($methodBuilder);
 
         $fileBuilder = $fileBuilder->addStmt($interfaceBuilder);
 

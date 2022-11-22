@@ -7,7 +7,8 @@ namespace OnMoon\OpenApiServerBundle\CodeGenerator\Definitions;
 final class RequestHandlerInterfaceDefinition extends GeneratedInterfaceDefinition
 {
     private ?ClassDefinition $requestType  = null;
-    private ?ClassDefinition $responseType = null;
+    /** @var ClassDefinition[] */
+    private array $responseTypes = [];
     private string $methodName;
     private ?string $methodDescription = null;
 
@@ -23,14 +24,16 @@ final class RequestHandlerInterfaceDefinition extends GeneratedInterfaceDefiniti
         return $this;
     }
 
-    public function getResponseType(): ?ClassDefinition
+    /** @return ClassDefinition[] */
+    public function getResponseTypes(): array
     {
-        return $this->responseType;
+        return $this->responseTypes;
     }
 
-    public function setResponseType(?ClassDefinition $responseType): self
+    /** @param ClassDefinition[] $responseTypes */
+    public function setResponseTypes(array $responseTypes): self
     {
-        $this->responseType = $responseType;
+        $this->responseTypes = $responseTypes;
 
         return $this;
     }
@@ -58,4 +61,5 @@ final class RequestHandlerInterfaceDefinition extends GeneratedInterfaceDefiniti
 
         return $this;
     }
-}
+
+ }

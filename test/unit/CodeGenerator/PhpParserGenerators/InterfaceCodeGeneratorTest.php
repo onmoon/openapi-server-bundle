@@ -180,7 +180,7 @@ EOD;
         $generatedInterfaceDefinition->setClassName('TestClass');
         $generatedInterfaceDefinition->setMethodName('test');
         $generatedInterfaceDefinition->setNamespace('Test\Test2');
-        $generatedInterfaceDefinition->setResponseType(ClassDefinition::fromFQCN('TestClass'));
+        $generatedInterfaceDefinition->setResponseTypes(ClassDefinition::fromFQCN('TestClass'));
 
         $generatedCode                   =
             <<<EOD

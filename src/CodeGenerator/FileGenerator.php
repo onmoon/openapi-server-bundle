@@ -48,11 +48,6 @@ class FileGenerator
                     $result = array_merge($result, $this->generateDtoTree($response));
                 }
 
-                $markersInterface = $operation->getMarkersInterface();
-                if ($markersInterface instanceof GeneratedInterfaceDefinition) {
-                    $result[] = $this->interfaceGenerator->generate($markersInterface);
-                }
-
                 $result[] = $this->interfaceGenerator->generate($operation->getRequestHandlerInterface());
             }
         }
