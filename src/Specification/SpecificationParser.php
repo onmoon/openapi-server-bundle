@@ -76,13 +76,10 @@ class SpecificationParser
                 $requestBody   = null;
 
                 if ($requestSchema !== null) {
-                    $requestBody = new ObjectDefinition(
-                        $this->getPropertyGraph(
-                            $requestSchema,
-                            true,
-                            true,
-                            $exceptionContext + ['location' => 'request body']
-                        )
+                    $requestBody = $this->getObjectDefinition(
+                        $requestSchema,
+                        true,
+                        $exceptionContext + ['location' => 'request body']
                     );
                 }
 
@@ -147,14 +144,11 @@ class SpecificationParser
                 continue;
             }
 
-            $propertyDefinitions                = $this->getPropertyGraph(
+            $responseDefinitions[$responseCode] = $this->getObjectDefinition(
                 $responseSchema,
                 false,
-                true,
                 $exceptionContext + ['location' => 'response (code "' . $responseCode . '")']
             );
-            $responseDefinition                 = new ObjectDefinition($propertyDefinitions);
-            $responseDefinitions[$responseCode] = $responseDefinition;
         }
 
         return $responseDefinitions;
@@ -259,12 +253,10 @@ class SpecificationParser
 
     /**
      * @param array{location:string,method:string,url:string,path:string} $exceptionContext
-     *
-     * @return PropertyDefinition[]
      */
-    private function getPropertyGraph(Schema $schema, bool $isRequest, bool $isRoot, array $exceptionContext): array
+    private function getObjectDefinition(Schema $schema, bool $isRequest, array $exceptionContext): ObjectDefinition
     {
-        if ($isRoot && $schema->type !== Type::OBJECT) {
+        if ($schema->type !== Type::OBJECT) {
             throw CannotParseOpenApi::becauseRootIsNotObject(
                 $exceptionContext,
                 ($schema->type === Type::ARRAY)
@@ -291,7 +283,7 @@ class SpecificationParser
             $propertyDefinitions[] = $this->getProperty($propertyName, $property, $isRequest, $exceptionContext)->setRequired($required);
         }
 
-        return $propertyDefinitions;
+        return new ObjectDefinition($propertyDefinitions);
     }
 
     /**
@@ -328,15 +320,10 @@ class SpecificationParser
             $scalarTypeId = $this->typeResolver->findScalarType($itemProperty->type, $itemProperty->format);
             $propertyDefinition->setScalarTypeId($scalarTypeId);
         } elseif ($itemProperty->type === Type::OBJECT) {
-            $objectType = new ObjectDefinition(
-                $this->getPropertyGraph(
-                    $itemProperty,
-                    $isRequest,
-                    // @codeCoverageIgnoreStart
-                    false,
-                    // @codeCoverageIgnoreEnd
-                    $exceptionContext
-                )
+            $objectType = $this->getObjectDefinition(
+                $itemProperty,
+                $isRequest,
+                $exceptionContext
             );
             $propertyDefinition->setObjectTypeDefinition($objectType);
             $isScalar = false;
