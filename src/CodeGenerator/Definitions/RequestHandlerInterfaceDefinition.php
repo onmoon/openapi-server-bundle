@@ -6,7 +6,7 @@ namespace OnMoon\OpenApiServerBundle\CodeGenerator\Definitions;
 
 final class RequestHandlerInterfaceDefinition extends GeneratedInterfaceDefinition
 {
-    private ?ClassDefinition $requestType  = null;
+    private ?ClassDefinition $requestType = null;
     /** @var ClassDefinition[] */
     private array $responseTypes = [];
     private string $methodName;
@@ -61,5 +61,4 @@ final class RequestHandlerInterfaceDefinition extends GeneratedInterfaceDefiniti
 
         return $this;
     }
-
- }
+}

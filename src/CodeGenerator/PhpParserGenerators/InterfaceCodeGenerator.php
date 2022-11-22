@@ -8,7 +8,9 @@ use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\ClassDefinition;
 use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\GeneratedFileDefinition;
 use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\RequestHandlerInterfaceDefinition;
 
+use function array_map;
 use function count;
+use function implode;
 use function Safe\sprintf;
 
 class InterfaceCodeGenerator extends CodeGenerator
@@ -48,7 +50,7 @@ class InterfaceCodeGenerator extends CodeGenerator
         $responses = $definition->getResponseTypes();
         if (count($responses)) {
             $responseClasses = array_map(static fn (ClassDefinition $response) => $fileBuilder->getReference($response), $responses);
-            $unionClass = implode("|", $responseClasses);
+            $unionClass      = implode('|', $responseClasses);
             $methodBuilder->setReturnType($unionClass);
             if ($this->fullDocs) {
                 $docBlocks[] = sprintf(

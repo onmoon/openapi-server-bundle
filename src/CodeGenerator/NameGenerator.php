@@ -6,7 +6,6 @@ namespace OnMoon\OpenApiServerBundle\CodeGenerator;
 
 use Lukasoppermann\Httpstatus\Httpstatus;
 use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\DtoDefinition;
-use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\GeneratedInterfaceDefinition;
 use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\GraphDefinition;
 use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\RequestDtoDefinition;
 use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\ResponseDtoDefinition;
@@ -88,7 +87,6 @@ class NameGenerator
                     $this->setResponseNames($response, $responseNamespace, $operationName, $responsePath);
                     $this->setTreeGettersSetters($response);
                 }
-
             }
         }
     }

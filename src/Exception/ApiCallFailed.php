@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace OnMoon\OpenApiServerBundle\Exception;
 
+use function implode;
 use function Safe\sprintf;
 
 final class ApiCallFailed extends OpenApiError
@@ -31,6 +32,6 @@ final class ApiCallFailed extends OpenApiError
     /** @param string[] $allowedCodes */
     public static function becauseWrongResponseCodeSet(array $allowedCodes): self
     {
-        return new self('Response code does not match specification, allowed are '. implode(', ', $allowedCodes));
+        return new self('Response code does not match specification, allowed are ' . implode(', ', $allowedCodes));
     }
 }

@@ -78,6 +78,7 @@ class SpecificationLoader
 
     public function load(string $name): Specification
     {
+        $this->cache->delete(self::CACHE_KEY_PREFIX . $name);
         /** @var Specification $parsedSpecification */
         $parsedSpecification = $this->cache->get(
             self::CACHE_KEY_PREFIX . $name,
@@ -115,7 +116,7 @@ class SpecificationLoader
 
         $specification = null;
         if ($type === 'yaml') {
-            $specification = Reader::readFromYamlFile($specPath);
+            $specification = Reader::readFromYamlFile($specPath, OpenApi::class, true);
         }
 
         if ($type === 'json') {

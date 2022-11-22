@@ -34,8 +34,13 @@ use Symfony\Component\Routing\RouterInterface;
 use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 
 use function count;
+use function get_class;
+use function in_array;
+use function intdiv;
+use function is_numeric;
 use function ltrim;
 use function Safe\sprintf;
+use function strcasecmp;
 
 use const JSON_PRETTY_PRINT;
 use const JSON_THROW_ON_ERROR;
@@ -169,9 +174,12 @@ final class ApiController
         return [$requestHandlerInterface, $requestHandler];
     }
 
-    private function createResponse(RequestHandler $requestHandler, Operation $operation,
-                                    string $handlerInterface, ?Dto $responseDto = null): Response
-    {
+    private function createResponse(
+        RequestHandler $requestHandler,
+        Operation $operation,
+        string $handlerInterface,
+        ?Dto $responseDto = null
+    ): Response {
         $response = new JsonResponse();
         $response->setEncodingOptions(JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_THROW_ON_ERROR);
 
@@ -179,49 +187,53 @@ final class ApiController
 
         if ($responseDto !== null) {
             $allowedCodes = $this->apiLoader->getAllowedCodes($handlerInterface, get_class($responseDto));
-            $guessedCode = null;
-            if(count($allowedCodes) === 1 && is_numeric($allowedCodes[0])) {
+            $guessedCode  = null;
+            if (count($allowedCodes) === 1 && is_numeric($allowedCodes[0])) {
                 $guessedCode = (int) $allowedCodes[0];
             }
+
             if ($requestHandler instanceof GetResponseCode) {
                 $statusCode = $requestHandler->getResponseCode($guessedCode) ?? $guessedCode;
             } else {
                 $statusCode = $guessedCode;
             }
 
-            $matchedCode = $this->findMatchingResponseCode($statusCode, $allowedCodes);
+            $matchedCode  = $this->findMatchingResponseCode($statusCode, $allowedCodes);
             $responseData = $this->serializer->createResponseFromDto($responseDto, $operation->getResponse($matchedCode));
             $response->setData($responseData);
         } else {
             if ($requestHandler instanceof GetResponseCode) {
                 $statusCode = $requestHandler->getResponseCode(Response::HTTP_OK);
             }
+
             $statusCode ??= Response::HTTP_OK;
         }
 
         $response->setStatusCode($statusCode);
+
         return $response;
     }
 
     /** @param string[] $allowedCodes */
-    private function findMatchingResponseCode(?int $statusCode, array $allowedCodes): string {
-        if($statusCode === null) {
+    private function findMatchingResponseCode(?int $statusCode, array $allowedCodes): string
+    {
+        if ($statusCode === null) {
             throw ApiCallFailed::becauseNoResponseCodeSet();
         }
 
         $code = (string) $statusCode;
-        if(in_array($code, $allowedCodes)) {
+        if (in_array($code, $allowedCodes)) {
             return $code;
         }
 
-        $code = intdiv($statusCode, 100).'XX';
+        $code = intdiv($statusCode, 100) . 'XX';
         foreach ($allowedCodes as $allowedCode) {
-            if(strcasecmp($code, $allowedCode) === 0) {
+            if (strcasecmp($code, $allowedCode) === 0) {
                 return $allowedCode;
             }
         }
 
-        if(in_array('default', $allowedCodes)) {
+        if (in_array('default', $allowedCodes)) {
             return 'default';
         }
 

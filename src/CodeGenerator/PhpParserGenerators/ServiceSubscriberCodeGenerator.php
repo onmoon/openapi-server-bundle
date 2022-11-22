@@ -8,7 +8,6 @@ use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\ClassDefinition;
 use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\GeneratedFileDefinition;
 use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\GraphDefinition;
 use OnMoon\OpenApiServerBundle\Interfaces\RequestHandler;
-use phpDocumentor\Reflection\Types\Self_;
 use PhpParser\Node\Arg;
 use PhpParser\Node\Expr\Array_;
 use PhpParser\Node\Expr\ArrayDimFetch;
@@ -17,7 +16,6 @@ use PhpParser\Node\Expr\Assign;
 use PhpParser\Node\Expr\BinaryOp\Concat;
 use PhpParser\Node\Expr\BooleanNot;
 use PhpParser\Node\Expr\ClassConstFetch;
-use PhpParser\Node\Expr\ConstFetch;
 use PhpParser\Node\Expr\MethodCall;
 use PhpParser\Node\Expr\Variable;
 use PhpParser\Node\Name;
@@ -48,11 +46,11 @@ class ServiceSubscriberCodeGenerator extends CodeGenerator
             $classBuilder->implement($fileBuilder->getReference($implement));
         }
 
-        $services = [];
+        $services           = [];
         $responseCodeMapper = [];
         foreach ($graphDefinition->getSpecifications() as $specification) {
             foreach ($specification->getOperations() as $operation) {
-                $services[] =  new ArrayItem(
+                $services[]    =  new ArrayItem(
                     new Concat(
                         new String_('?'),
                         new ClassConstFetch(
@@ -72,6 +70,7 @@ class ServiceSubscriberCodeGenerator extends CodeGenerator
                         )
                     );
                 }
+
                 $responseCodeMapper[] = new ArrayItem(
                     new Array_($responseTypes, ['kind' => Array_::KIND_SHORT]),
                     new ClassConstFetch(
@@ -119,7 +118,8 @@ class ServiceSubscriberCodeGenerator extends CodeGenerator
             ->addStmt(
                 new Return_(
                     new Array_(
-                        $services, ['kind' => Array_::KIND_SHORT]
+                        $services,
+                        ['kind' => Array_::KIND_SHORT]
                     )
                 )
             );
@@ -171,7 +171,7 @@ class ServiceSubscriberCodeGenerator extends CodeGenerator
             ->setDocComment($this->getDocComment(['@return string[]']))
             ->addParams([
                 $this->factory->param('apiClass')->setType('string'),
-                $this->factory->param('dtoClass')->setType('string')
+                $this->factory->param('dtoClass')->setType('string'),
             ])
             ->addStmt(
                 new Return_(

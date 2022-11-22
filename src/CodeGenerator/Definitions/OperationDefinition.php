@@ -11,7 +11,7 @@ final class OperationDefinition
     private string $operationId;
     private string $requestHandlerName;
     private ?string $summary;
-    private ?RequestDtoDefinition $request ;
+    private ?RequestDtoDefinition $request;
     private RequestHandlerInterfaceDefinition $requestHandlerInterface;
 
     /** @var ResponseDtoDefinition[] */
