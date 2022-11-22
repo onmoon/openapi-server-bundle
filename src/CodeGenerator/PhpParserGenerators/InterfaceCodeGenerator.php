@@ -48,7 +48,7 @@ class InterfaceCodeGenerator extends CodeGenerator
         }
 
         $responses = $definition->getResponseTypes();
-        if (count($responses)) {
+        if (count($responses) > 0) {
             $responseClasses = array_map(static fn (ClassDefinition $response) => $fileBuilder->getReference($response), $responses);
             $unionClass      = implode('|', $responseClasses);
             $methodBuilder->setReturnType($unionClass);

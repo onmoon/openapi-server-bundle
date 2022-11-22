@@ -147,17 +147,13 @@ final class ApiController
      */
     private function getRequestHandler(Request $request, Operation $operation): array
     {
-        if ($this->apiLoader === null) {
-            throw ApiCallFailed::becauseApiLoaderNotFound();
-        }
-
         $handlerName = $operation->getRequestHandlerName();
 
-        $requestHandlers                = $this->apiLoader::getSubscribedServices();
+        $requestHandlers                = $this->getApiLoader()::getSubscribedServices();
         $requestHandlerSubscribedString = $requestHandlers[$handlerName];
         /** @psalm-var class-string<RequestHandler> $requestHandlerInterface */
         $requestHandlerInterface = ltrim($requestHandlerSubscribedString, '?');
-        $requestHandler          = $this->apiLoader->get($handlerName);
+        $requestHandler          = $this->getApiLoader()->get($handlerName);
 
         if ($requestHandler === null) {
             throw ApiCallFailed::becauseNotImplemented($requestHandlerInterface);
@@ -186,7 +182,7 @@ final class ApiController
         $statusCode = null;
 
         if ($responseDto !== null) {
-            $allowedCodes = $this->apiLoader->getAllowedCodes($handlerInterface, get_class($responseDto));
+            $allowedCodes = $this->getApiLoader()->getAllowedCodes($handlerInterface, get_class($responseDto));
             $guessedCode  = null;
             if (count($allowedCodes) === 1 && is_numeric($allowedCodes[0])) {
                 $guessedCode = (int) $allowedCodes[0];
@@ -196,6 +192,10 @@ final class ApiController
                 $statusCode = $requestHandler->getResponseCode($guessedCode) ?? $guessedCode;
             } else {
                 $statusCode = $guessedCode;
+            }
+
+            if ($statusCode === null) {
+                throw ApiCallFailed::becauseNoResponseCodeSet();
             }
 
             $matchedCode  = $this->findMatchingResponseCode($statusCode, $allowedCodes);
@@ -215,25 +215,21 @@ final class ApiController
     }
 
     /** @param string[] $allowedCodes */
-    private function findMatchingResponseCode(?int $statusCode, array $allowedCodes): string
+    private function findMatchingResponseCode(int $statusCode, array $allowedCodes): string
     {
-        if ($statusCode === null) {
-            throw ApiCallFailed::becauseNoResponseCodeSet();
-        }
-
         $code = (string) $statusCode;
-        if (in_array($code, $allowedCodes)) {
+        if (in_array($code, $allowedCodes, true)) {
             return $code;
         }
 
-        $code = intdiv($statusCode, 100) . 'XX';
+        $code = (string) intdiv($statusCode, 100) . 'XX';
         foreach ($allowedCodes as $allowedCode) {
             if (strcasecmp($code, $allowedCode) === 0) {
                 return $allowedCode;
             }
         }
 
-        if (in_array('default', $allowedCodes)) {
+        if (in_array('default', $allowedCodes, true)) {
             return 'default';
         }
 
@@ -288,5 +284,14 @@ final class ApiController
         $inputTypeName = $inputType->getName();
 
         return [$methodName, $inputTypeName];
+    }
+
+    private function getApiLoader(): ApiLoader
+    {
+        if ($this->apiLoader === null) {
+            throw ApiCallFailed::becauseApiLoaderNotFound();
+        }
+
+        return $this->apiLoader;
     }
 }
