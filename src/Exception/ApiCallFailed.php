@@ -22,4 +22,15 @@ final class ApiCallFailed extends OpenApiError
             )
         );
     }
+
+    public static function becauseNoResponseCodeSet(): self
+    {
+        return new self('Response type is ambiguous, please set response code manually');
+    }
+
+    /** @param string[] $allowedCodes */
+    public static function becauseWrongResponseCodeSet(array $allowedCodes): self
+    {
+        return new self('Response code does not match specification, allowed are '. implode(', ', $allowedCodes));
+    }
 }

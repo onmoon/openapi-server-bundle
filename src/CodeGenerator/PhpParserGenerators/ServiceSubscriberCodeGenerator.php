@@ -8,13 +8,16 @@ use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\ClassDefinition;
 use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\GeneratedFileDefinition;
 use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\GraphDefinition;
 use OnMoon\OpenApiServerBundle\Interfaces\RequestHandler;
+use phpDocumentor\Reflection\Types\Self_;
 use PhpParser\Node\Arg;
 use PhpParser\Node\Expr\Array_;
+use PhpParser\Node\Expr\ArrayDimFetch;
 use PhpParser\Node\Expr\ArrayItem;
 use PhpParser\Node\Expr\Assign;
 use PhpParser\Node\Expr\BinaryOp\Concat;
 use PhpParser\Node\Expr\BooleanNot;
 use PhpParser\Node\Expr\ClassConstFetch;
+use PhpParser\Node\Expr\ConstFetch;
 use PhpParser\Node\Expr\MethodCall;
 use PhpParser\Node\Expr\Variable;
 use PhpParser\Node\Name;
@@ -46,6 +49,7 @@ class ServiceSubscriberCodeGenerator extends CodeGenerator
         }
 
         $services = [];
+        $responseCodeMapper = [];
         foreach ($graphDefinition->getSpecifications() as $specification) {
             foreach ($specification->getOperations() as $operation) {
                 $services[] =  new ArrayItem(
@@ -58,8 +62,27 @@ class ServiceSubscriberCodeGenerator extends CodeGenerator
                     ),
                     new String_($operation->getRequestHandlerName())
                 );
+                $responseTypes = [];
+                foreach ($operation->getResponses() as $response) {
+                    $responseTypes[] = new ArrayItem(
+                        new Array_([new ArrayItem(new String_($response->getStatusCode()))], ['kind' => Array_::KIND_SHORT]),
+                        new ClassConstFetch(
+                            new Name($fileBuilder->getReference($response)),
+                            'class'
+                        )
+                    );
+                }
+                $responseCodeMapper[] = new ArrayItem(
+                    new Array_($responseTypes, ['kind' => Array_::KIND_SHORT]),
+                    new ClassConstFetch(
+                        new Name($fileBuilder->getReference($operation->getRequestHandlerInterface())),
+                        'class'
+                    )
+                );
             }
         }
+
+        $httpCodeMapper = $this->factory->classConst('HTTP_CODES', new Array_($responseCodeMapper, ['kind' => Array_::KIND_SHORT]))->makePublic();
 
         $property = $this
             ->factory
@@ -96,7 +119,7 @@ class ServiceSubscriberCodeGenerator extends CodeGenerator
             ->addStmt(
                 new Return_(
                     new Array_(
-                        $services
+                        $services, ['kind' => Array_::KIND_SHORT]
                     )
                 )
             );
@@ -142,7 +165,27 @@ class ServiceSubscriberCodeGenerator extends CodeGenerator
             $getRequestHandler->setDocComment($this->getDocComment($docs));
         }
 
-        $classBuilder->addStmts([$property, $constructor, $getSubscribedServices, $getRequestHandler]);
+        $getAllowedCodes = $this->factory->method('getAllowedCodes')
+            ->setReturnType('array')
+            ->makePublic()
+            ->setDocComment($this->getDocComment(['@return string[]']))
+            ->addParams([
+                $this->factory->param('apiClass')->setType('string'),
+                $this->factory->param('dtoClass')->setType('string')
+            ])
+            ->addStmt(
+                new Return_(
+                    new ArrayDimFetch(
+                        new ArrayDimFetch(
+                            new ClassConstFetch(new Name('self'), 'HTTP_CODES'),
+                            new Variable('apiClass')
+                        ),
+                        new Variable('dtoClass')
+                    )
+                )
+            );
+
+        $classBuilder->addStmts([$property, $constructor, $httpCodeMapper, $getSubscribedServices, $getRequestHandler, $getAllowedCodes]);
 
         $fileBuilder->addStmt($classBuilder);
 

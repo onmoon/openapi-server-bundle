@@ -14,7 +14,6 @@ use OnMoon\OpenApiServerBundle\Interfaces\ApiLoader;
 use OnMoon\OpenApiServerBundle\Interfaces\Dto;
 use OnMoon\OpenApiServerBundle\Interfaces\GetResponseCode;
 use OnMoon\OpenApiServerBundle\Interfaces\RequestHandler;
-use OnMoon\OpenApiServerBundle\Interfaces\ResponseDto;
 use OnMoon\OpenApiServerBundle\Interfaces\SetClientIp;
 use OnMoon\OpenApiServerBundle\Interfaces\SetRequest;
 use OnMoon\OpenApiServerBundle\Router\RouteLoader;
@@ -94,7 +93,7 @@ final class ApiController
         $responseDto = $this->executeRequestHandler($requestHandler, $methodName, $requestDto);
         $this->eventDispatcher->dispatch(new ResponseDtoEvent($responseDto, $operationId, $specification));
 
-        $response = $this->createResponse($requestHandler, $operation, $responseDto);
+        $response = $this->createResponse($requestHandler, $operation, $requestHandlerInterface, $responseDto);
         $this->eventDispatcher->dispatch(new ResponseEvent($response, $operationId, $specification));
 
         return $response;
@@ -129,8 +128,8 @@ final class ApiController
         RequestHandler $requestHandler,
         string $methodName,
         ?Dto $requestDto
-    ): ?ResponseDto {
-        /** @var ResponseDto|null $responseDto */
+    ): ?Dto {
+        /** @var Dto|null $responseDto */
         $responseDto = $requestDto !== null ?
             $requestHandler->{$methodName}($requestDto) :
             $requestHandler->{$methodName}();
@@ -170,29 +169,63 @@ final class ApiController
         return [$requestHandlerInterface, $requestHandler];
     }
 
-    private function createResponse(RequestHandler $requestHandler, Operation $operation, ?ResponseDto $responseDto = null): Response
+    private function createResponse(RequestHandler $requestHandler, Operation $operation,
+                                    string $handlerInterface, ?Dto $responseDto = null): Response
     {
         $response = new JsonResponse();
         $response->setEncodingOptions(JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_THROW_ON_ERROR);
 
         $statusCode = null;
 
-        if ($responseDto instanceof ResponseDto) {
-            $responseData = $this->serializer->createResponseFromDto($responseDto, $operation);
+        if ($responseDto !== null) {
+            $allowedCodes = $this->apiLoader->getAllowedCodes($handlerInterface, get_class($responseDto));
+            $guessedCode = null;
+            if(count($allowedCodes) === 1 && is_numeric($allowedCodes[0])) {
+                $guessedCode = (int) $allowedCodes[0];
+            }
+            if ($requestHandler instanceof GetResponseCode) {
+                $statusCode = $requestHandler->getResponseCode($guessedCode) ?? $guessedCode;
+            } else {
+                $statusCode = $guessedCode;
+            }
+
+            $matchedCode = $this->findMatchingResponseCode($statusCode, $allowedCodes);
+            $responseData = $this->serializer->createResponseFromDto($responseDto, $operation->getResponse($matchedCode));
             $response->setData($responseData);
-            $dtoStatusCode = (int) $responseDto::_getResponseCode();
-            $statusCode    =  $dtoStatusCode !== 0 ? $dtoStatusCode : $statusCode;
+        } else {
+            if ($requestHandler instanceof GetResponseCode) {
+                $statusCode = $requestHandler->getResponseCode(Response::HTTP_OK);
+            }
+            $statusCode ??= Response::HTTP_OK;
         }
-
-        if ($requestHandler instanceof GetResponseCode) {
-            $statusCode = $requestHandler->getResponseCode($statusCode) ?? $statusCode;
-        }
-
-        $statusCode ??= Response::HTTP_OK;
 
         $response->setStatusCode($statusCode);
-
         return $response;
+    }
+
+    /** @param string[] $allowedCodes */
+    private function findMatchingResponseCode(?int $statusCode, array $allowedCodes): string {
+        if($statusCode === null) {
+            throw ApiCallFailed::becauseNoResponseCodeSet();
+        }
+
+        $code = (string) $statusCode;
+        if(in_array($code, $allowedCodes)) {
+            return $code;
+        }
+
+        $code = intdiv($statusCode, 100).'XX';
+        foreach ($allowedCodes as $allowedCode) {
+            if(strcasecmp($code, $allowedCode) === 0) {
+                return $allowedCode;
+            }
+        }
+
+        if(in_array('default', $allowedCodes)) {
+            return 'default';
+        }
+
+        throw ApiCallFailed::becauseWrongResponseCodeSet($allowedCodes);
     }
 
     private function getRoute(Request $request): Route

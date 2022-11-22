@@ -12,7 +12,6 @@ use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\RequestHandlerInterface
 use OnMoon\OpenApiServerBundle\Interfaces\ApiLoader;
 use OnMoon\OpenApiServerBundle\Interfaces\Dto;
 use OnMoon\OpenApiServerBundle\Interfaces\RequestHandler;
-use OnMoon\OpenApiServerBundle\Interfaces\ResponseDto;
 
 use function count;
 

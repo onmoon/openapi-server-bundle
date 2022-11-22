@@ -6,7 +6,6 @@ namespace OnMoon\OpenApiServerBundle\Serializer;
 
 use Exception;
 use OnMoon\OpenApiServerBundle\Interfaces\Dto;
-use OnMoon\OpenApiServerBundle\Interfaces\ResponseDto;
 use OnMoon\OpenApiServerBundle\Specification\Definitions\ObjectType;
 use OnMoon\OpenApiServerBundle\Specification\Definitions\Operation;
 use OnMoon\OpenApiServerBundle\Types\ScalarTypesResolver;
@@ -69,12 +68,9 @@ final class ArrayDtoSerializer implements DtoSerializer
     }
 
     /** @inheritDoc */
-    public function createResponseFromDto(ResponseDto $responseDto, Operation $operation): array
+    public function createResponseFromDto(Dto $responseDto, ObjectType $definition): array
     {
-        $statusCode = $responseDto::_getResponseCode();
-        $source     = $responseDto->toArray();
-
-        return $this->convert(false, $source, $operation->getResponse($statusCode));
+        return $this->convert(false, $responseDto->toArray(), $definition);
     }
 
     /**

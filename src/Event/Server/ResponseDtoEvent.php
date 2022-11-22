@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace OnMoon\OpenApiServerBundle\Event\Server;
 
-use OnMoon\OpenApiServerBundle\Interfaces\ResponseDto;
+use OnMoon\OpenApiServerBundle\Interfaces\Dto;
 use OnMoon\OpenApiServerBundle\Specification\Definitions\Specification;
 use Symfony\Contracts\EventDispatcher\Event;
 
@@ -26,18 +26,18 @@ use Symfony\Contracts\EventDispatcher\Event;
  */
 final class ResponseDtoEvent extends Event
 {
-    private ?ResponseDto $responseDto;
+    private ?Dto $responseDto;
     private string $operationId;
     private Specification $specification;
 
-    public function __construct(?ResponseDto $responseDto, string $operationId, Specification $specification)
+    public function __construct(?Dto $responseDto, string $operationId, Specification $specification)
     {
         $this->responseDto   = $responseDto;
         $this->operationId   = $operationId;
         $this->specification = $specification;
     }
 
-    public function getResponseDto(): ?ResponseDto
+    public function getResponseDto(): ?Dto
     {
         return $this->responseDto;
     }
