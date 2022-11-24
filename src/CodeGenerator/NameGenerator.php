@@ -8,7 +8,7 @@ use Lukasoppermann\Httpstatus\Httpstatus;
 use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\DtoDefinition;
 use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\GraphDefinition;
 use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\RequestDtoDefinition;
-use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\ResponseDtoDefinition;
+use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\ResponseDefinition;
 use OnMoon\OpenApiServerBundle\CodeGenerator\Naming\NamingStrategy;
 use Throwable;
 
@@ -83,9 +83,9 @@ class NameGenerator
                 );
 
                 foreach ($operation->getResponses() as $response) {
-                    $this->setTreePropertyClassNames($response);
+                    $this->setTreePropertyClassNames($response->getResponseBody());
                     $this->setResponseNames($response, $responseNamespace, $operationName, $responsePath);
-                    $this->setTreeGettersSetters($response);
+                    $this->setTreeGettersSetters($response->getResponseBody());
                 }
             }
         }
@@ -110,7 +110,7 @@ class NameGenerator
         $this->setTreePathsAndClassNames($request, $requestDtoNamespace, $requestDtoClassName, $requestDtoPath);
     }
 
-    public function setResponseNames(ResponseDtoDefinition $response, string $responseNamespace, string $operationName, string $responsePath): void
+    public function setResponseNames(ResponseDefinition $response, string $responseNamespace, string $operationName, string $responsePath): void
     {
         try {
             $statusNamespace = $this->httpstatus->getReasonPhrase((int) $response->getStatusCode());
@@ -126,7 +126,7 @@ class NameGenerator
         );
         $responseDtoPath      = $this->naming->buildPath($responsePath, $statusNamespace);
 
-        $this->setTreePathsAndClassNames($response, $responseDtoNamespace, $responseDtoClassName, $responseDtoPath);
+        $this->setTreePathsAndClassNames($response->getResponseBody(), $responseDtoNamespace, $responseDtoClassName, $responseDtoPath);
     }
 
     public function setTreePathsAndClassNames(DtoDefinition $root, string $namespace, string $className, string $path): void

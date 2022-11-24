@@ -11,7 +11,7 @@ use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\PropertyDefinition;
 use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\RequestBodyDtoDefinition;
 use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\RequestDtoDefinition;
 use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\RequestParametersDtoDefinition;
-use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\ResponseDtoDefinition;
+use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\ResponseDefinition;
 use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\ServiceSubscriberDefinition;
 use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\SpecificationDefinition;
 use OnMoon\OpenApiServerBundle\Specification\Definitions\ObjectType;
@@ -20,6 +20,7 @@ use OnMoon\OpenApiServerBundle\Specification\SpecificationLoader;
 
 use function array_key_exists;
 use function array_map;
+use function count;
 
 class GraphGenerator
 {
@@ -53,14 +54,21 @@ class GraphGenerator
                     $this->parametersToDto('path', $operation->getRequestParameters())
                 );
 
+                $singleHttpCode = null;
+                $responses      = $this->getResponseDefinitions($operation->getResponses());
+                if (count($responses) === 1 && $responses[0]->getResponseBody()->isEmpty()) {
+                    $singleHttpCode = $responses[0]->getStatusCode();
+                }
+
                 $operationDefinitions[] = new OperationDefinition(
                     $operation->getUrl(),
                     $operation->getMethod(),
                     $operationId,
                     $operation->getRequestHandlerName(),
                     $operation->getSummary(),
+                    $singleHttpCode,
                     $requestDefinitions->isEmpty() ? null : $requestDefinitions,
-                    $this->getResponseDtoDefinitions($operation->getResponses())
+                    $singleHttpCode !== null ? [] : $responses
                 );
             }
 
@@ -73,18 +81,18 @@ class GraphGenerator
     }
 
     /**
-     * @param ObjectType[] $responses
+     * @param array<string|int,ObjectType> $responses
      *
-     * @return ResponseDtoDefinition[]
+     * @return ResponseDefinition[]
      */
-    private function getResponseDtoDefinitions(array $responses): array
+    private function getResponseDefinitions(array $responses): array
     {
         $responseDtoDefinitions = [];
 
         foreach ($responses as $statusCode => $response) {
-            $responseDtoDefinitions[] = new ResponseDtoDefinition(
+            $responseDtoDefinitions[] = new ResponseDefinition(
                 (string) $statusCode,
-                $this->propertiesToDefinitions($response->getProperties())
+                new DtoDefinition($this->propertiesToDefinitions($response->getProperties()))
             );
         }
 

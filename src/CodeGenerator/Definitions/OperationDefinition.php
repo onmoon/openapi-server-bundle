@@ -11,22 +11,32 @@ final class OperationDefinition
     private string $operationId;
     private string $requestHandlerName;
     private ?string $summary;
+    private ?string $singleHttpCode;
     private ?RequestDtoDefinition $request;
     private RequestHandlerInterfaceDefinition $requestHandlerInterface;
 
-    /** @var ResponseDtoDefinition[] */
+    /** @var ResponseDefinition[] */
     private array $responses;
 
     /**
-     * @param ResponseDtoDefinition[] $responses
+     * @param ResponseDefinition[] $responses
      */
-    public function __construct(string $url, string $method, string $operationId, string $requestHandlerName, ?string $summary, ?RequestDtoDefinition $request, array $responses)
-    {
+    public function __construct(
+        string $url,
+        string $method,
+        string $operationId,
+        string $requestHandlerName,
+        ?string $summary,
+        ?string $singleHttpCode,
+        ?RequestDtoDefinition $request,
+        array $responses
+    ) {
         $this->url                = $url;
         $this->method             = $method;
         $this->operationId        = $operationId;
         $this->requestHandlerName = $requestHandlerName;
         $this->summary            = $summary;
+        $this->singleHttpCode     = $singleHttpCode;
         $this->request            = $request;
         $this->responses          = $responses;
     }
@@ -62,7 +72,7 @@ final class OperationDefinition
     }
 
     /**
-     * @return ResponseDtoDefinition[]
+     * @return ResponseDefinition[]
      */
     public function getResponses(): array
     {
@@ -79,5 +89,10 @@ final class OperationDefinition
         $this->requestHandlerInterface = $requestHandlerInterface;
 
         return $this;
+    }
+
+    public function getSingleHttpCode(): ?string
+    {
+        return $this->singleHttpCode;
     }
 }

@@ -12,22 +12,14 @@ final class Operation
     private ?string $summary;
     private ?ObjectType $requestBody;
 
-    /**
-     * @var ObjectType[]
-     * @psalm-var array<string, ObjectType>
-     */
+    /** @var array<string, ObjectType> */
     private array $requestParameters;
-    /**
-     * @var ObjectType[]
-     * @psalm-var array<string|int, ObjectType>
-     */
+    /** @var array<string|int, ObjectType> */
     private array $responses;
 
     /**
-     * @param ObjectType[] $requestParameters
-     * @param ObjectType[] $responses
-     * @psalm-param array<string, ObjectType> $requestParameters
-     * @psalm-param array<string|int, ObjectType> $responses
+     * @param  array<string, ObjectType>     $requestParameters
+     * @param array<string|int, ObjectType> $responses
      */
     public function __construct(
         string $url,
@@ -73,8 +65,7 @@ final class Operation
     }
 
     /**
-     * @return ObjectType[]
-     * @psalm-return array<string, ObjectType>
+     * @return array<string, ObjectType>
      */
     public function getRequestParameters(): array
     {
@@ -82,8 +73,7 @@ final class Operation
     }
 
     /**
-     * @return ObjectType[]
-     * @psalm-return array<string|int, ObjectType>
+     * @return array<string|int, ObjectType>
      */
     public function getResponses(): array
     {

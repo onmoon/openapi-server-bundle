@@ -8,9 +8,12 @@ use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\ClassDefinition;
 use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\DtoDefinition;
 use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\GraphDefinition;
 use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\RequestHandlerInterfaceDefinition;
+use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\ResponseDefinition;
 use OnMoon\OpenApiServerBundle\Interfaces\ApiLoader;
 use OnMoon\OpenApiServerBundle\Interfaces\Dto;
 use OnMoon\OpenApiServerBundle\Interfaces\RequestHandler;
+
+use function array_map;
 
 class InterfaceGenerator
 {
@@ -33,7 +36,7 @@ class InterfaceGenerator
             foreach ($specificationDefinition->getOperations() as $operation) {
                 $responses = $operation->getResponses();
                 foreach ($responses as $response) {
-                    $this->setDtoInterfaceRecursive($response);
+                    $this->setDtoInterfaceRecursive($response->getResponseBody());
                 }
 
                 $request = $operation->getRequest();
@@ -43,7 +46,12 @@ class InterfaceGenerator
 
                 $service = new RequestHandlerInterfaceDefinition();
                 $service
-                    ->setResponseTypes($responses)
+                    ->setResponseTypes(
+                        array_map(
+                            static fn (ResponseDefinition $response) => $response->getResponseBody(),
+                            $responses
+                        )
+                    )
                     ->setRequestType($operation->getRequest())
                     ->setExtends($this->defaultHandler);
                 $operation->setRequestHandlerInterface($service);

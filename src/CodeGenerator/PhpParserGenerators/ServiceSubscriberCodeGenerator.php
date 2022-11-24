@@ -61,14 +61,21 @@ class ServiceSubscriberCodeGenerator extends CodeGenerator
                     new String_($operation->getRequestHandlerName())
                 );
                 $responseTypes = [];
-                foreach ($operation->getResponses() as $response) {
+                if ($operation->getSingleHttpCode() !== null) {
                     $responseTypes[] = new ArrayItem(
-                        new Array_([new ArrayItem(new String_($response->getStatusCode()))], ['kind' => Array_::KIND_SHORT]),
-                        new ClassConstFetch(
-                            new Name($fileBuilder->getReference($response)),
-                            'class'
-                        )
+                        new Array_([new ArrayItem(new String_($operation->getSingleHttpCode()))], ['kind' => Array_::KIND_SHORT]),
+                        new String_('void')
                     );
+                } else {
+                    foreach ($operation->getResponses() as $response) {
+                        $responseTypes[] = new ArrayItem(
+                            new Array_([new ArrayItem(new String_($response->getStatusCode()))], ['kind' => Array_::KIND_SHORT]),
+                            new ClassConstFetch(
+                                new Name($fileBuilder->getReference($response->getResponseBody())),
+                                'class'
+                            )
+                        );
+                    }
                 }
 
                 $responseCodeMapper[] = new ArrayItem(

@@ -117,10 +117,10 @@ class SpecificationParser
      * @param Response[]|Responses|null                                    $responses
      * @param array{location?:string,method:string,url:string,path:string} $exceptionContext
      *
-     * @return ObjectDefinition[]
+     * @return array<string|int,ObjectDefinition>
      */
     private function getResponseDtoDefinitions(
-        $responses,
+        array|Responses|null $responses,
         SpecificationConfig $specificationConfig,
         array $exceptionContext
     ): array {
@@ -134,30 +134,24 @@ class SpecificationParser
             $responses = $responses->getResponses();
         }
 
-        /**
-         * @var string $responseCode
-         */
         foreach ($responses as $responseCode => $response) {
             $responseSchema = $this->findByMediaType($response, $specificationConfig->getMediaType());
 
             if ($responseSchema === null) {
-                continue;
+                $responseDefinitions[$responseCode] = new ObjectDefinition([]);
+            } else {
+                $responseDefinitions[$responseCode] = $this->getObjectDefinition(
+                    $responseSchema,
+                    false,
+                    $exceptionContext + ['location' => 'response (code "' . (string) $responseCode . '")']
+                );
             }
-
-            $responseDefinitions[$responseCode] = $this->getObjectDefinition(
-                $responseSchema,
-                false,
-                $exceptionContext + ['location' => 'response (code "' . $responseCode . '")']
-            );
         }
 
         return $responseDefinitions;
     }
 
-    /**
-     * @param RequestBody|Response|Reference|null $body
-     */
-    private function findByMediaType($body, string $mediaType): ?Schema
+    private function findByMediaType(Response|RequestBody|Reference|null $body, string $mediaType): ?Schema
     {
         if ($body === null || $body instanceof Reference) {
             return null;
@@ -287,11 +281,15 @@ class SpecificationParser
     }
 
     /**
-     * @param Schema|Reference|null                                       $property
      * @param array{location:string,method:string,url:string,path:string} $exceptionContext
      */
-    private function getProperty(string $propertyName, $property, bool $isRequest, array $exceptionContext, bool $allowNonScalar = true): PropertyDefinition
-    {
+    private function getProperty(
+        string $propertyName,
+        Schema|Reference|null $property,
+        bool $isRequest,
+        array $exceptionContext,
+        bool $allowNonScalar = true
+    ): PropertyDefinition {
         if (! ($property instanceof Schema)) {
             throw CannotParseOpenApi::becausePropertyIsNotScheme();
         }

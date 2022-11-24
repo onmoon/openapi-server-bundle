@@ -12,6 +12,7 @@ use OnMoon\OpenApiServerBundle\CodeGenerator\PhpParserGenerators\InterfaceCodeGe
 use OnMoon\OpenApiServerBundle\CodeGenerator\PhpParserGenerators\ServiceSubscriberCodeGenerator;
 
 use function array_merge;
+use function array_push;
 
 class FileGenerator
 {
@@ -40,11 +41,11 @@ class FileGenerator
             foreach ($specificationDefinition->getOperations() as $operation) {
                 $request = $operation->getRequest();
                 if ($request !== null) {
-                    $result = array_merge($result, $this->generateDtoTree($request));
+                    array_push($result, ...$this->generateDtoTree($request));
                 }
 
                 foreach ($operation->getResponses() as $response) {
-                    $result = array_merge($result, $this->generateDtoTree($response));
+                    array_push($result, ...$this->generateDtoTree($response->getResponseBody()));
                 }
 
                 $result[] = $this->interfaceGenerator->generate($operation->getRequestHandlerInterface());

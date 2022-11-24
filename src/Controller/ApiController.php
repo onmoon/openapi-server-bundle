@@ -179,37 +179,34 @@ final class ApiController
         $response = new JsonResponse();
         $response->setEncodingOptions(JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_THROW_ON_ERROR);
 
-        $statusCode = null;
+        $allowedCodes = $this->getApiLoader()->getAllowedCodes(
+            $handlerInterface,
+            $responseDto !== null ? get_class($responseDto) : 'void'
+        );
 
-        if ($responseDto !== null) {
-            $allowedCodes = $this->getApiLoader()->getAllowedCodes($handlerInterface, get_class($responseDto));
-            $guessedCode  = null;
-            if (count($allowedCodes) === 1 && is_numeric($allowedCodes[0])) {
-                $guessedCode = (int) $allowedCodes[0];
-            }
-
-            if ($requestHandler instanceof GetResponseCode) {
-                $statusCode = $requestHandler->getResponseCode($guessedCode) ?? $guessedCode;
-            } else {
-                $statusCode = $guessedCode;
-            }
-
-            if ($statusCode === null) {
-                throw ApiCallFailed::becauseNoResponseCodeSet();
-            }
-
-            $matchedCode  = $this->findMatchingResponseCode($statusCode, $allowedCodes);
-            $responseData = $this->serializer->createResponseFromDto($responseDto, $operation->getResponse($matchedCode));
-            $response->setData($responseData);
-        } else {
-            if ($requestHandler instanceof GetResponseCode) {
-                $statusCode = $requestHandler->getResponseCode(Response::HTTP_OK);
-            }
-
-            $statusCode ??= Response::HTTP_OK;
+        $guessedCode = null;
+        if (count($allowedCodes) === 1 && is_numeric($allowedCodes[0])) {
+            $guessedCode = (int) $allowedCodes[0];
         }
 
+        if ($requestHandler instanceof GetResponseCode) {
+            $statusCode = $requestHandler->getResponseCode($guessedCode) ?? $guessedCode;
+        } else {
+            $statusCode = $guessedCode;
+        }
+
+        if ($statusCode === null) {
+            throw ApiCallFailed::becauseNoResponseCodeSet();
+        }
+
+        $matchedCode = $this->findMatchingResponseCode($statusCode, $allowedCodes);
+
         $response->setStatusCode($statusCode);
+
+        if ($responseDto !== null) {
+            $responseData = $this->serializer->createResponseFromDto($responseDto, $operation->getResponse($matchedCode));
+            $response->setData($responseData);
+        }
 
         return $response;
     }

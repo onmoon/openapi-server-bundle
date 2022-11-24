@@ -19,7 +19,7 @@ class AttributeGenerator
                 }
 
                 foreach ($operation->getResponses() as $response) {
-                    $this->responsePass($response);
+                    $this->responsePass($response->getResponseBody());
                 }
             }
         }
