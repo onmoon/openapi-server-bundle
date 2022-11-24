@@ -81,7 +81,10 @@ class ServiceSubscriberCodeGenerator extends CodeGenerator
             }
         }
 
-        $httpCodeMapper = $this->factory->classConst('HTTP_CODES', new Array_($responseCodeMapper, ['kind' => Array_::KIND_SHORT]))->makePublic();
+        $httpCodeMapper = $this
+            ->factory
+            ->classConst('HTTP_CODES', new Array_($responseCodeMapper, ['kind' => Array_::KIND_SHORT]))
+            ->makePrivate();
 
         $property = $this
             ->factory

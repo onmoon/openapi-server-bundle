@@ -38,7 +38,6 @@
         "symfony/dependency-injection": "^6.0",
         "symfony/event-dispatcher": "^6.0",
         "symfony/http-kernel": "^6.0",
-        "symfony/process": "^6.0",
         "symfony/psr-http-message-bridge": "^2.1",
         "symfony/routing": "^6.0",
         "symfony/yaml": "^6.0",

@@ -30,7 +30,8 @@ class ApiServerCodeGenerator
         $this->eventDispatcher    = $eventDispatcher;
     }
 
-    public function generate(): void
+    /** @return string[] */
+    public function generate(): array
     {
         $graph = $this->graphGenerator->generateClassGraph();
         $this->interfaceGenerator->setAllInterfaces($graph);
@@ -42,9 +43,13 @@ class ApiServerCodeGenerator
         $files = $this->filesGenerator->generateAllFiles($graph);
 
         $this->eventDispatcher->dispatch(new FilesReadyEvent($files));
+        $writtenFiles = [];
 
         foreach ($files as $item) {
             $this->writer->write($item->getClass()->getFilePath(), $item->getClass()->getFileName(), $item->getFileContents());
+            $writtenFiles[] = $item->getClass()->getFilePath() . '/' . $item->getClass()->getFileName();
         }
+
+        return $writtenFiles;
     }
 }

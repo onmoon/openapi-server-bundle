@@ -52,10 +52,6 @@
         <service id="OnMoon\OpenApiServerBundle\Command\DeleteGeneratedCodeCommand">
             <argument key="$rootPath">%openapi.generated.code.root.path%</argument>
         </service>
-        <service id="OnMoon\OpenApiServerBundle\Command\ProcessFactory" class="OnMoon\OpenApiServerBundle\Command\SymfonyProcessFactory" />
-        <service id="OnMoon\OpenApiServerBundle\Command\RefreshApiCodeCommand">
-            <argument key="$rootPath">%openapi.generated.code.root.path%</argument>
-        </service>
         <service id="OnMoon\OpenApiServerBundle\Serializer\DtoSerializer" class="OnMoon\OpenApiServerBundle\Serializer\ArrayDtoSerializer">
             <argument key="$sendNulls">%openapi.send.nulls%</argument>
         </service>
@@ -64,7 +60,6 @@
             <argument key="$cache" type="service" id="cache.app.taggable" />
         </service>
         <service id="OnMoon\OpenApiServerBundle\Specification\SpecificationParser" />
-        <service id="OnMoon\OpenApiServerBundle\Mapper\DtoMapper" />
         <service id="OnMoon\OpenApiServerBundle\CodeGenerator\GraphGenerator" />
         <service id="OnMoon\OpenApiServerBundle\CodeGenerator\InterfaceGenerator" />
         <service id="OnMoon\OpenApiServerBundle\CodeGenerator\AttributeGenerator" />
