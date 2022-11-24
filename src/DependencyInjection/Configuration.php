@@ -17,7 +17,7 @@ final class Configuration implements ConfigurationInterface
             ->children()
                 ->scalarNode('root_path')->end()
                 ->scalarNode('root_name_space')->defaultValue('App\Generated')->cannotBeEmpty()->end()
-                ->scalarNode('language_level')->defaultValue('7.4.0')->cannotBeEmpty()->end()
+                ->scalarNode('language_level')->defaultValue('8.0.0')->cannotBeEmpty()->end()
                 ->scalarNode('generated_dir_permissions')->defaultValue('0755')->cannotBeEmpty()->end()
                 ->booleanNode('full_doc_blocks')->defaultValue(false)->end()
                 ->booleanNode('send_nulls')->defaultValue(false)->end()
