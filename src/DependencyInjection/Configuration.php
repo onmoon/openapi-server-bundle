@@ -21,6 +21,7 @@ final class Configuration implements ConfigurationInterface
                 ->scalarNode('generated_dir_permissions')->defaultValue('0755')->cannotBeEmpty()->end()
                 ->booleanNode('full_doc_blocks')->defaultValue(false)->end()
                 ->booleanNode('send_nulls')->defaultValue(false)->end()
+                ->arrayNode('skip_http_codes')->scalarPrototype()->end()->defaultValue([])->end()
                 ->arrayNode('specs')
                     ->arrayPrototype()
                         ->children()

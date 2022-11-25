@@ -32,14 +32,21 @@ use function count;
 use function in_array;
 use function is_array;
 use function is_int;
+use function str_ends_with;
+use function strcasecmp;
+use function substr;
 
 class SpecificationParser
 {
     private ScalarTypesResolver $typeResolver;
+    /** @var string[] */
+    private array $skipHttpCodes;
 
-    public function __construct(ScalarTypesResolver $typeResolver)
+    /** @param array<array-key, string|int> $skipHttpCodes */
+    public function __construct(ScalarTypesResolver $typeResolver, array $skipHttpCodes)
     {
-        $this->typeResolver = $typeResolver;
+        $this->typeResolver  = $typeResolver;
+        $this->skipHttpCodes = array_map(static fn ($code) => (string) $code, $skipHttpCodes);
     }
 
     public function parseOpenApi(string $specificationName, SpecificationConfig $specificationConfig, OpenApi $parsedSpecification): Specification
@@ -135,6 +142,10 @@ class SpecificationParser
         }
 
         foreach ($responses as $responseCode => $response) {
+            if ($this->isHttpCodeSkipped((string) $responseCode)) {
+                continue;
+            }
+
             $responseSchema = $this->findByMediaType($response, $specificationConfig->getMediaType());
 
             if ($responseSchema === null) {
@@ -149,6 +160,27 @@ class SpecificationParser
         }
 
         return $responseDefinitions;
+    }
+
+    private function isHttpCodeSkipped(string $code): bool
+    {
+        foreach ($this->skipHttpCodes as $skippedCode) {
+            if (strcasecmp($skippedCode, $code) === 0) {
+                return true;
+            }
+
+            if (
+                str_ends_with($skippedCode, '**') &&
+                strcasecmp(
+                    substr($skippedCode, 0, -2),
+                    substr($code, 0, -2)
+                ) === 0
+            ) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     private function findByMediaType(Response|RequestBody|Reference|null $body, string $mediaType): ?Schema
