@@ -16,7 +16,7 @@ use cebe\openapi\spec\Responses;
 use cebe\openapi\spec\Schema;
 use cebe\openapi\spec\Type;
 use OnMoon\OpenApiServerBundle\Exception\CannotParseOpenApi;
-use OnMoon\OpenApiServerBundle\Specification\Definitions\ObjectType as ObjectDefinition;
+use OnMoon\OpenApiServerBundle\Specification\Definitions\ObjectSchema as ObjectDefinition;
 use OnMoon\OpenApiServerBundle\Specification\Definitions\Operation as OperationDefinition;
 use OnMoon\OpenApiServerBundle\Specification\Definitions\Property as PropertyDefinition;
 use OnMoon\OpenApiServerBundle\Specification\Definitions\Specification;

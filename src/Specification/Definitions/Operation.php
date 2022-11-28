@@ -10,25 +10,25 @@ final class Operation
     private string $method;
     private string $requestHandlerName;
     private ?string $summary;
-    private ?ObjectType $requestBody;
+    private ?ObjectSchema $requestBody;
 
-    /** @var array<string, ObjectType> */
+    /** @var array<string, ObjectSchema> */
     private array $requestParameters;
-    /** @var array<string|int, ObjectType> */
+    /** @var array<string|int, ObjectSchema> */
     private array $responses;
 
     /**
-     * @param  array<string, ObjectType>     $requestParameters
-     * @param array<string|int, ObjectType> $responses
+     * @param  array<string, ObjectSchema>     $requestParameters
+     * @param array<string|int, ObjectSchema> $responses
      */
     public function __construct(
-        string $url,
-        string $method,
-        string $requestHandlerName,
-        ?string $summary = null,
-        ?ObjectType $requestBody = null,
-        array $requestParameters = [],
-        array $responses = []
+        string        $url,
+        string        $method,
+        string        $requestHandlerName,
+        ?string       $summary = null,
+        ?ObjectSchema $requestBody = null,
+        array         $requestParameters = [],
+        array         $responses = []
     ) {
         $this->url                = $url;
         $this->method             = $method;
@@ -59,13 +59,13 @@ final class Operation
         return $this->summary;
     }
 
-    public function getRequestBody(): ?ObjectType
+    public function getRequestBody(): ?ObjectSchema
     {
         return $this->requestBody;
     }
 
     /**
-     * @return array<string, ObjectType>
+     * @return array<string, ObjectSchema>
      */
     public function getRequestParameters(): array
     {
@@ -73,14 +73,14 @@ final class Operation
     }
 
     /**
-     * @return array<string|int, ObjectType>
+     * @return array<string|int, ObjectSchema>
      */
     public function getResponses(): array
     {
         return $this->responses;
     }
 
-    public function getResponse(string $code): ObjectType
+    public function getResponse(string $code): ObjectSchema
     {
         return $this->responses[$code];
     }

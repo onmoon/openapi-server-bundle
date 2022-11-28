@@ -14,7 +14,7 @@ use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\RequestParametersDtoDef
 use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\ResponseDefinition;
 use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\ServiceSubscriberDefinition;
 use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\SpecificationDefinition;
-use OnMoon\OpenApiServerBundle\Specification\Definitions\ObjectType;
+use OnMoon\OpenApiServerBundle\Specification\Definitions\ObjectSchema;
 use OnMoon\OpenApiServerBundle\Specification\Definitions\Property;
 use OnMoon\OpenApiServerBundle\Specification\SpecificationLoader;
 
@@ -81,7 +81,7 @@ class GraphGenerator
     }
 
     /**
-     * @param array<string|int,ObjectType> $responses
+     * @param array<string|int,ObjectSchema> $responses
      *
      * @return ResponseDefinition[]
      */
@@ -100,7 +100,7 @@ class GraphGenerator
     }
 
     /**
-     * @param ObjectType[] $parameters
+     * @param ObjectSchema[] $parameters
      */
     private function parametersToDto(string $in, array $parameters): ?RequestParametersDtoDefinition
     {
@@ -113,7 +113,7 @@ class GraphGenerator
         );
     }
 
-    private function objectTypeToDefinition(?ObjectType $type): ?DtoDefinition
+    private function objectTypeToDefinition(?ObjectSchema $type): ?DtoDefinition
     {
         if ($type === null) {
             return null;

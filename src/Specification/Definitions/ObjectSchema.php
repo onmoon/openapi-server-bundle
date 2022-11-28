@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace OnMoon\OpenApiServerBundle\Specification\Definitions;
 
-final class ObjectType
+final class ObjectSchema
 {
     /** @var Property[] $properties; */
     private array $properties;

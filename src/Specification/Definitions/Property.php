@@ -14,7 +14,7 @@ final class Property
     private bool $required                    = false;
     private bool $nullable                    = false;
     private ?int $scalarTypeId                = null;
-    private ?ObjectType $objectTypeDefinition = null;
+    private ?ObjectSchema $objectTypeDefinition = null;
     private ?string $description              = null;
     private ?string $pattern                  = null;
 
@@ -91,7 +91,7 @@ final class Property
         return $this;
     }
 
-    public function getObjectTypeDefinition(): ?ObjectType
+    public function getObjectTypeDefinition(): ?ObjectSchema
     {
         return $this->objectTypeDefinition;
     }
@@ -99,7 +99,7 @@ final class Property
     /**
      * @return Property
      */
-    public function setObjectTypeDefinition(?ObjectType $objectTypeDefinition): self
+    public function setObjectTypeDefinition(?ObjectSchema $objectTypeDefinition): self
     {
         $this->objectTypeDefinition = $objectTypeDefinition;
 
