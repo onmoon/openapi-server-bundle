@@ -13,17 +13,15 @@ class ApiServerCodeGenerator
 {
     private GraphGenerator $graphGenerator;
     private NameGenerator $nameGenerator;
-    private InterfaceGenerator $interfaceGenerator;
     private FileGenerator $filesGenerator;
     private AttributeGenerator $attributeGenerator;
     private FileWriter $writer;
     private EventDispatcherInterface $eventDispatcher;
 
-    public function __construct(GraphGenerator $graphGenerator, NameGenerator $nameGenerator, InterfaceGenerator $interfaceGenerator, FileGenerator $filesGenerator, AttributeGenerator $attributeGenerator, FileWriter $writer, EventDispatcherInterface $eventDispatcher)
+    public function __construct(GraphGenerator $graphGenerator, NameGenerator $nameGenerator, FileGenerator $filesGenerator, AttributeGenerator $attributeGenerator, FileWriter $writer, EventDispatcherInterface $eventDispatcher)
     {
         $this->graphGenerator     = $graphGenerator;
         $this->nameGenerator      = $nameGenerator;
-        $this->interfaceGenerator = $interfaceGenerator;
         $this->filesGenerator     = $filesGenerator;
         $this->attributeGenerator = $attributeGenerator;
         $this->writer             = $writer;
@@ -34,7 +32,6 @@ class ApiServerCodeGenerator
     public function generate(): array
     {
         $graph = $this->graphGenerator->generateClassGraph();
-        $this->interfaceGenerator->setAllInterfaces($graph);
         $this->attributeGenerator->setAllAttributes($graph);
         $this->nameGenerator->setAllNamesAndPaths($graph);
 

@@ -7,7 +7,6 @@ namespace OnMoon\OpenApiServerBundle\CodeGenerator;
 use Lukasoppermann\Httpstatus\Httpstatus;
 use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\DtoDefinition;
 use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\GraphDefinition;
-use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\RequestDtoDefinition;
 use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\ResponseDefinition;
 use OnMoon\OpenApiServerBundle\CodeGenerator\Naming\NamingStrategy;
 use Throwable;
@@ -91,7 +90,7 @@ class NameGenerator
         }
     }
 
-    public function setRequestNames(RequestDtoDefinition $request, string $operationNamespace, string $operationName, string $operationPath): void
+    public function setRequestNames(DtoDefinition $request, string $operationNamespace, string $operationName, string $operationPath): void
     {
         $requestDtoNamespace = $this->naming->buildNamespace(
             $operationNamespace,

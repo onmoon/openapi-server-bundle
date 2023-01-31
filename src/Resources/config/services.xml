@@ -63,7 +63,6 @@
             <argument key="$skipHttpCodes">%openapi.generated.code.skip.http.codes%</argument>
         </service>
         <service id="OnMoon\OpenApiServerBundle\CodeGenerator\GraphGenerator" />
-        <service id="OnMoon\OpenApiServerBundle\CodeGenerator\InterfaceGenerator" />
         <service id="OnMoon\OpenApiServerBundle\CodeGenerator\AttributeGenerator" />
         <service id="OnMoon\OpenApiServerBundle\CodeGenerator\FileGenerator" />
         <service id="OnMoon\OpenApiServerBundle\CodeGenerator\NameGenerator">

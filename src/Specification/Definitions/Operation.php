@@ -22,13 +22,13 @@ final class Operation
      * @param array<string|int, ObjectSchema> $responses
      */
     public function __construct(
-        string        $url,
-        string        $method,
-        string        $requestHandlerName,
-        ?string       $summary = null,
+        string $url,
+        string $method,
+        string $requestHandlerName,
+        ?string $summary = null,
         ?ObjectSchema $requestBody = null,
-        array         $requestParameters = [],
-        array         $responses = []
+        array $requestParameters = [],
+        array $responses = []
     ) {
         $this->url                = $url;
         $this->method             = $method;

@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace OnMoon\OpenApiServerBundle\CodeGenerator\Definitions;
 
+use OnMoon\OpenApiServerBundle\Interfaces\Dto;
+
 use function count;
 
 class DtoDefinition extends GeneratedClassDefinition
@@ -17,6 +19,7 @@ class DtoDefinition extends GeneratedClassDefinition
      */
     public function __construct(array $properties)
     {
+        $this->implements = ClassDefinition::fromFQCN(Dto::class);
         $this->properties = $properties;
     }
 

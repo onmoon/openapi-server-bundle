@@ -8,17 +8,15 @@ use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\DtoDefinition;
 use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\GraphDefinition;
 use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\OperationDefinition;
 use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\PropertyDefinition;
-use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\RequestBodyDtoDefinition;
-use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\RequestDtoDefinition;
-use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\RequestParametersDtoDefinition;
+use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\RequestHandlerInterfaceDefinition;
 use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\ResponseDefinition;
 use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\ServiceSubscriberDefinition;
 use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\SpecificationDefinition;
 use OnMoon\OpenApiServerBundle\Specification\Definitions\ObjectSchema;
+use OnMoon\OpenApiServerBundle\Specification\Definitions\Operation;
 use OnMoon\OpenApiServerBundle\Specification\Definitions\Property;
 use OnMoon\OpenApiServerBundle\Specification\SpecificationLoader;
 
-use function array_key_exists;
 use function array_map;
 use function count;
 
@@ -40,25 +38,22 @@ class GraphGenerator
             $operationDefinitions = [];
 
             foreach ($parsedSpecification->getOperations() as $operationId => $operation) {
-                $requestBody = null;
-                $bodyType    = $operation->getRequestBody();
-                if ($bodyType !== null) {
-                    $requestBody = new RequestBodyDtoDefinition(
-                        $this->propertiesToDefinitions($bodyType->getProperties())
-                    );
-                }
-
-                $requestDefinitions = new RequestDtoDefinition(
-                    $requestBody,
-                    $this->parametersToDto('query', $operation->getRequestParameters()),
-                    $this->parametersToDto('path', $operation->getRequestParameters())
-                );
+                $requestDefinition = $this->getRequestDefinition($operation);
 
                 $singleHttpCode = null;
                 $responses      = $this->getResponseDefinitions($operation->getResponses());
                 if (count($responses) === 1 && $responses[0]->getResponseBody()->isEmpty()) {
                     $singleHttpCode = $responses[0]->getStatusCode();
+                    $responses      = [];
                 }
+
+                $service = new RequestHandlerInterfaceDefinition(
+                    $requestDefinition,
+                    array_map(
+                        static fn (ResponseDefinition $response) => $response->getResponseBody(),
+                        $responses
+                    )
+                );
 
                 $operationDefinitions[] = new OperationDefinition(
                     $operation->getUrl(),
@@ -67,8 +62,9 @@ class GraphGenerator
                     $operation->getRequestHandlerName(),
                     $operation->getSummary(),
                     $singleHttpCode,
-                    $requestDefinitions->isEmpty() ? null : $requestDefinitions,
-                    $singleHttpCode !== null ? [] : $responses
+                    $requestDefinition,
+                    $responses,
+                    $service
                 );
             }
 
@@ -78,6 +74,33 @@ class GraphGenerator
         $serviceSubscriber = new ServiceSubscriberDefinition();
 
         return new GraphDefinition($specificationDefinitions, $serviceSubscriber);
+    }
+
+    private function getRequestDefinition(Operation $operation): ?DtoDefinition
+    {
+        $fields = [
+            'pathParameters' => $operation->getRequestParameters()['path'] ?? null,
+            'queryParameters' => $operation->getRequestParameters()['query'] ?? null,
+            'body' => $operation->getRequestBody(),
+        ];
+
+        $properties = [];
+
+        foreach ($fields as $name => $definition) {
+            if ($definition === null) {
+                continue;
+            }
+
+            $specProperty = (new Property($name))->setRequired(true);
+            $properties[] = (new PropertyDefinition($specProperty))
+                ->setObjectTypeDefinition($this->objectTypeToDefinition($definition));
+        }
+
+        if (count($properties) === 0) {
+            return null;
+        }
+
+        return new DtoDefinition($properties);
     }
 
     /**
@@ -92,25 +115,11 @@ class GraphGenerator
         foreach ($responses as $statusCode => $response) {
             $responseDtoDefinitions[] = new ResponseDefinition(
                 (string) $statusCode,
-                new DtoDefinition($this->propertiesToDefinitions($response->getProperties()))
+                $this->propertiesToDto($response->getProperties())
             );
         }
 
         return $responseDtoDefinitions;
-    }
-
-    /**
-     * @param ObjectSchema[] $parameters
-     */
-    private function parametersToDto(string $in, array $parameters): ?RequestParametersDtoDefinition
-    {
-        if (! array_key_exists($in, $parameters)) {
-            return null;
-        }
-
-        return new RequestParametersDtoDefinition(
-            $this->propertiesToDefinitions($parameters[$in]->getProperties())
-        );
     }
 
     private function objectTypeToDefinition(?ObjectSchema $type): ?DtoDefinition
@@ -119,20 +128,18 @@ class GraphGenerator
             return null;
         }
 
-        return new DtoDefinition($this->propertiesToDefinitions($type->getProperties()));
+        return $this->propertiesToDto($type->getProperties());
     }
 
     /**
      * @param Property[] $properties
-     *
-     * @return PropertyDefinition[]
      */
-    private function propertiesToDefinitions(array $properties): array
+    private function propertiesToDto(array $properties): DtoDefinition
     {
-        return array_map(
+        return new DtoDefinition(array_map(
             fn (Property $p): PropertyDefinition => $this->propertyToDefinition($p),
             $properties
-        );
+        ));
     }
 
     private function propertyToDefinition(Property $property): PropertyDefinition

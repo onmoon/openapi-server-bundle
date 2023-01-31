@@ -12,8 +12,7 @@ final class OperationDefinition
     private string $requestHandlerName;
     private ?string $summary;
     private ?string $singleHttpCode;
-    private ?RequestDtoDefinition $request;
-    private RequestHandlerInterfaceDefinition $requestHandlerInterface;
+    private ?DtoDefinition $request;
 
     /** @var ResponseDefinition[] */
     private array $responses;
@@ -28,8 +27,9 @@ final class OperationDefinition
         string $requestHandlerName,
         ?string $summary,
         ?string $singleHttpCode,
-        ?RequestDtoDefinition $request,
-        array $responses
+        ?DtoDefinition $request,
+        array $responses,
+        private RequestHandlerInterfaceDefinition $requestHandlerInterface
     ) {
         $this->url                = $url;
         $this->method             = $method;
@@ -66,7 +66,7 @@ final class OperationDefinition
         return $this->summary;
     }
 
-    public function getRequest(): ?RequestDtoDefinition
+    public function getRequest(): ?DtoDefinition
     {
         return $this->request;
     }
@@ -82,13 +82,6 @@ final class OperationDefinition
     public function getRequestHandlerInterface(): RequestHandlerInterfaceDefinition
     {
         return $this->requestHandlerInterface;
-    }
-
-    public function setRequestHandlerInterface(RequestHandlerInterfaceDefinition $requestHandlerInterface): self
-    {
-        $this->requestHandlerInterface = $requestHandlerInterface;
-
-        return $this;
     }
 
     public function getSingleHttpCode(): ?string

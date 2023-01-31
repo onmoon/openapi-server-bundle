@@ -4,13 +4,23 @@ declare(strict_types=1);
 
 namespace OnMoon\OpenApiServerBundle\CodeGenerator\Definitions;
 
+use OnMoon\OpenApiServerBundle\Interfaces\RequestHandler;
+
 final class RequestHandlerInterfaceDefinition extends GeneratedInterfaceDefinition
 {
-    private ?ClassDefinition $requestType = null;
+    private ?ClassDefinition $requestType;
     /** @var ClassDefinition[] */
-    private array $responseTypes = [];
+    private array $responseTypes;
     private string $methodName;
     private ?string $methodDescription = null;
+
+    /** @param ClassDefinition[] $responseTypes  */
+    public function __construct(?ClassDefinition $requestType, array $responseTypes)
+    {
+        $this->requestType   = $requestType;
+        $this->responseTypes = $responseTypes;
+        $this->setExtends(ClassDefinition::fromFQCN(RequestHandler::class));
+    }
 
     public function getRequestType(): ?ClassDefinition
     {
