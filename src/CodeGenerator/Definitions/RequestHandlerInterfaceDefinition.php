@@ -8,39 +8,39 @@ use OnMoon\OpenApiServerBundle\Interfaces\RequestHandler;
 
 final class RequestHandlerInterfaceDefinition extends GeneratedInterfaceDefinition
 {
-    private ?ClassDefinition $requestType;
-    /** @var ClassDefinition[] */
+    private ?DtoReference $requestType;
+    /** @var DtoReference[] */
     private array $responseTypes;
     private string $methodName;
     private ?string $methodDescription = null;
 
-    /** @param ClassDefinition[] $responseTypes  */
-    public function __construct(?ClassDefinition $requestType, array $responseTypes)
+    /** @param DtoReference[] $responseTypes  */
+    public function __construct(?DtoReference $requestType, array $responseTypes)
     {
         $this->requestType   = $requestType;
         $this->responseTypes = $responseTypes;
         $this->setExtends(ClassDefinition::fromFQCN(RequestHandler::class));
     }
 
-    public function getRequestType(): ?ClassDefinition
+    public function getRequestType(): ?DtoReference
     {
         return $this->requestType;
     }
 
-    public function setRequestType(?ClassDefinition $requestType): self
+    public function setRequestType(?DtoReference $requestType): self
     {
         $this->requestType = $requestType;
 
         return $this;
     }
 
-    /** @return ClassDefinition[] */
+    /** @return DtoReference[] */
     public function getResponseTypes(): array
     {
         return $this->responseTypes;
     }
 
-    /** @param ClassDefinition[] $responseTypes */
+    /** @param DtoReference[] $responseTypes */
     public function setResponseTypes(array $responseTypes): self
     {
         $this->responseTypes = $responseTypes;

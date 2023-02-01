@@ -16,7 +16,9 @@ use cebe\openapi\spec\Responses;
 use cebe\openapi\spec\Schema;
 use cebe\openapi\spec\Type;
 use OnMoon\OpenApiServerBundle\Exception\CannotParseOpenApi;
-use OnMoon\OpenApiServerBundle\Specification\Definitions\ObjectSchema as ObjectDefinition;
+use OnMoon\OpenApiServerBundle\Specification\Definitions\ComponentArray;
+use OnMoon\OpenApiServerBundle\Specification\Definitions\ObjectReference;
+use OnMoon\OpenApiServerBundle\Specification\Definitions\ObjectSchema;
 use OnMoon\OpenApiServerBundle\Specification\Definitions\Operation as OperationDefinition;
 use OnMoon\OpenApiServerBundle\Specification\Definitions\Property as PropertyDefinition;
 use OnMoon\OpenApiServerBundle\Specification\Definitions\Specification;
@@ -51,6 +53,8 @@ class SpecificationParser
 
     public function parseOpenApi(string $specificationName, SpecificationConfig $specificationConfig, OpenApi $parsedSpecification): Specification
     {
+        $componentSchemas = new ComponentArray();
+
         $operationDefinitions = [];
         /**
          * @var string $url
@@ -77,15 +81,16 @@ class SpecificationParser
                     throw CannotParseOpenApi::becauseDuplicateOperationId($operationId, $exceptionContext);
                 }
 
-                $responses = $this->getResponseDtoDefinitions($operation->responses, $specificationConfig, $exceptionContext);
+                $responses = $this->getResponseDtoDefinitions($operation->responses, $specificationConfig, $componentSchemas, $exceptionContext);
 
                 $requestSchema = $this->findByMediaType($operation->requestBody, $specificationConfig->getMediaType());
                 $requestBody   = null;
 
                 if ($requestSchema !== null) {
-                    $requestBody = $this->getObjectDefinition(
+                    $requestBody = $this->getObjectSchema(
                         $requestSchema,
                         true,
+                        $componentSchemas,
                         $exceptionContext + ['location' => 'request body']
                     );
                 }
@@ -94,7 +99,7 @@ class SpecificationParser
                 $requestParameters = [];
 
                 foreach (['path', 'query'] as $in) {
-                    $params = $this->parseParameters($in, $parameters, $exceptionContext + ['location' => 'request ' . $in . ' parameters']);
+                    $params = $this->parseParameters($in, $parameters, $componentSchemas, $exceptionContext + ['location' => 'request ' . $in . ' parameters']);
 
                     if ($params === null) {
                         continue;
@@ -117,18 +122,19 @@ class SpecificationParser
             }
         }
 
-        return new Specification($operationDefinitions, $parsedSpecification);
+        return new Specification($operationDefinitions, $componentSchemas->getArrayCopy(), $parsedSpecification);
     }
 
     /**
      * @param Response[]|Responses|null                                    $responses
      * @param array{location?:string,method:string,url:string,path:string} $exceptionContext
      *
-     * @return array<string|int,ObjectDefinition>
+     * @return array<string|int,ObjectSchema|ObjectReference>
      */
     private function getResponseDtoDefinitions(
         array|Responses|null $responses,
         SpecificationConfig $specificationConfig,
+        ComponentArray $componentSchemas,
         array $exceptionContext
     ): array {
         $responseDefinitions = [];
@@ -149,11 +155,12 @@ class SpecificationParser
             $responseSchema = $this->findByMediaType($response, $specificationConfig->getMediaType());
 
             if ($responseSchema === null) {
-                $responseDefinitions[$responseCode] = new ObjectDefinition([]);
+                $responseDefinitions[$responseCode] = new ObjectSchema([]);
             } else {
-                $responseDefinitions[$responseCode] = $this->getObjectDefinition(
+                $responseDefinitions[$responseCode] = $this->getObjectSchema(
                     $responseSchema,
                     false,
+                    $componentSchemas,
                     $exceptionContext + ['location' => 'response (code "' . (string) $responseCode . '")']
                 );
             }
@@ -252,7 +259,7 @@ class SpecificationParser
      * @param Parameter[]                                                 $parameters
      * @param array{location:string,method:string,url:string,path:string} $exceptionContext
      */
-    private function parseParameters(string $in, array $parameters, array $exceptionContext): ?ObjectDefinition
+    private function parseParameters(string $in, array $parameters, ComponentArray $componentSchemas, array $exceptionContext): ?ObjectSchema
     {
         $properties = array_map(
             fn (Parameter $p) => $this
@@ -261,6 +268,7 @@ class SpecificationParser
                     $p->schema,
                     // @codeCoverageIgnoreStart
                     true,
+                    $componentSchemas,
                     // @codeCoverageIgnoreEnd
                     $exceptionContext,
                     false
@@ -274,19 +282,33 @@ class SpecificationParser
             return null;
         }
 
-        return new ObjectDefinition($properties);
+        return new ObjectSchema($properties);
+    }
+
+    private function getComponentSchemaName(string $path): ?string {
+        if(\Safe\preg_match('#^/components/schemas/([^/]+)$#', $path, $match) === 1) {
+            /** @psalm-suppress PossiblyNullArrayAccess */
+            return $match[1];
+        }
+        return null;
     }
 
     /**
      * @param array{location:string,method:string,url:string,path:string} $exceptionContext
      */
-    private function getObjectDefinition(Schema $schema, bool $isRequest, array $exceptionContext): ObjectDefinition
+    private function getObjectSchema(Schema $schema, ?bool $isRequest, ComponentArray $componentSchemas, array $exceptionContext): ObjectSchema|ObjectReference
     {
         if ($schema->type !== Type::OBJECT) {
             throw CannotParseOpenApi::becauseRootIsNotObject(
                 $exceptionContext,
                 ($schema->type === Type::ARRAY)
             );
+        }
+
+        $componentName = $this->getComponentSchemaName($schema->getDocumentPosition()?->getPointer() ?? '');
+        if($componentName !== null && $componentSchemas->offsetExists($componentName)) {
+            /** @phpstan-ignore-next-line */
+            return new ObjectReference($componentName, $componentSchemas[$componentName]);
         }
 
         $propertyDefinitions = [];
@@ -298,7 +320,8 @@ class SpecificationParser
                 throw CannotParseOpenApi::becausePropertyIsNotScheme();
             }
 
-            if (($property->readOnly && $isRequest) || ($property->writeOnly && ! $isRequest)) {
+            //ToDo: Rework this in components
+            if (($property->readOnly && $isRequest === true) || ($property->writeOnly && $isRequest === false)) {
                 continue;
             }
 
@@ -306,10 +329,16 @@ class SpecificationParser
              * @psalm-suppress RedundantConditionGivenDocblockType
              */
             $required              = is_array($schema->required) && in_array($propertyName, $schema->required, true);
-            $propertyDefinitions[] = $this->getProperty($propertyName, $property, $isRequest, $exceptionContext)->setRequired($required);
+            $propertyDefinitions[] = $this->getProperty($propertyName, $property, $isRequest, $componentSchemas, $exceptionContext)->setRequired($required);
+        }
+        $objectSchema = new ObjectSchema($propertyDefinitions);
+
+        if($componentName !== null) {
+            $componentSchemas[$componentName] = $objectSchema;
+            return new ObjectReference($componentName, $objectSchema);
         }
 
-        return new ObjectDefinition($propertyDefinitions);
+        return $objectSchema;
     }
 
     /**
@@ -318,7 +347,8 @@ class SpecificationParser
     private function getProperty(
         string $propertyName,
         Schema|Reference|null $property,
-        bool $isRequest,
+        ?bool $isRequest,
+        ComponentArray $componentSchemas,
         array $exceptionContext,
         bool $allowNonScalar = true
     ): PropertyDefinition {
@@ -350,9 +380,10 @@ class SpecificationParser
             $scalarTypeId = $this->typeResolver->findScalarType($itemProperty->type, $itemProperty->format);
             $propertyDefinition->setScalarTypeId($scalarTypeId);
         } elseif ($itemProperty->type === Type::OBJECT) {
-            $objectType = $this->getObjectDefinition(
+            $objectType = $this->getObjectSchema(
                 $itemProperty,
                 $isRequest,
+                $componentSchemas,
                 $exceptionContext
             );
             $propertyDefinition->setObjectTypeDefinition($objectType);

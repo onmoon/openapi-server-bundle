@@ -7,9 +7,9 @@ namespace OnMoon\OpenApiServerBundle\CodeGenerator\Definitions;
 final class ResponseDefinition
 {
     private string $statusCode;
-    private DtoDefinition $responseBody;
+    private DtoReference $responseBody;
 
-    public function __construct(string $statusCode, DtoDefinition $responseBody)
+    public function __construct(string $statusCode, DtoReference $responseBody)
     {
         $this->statusCode   = $statusCode;
         $this->responseBody = $responseBody;
@@ -20,7 +20,7 @@ final class ResponseDefinition
         return $this->statusCode;
     }
 
-    public function getResponseBody(): DtoDefinition
+    public function getResponseBody(): DtoReference
     {
         return $this->responseBody;
     }

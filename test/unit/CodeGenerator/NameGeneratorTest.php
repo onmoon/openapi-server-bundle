@@ -621,7 +621,7 @@ final class NameGeneratorTest extends TestCase
             $payload['rootPath']
         );
 
-        $nameGenerator->setTreePathsAndClassNames(
+        $nameGenerator->setTreeNames(
             $root,
             $namespace,
             $className,
@@ -702,7 +702,7 @@ final class NameGeneratorTest extends TestCase
             $payload['rootPath']
         );
 
-        $nameGenerator->setTreeGettersSetters($root);
+        $nameGenerator->setGettersSetters($root);
 
         Assert::assertSame(
             'getSomeCustomMinorClassProperty',
@@ -773,7 +773,7 @@ final class NameGeneratorTest extends TestCase
             $payload['rootPath']
         );
 
-        $nameGenerator->setTreePropertyClassNames($root);
+        $nameGenerator->setPropertyClassNames($root);
 
         Assert::assertSame(
             'someCustomMinorProperty',

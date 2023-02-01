@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace OnMoon\OpenApiServerBundle\CodeGenerator;
 
+use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\ClassReference;
 use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\DtoDefinition;
+use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\DtoReference;
 use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\GeneratedFileDefinition;
 use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\GraphDefinition;
 use OnMoon\OpenApiServerBundle\CodeGenerator\PhpParserGenerators\DtoCodeGenerator;
@@ -38,11 +40,12 @@ class FileGenerator
         /** @var GeneratedFileDefinition[] $result */
         $result = [];
         foreach ($graph->getSpecifications() as $specificationDefinition) {
+            foreach ($specificationDefinition->getComponents() as $component) {
+                array_push($result, ...$this->generateDtoTree($component->getDto()));
+            }
+
             foreach ($specificationDefinition->getOperations() as $operation) {
-                $request = $operation->getRequest();
-                if ($request !== null) {
-                    array_push($result, ...$this->generateDtoTree($request));
-                }
+                array_push($result, ...$this->generateDtoTree($operation->getRequest()));
 
                 foreach ($operation->getResponses() as $response) {
                     array_push($result, ...$this->generateDtoTree($response->getResponseBody()));
@@ -60,17 +63,15 @@ class FileGenerator
     /**
      * @return GeneratedFileDefinition[]
      */
-    public function generateDtoTree(DtoDefinition $root): array
+    public function generateDtoTree(?DtoReference $root): array
     {
+        if(!$root instanceof DtoDefinition) {
+            return [];
+        }
         $result   = [];
         $result[] = $this->dtoGenerator->generate($root);
         foreach ($root->getProperties() as $property) {
-            $object = $property->getObjectTypeDefinition();
-            if ($object === null) {
-                continue;
-            }
-
-            $result = array_merge($result, $this->generateDtoTree($object));
+            array_push($result, ...$this->generateDtoTree($property->getObjectTypeDefinition()));
         }
 
         return $result;

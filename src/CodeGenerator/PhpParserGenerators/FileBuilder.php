@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace OnMoon\OpenApiServerBundle\CodeGenerator\PhpParserGenerators;
 
 use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\ClassDefinition;
+use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\ClassReference;
 use PhpParser\Builder;
 use PhpParser\Builder\Namespace_;
 use PhpParser\Builder\Use_;
@@ -30,7 +31,7 @@ class FileBuilder
         $this->namespace = new Namespace_($definition->getNamespace());
     }
 
-    public function getReference(ClassDefinition $class): string
+    public function getReference(ClassReference $class): string
     {
         $fullName = $class->getFQCN();
 
@@ -40,7 +41,7 @@ class FileBuilder
 
         $reference = $class->getClassName();
         $rename    = false;
-        while (array_search($reference, $this->references, true) !== false) {
+        while (in_array($reference, $this->references, true)) {
             $reference = $this->rename($reference);
             $rename    = true;
         }

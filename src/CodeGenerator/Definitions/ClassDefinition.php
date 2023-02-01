@@ -7,7 +7,7 @@ namespace OnMoon\OpenApiServerBundle\CodeGenerator\Definitions;
 use function Safe\substr;
 use function strrpos;
 
-class ClassDefinition
+class ClassDefinition implements ClassReference
 {
     private string $className;
     private string $namespace;

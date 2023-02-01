@@ -11,7 +11,7 @@ final class PropertyDefinition
     private Property $specProperty;
     private string $classPropertyName;
     private bool $nullable                       = true;
-    private ?DtoDefinition $objectTypeDefinition = null;
+    private ?DtoReference $objectTypeDefinition = null;
     private ?string $getterName                  = null;
     private ?string $setterName                  = null;
     private bool $hasGetter                      = false;
@@ -60,12 +60,12 @@ final class PropertyDefinition
         return $this->specProperty->getScalarTypeId();
     }
 
-    public function getObjectTypeDefinition(): ?DtoDefinition
+    public function getObjectTypeDefinition(): ?DtoReference
     {
         return $this->objectTypeDefinition;
     }
 
-    public function setObjectTypeDefinition(?DtoDefinition $objectTypeDefinition): self
+    public function setObjectTypeDefinition(?DtoReference $objectTypeDefinition): self
     {
         $this->objectTypeDefinition = $objectTypeDefinition;
 

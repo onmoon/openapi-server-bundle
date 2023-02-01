@@ -26,6 +26,11 @@ final class CannotParseOpenApi extends OpenApiError
         return new self('Property is not scheme');
     }
 
+    public static function becauseUnknownReferenceFound(string $name): self
+    {
+        return new self(sprintf('Component "%s does not exist"', $name));
+    }
+
     /** @param array{method:string,url:string,path:string} $context */
     public static function becauseDuplicateOperationId(string $id, array $context): self
     {

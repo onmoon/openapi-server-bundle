@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace OnMoon\OpenApiServerBundle\CodeGenerator\PhpParserGenerators;
 
 use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\ClassDefinition;
+use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\ClassReference;
 use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\GeneratedFileDefinition;
 use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\RequestHandlerInterfaceDefinition;
 
@@ -49,7 +50,7 @@ class InterfaceCodeGenerator extends CodeGenerator
 
         $responses = $definition->getResponseTypes();
         if (count($responses) > 0) {
-            $responseClasses = array_map(static fn (ClassDefinition $response) => $fileBuilder->getReference($response), $responses);
+            $responseClasses = array_map(static fn (ClassReference $response) => $fileBuilder->getReference($response), $responses);
             $unionClass      = implode('|', $responseClasses);
             $methodBuilder->setReturnType($unionClass);
             if ($this->fullDocs) {

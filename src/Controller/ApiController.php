@@ -204,7 +204,7 @@ final class ApiController
         $response->setStatusCode($statusCode);
 
         if ($responseDto !== null) {
-            $responseData = $this->serializer->createResponseFromDto($responseDto, $operation->getResponse($matchedCode));
+            $responseData = $this->serializer->createResponseFromDto($responseDto, $operation->getResponse($matchedCode)->getSchema());
             $response->setData($responseData);
         }
 

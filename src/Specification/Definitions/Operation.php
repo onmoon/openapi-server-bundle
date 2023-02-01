@@ -6,37 +6,19 @@ namespace OnMoon\OpenApiServerBundle\Specification\Definitions;
 
 final class Operation
 {
-    private string $url;
-    private string $method;
-    private string $requestHandlerName;
-    private ?string $summary;
-    private ?ObjectSchema $requestBody;
-
-    /** @var array<string, ObjectSchema> */
-    private array $requestParameters;
-    /** @var array<string|int, ObjectSchema> */
-    private array $responses;
-
     /**
      * @param  array<string, ObjectSchema>     $requestParameters
-     * @param array<string|int, ObjectSchema> $responses
+     * @param array<string|int, ObjectSchema|ObjectReference> $responses
      */
     public function __construct(
-        string $url,
-        string $method,
-        string $requestHandlerName,
-        ?string $summary = null,
-        ?ObjectSchema $requestBody = null,
-        array $requestParameters = [],
-        array $responses = []
+        private string $url,
+        private string $method,
+        private string $requestHandlerName,
+        private ?string $summary = null,
+        private ObjectSchema|ObjectReference|null $requestBody = null,
+        private array $requestParameters = [],
+        private array $responses = []
     ) {
-        $this->url                = $url;
-        $this->method             = $method;
-        $this->requestHandlerName = $requestHandlerName;
-        $this->summary            = $summary;
-        $this->requestBody        = $requestBody;
-        $this->requestParameters  = $requestParameters;
-        $this->responses          = $responses;
     }
 
     public function getUrl(): string
@@ -59,7 +41,7 @@ final class Operation
         return $this->summary;
     }
 
-    public function getRequestBody(): ?ObjectSchema
+    public function getRequestBody(): ObjectSchema|ObjectReference|null
     {
         return $this->requestBody;
     }
@@ -73,14 +55,14 @@ final class Operation
     }
 
     /**
-     * @return array<string|int, ObjectSchema>
+     * @return array<string|int, ObjectSchema|ObjectReference>
      */
     public function getResponses(): array
     {
         return $this->responses;
     }
 
-    public function getResponse(string $code): ObjectSchema
+    public function getResponse(string $code): ObjectSchema|ObjectReference
     {
         return $this->responses[$code];
     }

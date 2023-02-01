@@ -6,6 +6,7 @@ namespace OnMoon\OpenApiServerBundle\Serializer;
 
 use Exception;
 use OnMoon\OpenApiServerBundle\Interfaces\Dto;
+use OnMoon\OpenApiServerBundle\Specification\Definitions\ObjectReference;
 use OnMoon\OpenApiServerBundle\Specification\Definitions\ObjectSchema;
 use OnMoon\OpenApiServerBundle\Specification\Definitions\Operation;
 use OnMoon\OpenApiServerBundle\Types\ScalarTypesResolver;
@@ -56,7 +57,7 @@ final class ArrayDtoSerializer implements DtoSerializer
 
             /** @var mixed[] $rawBody */
             $rawBody       = json_decode($source, true);
-            $input['body'] = $this->convert(true, $rawBody, $bodyType);
+            $input['body'] = $this->convert(true, $rawBody, $bodyType->getSchema());
         }
 
         /**
@@ -110,7 +111,7 @@ final class ArrayDtoSerializer implements DtoSerializer
 
             if ($objectType !== null) {
                 /** @psalm-suppress MissingClosureParamType */
-                $converter = fn ($v) => $this->convert($deserialize, $v, $objectType);
+                $converter = fn ($v) => $this->convert($deserialize, $v, $objectType->getSchema());
             } else {
                 /** @psalm-suppress MissingClosureParamType */
                 $converter = fn ($v) => $this->resolver->convert($deserialize, $typeId ?? 0, $v);

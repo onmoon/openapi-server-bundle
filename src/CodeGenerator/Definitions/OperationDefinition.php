@@ -6,39 +6,20 @@ namespace OnMoon\OpenApiServerBundle\CodeGenerator\Definitions;
 
 final class OperationDefinition
 {
-    private string $url;
-    private string $method;
-    private string $operationId;
-    private string $requestHandlerName;
-    private ?string $summary;
-    private ?string $singleHttpCode;
-    private ?DtoDefinition $request;
-
-    /** @var ResponseDefinition[] */
-    private array $responses;
-
     /**
      * @param ResponseDefinition[] $responses
      */
     public function __construct(
-        string $url,
-        string $method,
-        string $operationId,
-        string $requestHandlerName,
-        ?string $summary,
-        ?string $singleHttpCode,
-        ?DtoDefinition $request,
-        array $responses,
+        private string $url,
+        private string $method,
+        private string $operationId,
+        private string $requestHandlerName,
+        private ?string $summary,
+        private ?string $singleHttpCode,
+        private ?DtoReference $request,
+        private array $responses,
         private RequestHandlerInterfaceDefinition $requestHandlerInterface
     ) {
-        $this->url                = $url;
-        $this->method             = $method;
-        $this->operationId        = $operationId;
-        $this->requestHandlerName = $requestHandlerName;
-        $this->summary            = $summary;
-        $this->singleHttpCode     = $singleHttpCode;
-        $this->request            = $request;
-        $this->responses          = $responses;
     }
 
     public function getUrl(): string
@@ -66,7 +47,7 @@ final class OperationDefinition
         return $this->summary;
     }
 
-    public function getRequest(): ?DtoDefinition
+    public function getRequest(): ?DtoReference
     {
         return $this->request;
     }

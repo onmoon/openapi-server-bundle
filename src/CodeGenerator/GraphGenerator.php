@@ -4,7 +4,10 @@ declare(strict_types=1);
 
 namespace OnMoon\OpenApiServerBundle\CodeGenerator;
 
+use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\ComponentDefinition;
+use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\ComponentReference;
 use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\DtoDefinition;
+use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\DtoReference;
 use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\GraphDefinition;
 use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\OperationDefinition;
 use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\PropertyDefinition;
@@ -12,6 +15,8 @@ use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\RequestHandlerInterface
 use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\ResponseDefinition;
 use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\ServiceSubscriberDefinition;
 use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\SpecificationDefinition;
+use OnMoon\OpenApiServerBundle\Exception\CannotParseOpenApi;
+use OnMoon\OpenApiServerBundle\Specification\Definitions\ObjectReference;
 use OnMoon\OpenApiServerBundle\Specification\Definitions\ObjectSchema;
 use OnMoon\OpenApiServerBundle\Specification\Definitions\Operation;
 use OnMoon\OpenApiServerBundle\Specification\Definitions\Property;
@@ -35,13 +40,22 @@ class GraphGenerator
         foreach ($this->loader->list() as $specificationName => $specificationConfig) {
             $parsedSpecification = $this->loader->load($specificationName);
 
+            $componentDefinitions = [];
+            $componentSchemas = $parsedSpecification->getComponentSchemas();
+            foreach ($componentSchemas as $name => $_) {
+                $componentDefinitions[] = new ComponentDefinition($name);
+            }
+            foreach ($componentDefinitions as $component) {
+                $component->setDto($this->objectSchemaToDefinition($componentSchemas[$component->getName()], $componentDefinitions));
+            }
+
             $operationDefinitions = [];
 
             foreach ($parsedSpecification->getOperations() as $operationId => $operation) {
-                $requestDefinition = $this->getRequestDefinition($operation);
+                $requestDefinition = $this->getRequestDefinition($operation, $componentDefinitions);
 
                 $singleHttpCode = null;
-                $responses      = $this->getResponseDefinitions($operation->getResponses());
+                $responses      = $this->getResponseDefinitions($operation->getResponses(), $componentDefinitions);
                 if (count($responses) === 1 && $responses[0]->getResponseBody()->isEmpty()) {
                     $singleHttpCode = $responses[0]->getStatusCode();
                     $responses      = [];
@@ -68,7 +82,7 @@ class GraphGenerator
                 );
             }
 
-            $specificationDefinitions[] = new SpecificationDefinition($specificationConfig, $operationDefinitions);
+            $specificationDefinitions[] = new SpecificationDefinition($specificationConfig, $operationDefinitions, $componentDefinitions);
         }
 
         $serviceSubscriber = new ServiceSubscriberDefinition();
@@ -76,7 +90,8 @@ class GraphGenerator
         return new GraphDefinition($specificationDefinitions, $serviceSubscriber);
     }
 
-    private function getRequestDefinition(Operation $operation): ?DtoDefinition
+    /** @param ComponentDefinition[] $components */
+    private function getRequestDefinition(Operation $operation, array $components): ?DtoDefinition
     {
         $fields = [
             'pathParameters' => $operation->getRequestParameters()['path'] ?? null,
@@ -93,7 +108,7 @@ class GraphGenerator
 
             $specProperty = (new Property($name))->setRequired(true);
             $properties[] = (new PropertyDefinition($specProperty))
-                ->setObjectTypeDefinition($this->objectTypeToDefinition($definition));
+                ->setObjectTypeDefinition($this->objectTypeToDefinition($definition, $components));
         }
 
         if (count($properties) === 0) {
@@ -104,47 +119,57 @@ class GraphGenerator
     }
 
     /**
-     * @param array<string|int,ObjectSchema> $responses
+     * @param array<string|int,ObjectSchema|ObjectReference> $responses
+     * @param ComponentDefinition[] $components
      *
      * @return ResponseDefinition[]
      */
-    private function getResponseDefinitions(array $responses): array
+    private function getResponseDefinitions(array $responses, array $components): array
     {
         $responseDtoDefinitions = [];
 
         foreach ($responses as $statusCode => $response) {
             $responseDtoDefinitions[] = new ResponseDefinition(
                 (string) $statusCode,
-                $this->propertiesToDto($response->getProperties())
+                $this->objectTypeToDefinition($response, $components)
             );
         }
 
         return $responseDtoDefinitions;
     }
 
-    private function objectTypeToDefinition(?ObjectSchema $type): ?DtoDefinition
+    /** @param ComponentDefinition[] $components */
+    private function objectTypeToDefinition(ObjectSchema|ObjectReference $type, array $components): DtoReference
     {
-        if ($type === null) {
-            return null;
+        if($type instanceof ObjectReference) {
+            foreach ($components as $component) {
+                if($component->getName() === $type->getSchemaName()) {
+                    return new ComponentReference($component);
+                }
+            }
+            throw CannotParseOpenApi::becauseUnknownReferenceFound($type->getSchemaName());
         }
 
-        return $this->propertiesToDto($type->getProperties());
+        return $this->objectSchemaToDefinition($type, $components);
     }
 
-    /**
-     * @param Property[] $properties
-     */
-    private function propertiesToDto(array $properties): DtoDefinition
+    /** @param ComponentDefinition[] $components */
+    private function objectSchemaToDefinition(ObjectSchema $type, array $components): DtoDefinition
     {
         return new DtoDefinition(array_map(
-            fn (Property $p): PropertyDefinition => $this->propertyToDefinition($p),
-            $properties
+            fn (Property $p): PropertyDefinition => $this->propertyToDefinition($p, $components),
+            $type->getProperties()
         ));
     }
 
-    private function propertyToDefinition(Property $property): PropertyDefinition
+    /** @param ComponentDefinition[] $components */
+    private function propertyToDefinition(Property $property, array $components): PropertyDefinition
     {
-        return (new PropertyDefinition($property))
-            ->setObjectTypeDefinition($this->objectTypeToDefinition($property->getObjectTypeDefinition()));
+        $definition = new PropertyDefinition($property);
+        $objectType = $property->getObjectTypeDefinition();
+        if($objectType !== null) {
+            $definition->setObjectTypeDefinition($this->objectTypeToDefinition($objectType, $components));
+        }
+        return $definition;
     }
 }
