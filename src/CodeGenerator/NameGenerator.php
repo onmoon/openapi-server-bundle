@@ -48,13 +48,13 @@ class NameGenerator
             $apiName             = $this->naming->stringToNamespace($specification->getNameSpace());
             $apiNamespace        = $this->naming->buildNamespace($this->rootNamespace, self::APIS_NAMESPACE, $apiName);
             $apiPath             = $this->naming->buildPath($this->rootPath, self::APIS_NAMESPACE, $apiName);
-            $componentsNamespace = $this->naming->buildPath($this->rootNamespace, self::COMPONENTS_NAMESPACE, $apiName);
+            $componentsNamespace = $this->naming->buildNamespace($this->rootNamespace, self::COMPONENTS_NAMESPACE, $apiName);
             $componentsPath      = $this->naming->buildPath($this->rootPath, self::COMPONENTS_NAMESPACE, $apiName);
 
             foreach ($specificationDefinition->getComponents() as $component) {
                 $componentName      = $this->naming->stringToNamespace($component->getName());
                 $componentNamespace = $this->naming->buildNamespace($componentsNamespace, $componentName);
-                $componentPath      = $this->naming->buildNamespace($componentsPath, $componentName);
+                $componentPath      = $this->naming->buildPath($componentsPath, $componentName);
 
                 $this->setTreeNames($component->getDto(), $componentNamespace, $componentName, $componentPath);
             }
