@@ -9,15 +9,14 @@ use cebe\openapi\spec\OpenApi;
 final class Specification
 {
     /**
-     * @param array<string, Operation> $operations
+     * @param array<string, Operation>    $operations
      * @param array<string, ObjectSchema> $componentSchemas
      */
     public function __construct(
-        private array   $operations,
-        private array   $componentSchemas,
+        private array $operations,
+        private array $componentSchemas,
         private OpenApi $openApi
     ) {
-
     }
 
     /**

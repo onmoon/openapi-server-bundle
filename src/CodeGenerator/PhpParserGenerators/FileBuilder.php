@@ -12,7 +12,7 @@ use PhpParser\Builder\Use_;
 use PhpParser\Node;
 use PhpParser\Node\Stmt\Use_ as UseStmt;
 
-use function array_search;
+use function in_array;
 use function Safe\preg_match;
 use function Safe\preg_replace;
 use function Safe\substr;

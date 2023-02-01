@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace OnMoon\OpenApiServerBundle\CodeGenerator\PhpParserGenerators;
 
-use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\ClassDefinition;
 use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\ClassReference;
 use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\GeneratedFileDefinition;
 use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\RequestHandlerInterfaceDefinition;

@@ -7,7 +7,7 @@ namespace OnMoon\OpenApiServerBundle\Specification\Definitions;
 final class Operation
 {
     /**
-     * @param  array<string, ObjectSchema>     $requestParameters
+     * @param  array<string, ObjectSchema>                     $requestParameters
      * @param array<string|int, ObjectSchema|ObjectReference> $responses
      */
     public function __construct(

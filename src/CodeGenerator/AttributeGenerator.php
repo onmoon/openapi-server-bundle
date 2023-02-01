@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace OnMoon\OpenApiServerBundle\CodeGenerator;
 
-use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\ClassReference;
 use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\DtoDefinition;
 use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\DtoReference;
 use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\GraphDefinition;
@@ -32,8 +31,8 @@ class AttributeGenerator
 
     public function componentsPass(?DtoReference $root): void
     {
-        $this->treeWalk($root, static function (Property $specProperty, PropertyDefinition $property) {
-            $needValue    = $specProperty->isRequired() && $specProperty->getDefaultValue() === null;
+        $this->treeWalk($root, static function (Property $specProperty, PropertyDefinition $property): void {
+            $needValue = $specProperty->isRequired() && $specProperty->getDefaultValue() === null;
             $property
                 ->setHasGetter(true)
                 ->setHasSetter(! $needValue)
@@ -44,8 +43,8 @@ class AttributeGenerator
 
     public function requestPass(?DtoReference $root): void
     {
-        $this->treeWalk($root, static function (Property $specProperty, PropertyDefinition $property) {
-            $willExist    = $specProperty->isRequired() || $specProperty->getDefaultValue() !== null;
+        $this->treeWalk($root, static function (Property $specProperty, PropertyDefinition $property): void {
+            $willExist = $specProperty->isRequired() || $specProperty->getDefaultValue() !== null;
             $property
                 ->setHasGetter(true)
                 ->setHasSetter(false)
@@ -56,8 +55,8 @@ class AttributeGenerator
 
     public function responsePass(?DtoReference $root): void
     {
-        $this->treeWalk($root, static function (Property $specProperty, PropertyDefinition $property) {
-            $needValue    = $specProperty->isRequired() && $specProperty->getDefaultValue() === null;
+        $this->treeWalk($root, static function (Property $specProperty, PropertyDefinition $property): void {
+            $needValue = $specProperty->isRequired() && $specProperty->getDefaultValue() === null;
             $property
                 ->setHasGetter(true)
                 ->setHasSetter(! $needValue)
@@ -69,7 +68,7 @@ class AttributeGenerator
     /** @param callable(Property, PropertyDefinition): void $action */
     private function treeWalk(?DtoReference $root, callable $action): void
     {
-        if(!$root instanceof DtoDefinition) {
+        if (! $root instanceof DtoDefinition) {
             return;
         }
 

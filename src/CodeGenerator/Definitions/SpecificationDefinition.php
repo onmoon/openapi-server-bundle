@@ -14,7 +14,6 @@ final class SpecificationDefinition
      */
     public function __construct(private SpecificationConfig $specification, private array $operations, private array $components)
     {
-
     }
 
     /**
@@ -37,6 +36,4 @@ final class SpecificationDefinition
     {
         return $this->components;
     }
-
-
 }

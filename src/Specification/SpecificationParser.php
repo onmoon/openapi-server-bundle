@@ -34,6 +34,7 @@ use function count;
 use function in_array;
 use function is_array;
 use function is_int;
+use function Safe\preg_match;
 use function str_ends_with;
 use function strcasecmp;
 use function substr;
@@ -285,11 +286,13 @@ class SpecificationParser
         return new ObjectSchema($properties);
     }
 
-    private function getComponentSchemaName(string $path): ?string {
-        if(\Safe\preg_match('#^/components/schemas/([^/]+)$#', $path, $match) === 1) {
+    private function getComponentSchemaName(string $path): ?string
+    {
+        if (preg_match('#^/components/schemas/([^/]+)$#', $path, $match) === 1) {
             /** @psalm-suppress PossiblyNullArrayAccess */
             return $match[1];
         }
+
         return null;
     }
 
@@ -306,7 +309,7 @@ class SpecificationParser
         }
 
         $componentName = $this->getComponentSchemaName($schema->getDocumentPosition()?->getPointer() ?? '');
-        if($componentName !== null && $componentSchemas->offsetExists($componentName)) {
+        if ($componentName !== null && $componentSchemas->offsetExists($componentName)) {
             /** @phpstan-ignore-next-line */
             return new ObjectReference($componentName, $componentSchemas[$componentName]);
         }
@@ -331,10 +334,12 @@ class SpecificationParser
             $required              = is_array($schema->required) && in_array($propertyName, $schema->required, true);
             $propertyDefinitions[] = $this->getProperty($propertyName, $property, $isRequest, $componentSchemas, $exceptionContext)->setRequired($required);
         }
+
         $objectSchema = new ObjectSchema($propertyDefinitions);
 
-        if($componentName !== null) {
+        if ($componentName !== null) {
             $componentSchemas[$componentName] = $objectSchema;
+
             return new ObjectReference($componentName, $objectSchema);
         }
 

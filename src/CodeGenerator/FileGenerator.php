@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace OnMoon\OpenApiServerBundle\CodeGenerator;
 
-use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\ClassReference;
 use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\DtoDefinition;
 use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\DtoReference;
 use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\GeneratedFileDefinition;
@@ -13,7 +12,6 @@ use OnMoon\OpenApiServerBundle\CodeGenerator\PhpParserGenerators\DtoCodeGenerato
 use OnMoon\OpenApiServerBundle\CodeGenerator\PhpParserGenerators\InterfaceCodeGenerator;
 use OnMoon\OpenApiServerBundle\CodeGenerator\PhpParserGenerators\ServiceSubscriberCodeGenerator;
 
-use function array_merge;
 use function array_push;
 
 class FileGenerator
@@ -65,9 +63,10 @@ class FileGenerator
      */
     public function generateDtoTree(?DtoReference $root): array
     {
-        if(!$root instanceof DtoDefinition) {
+        if (! $root instanceof DtoDefinition) {
             return [];
         }
+
         $result   = [];
         $result[] = $this->dtoGenerator->generate($root);
         foreach ($root->getProperties() as $property) {

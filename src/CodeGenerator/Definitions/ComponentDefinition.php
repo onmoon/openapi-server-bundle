@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace OnMoon\OpenApiServerBundle\CodeGenerator\Definitions;
 
 class ComponentDefinition
@@ -23,7 +25,7 @@ class ComponentDefinition
     public function setDto(DtoDefinition $dto): self
     {
         $this->dto = $dto;
+
         return $this;
     }
-
 }

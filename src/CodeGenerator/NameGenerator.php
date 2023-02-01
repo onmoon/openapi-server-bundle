@@ -15,12 +15,12 @@ use function ucfirst;
 
 class NameGenerator
 {
-    private const DTO_NAMESPACE   = 'Dto';
-    private const REQUEST_SUFFIX  = 'Request';
-    private const RESPONSE_SUFFIX = 'Response';
-    public const DTO_SUFFIX       = 'Dto';
-    public const APIS_NAMESPACE   = 'Apis';
-    public const COMPONENTS_NAMESPACE   = 'Components';
+    private const DTO_NAMESPACE       = 'Dto';
+    private const REQUEST_SUFFIX      = 'Request';
+    private const RESPONSE_SUFFIX     = 'Response';
+    public const DTO_SUFFIX           = 'Dto';
+    public const APIS_NAMESPACE       = 'Apis';
+    public const COMPONENTS_NAMESPACE = 'Components';
 
     private NamingStrategy $naming;
     private Httpstatus $httpstatus;
@@ -44,17 +44,17 @@ class NameGenerator
             ->setNamespace($this->naming->buildNamespace($this->rootNamespace, 'ServiceSubscriber'));
 
         foreach ($graph->getSpecifications() as $specificationDefinition) {
-            $specification = $specificationDefinition->getSpecification();
-            $apiName       = $this->naming->stringToNamespace($specification->getNameSpace());
-            $apiNamespace  = $this->naming->buildNamespace($this->rootNamespace, self::APIS_NAMESPACE, $apiName);
-            $apiPath       = $this->naming->buildPath($this->rootPath, self::APIS_NAMESPACE, $apiName);
+            $specification       = $specificationDefinition->getSpecification();
+            $apiName             = $this->naming->stringToNamespace($specification->getNameSpace());
+            $apiNamespace        = $this->naming->buildNamespace($this->rootNamespace, self::APIS_NAMESPACE, $apiName);
+            $apiPath             = $this->naming->buildPath($this->rootPath, self::APIS_NAMESPACE, $apiName);
             $componentsNamespace = $this->naming->buildPath($this->rootNamespace, self::COMPONENTS_NAMESPACE, $apiName);
-            $componentsPath = $this->naming->buildPath($this->rootPath, self::COMPONENTS_NAMESPACE, $apiName);
+            $componentsPath      = $this->naming->buildPath($this->rootPath, self::COMPONENTS_NAMESPACE, $apiName);
 
             foreach ($specificationDefinition->getComponents() as $component) {
-                $componentName = $this->naming->stringToNamespace($component->getName());
+                $componentName      = $this->naming->stringToNamespace($component->getName());
                 $componentNamespace = $this->naming->buildNamespace($componentsNamespace, $componentName);
-                $componentPath = $this->naming->buildNamespace($componentsPath, $componentName);
+                $componentPath      = $this->naming->buildNamespace($componentsPath, $componentName);
 
                 $this->setTreeNames($component->getDto(), $componentNamespace, $componentName, $componentPath);
             }
@@ -119,7 +119,7 @@ class NameGenerator
     public function setResponseNames(ResponseDefinition $response, string $responseNamespace, string $operationName, string $responsePath): void
     {
         $responseBody = $response->getResponseBody();
-        if(!$responseBody instanceof DtoDefinition) {
+        if (! $responseBody instanceof DtoDefinition) {
             return;
         }
 
@@ -151,7 +151,7 @@ class NameGenerator
 
         foreach ($root->getProperties() as $property) {
             $objectDefinition = $property->getObjectTypeDefinition();
-            if (!$objectDefinition instanceof DtoDefinition) {
+            if (! $objectDefinition instanceof DtoDefinition) {
                 continue;
             }
 

@@ -41,10 +41,11 @@ class GraphGenerator
             $parsedSpecification = $this->loader->load($specificationName);
 
             $componentDefinitions = [];
-            $componentSchemas = $parsedSpecification->getComponentSchemas();
+            $componentSchemas     = $parsedSpecification->getComponentSchemas();
             foreach ($componentSchemas as $name => $_) {
                 $componentDefinitions[] = new ComponentDefinition($name);
             }
+
             foreach ($componentDefinitions as $component) {
                 $component->setDto($this->objectSchemaToDefinition($componentSchemas[$component->getName()], $componentDefinitions));
             }
@@ -120,7 +121,7 @@ class GraphGenerator
 
     /**
      * @param array<string|int,ObjectSchema|ObjectReference> $responses
-     * @param ComponentDefinition[] $components
+     * @param ComponentDefinition[]                          $components
      *
      * @return ResponseDefinition[]
      */
@@ -141,12 +142,13 @@ class GraphGenerator
     /** @param ComponentDefinition[] $components */
     private function objectTypeToDefinition(ObjectSchema|ObjectReference $type, array $components): DtoReference
     {
-        if($type instanceof ObjectReference) {
+        if ($type instanceof ObjectReference) {
             foreach ($components as $component) {
-                if($component->getName() === $type->getSchemaName()) {
+                if ($component->getName() === $type->getSchemaName()) {
                     return new ComponentReference($component);
                 }
             }
+
             throw CannotParseOpenApi::becauseUnknownReferenceFound($type->getSchemaName());
         }
 
@@ -167,9 +169,10 @@ class GraphGenerator
     {
         $definition = new PropertyDefinition($property);
         $objectType = $property->getObjectTypeDefinition();
-        if($objectType !== null) {
+        if ($objectType !== null) {
             $definition->setObjectTypeDefinition($this->objectTypeToDefinition($objectType, $components));
         }
+
         return $definition;
     }
 }

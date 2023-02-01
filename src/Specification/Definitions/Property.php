@@ -10,13 +10,13 @@ final class Property
 
     private bool $array = false;
     /** @var string|int|float|bool|null  */
-    private $defaultValue                       = null;
-    private bool $required                      = false;
-    private bool $nullable                      = false;
-    private ?int $scalarTypeId                  = null;
+    private $defaultValue                                           = null;
+    private bool $required                                          = false;
+    private bool $nullable                                          = false;
+    private ?int $scalarTypeId                                      = null;
     private ObjectSchema|ObjectReference|null $objectTypeDefinition = null;
-    private ?string $description                = null;
-    private ?string $pattern                    = null;
+    private ?string $description                                    = null;
+    private ?string $pattern                                        = null;
 
     public function __construct(string $name)
     {

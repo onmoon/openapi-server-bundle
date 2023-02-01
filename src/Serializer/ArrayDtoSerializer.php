@@ -6,7 +6,6 @@ namespace OnMoon\OpenApiServerBundle\Serializer;
 
 use Exception;
 use OnMoon\OpenApiServerBundle\Interfaces\Dto;
-use OnMoon\OpenApiServerBundle\Specification\Definitions\ObjectReference;
 use OnMoon\OpenApiServerBundle\Specification\Definitions\ObjectSchema;
 use OnMoon\OpenApiServerBundle\Specification\Definitions\Operation;
 use OnMoon\OpenApiServerBundle\Types\ScalarTypesResolver;

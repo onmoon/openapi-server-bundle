@@ -10,13 +10,13 @@ final class PropertyDefinition
 {
     private Property $specProperty;
     private string $classPropertyName;
-    private bool $nullable                       = true;
+    private bool $nullable                      = true;
     private ?DtoReference $objectTypeDefinition = null;
-    private ?string $getterName                  = null;
-    private ?string $setterName                  = null;
-    private bool $hasGetter                      = false;
-    private bool $hasSetter                      = false;
-    private bool $inConstructor                  = false;
+    private ?string $getterName                 = null;
+    private ?string $setterName                 = null;
+    private bool $hasGetter                     = false;
+    private bool $hasSetter                     = false;
+    private bool $inConstructor                 = false;
 
     public function __construct(Property $specProperty)
     {
