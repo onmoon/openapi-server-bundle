@@ -42,7 +42,7 @@ class GraphGenerator
 
             $componentDefinitions = [];
             $componentSchemas     = $parsedSpecification->getComponentSchemas();
-            foreach ($componentSchemas as $name => $_) {
+            foreach ($componentSchemas as $name => $_objectSchema) {
                 $componentDefinitions[] = new ComponentDefinition($name);
             }
 
