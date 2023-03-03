@@ -149,7 +149,8 @@ final class ApiController
     {
         $handlerName = $operation->getRequestHandlerName();
 
-        $requestHandlers                = $this->getApiLoader()::getSubscribedServices();
+        $requestHandlers = $this->getApiLoader()::getSubscribedServices();
+        /** @var String $requestHandlerSubscribedString */
         $requestHandlerSubscribedString = $requestHandlers[$handlerName];
         /** @psalm-var class-string<RequestHandler> $requestHandlerInterface */
         $requestHandlerInterface = ltrim($requestHandlerSubscribedString, '?');
