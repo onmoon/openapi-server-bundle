@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace OnMoon\OpenApiServerBundle\Test\Generation\Types;
 
+use OnMoon\OpenApiServerBundle\Interfaces\Dto;
 use OnMoon\OpenApiServerBundle\Interfaces\RequestHandler;
-use OnMoon\OpenApiServerBundle\Interfaces\ResponseDto;
 use OnMoon\OpenApiServerBundle\Test\Generation\GeneratedClassAsserter;
 use OnMoon\OpenApiServerBundle\Test\Generation\GenerationTestCase;
 use Psr\Container\ContainerInterface;
@@ -23,9 +23,9 @@ final class TypesGenerationTest extends GenerationTestCase
 
         $okDtoAsserter->assertInNamespace('Test\Apis\TestApi\GetTest\Dto\Response\OK');
         $okDtoAsserter->assertHasName('GetTestOKDto');
-        $okDtoAsserter->assertImplements(ResponseDto::class);
+        $okDtoAsserter->assertImplements(Dto::class);
         $okDtoAsserter->assertHasProperty('string_property', 'string', false);
-        $okDtoAsserter->assertHasUseStatement('OnMoon\OpenApiServerBundle\Interfaces\ResponseDto');
+        $okDtoAsserter->assertHasUseStatement('OnMoon\OpenApiServerBundle\Interfaces\Dto');
         $okDtoAsserter->assertHasMethod('getStringProperty');
         $okDtoAsserter->assertMethodDocblockContains('toArray', '/** @inheritDoc */');
         $okDtoAsserter->assertMethodReturns('getStringProperty', 'string', false);

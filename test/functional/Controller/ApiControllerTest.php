@@ -106,14 +106,14 @@ declare(strict_types=1);
 namespace OnMoon\OpenApiServerBundle\Test\Functional\Generated;
 
 use OnMoon\OpenApiServerBundle\Test\Functional\Generated\Apis\PetStore\GetGood\Dto\Request\GetGoodRequestDto;
-use OnMoon\OpenApiServerBundle\Test\Functional\Generated\Apis\PetStore\GetGood\Dto\Response\OK\GetGoodOKDto;
+use OnMoon\OpenApiServerBundle\Test\Functional\Generated\Components\PetStore\GoodResponseSchema\GoodResponseSchema;
 use OnMoon\OpenApiServerBundle\Test\Functional\Generated\Apis\PetStore\GetGood\GetGood;
 
 class GetGoodImpl implements GetGood
 {
-    public function getGood(GetGoodRequestDto \$request): GetGoodOKDto
+    public function getGood(GetGoodRequestDto \$request): GoodResponseSchema
     {
-        return new GetGoodOKDto('test');
+        return new GoodResponseSchema('test');
     }
 }
 EOD;

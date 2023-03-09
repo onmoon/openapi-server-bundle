@@ -12,7 +12,6 @@ use OnMoon\OpenApiServerBundle\CodeGenerator\AttributeGenerator;
 use OnMoon\OpenApiServerBundle\CodeGenerator\FileGenerator;
 use OnMoon\OpenApiServerBundle\CodeGenerator\Filesystem\FileWriter;
 use OnMoon\OpenApiServerBundle\CodeGenerator\GraphGenerator;
-use OnMoon\OpenApiServerBundle\CodeGenerator\InterfaceGenerator;
 use OnMoon\OpenApiServerBundle\CodeGenerator\NameGenerator;
 use OnMoon\OpenApiServerBundle\CodeGenerator\Naming\DefaultNamingStrategy;
 use OnMoon\OpenApiServerBundle\CodeGenerator\PhpParserGenerators\DtoCodeGenerator;
@@ -129,7 +128,6 @@ final class TestApiServerCodeGeneratorFactory
                 $rootNamespace,
                 $rootPath
             ),
-            new InterfaceGenerator(),
             new FileGenerator(
                 new DtoCodeGenerator(
                     $builderFactory,
