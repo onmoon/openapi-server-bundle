@@ -45,7 +45,8 @@ final class TestApiServerCodeGeneratorFactory
 
         $specificationLoader = new SpecificationLoader(
             new SpecificationParser(
-                new ScalarTypesResolver()
+                new ScalarTypesResolver(),
+                []
             ),
             new FileLocator(),
             new class () implements TagAwareCacheInterface {

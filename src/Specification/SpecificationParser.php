@@ -43,16 +43,12 @@ class SpecificationParser
 {
     private ScalarTypesResolver $typeResolver;
     /** @var string[] */
-    private array $skipHttpCodes = [];
+    private array $skipHttpCodes;
 
     /** @param array<array-key, string|int> $skipHttpCodes */
-    public function __construct(ScalarTypesResolver $typeResolver, ?array $skipHttpCodes = null)
+    public function __construct(ScalarTypesResolver $typeResolver, array $skipHttpCodes)
     {
         $this->typeResolver = $typeResolver;
-
-        if ($skipHttpCodes === null) {
-            return;
-        }
 
         $this->skipHttpCodes = array_map(static fn ($code) => (string) $code, $skipHttpCodes);
     }
@@ -177,10 +173,6 @@ class SpecificationParser
 
     private function isHttpCodeSkipped(string $code): bool
     {
-        if (count($this->skipHttpCodes) === 0) {
-            return false;
-        }
-
         foreach ($this->skipHttpCodes as $skippedCode) {
             if (strcasecmp($skippedCode, $code) === 0) {
                 return true;
