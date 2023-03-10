@@ -139,7 +139,7 @@ class SpecificationLoaderTest extends TestCase
     public function testRegisterSpecAndGettingRegisteredSpecifications(): void
     {
         $specificationLoader         = new SpecificationLoader(
-            new SpecificationParser(new ScalarTypesResolver()),
+            new SpecificationParser(new ScalarTypesResolver(), []),
             $this->fileLocator,
             $this->cache
         );
