@@ -6,7 +6,7 @@ namespace OnMoon\OpenApiServerBundle\Test\Unit\Router;
 
 use cebe\openapi\spec\OpenApi;
 use OnMoon\OpenApiServerBundle\Router\RouteLoader;
-use OnMoon\OpenApiServerBundle\Specification\Definitions\ObjectType;
+use OnMoon\OpenApiServerBundle\Specification\Definitions\ObjectSchema;
 use OnMoon\OpenApiServerBundle\Specification\Definitions\Operation;
 use OnMoon\OpenApiServerBundle\Specification\Definitions\Property;
 use OnMoon\OpenApiServerBundle\Specification\Definitions\Specification;
@@ -95,7 +95,7 @@ final class RouteLoaderTest extends TestCase
         $operationMethod             = 'GET';
         $operationRequestHandlerName = 'RequestHandlerExample';
         $operationRequestParameters  = [
-            'path' => new ObjectType([new Property('path')]),
+            'path' => new ObjectSchema([new Property('path')]),
         ];
 
         $requirements = [];

@@ -16,7 +16,7 @@ use cebe\openapi\spec\Responses;
 use cebe\openapi\spec\Schema;
 use cebe\openapi\spec\Type;
 use OnMoon\OpenApiServerBundle\Exception\CannotParseOpenApi;
-use OnMoon\OpenApiServerBundle\Specification\Definitions\ObjectType;
+use OnMoon\OpenApiServerBundle\Specification\Definitions\ObjectSchema;
 use OnMoon\OpenApiServerBundle\Specification\Definitions\SpecificationConfig;
 use OnMoon\OpenApiServerBundle\Specification\SpecificationParser;
 use OnMoon\OpenApiServerBundle\Types\ScalarTypesResolver;
@@ -201,7 +201,7 @@ final class SpecificationParserTest extends TestCase
             ]),
         ]);
 
-        $specificationParser = new SpecificationParser(new ScalarTypesResolver());
+        $specificationParser = new SpecificationParser(new ScalarTypesResolver(), []);
 
         $specification = $specificationParser->parseOpenApi(
             $specificationName,
@@ -232,7 +232,7 @@ final class SpecificationParserTest extends TestCase
 
         Assert::assertSame('someProperty3', $requestBodyProperties[3]->getName());
 
-        /** @var ObjectType $objectTypeDefinition */
+        /** @var ObjectSchema $objectTypeDefinition */
         $objectTypeDefinition = $requestBodyProperties[3]->getObjectTypeDefinition();
 
         Assert::assertTrue($objectTypeDefinition->getProperties()[2]->isArray());
@@ -323,7 +323,7 @@ final class SpecificationParserTest extends TestCase
             ]),
         ]);
 
-        $specificationParser = new SpecificationParser(new ScalarTypesResolver());
+        $specificationParser = new SpecificationParser(new ScalarTypesResolver(), []);
 
         $specification = $specificationParser->parseOpenApi(
             $specificationName,
@@ -372,7 +372,7 @@ final class SpecificationParserTest extends TestCase
             ]),
         ]);
 
-        $specificationParser = new SpecificationParser(new ScalarTypesResolver());
+        $specificationParser = new SpecificationParser(new ScalarTypesResolver(), []);
 
         $specification = $specificationParser->parseOpenApi(
             $specificationName,
@@ -381,7 +381,7 @@ final class SpecificationParserTest extends TestCase
         );
 
         Assert::assertInstanceOf(
-            ObjectType::class,
+            ObjectSchema::class,
             $specification
                 ->getOperation('SomeCustomOperationRequestBadMediaType')
                 ->getRequestBody()
@@ -473,7 +473,7 @@ final class SpecificationParserTest extends TestCase
      */
     public function testParseOpenApiSuccessDefaultValue(array $payload): void
     {
-        $specification = (new SpecificationParser(new ScalarTypesResolver()))->parseOpenApi(
+        $specification = (new SpecificationParser(new ScalarTypesResolver(), []))->parseOpenApi(
             'SomeCustomSpecification',
             new SpecificationConfig(
                 '/some/custom/specification/path',
@@ -517,7 +517,7 @@ final class SpecificationParserTest extends TestCase
 
         foreach ($specification->getOperation('SomeCustomThirdPostOperation')->getResponse('200')->getProperties() as $propertyName => $property) {
             if ((bool) $payload['responseProperties'][$property->getName()]['expected']['hasObjectTypeDefinitionInstance']) {
-                Assert::assertInstanceOf(ObjectType::class, $property->getObjectTypeDefinition());
+                Assert::assertInstanceOf(ObjectSchema::class, $property->getObjectTypeDefinition());
             }
 
             Assert::assertSame(
@@ -639,7 +639,7 @@ final class SpecificationParserTest extends TestCase
             'paths' => new Paths($paths),
         ]);
 
-        $specificationParser = new SpecificationParser(new ScalarTypesResolver());
+        $specificationParser = new SpecificationParser(new ScalarTypesResolver(), []);
 
         if ($expected['exceptionMessage'] === null) {
             $this->expectException(CannotParseOpenApi::class);
@@ -671,7 +671,7 @@ final class SpecificationParserTest extends TestCase
             ]),
         ]);
 
-        $specificationParser = new SpecificationParser(new ScalarTypesResolver());
+        $specificationParser = new SpecificationParser(new ScalarTypesResolver(), []);
 
         $this->expectException(CannotParseOpenApi::class);
 
@@ -714,7 +714,7 @@ final class SpecificationParserTest extends TestCase
             ]),
         ]);
 
-        $specificationParser = new SpecificationParser(new ScalarTypesResolver());
+        $specificationParser = new SpecificationParser(new ScalarTypesResolver(), []);
 
         $this->expectException(CannotParseOpenApi::class);
         $this->expectExceptionMessage('Property is not scheme');
@@ -752,7 +752,7 @@ final class SpecificationParserTest extends TestCase
             ]),
         ]);
 
-        $specificationParser = new SpecificationParser(new ScalarTypesResolver());
+        $specificationParser = new SpecificationParser(new ScalarTypesResolver(), []);
 
         $this->expectException(CannotParseOpenApi::class);
         $this->expectExceptionMessage('Property is not scheme');
@@ -792,7 +792,7 @@ final class SpecificationParserTest extends TestCase
             ]),
         ]);
 
-        $specificationParser = new SpecificationParser(new ScalarTypesResolver());
+        $specificationParser = new SpecificationParser(new ScalarTypesResolver(), []);
 
         $this->expectException(CannotParseOpenApi::class);
         $this->expectExceptionMessage(
@@ -839,7 +839,7 @@ final class SpecificationParserTest extends TestCase
             ]),
         ]);
 
-        $specificationParser = new SpecificationParser(new ScalarTypesResolver());
+        $specificationParser = new SpecificationParser(new ScalarTypesResolver(), []);
 
         $this->expectException(CannotParseOpenApi::class);
         $this->expectExceptionMessage(
@@ -881,7 +881,7 @@ final class SpecificationParserTest extends TestCase
             ]),
         ]);
 
-        $specificationParser = new SpecificationParser(new ScalarTypesResolver());
+        $specificationParser = new SpecificationParser(new ScalarTypesResolver(), []);
 
         $this->expectException(CannotParseOpenApi::class);
         $this->expectExceptionMessage(
@@ -917,7 +917,7 @@ final class SpecificationParserTest extends TestCase
             ]),
         ]);
 
-        $specificationParser = new SpecificationParser(new ScalarTypesResolver());
+        $specificationParser = new SpecificationParser(new ScalarTypesResolver(), []);
 
         $this->expectException(CannotParseOpenApi::class);
 

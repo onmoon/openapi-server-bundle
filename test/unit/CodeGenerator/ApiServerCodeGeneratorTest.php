@@ -14,7 +14,6 @@ use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\SpecificationDefinition
 use OnMoon\OpenApiServerBundle\CodeGenerator\FileGenerator;
 use OnMoon\OpenApiServerBundle\CodeGenerator\Filesystem\FileWriter;
 use OnMoon\OpenApiServerBundle\CodeGenerator\GraphGenerator;
-use OnMoon\OpenApiServerBundle\CodeGenerator\InterfaceGenerator;
 use OnMoon\OpenApiServerBundle\CodeGenerator\NameGenerator;
 use OnMoon\OpenApiServerBundle\Event\CodeGenerator\ClassGraphReadyEvent;
 use OnMoon\OpenApiServerBundle\Event\CodeGenerator\FilesReadyEvent;
@@ -33,6 +32,7 @@ final class ApiServerCodeGeneratorTest extends TestCase
             [
                 new SpecificationDefinition(
                     new SpecificationConfig('/', null, '/', 'application/json'),
+                    [],
                     []
                 ),
             ],
@@ -44,12 +44,6 @@ final class ApiServerCodeGeneratorTest extends TestCase
             ->expects(self::once())
             ->method('generateClassGraph')
             ->willReturn($graphDefinition);
-
-        $interfaceGenerator = $this->createMock(InterfaceGenerator::class);
-        $interfaceGenerator
-            ->expects(self::once())
-            ->method('setAllInterfaces')
-            ->with($graphDefinition);
 
         $attributeGenerator = $this->createMock(AttributeGenerator::class);
         $attributeGenerator
@@ -98,7 +92,6 @@ final class ApiServerCodeGeneratorTest extends TestCase
         $apiServerCodeGenerator = new ApiServerCodeGenerator(
             $graphGenerator,
             $nameGenerator,
-            $interfaceGenerator,
             $fileGenerator,
             $attributeGenerator,
             $fileWriter,

@@ -4,15 +4,15 @@ declare(strict_types=1);
 
 namespace OnMoon\OpenApiServerBundle\Test\Unit\Specification\Definitions;
 
-use OnMoon\OpenApiServerBundle\Specification\Definitions\ObjectType;
+use OnMoon\OpenApiServerBundle\Specification\Definitions\ObjectSchema;
 use OnMoon\OpenApiServerBundle\Specification\Definitions\Property;
 use PHPUnit\Framework\Assert;
 use PHPUnit\Framework\TestCase;
 
 /**
- * @covers \OnMoon\OpenApiServerBundle\Specification\Definitions\ObjectType
+ * @covers \OnMoon\OpenApiServerBundle\Specification\Definitions\ObjectSchema
  */
-final class ObjectTypeTest extends TestCase
+final class ObjectSchemaTest extends TestCase
 {
     public function testGetProperties(): void
     {
@@ -22,7 +22,7 @@ final class ObjectTypeTest extends TestCase
             'array' => true,
             'description' => 'Some Custom Description',
             'nullable' => true,
-            'objectTypeDefinition' => new ObjectType([]),
+            'objectTypeDefinition' => new ObjectSchema([]),
             'pattern' => '/[0-9]+/',
             'required' => true,
             'scalarTypeId' => 777,
@@ -39,7 +39,7 @@ final class ObjectTypeTest extends TestCase
             ->setRequired($propertyData['required'])
             ->setScalarTypeId($propertyData['scalarTypeId']);
 
-        $objectType = new ObjectType([$property]);
+        $objectType = new ObjectSchema([$property]);
 
         Assert::assertSame([$property], $objectType->getProperties());
     }
