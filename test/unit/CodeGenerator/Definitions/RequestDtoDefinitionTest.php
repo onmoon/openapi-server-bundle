@@ -4,15 +4,14 @@ declare(strict_types=1);
 
 namespace OnMoon\OpenApiServerBundle\Test\Unit\CodeGenerator\Definitions;
 
-use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\RequestBodyDtoDefinition;
-use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\RequestDtoDefinition;
-use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\RequestParametersDtoDefinition;
+use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\DtoDefinition;
+use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\PropertyDefinition;
+use OnMoon\OpenApiServerBundle\Specification\Definitions\Property;
 use PHPUnit\Framework\Assert;
 use PHPUnit\Framework\TestCase;
 
-/**
- * @covers \OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\RequestDtoDefinition
- */
+use function array_key_exists;
+
 final class RequestDtoDefinitionTest extends TestCase
 {
     /**
@@ -96,20 +95,42 @@ final class RequestDtoDefinitionTest extends TestCase
      */
     public function testRequestDtoDefinition(array $conditions, array $expected): void
     {
-        $bodyDtoDefinition = new RequestBodyDtoDefinition([]);
-        $queryParameters   = new RequestParametersDtoDefinition([]);
-        $pathParameters    = new RequestParametersDtoDefinition([]);
+        $propertyOne = new Property('body');
+        $propertyOne->setRequired(true);
 
-        $payload                      = [];
-        $payload['bodyDtoDefinition'] = (bool) $conditions['hasBodyDtoDefinition'] ? $bodyDtoDefinition : null;
-        $payload['queryParameters']   = (bool) $conditions['hasQueryParameters'] ? $queryParameters : null;
-        $payload['pathParameters']    = (bool) $conditions['hasPathParameters'] ? $pathParameters : null;
+        $propertyTwo = new Property('queryParameters');
+        $propertyTwo->setRequired(true);
 
-        $requestDtoDefinition = new RequestDtoDefinition(
-            $payload['bodyDtoDefinition'],
-            $payload['queryParameters'],
-            $payload['pathParameters']
-        );
+        $propertyThree = new Property('pathParameters');
+        $propertyThree->setRequired(true);
+
+        $propertyObjectTypeDefinitionOne   = new DtoDefinition([]);
+        $propertyObjectTypeDefinitionTwo   = new DtoDefinition([]);
+        $propertyObjectTypeDefinitionThree = new DtoDefinition([]);
+
+        $propertyDefinitionOne = new PropertyDefinition($propertyOne);
+        $propertyDefinitionOne->setObjectTypeDefinition($propertyObjectTypeDefinitionOne);
+
+        $propertyDefinitionTwo = new PropertyDefinition($propertyTwo);
+        $propertyDefinitionTwo->setObjectTypeDefinition($propertyObjectTypeDefinitionTwo);
+
+        $propertyDefinitionThree = new PropertyDefinition($propertyThree);
+        $propertyDefinitionThree->setObjectTypeDefinition($propertyObjectTypeDefinitionThree);
+
+        $payload = [];
+        if ((bool) $conditions['hasBodyDtoDefinition']) {
+            $payload['bodyDtoDefinition'] = $propertyDefinitionOne;
+        }
+
+        if ((bool) $conditions['hasQueryParameters']) {
+            $payload['queryParameters'] = $propertyDefinitionTwo;
+        }
+
+        if ((bool) $conditions['hasPathParameters']) {
+            $payload['pathParameters'] = $propertyDefinitionThree;
+        }
+
+        $requestDtoDefinition = new DtoDefinition($payload);
 
         Assert::assertSame($expected['isEmpty'], $requestDtoDefinition->isEmpty());
 
@@ -118,9 +139,9 @@ final class RequestDtoDefinitionTest extends TestCase
         }
 
         $propertiesMap = [
-            'body' => $payload['bodyDtoDefinition'],
-            'queryParameters' => $payload['queryParameters'],
-            'pathParameters' => $payload['pathParameters'],
+            'body' => array_key_exists('bodyDtoDefinition', $payload) ? $payload['bodyDtoDefinition']->getObjectTypeDefinition() : null,
+            'queryParameters' => array_key_exists('queryParameters', $payload) ? $payload['queryParameters']->getObjectTypeDefinition() : null,
+            'pathParameters' => array_key_exists('pathParameters', $payload) ? $payload['pathParameters']->getObjectTypeDefinition() : null,
         ];
 
         foreach ($requestDtoDefinition->getProperties() as $property) {
