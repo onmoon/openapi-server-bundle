@@ -20,7 +20,7 @@ final class ResponseDtoEventTest extends TestCase
     {
         $responseDtoMock = $this->createMock(Dto::class);
         $operationId     = '12345';
-        $specification   = new Specification([], new OpenApi([]));
+        $specification   = new Specification([], [], new OpenApi([]));
 
         $responseDtoEvent = new ResponseDtoEvent($responseDtoMock, $operationId, $specification);
 

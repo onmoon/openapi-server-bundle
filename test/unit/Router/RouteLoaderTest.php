@@ -113,7 +113,7 @@ final class RouteLoaderTest extends TestCase
 
         $expectedOperationsCount = count($operations);
 
-        $specification = new Specification($operations, new OpenApi([]));
+        $specification = new Specification($operations, [], new OpenApi([]));
 
         $this->specificationLoaderMock
             ->expects(self::once())

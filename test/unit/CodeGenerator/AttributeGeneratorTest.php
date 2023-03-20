@@ -5,19 +5,21 @@ declare(strict_types=1);
 namespace OnMoon\OpenApiServerBundle\Test\Unit\CodeGenerator;
 
 use OnMoon\OpenApiServerBundle\CodeGenerator\AttributeGenerator;
+use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\ComponentDefinition;
 use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\DtoDefinition;
 use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\GraphDefinition;
 use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\OperationDefinition;
 use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\PropertyDefinition;
-use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\RequestBodyDtoDefinition;
-use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\RequestDtoDefinition;
-use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\ResponseDtoDefinition;
+use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\RequestHandlerInterfaceDefinition;
+use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\ResponseDefinition;
 use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\ServiceSubscriberDefinition;
 use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\SpecificationDefinition;
 use OnMoon\OpenApiServerBundle\Specification\Definitions\Property;
 use OnMoon\OpenApiServerBundle\Specification\Definitions\SpecificationConfig;
 use PHPUnit\Framework\Assert;
 use PHPUnit\Framework\TestCase;
+
+use function array_map;
 
 /**
  * @covers \OnMoon\OpenApiServerBundle\CodeGenerator\AttributeGenerator
@@ -30,13 +32,15 @@ class AttributeGeneratorTest extends TestCase
     private PropertyDefinition $propertyDefinition;
     private PropertyDefinition $propertyDefinitionTwo;
 
-    private RequestDtoDefinition $requestDtoDefinition;
-    private ResponseDtoDefinition $responseDtoDefinition;
+    private DtoDefinition $requestDtoDefinition;
+    private ResponseDefinition $responseDtoDefinition;
 
     private OperationDefinition $operationDefinition;
     private GraphDefinition $graphDefinition;
 
     private AttributeGenerator $attributesGenerator;
+
+    private RequestHandlerInterfaceDefinition $requestHandlerInterface;
 
     public function setUp(): void
     {
@@ -52,24 +56,35 @@ class AttributeGeneratorTest extends TestCase
         $this->propertyDefinitionTwo = new PropertyDefinition($this->propertyTwo);
         $this->propertyDefinitionTwo->setObjectTypeDefinition($propertyObjectTypeDefinitionTwo);
 
-        $requestBodyDtoDefinition   = new RequestBodyDtoDefinition([$this->propertyDefinition]);
-        $this->requestDtoDefinition = new RequestDtoDefinition($requestBodyDtoDefinition, null, null);
+        $this->requestDtoDefinition  = new DtoDefinition([$this->propertyDefinition]);
+        $this->responseDtoDefinition = new ResponseDefinition('200', new DtoDefinition([$this->propertyDefinitionTwo]));
 
-        $this->responseDtoDefinition = new ResponseDtoDefinition('200', [$this->propertyDefinitionTwo]);
-        $this->operationDefinition   = new OperationDefinition(
+        $this->requestHandlerInterface = new RequestHandlerInterfaceDefinition(
+            $this->requestDtoDefinition,
+            array_map(
+                static fn (ResponseDefinition $response) => $response->getResponseBody(),
+                [$this->responseDtoDefinition]
+            )
+        );
+
+        $this->operationDefinition = new OperationDefinition(
             '/',
             'get',
             'test',
             '',
             null,
+            null,
             $this->requestDtoDefinition,
-            [$this->responseDtoDefinition]
+            [$this->responseDtoDefinition],
+            $this->requestHandlerInterface
         );
-        $this->graphDefinition       = new GraphDefinition(
+
+        $this->graphDefinition = new GraphDefinition(
             [
                 new SpecificationDefinition(
                     new SpecificationConfig('/', null, '/', 'application/json'),
-                    [$this->operationDefinition]
+                    [$this->operationDefinition],
+                    [(new ComponentDefinition('TestComponent'))->setDto(new DtoDefinition([]))]
                 ),
             ],
             new ServiceSubscriberDefinition()
@@ -126,13 +141,17 @@ class AttributeGeneratorTest extends TestCase
             '',
             null,
             null,
-            [$this->responseDtoDefinition]
+            null,
+            [$this->responseDtoDefinition],
+            $this->requestHandlerInterface
         );
-        $this->graphDefinition     = new GraphDefinition(
+
+        $this->graphDefinition = new GraphDefinition(
             [
                 new SpecificationDefinition(
                     new SpecificationConfig('/', null, '/', 'application/json'),
-                    [$this->operationDefinition]
+                    [$this->operationDefinition],
+                    [(new ComponentDefinition('TestComponent'))->setDto(new DtoDefinition([]))]
                 ),
             ],
             new ServiceSubscriberDefinition()

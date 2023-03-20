@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace OnMoon\OpenApiServerBundle\Test\Unit\CodeGenerator\Definitions;
 
+use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\ComponentDefinition;
 use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\OperationDefinition;
+use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\RequestHandlerInterfaceDefinition;
 use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\SpecificationDefinition;
 use OnMoon\OpenApiServerBundle\Specification\Definitions\SpecificationConfig;
 use PHPUnit\Framework\Assert;
@@ -57,14 +59,19 @@ final class SpecificationDefinitionTest extends TestCase
             'Some\Namespace',
             'some/media-type'
         );
+
+        $requestHandlerInterfaceDefinition = new RequestHandlerInterfaceDefinition(null, []);
+
         $operationDefinition = new OperationDefinition(
             $payload['url'],
             $payload['method'],
             $payload['operationId'],
             $payload['requestHandlerName'],
             $payload['summary'],
+            null,
             $payload['request'],
-            $payload['responses']
+            $payload['responses'],
+            $requestHandlerInterfaceDefinition
         );
 
         $payload                  = [];
@@ -73,7 +80,8 @@ final class SpecificationDefinitionTest extends TestCase
 
         $specificationDefinition = new SpecificationDefinition(
             $payload['specification'],
-            $payload['operations']
+            $payload['operations'],
+            [new ComponentDefinition('TestComponent')]
         );
 
         Assert::assertSame($payload['operations'], $specificationDefinition->getOperations());

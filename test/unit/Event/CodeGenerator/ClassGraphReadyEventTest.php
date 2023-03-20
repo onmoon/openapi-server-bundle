@@ -19,15 +19,17 @@ final class ClassGraphReadyEventTest extends TestCase
 {
     public function testGraphMethodReturnGraph(): void
     {
-        $graph                = new GraphDefinition(
+        $graph = new GraphDefinition(
             [
                 new SpecificationDefinition(
                     new SpecificationConfig('/', null, '/', 'application/json'),
+                    [],
                     []
                 ),
             ],
             new ServiceSubscriberDefinition()
         );
+
         $classGraphReadyEvent = new ClassGraphReadyEvent($graph);
 
         $return = $classGraphReadyEvent->graph();

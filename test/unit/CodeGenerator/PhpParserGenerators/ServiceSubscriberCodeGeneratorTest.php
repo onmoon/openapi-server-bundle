@@ -5,14 +5,13 @@ declare(strict_types=1);
 namespace OnMoon\OpenApiServerBundle\Test\Unit\CodeGenerator\PhpParserGenerators;
 
 use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\ClassDefinition;
+use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\ComponentDefinition;
 use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\DtoDefinition;
 use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\GraphDefinition;
 use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\OperationDefinition;
 use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\PropertyDefinition;
-use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\RequestBodyDtoDefinition;
-use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\RequestDtoDefinition;
 use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\RequestHandlerInterfaceDefinition;
-use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\ResponseDtoDefinition;
+use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\ResponseDefinition;
 use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\ServiceSubscriberDefinition;
 use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\SpecificationDefinition;
 use OnMoon\OpenApiServerBundle\CodeGenerator\PhpParserGenerators\ServiceSubscriberCodeGenerator;
@@ -36,26 +35,25 @@ final class ServiceSubscriberCodeGeneratorTest extends TestCase
 
         $this->serviceSubscriberCodeGenerator = new ServiceSubscriberCodeGenerator($builderFactory, $scalarTypeResolver, '1', false);
 
-        $requestHandlerInterfaceDefinition = new RequestHandlerInterfaceDefinition();
+        $requestHandlerInterfaceDefinition = new RequestHandlerInterfaceDefinition(null, []);
         $requestHandlerInterfaceDefinition->setNamespace('NamespaceOne\NamespaceTwo');
         $requestHandlerInterfaceDefinition->setClassName('ClassName');
 
-        $request               = new RequestDtoDefinition(
-            new RequestBodyDtoDefinition(
-                [
-                    (new PropertyDefinition(new Property('locator')))
-                    ->setObjectTypeDefinition(
-                        new DtoDefinition([
-                            (new PropertyDefinition(new Property('locator')))
-                                ->setObjectTypeDefinition(new DtoDefinition([])),
-                        ])
-                    ),
-                ]
-            )
-        );
-        $responseDtoDefinition = new ResponseDtoDefinition(
-            '200',
+        $request = new DtoDefinition(
             [
+                (new PropertyDefinition(new Property('locator')))
+                ->setObjectTypeDefinition(
+                    new DtoDefinition([
+                        (new PropertyDefinition(new Property('locator')))
+                            ->setObjectTypeDefinition(new DtoDefinition([])),
+                    ])
+                ),
+            ]
+        );
+
+        $responseDtoDefinition = new ResponseDefinition(
+            '200',
+            (new DtoDefinition([
                 (new PropertyDefinition(new Property('locator')))
                     ->setObjectTypeDefinition(
                         new DtoDefinition([
@@ -63,19 +61,22 @@ final class ServiceSubscriberCodeGeneratorTest extends TestCase
                                 ->setObjectTypeDefinition(new DtoDefinition([])),
                         ])
                     ),
-            ]
+            ]))->setNamespace('')->setClassName('ResponceClassName')
         );
-        $operationDefinition   = new OperationDefinition(
+
+        $operationDefinition = new OperationDefinition(
             '/',
             'get',
             'test',
             'test',
             null,
+            null,
             $request,
-            [$responseDtoDefinition]
+            [$responseDtoDefinition],
+            $requestHandlerInterfaceDefinition
         );
-        $operationDefinition->setRequestHandlerInterface($requestHandlerInterfaceDefinition);
-        $operationDefinition->setMarkersInterface(ClassDefinition::fromFQCN('NamespaceOne\NamespaceTwo\ClassName'));
+
+        //dd($operationDefinition->getResponses()[0]->getResponseBody()->getFQCN());
 
         $serviceSubscriberDefinition = new ServiceSubscriberDefinition();
         $serviceSubscriberDefinition->setNamespace('NamespaceOne\NamespaceTwo');
@@ -89,7 +90,8 @@ final class ServiceSubscriberCodeGeneratorTest extends TestCase
             [
                 new SpecificationDefinition(
                     new SpecificationConfig('/', null, '/', 'application/json'),
-                    [$operationDefinition]
+                    [$operationDefinition],
+                    [new ComponentDefinition('TestComponent')]
                 ),
             ],
             $serviceSubscriberDefinition
@@ -108,12 +110,14 @@ namespace NamespaceOne\NamespaceTwo;
 
 use Psr\Container\ContainerInterface;
 use OnMoon\OpenApiServerBundle\Interfaces\RequestHandler;
+use \ResponceClassName;
 /**
  * This class was automatically generated
  * You should not change it manually as it will be overwritten
  */
 class ClassName implements ClassName, ClassName
 {
+    private const HTTP_CODES = [ClassName::class => [ResponceClassName::class => ['200']]];
     private ContainerInterface $locator;
     public function __construct(ContainerInterface $locator)
     {
@@ -124,7 +128,7 @@ class ClassName implements ClassName, ClassName
      */
     public static function getSubscribedServices() : array
     {
-        return array('test' => '?' . ClassName::class);
+        return ['test' => '?' . ClassName::class];
     }
     public function get(string $interface) : ?RequestHandler
     {
@@ -132,6 +136,11 @@ class ClassName implements ClassName, ClassName
             return null;
         }
         return $this->locator->get($interface);
+    }
+    /** @return string[] */
+    public function getAllowedCodes(string $apiClass, string $dtoClass) : array
+    {
+        return self::HTTP_CODES[$apiClass][$dtoClass];
     }
 }
 EOD;

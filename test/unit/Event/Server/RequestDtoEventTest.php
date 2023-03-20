@@ -39,7 +39,7 @@ final class RequestDtoEventTest extends TestCase
             }
         };
         $operationId    = '12345';
-        $specification  = new Specification([], new OpenApi([]));
+        $specification  = new Specification([], [], new OpenApi([]));
         $requestHandler = new class () implements RequestHandler{
         };
 
@@ -57,7 +57,7 @@ final class RequestDtoEventTest extends TestCase
         $request        = new Request();
         $requestDto     = null;
         $operationId    = '12345';
-        $specification  = new Specification([], new OpenApi([]));
+        $specification  = new Specification([], [], new OpenApi([]));
         $requestHandler = new class () implements RequestHandler{
         };
 

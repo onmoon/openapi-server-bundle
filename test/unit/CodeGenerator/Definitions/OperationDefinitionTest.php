@@ -4,11 +4,10 @@ declare(strict_types=1);
 
 namespace OnMoon\OpenApiServerBundle\Test\Unit\CodeGenerator\Definitions;
 
-use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\ClassDefinition;
+use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\DtoDefinition;
 use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\OperationDefinition;
-use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\RequestDtoDefinition;
 use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\RequestHandlerInterfaceDefinition;
-use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\ResponseDtoDefinition;
+use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\ResponseDefinition;
 use PHPUnit\Framework\Assert;
 use PHPUnit\Framework\TestCase;
 
@@ -61,11 +60,17 @@ final class OperationDefinitionTest extends TestCase
     public function testOperationDefinition(array $payload, array $conditions): void
     {
         $payload['request']   = (bool) $conditions['hasRequestDtoDefinition']
-            ? new RequestDtoDefinition()
+            ? new DtoDefinition([])
             : null;
         $payload['responses'] = (bool) $conditions['hasResponseDtoDefinition']
-            ? [new ResponseDtoDefinition('200', [])]
+            ? [new ResponseDefinition('200', new DtoDefinition([]))]
             : [];
+
+        $requestHandlerInterface = new RequestHandlerInterfaceDefinition(
+            $payload['request'],
+            (bool) $conditions['hasResponseDtoDefinition'] ? [$payload['responses'][0]->getResponseBody()] : []
+        );
+
 
         $generatedInterfaceDefinition = new OperationDefinition(
             $payload['url'],
@@ -73,8 +78,10 @@ final class OperationDefinitionTest extends TestCase
             $payload['operationId'],
             $payload['requestHandlerName'],
             $payload['summary'],
+            null,
             $payload['request'],
-            $payload['responses']
+            $payload['responses'],
+            $requestHandlerInterface
         );
 
         Assert::assertSame($payload['url'], $generatedInterfaceDefinition->getUrl());
@@ -84,46 +91,6 @@ final class OperationDefinitionTest extends TestCase
         Assert::assertSame($payload['summary'], $generatedInterfaceDefinition->getSummary());
         Assert::assertSame($payload['request'], $generatedInterfaceDefinition->getRequest());
         Assert::assertSame($payload['responses'], $generatedInterfaceDefinition->getResponses());
-    }
-
-    public function testOperationDefinitionChanged(): void
-    {
-        $classDefinition                = new ClassDefinition();
-        $requestHandlerInterface        = new RequestHandlerInterfaceDefinition();
-        $changedClassDefinition         = new ClassDefinition();
-        $changedRequestHandlerInterface = new RequestHandlerInterfaceDefinition();
-
-        $payload = [
-            'url' => '/some/custom/relative/url',
-            'method' => 'GET',
-            'operationId' => '',
-            'requestHandlerName' => 'SomeCustomRequestHandlerName',
-            'summary' => null,
-            'request' => null,
-            'responses' => [],
-        ];
-
-        $generatedInterfaceDefinition = new OperationDefinition(
-            $payload['url'],
-            $payload['method'],
-            $payload['operationId'],
-            $payload['requestHandlerName'],
-            $payload['summary'],
-            $payload['request'],
-            $payload['responses']
-        );
-
-        $generatedInterfaceDefinition->setMarkersInterface($classDefinition);
-        $generatedInterfaceDefinition->setRequestHandlerInterface($requestHandlerInterface);
-
-        Assert::assertSame($classDefinition, $generatedInterfaceDefinition->getMarkersInterface());
         Assert::assertSame($requestHandlerInterface, $generatedInterfaceDefinition->getRequestHandlerInterface());
-
-        $generatedInterfaceDefinition
-            ->setMarkersInterface($changedClassDefinition)
-            ->setRequestHandlerInterface($changedRequestHandlerInterface);
-
-        Assert::assertSame($changedClassDefinition, $generatedInterfaceDefinition->getMarkersInterface());
-        Assert::assertSame($changedRequestHandlerInterface, $generatedInterfaceDefinition->getRequestHandlerInterface());
     }
 }

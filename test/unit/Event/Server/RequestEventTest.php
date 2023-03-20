@@ -20,7 +20,7 @@ final class RequestEventTest extends TestCase
     {
         $requestMock   = new Request();
         $operationId   = '12345';
-        $specification = new Specification([], new OpenApi([]));
+        $specification = new Specification([], [], new OpenApi([]));
 
         $requestDtoEvent = new RequestEvent($requestMock, $operationId, $specification);
 

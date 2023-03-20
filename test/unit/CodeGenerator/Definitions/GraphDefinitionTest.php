@@ -49,6 +49,7 @@ final class GraphDefinitionTest extends TestCase
                 'Some\Namespace',
                 'some/media-type'
             ),
+            [],
             []
         );
         $serviceSubscriberDefinition = new ServiceSubscriberDefinition();

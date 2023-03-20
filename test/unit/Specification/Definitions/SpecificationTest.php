@@ -71,6 +71,7 @@ final class SpecificationTest extends TestCase
 
         $specification = new Specification(
             $specificationData['operations'],
+            [],
             $openApiMock
         );
 

@@ -28,7 +28,7 @@ final class LeaguePSR7RequestSchemaValidatorTest extends TestCase
         $request     = new Request();
 
         $operation     = new Operation('test_url', 'test_method', 'RequestHandler');
-        $specification = new Specification([$operationId => $operation], $openApi);
+        $specification = new Specification([$operationId => $operation], [], $openApi);
 
         $validatorBuilderMock = $this->createMock(ValidatorBuilder::class);
         $validatorBuilderMock
