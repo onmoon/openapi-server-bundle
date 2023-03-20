@@ -71,7 +71,6 @@ final class OperationDefinitionTest extends TestCase
             (bool) $conditions['hasResponseDtoDefinition'] ? [$payload['responses'][0]->getResponseBody()] : []
         );
 
-
         $generatedInterfaceDefinition = new OperationDefinition(
             $payload['url'],
             $payload['method'],

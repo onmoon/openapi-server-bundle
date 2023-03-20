@@ -6,7 +6,6 @@ namespace OnMoon\OpenApiServerBundle\Test\Unit\CodeGenerator;
 
 use Lukasoppermann\Httpstatus\Httpstatus;
 use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\DtoDefinition;
-use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\GeneratedInterfaceDefinition;
 use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\GraphDefinition;
 use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\OperationDefinition;
 use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\PropertyDefinition;
@@ -25,7 +24,6 @@ use sspat\ReservedWords\ReservedWords;
 use function array_map;
 use function array_merge;
 use function count;
-use function dd;
 use function str_replace;
 
 use const DIRECTORY_SEPARATOR;
