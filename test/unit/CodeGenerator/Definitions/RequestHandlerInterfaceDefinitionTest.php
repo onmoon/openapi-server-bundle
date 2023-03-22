@@ -6,6 +6,7 @@ namespace OnMoon\OpenApiServerBundle\Test\Unit\CodeGenerator\Definitions;
 
 use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\DtoDefinition;
 use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\RequestHandlerInterfaceDefinition;
+use OnMoon\OpenApiServerBundle\Interfaces\RequestHandler;
 use PHPUnit\Framework\Assert;
 use PHPUnit\Framework\TestCase;
 
@@ -63,5 +64,6 @@ final class RequestHandlerInterfaceDefinitionTest extends TestCase
         Assert::assertSame($payload['responseTypes'], $requestHandlerInterfaceDefinition->getResponseTypes());
         Assert::assertSame($payload['methodName'], $requestHandlerInterfaceDefinition->getMethodName());
         Assert::assertSame($payload['methodDescription'], $requestHandlerInterfaceDefinition->getMethodDescription());
+        Assert::assertSame(RequestHandler::class, $requestHandlerInterfaceDefinition->getExtends()->getFQCN());
     }
 }
