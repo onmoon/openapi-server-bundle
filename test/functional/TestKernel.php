@@ -11,11 +11,13 @@ use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\HttpKernel\Kernel as BaseKernel;
 
+use const DIRECTORY_SEPARATOR;
+
 abstract class TestKernel extends BaseKernel
 {
     use MicroKernelTrait;
 
-    public static string $bundleRootPath      = __DIR__ . '/Generated';
+    public static string $bundleRootPath      = __DIR__ . DIRECTORY_SEPARATOR . 'Generated';
     public static string $bundleRootNamespace = __NAMESPACE__ . '\Generated';
 
     protected function build(ContainerBuilder $container): void

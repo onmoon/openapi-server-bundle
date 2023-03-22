@@ -465,8 +465,8 @@ class GraphGeneratorTest extends TestCase
         $responseObjectPropertyTypeDefinition->setObjectTypeDefinition(
             new DtoDefinition([])
         );
-        $responseDefinition         = new ResponseDefinition('200', new DtoDefinition([new PropertyDefinition($responseTitleProperty), $responseObjectPropertyTypeDefinition]));
-        $responses                  = [$responseDefinition];
+        $responseDefinition = new ResponseDefinition('200', new DtoDefinition([new PropertyDefinition($responseTitleProperty), $responseObjectPropertyTypeDefinition]));
+        $responses          = [$responseDefinition];
 
         $singleHttpCode = null;
         if (count($responses) === 1 && $responses[0]->getResponseBody()->isEmpty()) {

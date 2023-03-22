@@ -22,8 +22,6 @@ use PHPUnit\Framework\TestCase;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Webmozart\Assert\Assert;
 
-use const DIRECTORY_SEPARATOR;
-
 /**
  * @covers  \OnMoon\OpenApiServerBundle\CodeGenerator\ApiServerCodeGenerator
  */
@@ -114,7 +112,7 @@ final class ApiServerCodeGeneratorTest extends TestCase
         $writtenFiles = $apiServerCodeGenerator->generate();
 
         Assert::count($writtenFiles, 2);
-        Assert::same($writtenFiles[0], 'test_file_path' . DIRECTORY_SEPARATOR . 'test_file_name');
-        Assert::same($writtenFiles[1], 'test_file_path_two' . DIRECTORY_SEPARATOR . 'test_file_name_two');
+        Assert::same($writtenFiles[0], 'test_file_path/test_file_name');
+        Assert::same($writtenFiles[1], 'test_file_path_two/test_file_name_two');
     }
 }
