@@ -24,7 +24,7 @@ abstract class TestKernel extends BaseKernel
     {
         $specificationName = 'petstore';
         $specification     = [
-            'path' => __DIR__ . '/openapi_specification.yaml',
+            'path' => __DIR__ . DIRECTORY_SEPARATOR . 'openapi_specification.yaml',
             'type' => 'yaml',
             'name_space' => 'PetStore',
             'media_type' => 'application/json',
@@ -47,12 +47,12 @@ abstract class TestKernel extends BaseKernel
 
     public function getCacheDir(): string
     {
-        return __DIR__ . '/var/cache';
+        return __DIR__ . DIRECTORY_SEPARATOR . 'var' . DIRECTORY_SEPARATOR . 'cache';
     }
 
     public function getLogDir(): string
     {
-        return __DIR__ . '/var/log';
+        return __DIR__ . DIRECTORY_SEPARATOR . 'var' . DIRECTORY_SEPARATOR . 'log';
     }
 
     /**
@@ -76,7 +76,7 @@ abstract class TestKernel extends BaseKernel
     public function shutdown(): void
     {
         $filesystem = new Filesystem();
-        $filesystem->remove([__DIR__ . '/var']);
+        $filesystem->remove([__DIR__ . DIRECTORY_SEPARATOR . 'var']);
 
         parent::shutdown();
     }

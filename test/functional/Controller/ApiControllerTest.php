@@ -23,6 +23,8 @@ use Symfony\Component\Routing\Loader\Configurator\RoutingConfigurator;
 use function Safe\file_put_contents;
 use function Safe\json_decode;
 
+use const DIRECTORY_SEPARATOR;
+
 /**
  * @covers \OnMoon\OpenApiServerBundle\Controller\ApiController
  */
@@ -91,7 +93,7 @@ class ApiControllerTest extends WebTestCase
 
             protected function configureRoutes(RoutingConfigurator $routes): void
             {
-                $routes->import(__DIR__ . '/openapi_routes.yaml');
+                $routes->import(__DIR__ . DIRECTORY_SEPARATOR . 'openapi_routes.yaml');
             }
         };
     }
@@ -118,7 +120,7 @@ class GetGoodImpl implements GetGood
 }
 EOD;
 
-        file_put_contents(TestKernel::$bundleRootPath . '/GetGoodImpl.php', $content);
+        file_put_contents(TestKernel::$bundleRootPath . DIRECTORY_SEPARATOR . '/GetGoodImpl.php', $content);
 
         return TestKernel::$bundleRootNamespace . '\GetGoodImpl';
     }

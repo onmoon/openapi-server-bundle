@@ -9,6 +9,8 @@ use OnMoon\OpenApiServerBundle\Event\CodeGenerator\ClassGraphReadyEvent;
 use OnMoon\OpenApiServerBundle\Event\CodeGenerator\FilesReadyEvent;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
+use const DIRECTORY_SEPARATOR;
+
 class ApiServerCodeGenerator
 {
     private GraphGenerator $graphGenerator;
@@ -44,7 +46,7 @@ class ApiServerCodeGenerator
 
         foreach ($files as $item) {
             $this->writer->write($item->getClass()->getFilePath(), $item->getClass()->getFileName(), $item->getFileContents());
-            $writtenFiles[] = $item->getClass()->getFilePath() . '/' . $item->getClass()->getFileName();
+            $writtenFiles[] = $item->getClass()->getFilePath() . DIRECTORY_SEPARATOR . $item->getClass()->getFileName();
         }
 
         return $writtenFiles;

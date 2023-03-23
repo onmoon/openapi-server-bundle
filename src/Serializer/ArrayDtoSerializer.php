@@ -49,7 +49,6 @@ final class ArrayDtoSerializer implements DtoSerializer
 
         $bodyType = $operation->getRequestBody();
         if ($bodyType !== null) {
-            /** @var resource|string $source */
             $source = $request->getContent();
             if (is_resource($source)) {
                 throw new Exception('Expecting string as contents, resource received');
