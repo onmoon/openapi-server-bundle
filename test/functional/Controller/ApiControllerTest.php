@@ -120,7 +120,7 @@ class GetGoodImpl implements GetGood
 }
 EOD;
 
-        file_put_contents(TestKernel::$bundleRootPath . DIRECTORY_SEPARATOR . '/GetGoodImpl.php', $content);
+        file_put_contents(TestKernel::$bundleRootPath . DIRECTORY_SEPARATOR . 'GetGoodImpl.php', $content);
 
         return TestKernel::$bundleRootNamespace . '\GetGoodImpl';
     }

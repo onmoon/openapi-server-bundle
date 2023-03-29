@@ -76,8 +76,6 @@ final class ServiceSubscriberCodeGeneratorTest extends TestCase
             $requestHandlerInterfaceDefinition
         );
 
-        //dd($operationDefinition->getResponses()[0]->getResponseBody()->getFQCN());
-
         $serviceSubscriberDefinition = new ServiceSubscriberDefinition();
         $serviceSubscriberDefinition->setNamespace('NamespaceOne\NamespaceTwo');
         $serviceSubscriberDefinition->setClassName('ClassName');
