@@ -4,22 +4,26 @@ declare(strict_types=1);
 
 namespace OnMoon\OpenApiServerBundle\CodeGenerator;
 
+use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\ComponentDefinition;
+use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\ComponentReference;
 use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\DtoDefinition;
+use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\DtoReference;
 use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\GraphDefinition;
 use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\OperationDefinition;
 use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\PropertyDefinition;
-use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\RequestBodyDtoDefinition;
-use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\RequestDtoDefinition;
-use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\RequestParametersDtoDefinition;
-use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\ResponseDtoDefinition;
+use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\RequestHandlerInterfaceDefinition;
+use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\ResponseDefinition;
 use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\ServiceSubscriberDefinition;
 use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\SpecificationDefinition;
-use OnMoon\OpenApiServerBundle\Specification\Definitions\ObjectType;
+use OnMoon\OpenApiServerBundle\Exception\CannotParseOpenApi;
+use OnMoon\OpenApiServerBundle\Specification\Definitions\ObjectReference;
+use OnMoon\OpenApiServerBundle\Specification\Definitions\ObjectSchema;
+use OnMoon\OpenApiServerBundle\Specification\Definitions\Operation;
 use OnMoon\OpenApiServerBundle\Specification\Definitions\Property;
 use OnMoon\OpenApiServerBundle\Specification\SpecificationLoader;
 
-use function array_key_exists;
 use function array_map;
+use function count;
 
 class GraphGenerator
 {
@@ -36,21 +40,34 @@ class GraphGenerator
         foreach ($this->loader->list() as $specificationName => $specificationConfig) {
             $parsedSpecification = $this->loader->load($specificationName);
 
+            $componentDefinitions = [];
+            $componentSchemas     = $parsedSpecification->getComponentSchemas();
+            foreach ($componentSchemas as $name => $_objectSchema) {
+                $componentDefinitions[] = new ComponentDefinition($name);
+            }
+
+            foreach ($componentDefinitions as $component) {
+                $component->setDto($this->objectSchemaToDefinition($componentSchemas[$component->getName()], $componentDefinitions));
+            }
+
             $operationDefinitions = [];
 
             foreach ($parsedSpecification->getOperations() as $operationId => $operation) {
-                $requestBody = null;
-                $bodyType    = $operation->getRequestBody();
-                if ($bodyType !== null) {
-                    $requestBody = new RequestBodyDtoDefinition(
-                        $this->propertiesToDefinitions($bodyType->getProperties())
-                    );
+                $requestDefinition = $this->getRequestDefinition($operation, $componentDefinitions);
+
+                $singleHttpCode = null;
+                $responses      = $this->getResponseDefinitions($operation->getResponses(), $componentDefinitions);
+                if (count($responses) === 1 && $responses[0]->getResponseBody()->isEmpty()) {
+                    $singleHttpCode = $responses[0]->getStatusCode();
+                    $responses      = [];
                 }
 
-                $requestDefinitions = new RequestDtoDefinition(
-                    $requestBody,
-                    $this->parametersToDto('query', $operation->getRequestParameters()),
-                    $this->parametersToDto('path', $operation->getRequestParameters())
+                $service = new RequestHandlerInterfaceDefinition(
+                    $requestDefinition,
+                    array_map(
+                        static fn (ResponseDefinition $response) => $response->getResponseBody(),
+                        $responses
+                    )
                 );
 
                 $operationDefinitions[] = new OperationDefinition(
@@ -59,12 +76,14 @@ class GraphGenerator
                     $operationId,
                     $operation->getRequestHandlerName(),
                     $operation->getSummary(),
-                    $requestDefinitions->isEmpty() ? null : $requestDefinitions,
-                    $this->getResponseDtoDefinitions($operation->getResponses())
+                    $singleHttpCode,
+                    $requestDefinition,
+                    $responses,
+                    $service
                 );
             }
 
-            $specificationDefinitions[] = new SpecificationDefinition($specificationConfig, $operationDefinitions);
+            $specificationDefinitions[] = new SpecificationDefinition($specificationConfig, $operationDefinitions, $componentDefinitions);
         }
 
         $serviceSubscriber = new ServiceSubscriberDefinition();
@@ -72,64 +91,88 @@ class GraphGenerator
         return new GraphDefinition($specificationDefinitions, $serviceSubscriber);
     }
 
+    /** @param ComponentDefinition[] $components */
+    private function getRequestDefinition(Operation $operation, array $components): ?DtoDefinition
+    {
+        $fields = [
+            'pathParameters' => $operation->getRequestParameters()['path'] ?? null,
+            'queryParameters' => $operation->getRequestParameters()['query'] ?? null,
+            'body' => $operation->getRequestBody(),
+        ];
+
+        $properties = [];
+
+        foreach ($fields as $name => $definition) {
+            if ($definition === null) {
+                continue;
+            }
+
+            $specProperty = (new Property($name))->setRequired(true);
+            $properties[] = (new PropertyDefinition($specProperty))
+                ->setObjectTypeDefinition($this->objectTypeToDefinition($definition, $components));
+        }
+
+        if (count($properties) === 0) {
+            return null;
+        }
+
+        return new DtoDefinition($properties);
+    }
+
     /**
-     * @param ObjectType[] $responses
+     * @param array<string|int,ObjectSchema|ObjectReference> $responses
+     * @param ComponentDefinition[]                          $components
      *
-     * @return ResponseDtoDefinition[]
+     * @return ResponseDefinition[]
      */
-    private function getResponseDtoDefinitions(array $responses): array
+    private function getResponseDefinitions(array $responses, array $components): array
     {
         $responseDtoDefinitions = [];
 
         foreach ($responses as $statusCode => $response) {
-            $responseDtoDefinitions[] = new ResponseDtoDefinition(
+            $responseDtoDefinitions[] = new ResponseDefinition(
                 (string) $statusCode,
-                $this->propertiesToDefinitions($response->getProperties())
+                $this->objectTypeToDefinition($response, $components)
             );
         }
 
         return $responseDtoDefinitions;
     }
 
-    /**
-     * @param ObjectType[] $parameters
-     */
-    private function parametersToDto(string $in, array $parameters): ?RequestParametersDtoDefinition
+    /** @param ComponentDefinition[] $components */
+    private function objectTypeToDefinition(ObjectSchema|ObjectReference $type, array $components): DtoReference
     {
-        if (! array_key_exists($in, $parameters)) {
-            return null;
+        if ($type instanceof ObjectReference) {
+            foreach ($components as $component) {
+                if ($component->getName() === $type->getSchemaName()) {
+                    return new ComponentReference($component);
+                }
+            }
+
+            throw CannotParseOpenApi::becauseUnknownReferenceFound($type->getSchemaName());
         }
 
-        return new RequestParametersDtoDefinition(
-            $this->propertiesToDefinitions($parameters[$in]->getProperties())
-        );
+        return $this->objectSchemaToDefinition($type, $components);
     }
 
-    private function objectTypeToDefinition(?ObjectType $type): ?DtoDefinition
+    /** @param ComponentDefinition[] $components */
+    private function objectSchemaToDefinition(ObjectSchema $type, array $components): DtoDefinition
     {
-        if ($type === null) {
-            return null;
+        return new DtoDefinition(array_map(
+            fn (Property $p): PropertyDefinition => $this->propertyToDefinition($p, $components),
+            $type->getProperties()
+        ));
+    }
+
+    /** @param ComponentDefinition[] $components */
+    private function propertyToDefinition(Property $property, array $components): PropertyDefinition
+    {
+        $definition = new PropertyDefinition($property);
+        $objectType = $property->getObjectTypeDefinition();
+        if ($objectType !== null) {
+            $definition->setObjectTypeDefinition($this->objectTypeToDefinition($objectType, $components));
         }
 
-        return new DtoDefinition($this->propertiesToDefinitions($type->getProperties()));
-    }
-
-    /**
-     * @param Property[] $properties
-     *
-     * @return PropertyDefinition[]
-     */
-    private function propertiesToDefinitions(array $properties): array
-    {
-        return array_map(
-            fn (Property $p): PropertyDefinition => $this->propertyToDefinition($p),
-            $properties
-        );
-    }
-
-    private function propertyToDefinition(Property $property): PropertyDefinition
-    {
-        return (new PropertyDefinition($property))
-            ->setObjectTypeDefinition($this->objectTypeToDefinition($property->getObjectTypeDefinition()));
+        return $definition;
     }
 }

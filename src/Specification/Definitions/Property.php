@@ -10,13 +10,13 @@ final class Property
 
     private bool $array = false;
     /** @var string|int|float|bool|null  */
-    private $defaultValue                     = null;
-    private bool $required                    = false;
-    private bool $nullable                    = false;
-    private ?int $scalarTypeId                = null;
-    private ?ObjectType $objectTypeDefinition = null;
-    private ?string $description              = null;
-    private ?string $pattern                  = null;
+    private $defaultValue                                           = null;
+    private bool $required                                          = false;
+    private bool $nullable                                          = false;
+    private ?int $scalarTypeId                                      = null;
+    private ObjectSchema|ObjectReference|null $objectTypeDefinition = null;
+    private ?string $description                                    = null;
+    private ?string $pattern                                        = null;
 
     public function __construct(string $name)
     {
@@ -91,7 +91,7 @@ final class Property
         return $this;
     }
 
-    public function getObjectTypeDefinition(): ?ObjectType
+    public function getObjectTypeDefinition(): ObjectSchema|ObjectReference|null
     {
         return $this->objectTypeDefinition;
     }
@@ -99,7 +99,7 @@ final class Property
     /**
      * @return Property
      */
-    public function setObjectTypeDefinition(?ObjectType $objectTypeDefinition): self
+    public function setObjectTypeDefinition(ObjectSchema|ObjectReference|null $objectTypeDefinition): self
     {
         $this->objectTypeDefinition = $objectTypeDefinition;
 

@@ -14,7 +14,6 @@ use OnMoon\OpenApiServerBundle\Interfaces\ApiLoader;
 use OnMoon\OpenApiServerBundle\Interfaces\Dto;
 use OnMoon\OpenApiServerBundle\Interfaces\GetResponseCode;
 use OnMoon\OpenApiServerBundle\Interfaces\RequestHandler;
-use OnMoon\OpenApiServerBundle\Interfaces\ResponseDto;
 use OnMoon\OpenApiServerBundle\Interfaces\SetClientIp;
 use OnMoon\OpenApiServerBundle\Interfaces\SetRequest;
 use OnMoon\OpenApiServerBundle\Router\RouteLoader;
@@ -35,8 +34,13 @@ use Symfony\Component\Routing\RouterInterface;
 use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 
 use function count;
+use function get_class;
+use function in_array;
+use function intdiv;
+use function is_numeric;
 use function ltrim;
 use function Safe\sprintf;
+use function strcasecmp;
 
 use const JSON_PRETTY_PRINT;
 use const JSON_THROW_ON_ERROR;
@@ -94,7 +98,7 @@ final class ApiController
         $responseDto = $this->executeRequestHandler($requestHandler, $methodName, $requestDto);
         $this->eventDispatcher->dispatch(new ResponseDtoEvent($responseDto, $operationId, $specification));
 
-        $response = $this->createResponse($requestHandler, $operation, $responseDto);
+        $response = $this->createResponse($requestHandler, $operation, $requestHandlerInterface, $responseDto);
         $this->eventDispatcher->dispatch(new ResponseEvent($response, $operationId, $specification));
 
         return $response;
@@ -129,8 +133,8 @@ final class ApiController
         RequestHandler $requestHandler,
         string $methodName,
         ?Dto $requestDto
-    ): ?ResponseDto {
-        /** @var ResponseDto|null $responseDto */
+    ): ?Dto {
+        /** @var Dto|null $responseDto */
         $responseDto = $requestDto !== null ?
             $requestHandler->{$methodName}($requestDto) :
             $requestHandler->{$methodName}();
@@ -143,17 +147,14 @@ final class ApiController
      */
     private function getRequestHandler(Request $request, Operation $operation): array
     {
-        if ($this->apiLoader === null) {
-            throw ApiCallFailed::becauseApiLoaderNotFound();
-        }
-
         $handlerName = $operation->getRequestHandlerName();
 
-        $requestHandlers                = $this->apiLoader::getSubscribedServices();
+        $requestHandlers = $this->getApiLoader()::getSubscribedServices();
+        /** @var String $requestHandlerSubscribedString */
         $requestHandlerSubscribedString = $requestHandlers[$handlerName];
         /** @psalm-var class-string<RequestHandler> $requestHandlerInterface */
         $requestHandlerInterface = ltrim($requestHandlerSubscribedString, '?');
-        $requestHandler          = $this->apiLoader->get($handlerName);
+        $requestHandler          = $this->getApiLoader()->get($handlerName);
 
         if ($requestHandler === null) {
             throw ApiCallFailed::becauseNotImplemented($requestHandlerInterface);
@@ -170,29 +171,67 @@ final class ApiController
         return [$requestHandlerInterface, $requestHandler];
     }
 
-    private function createResponse(RequestHandler $requestHandler, Operation $operation, ?ResponseDto $responseDto = null): Response
-    {
+    private function createResponse(
+        RequestHandler $requestHandler,
+        Operation $operation,
+        string $handlerInterface,
+        ?Dto $responseDto = null
+    ): Response {
         $response = new JsonResponse();
         $response->setEncodingOptions(JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_THROW_ON_ERROR);
 
-        $statusCode = null;
+        $allowedCodes = $this->getApiLoader()->getAllowedCodes(
+            $handlerInterface,
+            $responseDto !== null ? get_class($responseDto) : 'void'
+        );
 
-        if ($responseDto instanceof ResponseDto) {
-            $responseData = $this->serializer->createResponseFromDto($responseDto, $operation);
-            $response->setData($responseData);
-            $dtoStatusCode = (int) $responseDto::_getResponseCode();
-            $statusCode    =  $dtoStatusCode !== 0 ? $dtoStatusCode : $statusCode;
+        $guessedCode = null;
+        if (count($allowedCodes) === 1 && is_numeric($allowedCodes[0])) {
+            $guessedCode = (int) $allowedCodes[0];
         }
 
         if ($requestHandler instanceof GetResponseCode) {
-            $statusCode = $requestHandler->getResponseCode($statusCode) ?? $statusCode;
+            $statusCode = $requestHandler->getResponseCode($guessedCode) ?? $guessedCode;
+        } else {
+            $statusCode = $guessedCode;
         }
 
-        $statusCode ??= Response::HTTP_OK;
+        if ($statusCode === null) {
+            throw ApiCallFailed::becauseNoResponseCodeSet();
+        }
+
+        $matchedCode = $this->findMatchingResponseCode($statusCode, $allowedCodes);
 
         $response->setStatusCode($statusCode);
 
+        if ($responseDto !== null) {
+            $responseData = $this->serializer->createResponseFromDto($responseDto, $operation->getResponse($matchedCode)->getSchema());
+            $response->setData($responseData);
+        }
+
         return $response;
+    }
+
+    /** @param string[] $allowedCodes */
+    private function findMatchingResponseCode(int $statusCode, array $allowedCodes): string
+    {
+        $code = (string) $statusCode;
+        if (in_array($code, $allowedCodes, true)) {
+            return $code;
+        }
+
+        $code = (string) intdiv($statusCode, 100) . 'XX';
+        foreach ($allowedCodes as $allowedCode) {
+            if (strcasecmp($code, $allowedCode) === 0) {
+                return $allowedCode;
+            }
+        }
+
+        if (in_array('default', $allowedCodes, true)) {
+            return 'default';
+        }
+
+        throw ApiCallFailed::becauseWrongResponseCodeSet($allowedCodes);
     }
 
     private function getRoute(Request $request): Route
@@ -243,5 +282,14 @@ final class ApiController
         $inputTypeName = $inputType->getName();
 
         return [$methodName, $inputTypeName];
+    }
+
+    private function getApiLoader(): ApiLoader
+    {
+        if ($this->apiLoader === null) {
+            throw ApiCallFailed::becauseApiLoaderNotFound();
+        }
+
+        return $this->apiLoader;
     }
 }

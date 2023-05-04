@@ -5,14 +5,14 @@ declare(strict_types=1);
 namespace OnMoon\OpenApiServerBundle\CodeGenerator;
 
 use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\DtoDefinition;
+use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\DtoReference;
 use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\GeneratedFileDefinition;
-use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\GeneratedInterfaceDefinition;
 use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\GraphDefinition;
 use OnMoon\OpenApiServerBundle\CodeGenerator\PhpParserGenerators\DtoCodeGenerator;
 use OnMoon\OpenApiServerBundle\CodeGenerator\PhpParserGenerators\InterfaceCodeGenerator;
 use OnMoon\OpenApiServerBundle\CodeGenerator\PhpParserGenerators\ServiceSubscriberCodeGenerator;
 
-use function array_merge;
+use function array_push;
 
 class FileGenerator
 {
@@ -38,19 +38,15 @@ class FileGenerator
         /** @var GeneratedFileDefinition[] $result */
         $result = [];
         foreach ($graph->getSpecifications() as $specificationDefinition) {
+            foreach ($specificationDefinition->getComponents() as $component) {
+                array_push($result, ...$this->generateDtoTree($component->getDto()));
+            }
+
             foreach ($specificationDefinition->getOperations() as $operation) {
-                $request = $operation->getRequest();
-                if ($request !== null) {
-                    $result = array_merge($result, $this->generateDtoTree($request));
-                }
+                array_push($result, ...$this->generateDtoTree($operation->getRequest()));
 
                 foreach ($operation->getResponses() as $response) {
-                    $result = array_merge($result, $this->generateDtoTree($response));
-                }
-
-                $markersInterface = $operation->getMarkersInterface();
-                if ($markersInterface instanceof GeneratedInterfaceDefinition) {
-                    $result[] = $this->interfaceGenerator->generate($markersInterface);
+                    array_push($result, ...$this->generateDtoTree($response->getResponseBody()));
                 }
 
                 $result[] = $this->interfaceGenerator->generate($operation->getRequestHandlerInterface());
@@ -65,17 +61,16 @@ class FileGenerator
     /**
      * @return GeneratedFileDefinition[]
      */
-    public function generateDtoTree(DtoDefinition $root): array
+    public function generateDtoTree(?DtoReference $root): array
     {
+        if (! $root instanceof DtoDefinition) {
+            return [];
+        }
+
         $result   = [];
         $result[] = $this->dtoGenerator->generate($root);
         foreach ($root->getProperties() as $property) {
-            $object = $property->getObjectTypeDefinition();
-            if ($object === null) {
-                continue;
-            }
-
-            $result = array_merge($result, $this->generateDtoTree($object));
+            array_push($result, ...$this->generateDtoTree($property->getObjectTypeDefinition()));
         }
 
         return $result;

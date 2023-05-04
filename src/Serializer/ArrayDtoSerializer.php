@@ -6,8 +6,7 @@ namespace OnMoon\OpenApiServerBundle\Serializer;
 
 use Exception;
 use OnMoon\OpenApiServerBundle\Interfaces\Dto;
-use OnMoon\OpenApiServerBundle\Interfaces\ResponseDto;
-use OnMoon\OpenApiServerBundle\Specification\Definitions\ObjectType;
+use OnMoon\OpenApiServerBundle\Specification\Definitions\ObjectSchema;
 use OnMoon\OpenApiServerBundle\Specification\Definitions\Operation;
 use OnMoon\OpenApiServerBundle\Types\ScalarTypesResolver;
 use Symfony\Component\HttpFoundation\Request;
@@ -50,6 +49,7 @@ final class ArrayDtoSerializer implements DtoSerializer
 
         $bodyType = $operation->getRequestBody();
         if ($bodyType !== null) {
+            /** @var resource|string $source */
             $source = $request->getContent();
             if (is_resource($source)) {
                 throw new Exception('Expecting string as contents, resource received');
@@ -57,7 +57,7 @@ final class ArrayDtoSerializer implements DtoSerializer
 
             /** @var mixed[] $rawBody */
             $rawBody       = json_decode($source, true);
-            $input['body'] = $this->convert(true, $rawBody, $bodyType);
+            $input['body'] = $this->convert(true, $rawBody, $bodyType->getSchema());
         }
 
         /**
@@ -69,12 +69,9 @@ final class ArrayDtoSerializer implements DtoSerializer
     }
 
     /** @inheritDoc */
-    public function createResponseFromDto(ResponseDto $responseDto, Operation $operation): array
+    public function createResponseFromDto(Dto $responseDto, ObjectSchema $definition): array
     {
-        $statusCode = $responseDto::_getResponseCode();
-        $source     = $responseDto->toArray();
-
-        return $this->convert(false, $source, $operation->getResponse($statusCode));
+        return $this->convert(false, $responseDto->toArray(), $definition);
     }
 
     /**
@@ -87,7 +84,7 @@ final class ArrayDtoSerializer implements DtoSerializer
      * @psalm-suppress MixedArgument
      * @psalm-suppress MixedAssignment
      */
-    private function convert(bool $deserialize, array $source, ObjectType $params): array
+    private function convert(bool $deserialize, array $source, ObjectSchema $params): array
     {
         $result = [];
         foreach ($params->getProperties() as $property) {
@@ -114,7 +111,7 @@ final class ArrayDtoSerializer implements DtoSerializer
 
             if ($objectType !== null) {
                 /** @psalm-suppress MissingClosureParamType */
-                $converter = fn ($v) => $this->convert($deserialize, $v, $objectType);
+                $converter = fn ($v) => $this->convert($deserialize, $v, $objectType->getSchema());
             } else {
                 /** @psalm-suppress MissingClosureParamType */
                 $converter = fn ($v) => $this->resolver->convert($deserialize, $typeId ?? 0, $v);

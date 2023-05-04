@@ -6,7 +6,7 @@ namespace OnMoon\OpenApiServerBundle\Test\Unit\Event\Server;
 
 use cebe\openapi\spec\OpenApi;
 use OnMoon\OpenApiServerBundle\Event\Server\ResponseDtoEvent;
-use OnMoon\OpenApiServerBundle\Interfaces\ResponseDto;
+use OnMoon\OpenApiServerBundle\Interfaces\Dto;
 use OnMoon\OpenApiServerBundle\Specification\Definitions\Specification;
 use PHPUnit\Framework\Assert;
 use PHPUnit\Framework\TestCase;
@@ -18,9 +18,9 @@ final class ResponseDtoEventTest extends TestCase
 {
     public function testResponseDtoGettersReturnCorrectValues(): void
     {
-        $responseDtoMock = $this->createMock(ResponseDto::class);
+        $responseDtoMock = $this->createMock(Dto::class);
         $operationId     = '12345';
-        $specification   = new Specification([], new OpenApi([]));
+        $specification   = new Specification([], [], new OpenApi([]));
 
         $responseDtoEvent = new ResponseDtoEvent($responseDtoMock, $operationId, $specification);
 

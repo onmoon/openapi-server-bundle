@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace OnMoon\OpenApiServerBundle\Test\Unit\Specification\Definitions;
 
-use OnMoon\OpenApiServerBundle\Specification\Definitions\ObjectType;
+use OnMoon\OpenApiServerBundle\Specification\Definitions\ObjectSchema;
 use OnMoon\OpenApiServerBundle\Specification\Definitions\Operation;
 use PHPUnit\Framework\Assert;
 use PHPUnit\Framework\TestCase;
@@ -39,13 +39,13 @@ final class OperationTest extends TestCase
                     'method' => 'POST',
                     'requestHandlerName' => 'some-custom-request-handler-name',
                     'summary' => 'Some Custom Summary',
-                    'requestBody' => new ObjectType([]),
+                    'requestBody' => new ObjectSchema([]),
                     'requestParameters' => [
-                        'query' => new ObjectType([]),
-                        'path' => new ObjectType([]),
+                        'query' => new ObjectSchema([]),
+                        'path' => new ObjectSchema([]),
                     ],
                     'responses' => [
-                        '200' => new ObjectType([]),
+                        '200' => new ObjectSchema([]),
                     ],
                 ],
             ],

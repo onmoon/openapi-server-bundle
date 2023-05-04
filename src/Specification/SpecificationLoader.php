@@ -78,8 +78,7 @@ class SpecificationLoader
 
     public function load(string $name): Specification
     {
-        /** @var Specification $parsedSpecification */
-        $parsedSpecification = $this->cache->get(
+        return $this->cache->get(
             self::CACHE_KEY_PREFIX . $name,
             function (ItemInterface $cacheItem) use ($name): Specification {
                 $cacheItem->tag(self::CACHE_TAG);
@@ -87,8 +86,6 @@ class SpecificationLoader
                 return $this->parseSpecification($name, $this->get($name));
             }
         );
-
-        return $parsedSpecification;
     }
 
     private function parseSpecification(string $specificationName, SpecificationConfig $specificationConfig): Specification
@@ -115,7 +112,7 @@ class SpecificationLoader
 
         $specification = null;
         if ($type === 'yaml') {
-            $specification = Reader::readFromYamlFile($specPath);
+            $specification = Reader::readFromYamlFile($specPath, OpenApi::class, true);
         }
 
         if ($type === 'json') {

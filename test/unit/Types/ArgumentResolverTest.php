@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace OnMoon\OpenApiServerBundle\Test\Unit\Types;
 
-use OnMoon\OpenApiServerBundle\Specification\Definitions\ObjectType;
+use OnMoon\OpenApiServerBundle\Specification\Definitions\ObjectSchema;
 use OnMoon\OpenApiServerBundle\Specification\Definitions\Property;
 use OnMoon\OpenApiServerBundle\Types\ArgumentResolver;
 use OnMoon\OpenApiServerBundle\Types\ScalarTypesResolver;
@@ -30,7 +30,7 @@ final class ArgumentResolverTest extends TestCase
     {
         $this->pathParameter->setScalarTypeId(null);
         $argumentResolver = new ArgumentResolver($this->typeResolver);
-        $pathParameters   = new ObjectType([$this->pathParameter]);
+        $pathParameters   = new ObjectSchema([$this->pathParameter]);
         $this->expectException(Throwable::class);
         $this->expectExceptionMessage('Object types are not supported in parameters');
         $argumentResolver->resolveArgumentPatterns($pathParameters);
@@ -42,7 +42,7 @@ final class ArgumentResolverTest extends TestCase
             ->setScalarTypeId(0)
             ->setPattern('test_pattern');
         $expectedPatterns = [];
-        $pathParameters   = new ObjectType([$this->pathParameter]);
+        $pathParameters   = new ObjectSchema([$this->pathParameter]);
         $argumentResolver = new ArgumentResolver($this->typeResolver);
         $patterns         = $argumentResolver->resolveArgumentPatterns($pathParameters);
         Assert::assertSame($expectedPatterns, $patterns);
@@ -54,7 +54,7 @@ final class ArgumentResolverTest extends TestCase
             ->setScalarTypeId(1)
             ->setPattern('^123$');
         $expectedPatterns = [$this->pathParameter->getName() => '123'];
-        $pathParameters   = new ObjectType([$this->pathParameter]);
+        $pathParameters   = new ObjectSchema([$this->pathParameter]);
         $argumentResolver = new ArgumentResolver($this->typeResolver);
         $patterns         = $argumentResolver->resolveArgumentPatterns($pathParameters);
         Assert::assertSame($expectedPatterns, $patterns);
@@ -69,7 +69,7 @@ final class ArgumentResolverTest extends TestCase
         $expectedPatterns = [
             $this->pathParameter->getName() => $this->typeResolver->getPattern($scalarTypeId),
         ];
-        $pathParameters   = new ObjectType([$this->pathParameter]);
+        $pathParameters   = new ObjectSchema([$this->pathParameter]);
         $argumentResolver = new ArgumentResolver($this->typeResolver);
         $patterns         = $argumentResolver->resolveArgumentPatterns($pathParameters);
         Assert::assertSame($expectedPatterns, $patterns);
@@ -90,7 +90,7 @@ final class ArgumentResolverTest extends TestCase
             $this->pathParameter->getName() => $this->typeResolver->getPattern($scalarTypeId),
             $pathParameter2->getName() => $this->typeResolver->getPattern($scalarTypeId),
         ];
-        $pathParameters   = new ObjectType([$this->pathParameter, $pathParameter2]);
+        $pathParameters   = new ObjectSchema([$this->pathParameter, $pathParameter2]);
         $argumentResolver = new ArgumentResolver($this->typeResolver);
         $patterns         = $argumentResolver->resolveArgumentPatterns($pathParameters);
         Assert::assertSame($expectedPatterns, $patterns);

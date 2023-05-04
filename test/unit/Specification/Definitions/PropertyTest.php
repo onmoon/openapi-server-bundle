@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace OnMoon\OpenApiServerBundle\Test\Unit\Specification\Definitions;
 
-use OnMoon\OpenApiServerBundle\Specification\Definitions\ObjectType;
+use OnMoon\OpenApiServerBundle\Specification\Definitions\ObjectSchema;
 use OnMoon\OpenApiServerBundle\Specification\Definitions\Property;
 use PHPUnit\Framework\Assert;
 use PHPUnit\Framework\TestCase;
@@ -63,7 +63,7 @@ final class PropertyTest extends TestCase
                     'array' => true,
                     'description' => 'Some Custom Description',
                     'nullable' => true,
-                    'objectTypeDefinition' => new ObjectType([]),
+                    'objectTypeDefinition' => new ObjectSchema([]),
                     'pattern' => '/[0-9]+/',
                     'required' => true,
                     'scalarTypeId' => 777,

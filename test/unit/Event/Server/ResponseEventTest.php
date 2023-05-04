@@ -20,7 +20,7 @@ final class ResponseEventTest extends TestCase
     {
         $response      = new Response();
         $operationId   = '12345';
-        $specification = new Specification([], new OpenApi([]));
+        $specification = new Specification([], [], new OpenApi([]));
 
         $responseEvent = new ResponseEvent($response, $operationId, $specification);
 

@@ -5,9 +5,8 @@ declare(strict_types=1);
 namespace OnMoon\OpenApiServerBundle\Test\Unit\Serializer;
 
 use OnMoon\OpenApiServerBundle\Interfaces\Dto;
-use OnMoon\OpenApiServerBundle\Interfaces\ResponseDto;
 use OnMoon\OpenApiServerBundle\Serializer\ArrayDtoSerializer;
-use OnMoon\OpenApiServerBundle\Specification\Definitions\ObjectType;
+use OnMoon\OpenApiServerBundle\Specification\Definitions\ObjectSchema;
 use OnMoon\OpenApiServerBundle\Specification\Definitions\Operation;
 use OnMoon\OpenApiServerBundle\Specification\Definitions\Property;
 use OnMoon\OpenApiServerBundle\Types\ScalarTypesResolver;
@@ -199,11 +198,11 @@ class ArrayDtoSerializerTest extends TestCase
             $requestContent
         );
 
-        $requestQuery = new ObjectType([
+        $requestQuery = new ObjectSchema([
             (new Property('firstParam'))
                 ->setDefaultValue('SomeDefaultQueryParam'),
         ]);
-        $requestPath  = new ObjectType([
+        $requestPath  = new ObjectSchema([
             (new Property('firstParam'))
                 ->setDefaultValue('SomeDefaultPathParam'),
         ]);
@@ -211,14 +210,14 @@ class ArrayDtoSerializerTest extends TestCase
         $requestBodyThirdParam = new Property('thirdParam');
         if (isset($payload['bodyParams']['thirdParam'])) {
             $requestBodyThirdParam->setObjectTypeDefinition(
-                new ObjectType([
+                new ObjectSchema([
                     (new Property('firstParam'))
                         ->setDefaultValue('SomeDefaultFirstBodySubParam'),
                 ])
             );
         }
 
-        $requestBody = new ObjectType([
+        $requestBody = new ObjectSchema([
             (new Property('firstParam'))
                 ->setDefaultValue('SomeDefaultFirstBodyParam'),
             (new Property('secondParam'))
@@ -527,10 +526,9 @@ class ArrayDtoSerializerTest extends TestCase
         bool $sendNotRequiredNullableNulls,
         array $expectedResult
     ): void {
-        /** @var ResponseDto $okResponseDtoFQCN */
+        /** @var Dto $okResponseDtoFQCN */
         $okResponseDtoFQCN = get_class($this->makeOKResponseDtoFCQN());
 
-        /** @var ResponseDto $okResponseDto */
         $okResponseDto = $okResponseDtoFQCN::fromArray([
             self::OK_RESPONSE_DTO_FIRST_PROP => null,
             self::OK_RESPONSE_DTO_SECOND_PROP => null,
@@ -541,22 +539,12 @@ class ArrayDtoSerializerTest extends TestCase
 
         $result = $arrayDtoSerializer->createResponseFromDto(
             $okResponseDto,
-            new Operation(
-                '/example/path',
-                'POST',
-                'PostRequestHandler',
-                null,
-                null,
-                [],
-                [
-                    $okResponseDtoFQCN::_getResponseCode() => new ObjectType([
-                        (new Property(self::OK_RESPONSE_DTO_FIRST_PROP))
-                            ->setDefaultValue($propertyConditions['defaultValue'])
-                            ->setRequired($propertyConditions['isRequired'])
-                            ->setNullable($propertyConditions['isNullable']),
-                    ]),
-                ]
-            )
+            new ObjectSchema([
+                (new Property(self::OK_RESPONSE_DTO_FIRST_PROP))
+                    ->setDefaultValue($propertyConditions['defaultValue'])
+                    ->setRequired($propertyConditions['isRequired'])
+                    ->setNullable($propertyConditions['isNullable']),
+            ])
         );
 
         Assert::assertSame($expectedResult, $result);
@@ -615,10 +603,9 @@ class ArrayDtoSerializerTest extends TestCase
      */
     public function testCreateResponseFromDtoMultipleProperties(array $properties, array $expected): void
     {
-        /** @var ResponseDto $okResponseDtoFQCN */
+        /** @var Dto $okResponseDtoFQCN */
         $okResponseDtoFQCN = get_class($this->makeOKResponseDtoFCQN());
 
-        /** @var ResponseDto $okResponseDto */
         $okResponseDto = $okResponseDtoFQCN::fromArray($properties);
 
         $arrayDtoSerializer = new ArrayDtoSerializer(new ScalarTypesResolver(), false);
@@ -626,7 +613,7 @@ class ArrayDtoSerializerTest extends TestCase
         $responseThirdParam = new Property(self::OK_RESPONSE_DTO_THIRD_PROP);
         if (isset($properties[self::OK_RESPONSE_DTO_THIRD_PROP])) {
             $responseThirdParam->setObjectTypeDefinition(
-                new ObjectType([
+                new ObjectSchema([
                     (new Property('firstParam'))
                         ->setDefaultValue('SomeDefaultFirstSubParam'),
                 ])
@@ -635,23 +622,13 @@ class ArrayDtoSerializerTest extends TestCase
 
         $result = $arrayDtoSerializer->createResponseFromDto(
             $okResponseDto,
-            new Operation(
-                '/example/path',
-                'POST',
-                'PostRequestHandler',
-                null,
-                null,
-                [],
-                [
-                    $okResponseDtoFQCN::_getResponseCode() => new ObjectType([
-                        (new Property(self::OK_RESPONSE_DTO_FIRST_PROP))
-                            ->setDefaultValue('SomeFirstDefaultValue'),
-                        (new Property(self::OK_RESPONSE_DTO_SECOND_PROP))
-                            ->setDefaultValue('SomeSecondDefaultValue'),
-                        $responseThirdParam,
-                    ]),
-                ]
-            )
+            new ObjectSchema([
+                (new Property(self::OK_RESPONSE_DTO_FIRST_PROP))
+                    ->setDefaultValue('SomeFirstDefaultValue'),
+                (new Property(self::OK_RESPONSE_DTO_SECOND_PROP))
+                    ->setDefaultValue('SomeSecondDefaultValue'),
+                $responseThirdParam,
+            ])
         );
 
         Assert::assertSame(
@@ -673,9 +650,9 @@ class ArrayDtoSerializerTest extends TestCase
         );
     }
 
-    private function makeOKResponseDtoFCQN(): ResponseDto
+    private function makeOKResponseDtoFCQN(): Dto
     {
-        return new class () implements ResponseDto {
+        return new class () implements Dto {
             private ?string $firstProp  = null;
             private ?string $secondProp = null;
             private ?Dto $thirdProp     = null;

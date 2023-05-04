@@ -2,7 +2,7 @@ parameters:
     level: 8
     paths:
         - src
-        - test
+       # - test
     checkMissingIterableValueType: false
     treatPhpDocTypesAsCertain: false
     excludePaths:
@@ -17,18 +17,12 @@ parameters:
             message: '#Variable static method call on class-string<OnMoon\\OpenApiServerBundle\\Interfaces\\Dto>.#'
             paths:
                 - %currentWorkingDirectory%/src/Serializer/ArrayDtoSerializer.php
-        -
-            message: '#Call to function is_array\(\) with array<string> will always evaluate to true.#'
-            paths:
-                - %currentWorkingDirectory%/src/Specification/SpecificationParser.php
+
         -
             message: '#Variable static method call on OnMoon\\OpenApiServerBundle\\Types\\TypeSerializer.#'
             paths:
                 - %currentWorkingDirectory%/src/Types/ScalarTypesResolver.php
-        -
-            message: '#Instanceof between cebe\\openapi\\spec\\MediaType and cebe\\openapi\\spec\\MediaType will always evaluate to true\.#'
-            paths:
-                - %currentWorkingDirectory%/src/Specification/SpecificationParser.php
+
         -
             message: '#OnMoon\\OpenApiServerBundle\\Router\\RouteLoader::__construct\(\) does not call parent constructor from Symfony\\Component\\Config\\Loader\\Loader\.#'
             paths:

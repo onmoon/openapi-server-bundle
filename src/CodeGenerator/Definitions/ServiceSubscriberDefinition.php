@@ -4,13 +4,20 @@ declare(strict_types=1);
 
 namespace OnMoon\OpenApiServerBundle\CodeGenerator\Definitions;
 
+use OnMoon\OpenApiServerBundle\Interfaces\ApiLoader;
+
 final class ServiceSubscriberDefinition extends GeneratedClassDefinition
 {
-    /** @var ClassDefinition[] */
-    private array $implements = [];
+    /** @var ClassReference[] */
+    private array $implements;
+
+    public function __construct()
+    {
+        $this->implements = [ClassDefinition::fromFQCN(ApiLoader::class)];
+    }
 
     /**
-     * @return ClassDefinition[]
+     * @return ClassReference[]
      */
     public function getImplements(): array
     {
@@ -18,7 +25,7 @@ final class ServiceSubscriberDefinition extends GeneratedClassDefinition
     }
 
     /**
-     * @param ClassDefinition[] $implements
+     * @param ClassReference[] $implements
      */
     public function setImplements(array $implements): self
     {

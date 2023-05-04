@@ -6,45 +6,19 @@ namespace OnMoon\OpenApiServerBundle\Specification\Definitions;
 
 final class Operation
 {
-    private string $url;
-    private string $method;
-    private string $requestHandlerName;
-    private ?string $summary;
-    private ?ObjectType $requestBody;
-
     /**
-     * @var ObjectType[]
-     * @psalm-var array<string, ObjectType>
-     */
-    private array $requestParameters;
-    /**
-     * @var ObjectType[]
-     * @psalm-var array<string|int, ObjectType>
-     */
-    private array $responses;
-
-    /**
-     * @param ObjectType[] $requestParameters
-     * @param ObjectType[] $responses
-     * @psalm-param array<string, ObjectType> $requestParameters
-     * @psalm-param array<string|int, ObjectType> $responses
+     * @param  array<string, ObjectSchema>                     $requestParameters
+     * @param array<string|int, ObjectSchema|ObjectReference> $responses
      */
     public function __construct(
-        string $url,
-        string $method,
-        string $requestHandlerName,
-        ?string $summary = null,
-        ?ObjectType $requestBody = null,
-        array $requestParameters = [],
-        array $responses = []
+        private string $url,
+        private string $method,
+        private string $requestHandlerName,
+        private ?string $summary = null,
+        private ObjectSchema|ObjectReference|null $requestBody = null,
+        private array $requestParameters = [],
+        private array $responses = []
     ) {
-        $this->url                = $url;
-        $this->method             = $method;
-        $this->requestHandlerName = $requestHandlerName;
-        $this->summary            = $summary;
-        $this->requestBody        = $requestBody;
-        $this->requestParameters  = $requestParameters;
-        $this->responses          = $responses;
     }
 
     public function getUrl(): string
@@ -67,14 +41,13 @@ final class Operation
         return $this->summary;
     }
 
-    public function getRequestBody(): ?ObjectType
+    public function getRequestBody(): ObjectSchema|ObjectReference|null
     {
         return $this->requestBody;
     }
 
     /**
-     * @return ObjectType[]
-     * @psalm-return array<string, ObjectType>
+     * @return array<string, ObjectSchema>
      */
     public function getRequestParameters(): array
     {
@@ -82,15 +55,14 @@ final class Operation
     }
 
     /**
-     * @return ObjectType[]
-     * @psalm-return array<string|int, ObjectType>
+     * @return array<string|int, ObjectSchema|ObjectReference>
      */
     public function getResponses(): array
     {
         return $this->responses;
     }
 
-    public function getResponse(string $code): ObjectType
+    public function getResponse(string $code): ObjectSchema|ObjectReference
     {
         return $this->responses[$code];
     }

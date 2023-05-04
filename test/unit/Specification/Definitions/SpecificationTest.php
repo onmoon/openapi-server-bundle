@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace OnMoon\OpenApiServerBundle\Test\Unit\Specification\Definitions;
 
 use cebe\openapi\spec\OpenApi;
-use OnMoon\OpenApiServerBundle\Specification\Definitions\ObjectType;
+use OnMoon\OpenApiServerBundle\Specification\Definitions\ObjectSchema;
 use OnMoon\OpenApiServerBundle\Specification\Definitions\Operation;
 use OnMoon\OpenApiServerBundle\Specification\Definitions\Specification;
 use PHPUnit\Framework\Assert;
@@ -28,10 +28,10 @@ final class SpecificationTest extends TestCase
             'method' => 'POST',
             'requestHandlerName' => 'some-custom-request-handler-name',
             'summary' => 'Some Custom Summary',
-            'requestBody' => new ObjectType([]),
+            'requestBody' => new ObjectSchema([]),
             'requestParameters' => [
-                'query' => new ObjectType([]),
-                'path' => new ObjectType([]),
+                'query' => new ObjectSchema([]),
+                'path' => new ObjectSchema([]),
             ],
             'responses' => [],
         ];
@@ -71,6 +71,7 @@ final class SpecificationTest extends TestCase
 
         $specification = new Specification(
             $specificationData['operations'],
+            [],
             $openApiMock
         );
 

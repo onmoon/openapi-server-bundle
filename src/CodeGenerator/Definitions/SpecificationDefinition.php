@@ -8,17 +8,12 @@ use OnMoon\OpenApiServerBundle\Specification\Definitions\SpecificationConfig;
 
 final class SpecificationDefinition
 {
-    private SpecificationConfig $specification;
-    /** @var OperationDefinition[] */
-    private array $operations;
-
     /**
      * @param OperationDefinition[] $operations
+     * @param ComponentDefinition[] $components
      */
-    public function __construct(SpecificationConfig $specification, array $operations)
+    public function __construct(private SpecificationConfig $specification, private array $operations, private array $components)
     {
-        $this->specification = $specification;
-        $this->operations    = $operations;
     }
 
     /**
@@ -32,5 +27,13 @@ final class SpecificationDefinition
     public function getSpecification(): SpecificationConfig
     {
         return $this->specification;
+    }
+
+    /**
+     * @return ComponentDefinition[]
+     */
+    public function getComponents(): array
+    {
+        return $this->components;
     }
 }

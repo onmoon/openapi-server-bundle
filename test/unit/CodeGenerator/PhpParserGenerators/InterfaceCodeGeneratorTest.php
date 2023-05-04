@@ -5,11 +5,10 @@ declare(strict_types=1);
 namespace OnMoon\OpenApiServerBundle\Test\Unit\CodeGenerator\PhpParserGenerators;
 
 use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\ClassDefinition;
+use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\DtoDefinition;
 use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\GeneratedFileDefinition;
-use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\GeneratedInterfaceDefinition;
 use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\RequestHandlerInterfaceDefinition;
 use OnMoon\OpenApiServerBundle\CodeGenerator\PhpParserGenerators\InterfaceCodeGenerator;
-use OnMoon\OpenApiServerBundle\Interfaces\ResponseDto;
 use OnMoon\OpenApiServerBundle\Types\ScalarTypesResolver;
 use PhpParser\BuilderFactory;
 use PHPUnit\Framework\Assert;
@@ -42,71 +41,9 @@ class InterfaceCodeGeneratorTest extends TestCase
         parent::tearDown();
     }
 
-    public function testGenerateWithNotExtendedGeneratedInterfaceDefinition(): void
-    {
-        $generatedInterfaceDefinition = new GeneratedInterfaceDefinition();
-        $generatedInterfaceDefinition->setNamespace('Test\Test2');
-        $generatedInterfaceDefinition->setClassName('TestClass');
-
-        $generatedCode                   =
-            <<<EOD
-<?php
-
-declare (strict_types=1);
-namespace Test\Test2;
-
-/**
- * This interface was automatically generated
- * You should not change it manually as it will be overwritten
- */
-interface TestClass
-{
-}
-EOD;
-        $expectedGeneratedFileDefinition = new GeneratedFileDefinition(
-            $generatedInterfaceDefinition,
-            $generatedCode
-        );
-        $generatedFileDefinition         = $this->interfaceCodeGenerator->generate($generatedInterfaceDefinition);
-
-        Assert::assertEquals($expectedGeneratedFileDefinition, $generatedFileDefinition);
-    }
-
-    public function testGenerateWithExtendedGeneratedInterfaceDefinition(): void
-    {
-        $generatedInterfaceDefinition = new GeneratedInterfaceDefinition();
-        $generatedInterfaceDefinition->setExtends(ClassDefinition::fromFQCN(ResponseDto::class));
-        $generatedInterfaceDefinition->setNamespace('Test\Test2');
-        $generatedInterfaceDefinition->setClassName('TestClass');
-
-        $generatedCode                   =
-            <<<EOD
-<?php
-
-declare (strict_types=1);
-namespace Test\Test2;
-
-use OnMoon\OpenApiServerBundle\Interfaces\ResponseDto;
-/**
- * This interface was automatically generated
- * You should not change it manually as it will be overwritten
- */
-interface TestClass extends ResponseDto
-{
-}
-EOD;
-        $expectedGeneratedFileDefinition = new GeneratedFileDefinition(
-            $generatedInterfaceDefinition,
-            $generatedCode
-        );
-        $generatedFileDefinition         = $this->interfaceCodeGenerator->generate($generatedInterfaceDefinition);
-
-        Assert::assertEquals($expectedGeneratedFileDefinition, $generatedFileDefinition);
-    }
-
     public function testGenerateWithRequestHandlerInterfaceDefinition(): void
     {
-        $generatedInterfaceDefinition = new RequestHandlerInterfaceDefinition();
+        $generatedInterfaceDefinition = new RequestHandlerInterfaceDefinition(null, []);
 
         $generatedInterfaceDefinition->setClassName('TestClass');
         $generatedInterfaceDefinition->setMethodName('test');
@@ -119,11 +56,12 @@ EOD;
 declare (strict_types=1);
 namespace Test\Test2;
 
+use OnMoon\OpenApiServerBundle\Interfaces\RequestHandler;
 /**
  * This interface was automatically generated
  * You should not change it manually as it will be overwritten
  */
-interface TestClass
+interface TestClass extends RequestHandler
 {
     public function test() : void;
 }
@@ -139,12 +77,15 @@ EOD;
 
     public function testGenerateWithRequestHandlerInterfaceDefinitionAndRequestedType(): void
     {
-        $generatedInterfaceDefinition = new RequestHandlerInterfaceDefinition();
+        $dtoDefinition = new DtoDefinition([]);
+        $dtoDefinition
+            ->setNamespace('')
+            ->setClassName('TestClass');
 
+        $generatedInterfaceDefinition = new RequestHandlerInterfaceDefinition($dtoDefinition, []);
         $generatedInterfaceDefinition->setClassName('TestClass');
-            $generatedInterfaceDefinition->setMethodName('test');
-            $generatedInterfaceDefinition->setNamespace('Test\Test2');
-            $generatedInterfaceDefinition->setRequestType(ClassDefinition::fromFQCN('TestClass'));
+        $generatedInterfaceDefinition->setMethodName('test');
+        $generatedInterfaceDefinition->setNamespace('Test\Test2');
 
         $generatedCode                   =
             <<<EOD
@@ -153,12 +94,13 @@ EOD;
 declare (strict_types=1);
 namespace Test\Test2;
 
+use OnMoon\OpenApiServerBundle\Interfaces\RequestHandler;
 use \TestClass as TestClass_;
 /**
  * This interface was automatically generated
  * You should not change it manually as it will be overwritten
  */
-interface TestClass
+interface TestClass extends RequestHandler
 {
     /** @param TestClass_ \$request */
     public function test(TestClass_ \$request) : void;
@@ -175,12 +117,12 @@ EOD;
 
     public function testGenerateWithRequestHandlerInterfaceDefinitionAndResponseType(): void
     {
-        $generatedInterfaceDefinition = new RequestHandlerInterfaceDefinition();
+        $generatedInterfaceDefinition = new RequestHandlerInterfaceDefinition(null, []);
 
         $generatedInterfaceDefinition->setClassName('TestClass');
         $generatedInterfaceDefinition->setMethodName('test');
         $generatedInterfaceDefinition->setNamespace('Test\Test2');
-        $generatedInterfaceDefinition->setResponseType(ClassDefinition::fromFQCN('TestClass'));
+        $generatedInterfaceDefinition->setResponseTypes([ClassDefinition::fromFQCN('TestClass')]);
 
         $generatedCode                   =
             <<<EOD
@@ -189,12 +131,13 @@ EOD;
 declare (strict_types=1);
 namespace Test\Test2;
 
+use OnMoon\OpenApiServerBundle\Interfaces\RequestHandler;
 use \TestClass as TestClass_;
 /**
  * This interface was automatically generated
  * You should not change it manually as it will be overwritten
  */
-interface TestClass
+interface TestClass extends RequestHandler
 {
     /** @return TestClass_ */
     public function test() : TestClass_;
@@ -211,7 +154,7 @@ EOD;
 
     public function testGenerateWithRequestHandlerInterfaceDefinitionAndDescription(): void
     {
-        $generatedInterfaceDefinition = new RequestHandlerInterfaceDefinition();
+        $generatedInterfaceDefinition = new RequestHandlerInterfaceDefinition(null, []);
 
         $generatedInterfaceDefinition->setClassName('TestClass');
         $generatedInterfaceDefinition->setMethodName('test');
@@ -225,11 +168,12 @@ EOD;
 declare (strict_types=1);
 namespace Test\Test2;
 
+use OnMoon\OpenApiServerBundle\Interfaces\RequestHandler;
 /**
  * This interface was automatically generated
  * You should not change it manually as it will be overwritten
  */
-interface TestClass
+interface TestClass extends RequestHandler
 {
     /** method description */
     public function test() : void;

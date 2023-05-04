@@ -126,11 +126,12 @@ class ConfigurationTest extends TestCase
     {
         $this->assertProcessedConfigurationEquals([], [
             'root_name_space' => 'App\Generated',
-            'language_level' => '7.4.0',
+            'language_level' => '8.0.0',
             'generated_dir_permissions' => '0755',
             'full_doc_blocks' => false,
             'send_nulls' => false,
             'specs' => [],
+            'skip_http_codes' => [],
         ]);
     }
 }

@@ -6,9 +6,9 @@ namespace OnMoon\OpenApiServerBundle\CodeGenerator\Definitions;
 
 class GeneratedInterfaceDefinition extends GeneratedClassDefinition
 {
-    private ?ClassDefinition $extends = null;
+    private ?ClassReference $extends = null;
 
-    final public function getExtends(): ?ClassDefinition
+    final public function getExtends(): ?ClassReference
     {
         return $this->extends;
     }
@@ -16,7 +16,7 @@ class GeneratedInterfaceDefinition extends GeneratedClassDefinition
     /**
      * @return GeneratedInterfaceDefinition
      */
-    final public function setExtends(?ClassDefinition $extends): self
+    final public function setExtends(?ClassReference $extends): self
     {
         $this->extends = $extends;
 

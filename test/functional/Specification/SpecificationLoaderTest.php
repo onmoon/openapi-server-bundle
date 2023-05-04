@@ -139,7 +139,7 @@ class SpecificationLoaderTest extends TestCase
     public function testRegisterSpecAndGettingRegisteredSpecifications(): void
     {
         $specificationLoader         = new SpecificationLoader(
-            new SpecificationParser(new ScalarTypesResolver()),
+            new SpecificationParser(new ScalarTypesResolver(), []),
             $this->fileLocator,
             $this->cache
         );
@@ -284,7 +284,7 @@ class SpecificationLoaderTest extends TestCase
         $this->specificationParser
             ->expects(self::once())
             ->method('parseOpenApi')
-            ->willReturn(new Specification([], new OpenApi([])));
+            ->willReturn(new Specification([], [], new OpenApi([])));
 
         $specificationLoader = new SpecificationLoader(
             $this->specificationParser,
@@ -317,7 +317,7 @@ class SpecificationLoaderTest extends TestCase
 
         $specificationLoader->registerSpec(self::SPECIFICATION_NAME, $specificationArray);
         $cacheKey            = 'openapi-server-bundle-specification-' . self::SPECIFICATION_NAME;
-        $cachedSpecification = new Specification([], new OpenApi([]));
+        $cachedSpecification = new Specification([], [], new OpenApi([]));
         $this->cache->set($cacheKey, $cachedSpecification);
 
         $loadedSpecification = $specificationLoader->load(self::SPECIFICATION_NAME);

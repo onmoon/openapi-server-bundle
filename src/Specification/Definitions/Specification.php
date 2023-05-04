@@ -9,20 +9,14 @@ use cebe\openapi\spec\OpenApi;
 final class Specification
 {
     /**
-     * @var Operation[]
-     * @psalm-var array<string, Operation>
+     * @param array<string, Operation>    $operations
+     * @param array<string, ObjectSchema> $componentSchemas
      */
-    private array $operations;
-    private OpenApi $openApi;
-
-    /**
-     * @param Operation[] $operations
-     * @psalm-param array<string, Operation> $operations
-     */
-    public function __construct(array $operations, OpenApi $openApi)
-    {
-        $this->operations = $operations;
-        $this->openApi    = $openApi;
+    public function __construct(
+        private array $operations,
+        private array $componentSchemas,
+        private OpenApi $openApi
+    ) {
     }
 
     /**
@@ -37,6 +31,14 @@ final class Specification
     public function getOperation(string $id): Operation
     {
         return $this->operations[$id];
+    }
+
+    /**
+     * @return array<string, ObjectSchema>
+     */
+    public function getComponentSchemas(): array
+    {
+        return $this->componentSchemas;
     }
 
     public function getOpenApi(): OpenApi

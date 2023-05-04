@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace OnMoon\OpenApiServerBundle\Exception;
 
+use function implode;
 use function Safe\sprintf;
 
 final class ApiCallFailed extends OpenApiError
@@ -21,5 +22,16 @@ final class ApiCallFailed extends OpenApiError
                 $interface
             )
         );
+    }
+
+    public static function becauseNoResponseCodeSet(): self
+    {
+        return new self('Response type is ambiguous, please set response code manually');
+    }
+
+    /** @param string[] $allowedCodes */
+    public static function becauseWrongResponseCodeSet(array $allowedCodes): self
+    {
+        return new self('Response code does not match specification, allowed are ' . implode(', ', $allowedCodes));
     }
 }

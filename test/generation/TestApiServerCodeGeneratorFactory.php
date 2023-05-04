@@ -12,7 +12,6 @@ use OnMoon\OpenApiServerBundle\CodeGenerator\AttributeGenerator;
 use OnMoon\OpenApiServerBundle\CodeGenerator\FileGenerator;
 use OnMoon\OpenApiServerBundle\CodeGenerator\Filesystem\FileWriter;
 use OnMoon\OpenApiServerBundle\CodeGenerator\GraphGenerator;
-use OnMoon\OpenApiServerBundle\CodeGenerator\InterfaceGenerator;
 use OnMoon\OpenApiServerBundle\CodeGenerator\NameGenerator;
 use OnMoon\OpenApiServerBundle\CodeGenerator\Naming\DefaultNamingStrategy;
 use OnMoon\OpenApiServerBundle\CodeGenerator\PhpParserGenerators\DtoCodeGenerator;
@@ -46,7 +45,8 @@ final class TestApiServerCodeGeneratorFactory
 
         $specificationLoader = new SpecificationLoader(
             new SpecificationParser(
-                new ScalarTypesResolver()
+                new ScalarTypesResolver(),
+                []
             ),
             new FileLocator(),
             new class () implements TagAwareCacheInterface {
@@ -129,7 +129,6 @@ final class TestApiServerCodeGeneratorFactory
                 $rootNamespace,
                 $rootPath
             ),
-            new InterfaceGenerator(),
             new FileGenerator(
                 new DtoCodeGenerator(
                     $builderFactory,

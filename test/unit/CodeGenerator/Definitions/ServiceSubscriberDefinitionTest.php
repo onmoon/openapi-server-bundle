@@ -6,6 +6,7 @@ namespace OnMoon\OpenApiServerBundle\Test\Unit\CodeGenerator\Definitions;
 
 use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\ClassDefinition;
 use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\ServiceSubscriberDefinition;
+use OnMoon\OpenApiServerBundle\Interfaces\ApiLoader;
 use PHPUnit\Framework\Assert;
 use PHPUnit\Framework\TestCase;
 
@@ -42,6 +43,9 @@ final class ServiceSubscriberDefinitionTest extends TestCase
         $payload['implements'] = (bool) $conditions['hasImplements'] ? [$classDefinition] : [];
 
         $serviceSubscriberDefinition = new ServiceSubscriberDefinition();
+
+        Assert::assertSame(ApiLoader::class, $serviceSubscriberDefinition->getImplements()[0]->getFQCN());
+
         $serviceSubscriberDefinition->setImplements($payload['implements']);
 
         Assert::assertSame($payload['implements'], $serviceSubscriberDefinition->getImplements());

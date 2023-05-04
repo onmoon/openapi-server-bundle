@@ -13,6 +13,8 @@ use function rtrim;
 use function Safe\sprintf;
 use function ucfirst;
 
+use const DIRECTORY_SEPARATOR;
+
 /**
  * @covers \OnMoon\OpenApiServerBundle\Command\GenerateApiCodeCommand
  */
@@ -36,10 +38,10 @@ class GenerateApiCodeCommandTest extends CommandTestCase
         Assert::assertSame(0, $this->commandTester->getStatusCode());
         Assert::assertDirectoryExists(TestKernel::$bundleRootPath);
         Assert::assertDirectoryIsReadable(TestKernel::$bundleRootPath);
-        Assert::assertFileExists(TestKernel::$bundleRootPath . '/ServiceSubscriber/ApiServiceLoaderServiceSubscriber.php');
-        Assert::assertFileExists(TestKernel::$bundleRootPath . '/Apis/' . $this->openapiNamespace . '/' . ucfirst($this->openapiOperationId) . '/' . ucfirst($this->openapiOperationId) . '.php');
-        Assert::assertFileExists(TestKernel::$bundleRootPath . '/Apis/' . $this->openapiNamespace . '/' . ucfirst($this->openapiOperationId) . '/Dto/Request/' . ucfirst($this->openapiOperationId) . 'RequestDto.php');
-        Assert::assertFileExists(TestKernel::$bundleRootPath . '/Apis/' . $this->openapiNamespace . '/' . ucfirst($this->openapiOperationId) . '/Dto/Request/PathParameters/PathParametersDto.php');
-        Assert::assertFileExists(TestKernel::$bundleRootPath . '/Apis/' . $this->openapiNamespace . '/' . ucfirst($this->openapiOperationId) . '/Dto/Response/OK/' . ucfirst($this->openapiOperationId) . 'OKDto.php');
+        Assert::assertFileExists(TestKernel::$bundleRootPath . DIRECTORY_SEPARATOR . 'ServiceSubscriber' . DIRECTORY_SEPARATOR . 'ApiServiceLoaderServiceSubscriber.php');
+        Assert::assertFileExists(TestKernel::$bundleRootPath . DIRECTORY_SEPARATOR . 'Apis' . DIRECTORY_SEPARATOR . $this->openapiNamespace . DIRECTORY_SEPARATOR . ucfirst($this->openapiOperationId) . DIRECTORY_SEPARATOR . ucfirst($this->openapiOperationId) . '.php');
+        Assert::assertFileExists(TestKernel::$bundleRootPath . DIRECTORY_SEPARATOR . 'Apis' . DIRECTORY_SEPARATOR . $this->openapiNamespace . DIRECTORY_SEPARATOR . ucfirst($this->openapiOperationId) . DIRECTORY_SEPARATOR . 'Dto' . DIRECTORY_SEPARATOR . 'Request' . DIRECTORY_SEPARATOR . ucfirst($this->openapiOperationId) . 'RequestDto.php');
+        Assert::assertFileExists(TestKernel::$bundleRootPath . DIRECTORY_SEPARATOR . 'Apis' . DIRECTORY_SEPARATOR . $this->openapiNamespace . DIRECTORY_SEPARATOR . ucfirst($this->openapiOperationId) . DIRECTORY_SEPARATOR . 'Dto' . DIRECTORY_SEPARATOR . 'Request' . DIRECTORY_SEPARATOR . 'PathParameters' . DIRECTORY_SEPARATOR . 'PathParametersDto.php');
+        Assert::assertFileExists(TestKernel::$bundleRootPath . DIRECTORY_SEPARATOR . 'Components' . DIRECTORY_SEPARATOR . $this->openapiNamespace . DIRECTORY_SEPARATOR . 'GoodResponseSchema' . DIRECTORY_SEPARATOR . 'GoodResponseSchema.php');
     }
 }

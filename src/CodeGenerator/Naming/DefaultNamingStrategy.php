@@ -39,7 +39,7 @@ final class DefaultNamingStrategy implements NamingStrategy
 
     public function isAllowedPhpPropertyName(string $name): bool
     {
-        return preg_match('/^\d/', $name) === 0 && preg_match('/^[A-Za-z0-9_]+$/i', $name) === 1;
+        return preg_match('/^\d/', $name) === 0 && preg_match('/^[A-Za-z0-9_]+$/', $name) === 1;
     }
 
     public function getInterfaceFQCN(string $apiNameSpace, string $operationId): string

@@ -8,7 +8,6 @@ use Exception;
 use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\DtoDefinition;
 use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\GeneratedFileDefinition;
 use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\PropertyDefinition;
-use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\ResponseDtoDefinition;
 use PhpParser\Builder;
 use PhpParser\Builder\Method;
 use PhpParser\Builder\Param;
@@ -58,11 +57,6 @@ class DtoCodeGenerator extends CodeGenerator
         $classBuilder->addStmts($this->generateConstructor($fileBuilder, $definition));
         $classBuilder->addStmts($this->generateGetters($fileBuilder, $definition));
         $classBuilder->addStmts($this->generateSetters($fileBuilder, $definition));
-
-        if ($definition instanceof ResponseDtoDefinition) {
-            $classBuilder->addStmt($this->generateResponseCodeStaticMethod($definition));
-        }
-
         $classBuilder->addStmt($this->generateToArray($fileBuilder, $definition));
         $classBuilder->addStmt($this->generateFromArray($fileBuilder, $definition));
 
@@ -261,29 +255,6 @@ class DtoCodeGenerator extends CodeGenerator
             }
 
             $method->setDocComment($this->getDocComment($blocks));
-        }
-
-        return $method;
-    }
-
-    private function generateResponseCodeStaticMethod(ResponseDtoDefinition $definition): Method
-    {
-        $responseCode = $definition->getStatusCode();
-        $method       = $this
-            ->factory
-            ->method('_getResponseCode')
-            ->makePublic()
-            ->makeStatic()
-            ->setReturnType('string')
-            ->addStmt(
-                new Return_(
-                    new String_($responseCode)
-                )
-            );
-        if ($this->fullDocs) {
-            $method->setDocComment(
-                $this->getDocComment(['@return string'])
-            );
         }
 
         return $method;

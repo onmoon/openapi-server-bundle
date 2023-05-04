@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace OnMoon\OpenApiServerBundle\Types;
 
 use Exception;
-use OnMoon\OpenApiServerBundle\Specification\Definitions\ObjectType;
+use OnMoon\OpenApiServerBundle\Specification\Definitions\ObjectSchema;
 
 use function Safe\preg_match;
 
@@ -22,7 +22,7 @@ class ArgumentResolver
      * @return string[]
      * @psalm-return array<string, (string|null)>
      */
-    public function resolveArgumentPatterns(ObjectType $pathParameters): array
+    public function resolveArgumentPatterns(ObjectSchema $pathParameters): array
     {
         $patterns = [];
 

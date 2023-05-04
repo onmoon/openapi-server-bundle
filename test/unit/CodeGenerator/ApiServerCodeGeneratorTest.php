@@ -14,13 +14,15 @@ use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\SpecificationDefinition
 use OnMoon\OpenApiServerBundle\CodeGenerator\FileGenerator;
 use OnMoon\OpenApiServerBundle\CodeGenerator\Filesystem\FileWriter;
 use OnMoon\OpenApiServerBundle\CodeGenerator\GraphGenerator;
-use OnMoon\OpenApiServerBundle\CodeGenerator\InterfaceGenerator;
 use OnMoon\OpenApiServerBundle\CodeGenerator\NameGenerator;
 use OnMoon\OpenApiServerBundle\Event\CodeGenerator\ClassGraphReadyEvent;
 use OnMoon\OpenApiServerBundle\Event\CodeGenerator\FilesReadyEvent;
 use OnMoon\OpenApiServerBundle\Specification\Definitions\SpecificationConfig;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
+use Webmozart\Assert\Assert;
+
+use const DIRECTORY_SEPARATOR;
 
 /**
  * @covers  \OnMoon\OpenApiServerBundle\CodeGenerator\ApiServerCodeGenerator
@@ -33,6 +35,12 @@ final class ApiServerCodeGeneratorTest extends TestCase
             [
                 new SpecificationDefinition(
                     new SpecificationConfig('/', null, '/', 'application/json'),
+                    [],
+                    []
+                ),
+                new SpecificationDefinition(
+                    new SpecificationConfig('/someAnotherPath', null, '/SomeNameSpace', 'application/json'),
+                    [],
                     []
                 ),
             ],
@@ -44,12 +52,6 @@ final class ApiServerCodeGeneratorTest extends TestCase
             ->expects(self::once())
             ->method('generateClassGraph')
             ->willReturn($graphDefinition);
-
-        $interfaceGenerator = $this->createMock(InterfaceGenerator::class);
-        $interfaceGenerator
-            ->expects(self::once())
-            ->method('setAllInterfaces')
-            ->with($graphDefinition);
 
         $attributeGenerator = $this->createMock(AttributeGenerator::class);
         $attributeGenerator
@@ -69,13 +71,19 @@ final class ApiServerCodeGeneratorTest extends TestCase
 
         $generatedFileDefinition = new GeneratedFileDefinition($generatedClassDefinition, 'test');
 
+        $generatedClassDefinitionTwo = new GeneratedClassDefinition();
+        $generatedClassDefinitionTwo->setFilePath('test_file_path_two');
+        $generatedClassDefinitionTwo->setFileName('test_file_name_two');
+
+        $generatedFileDefinitionTwo = new GeneratedFileDefinition($generatedClassDefinitionTwo, 'test_two');
+
         $eventDispatcher = $this->createMock(EventDispatcherInterface::class);
         $eventDispatcher
             ->expects(self::exactly(2))
             ->method('dispatch')
             ->withConsecutive(
                 [new ClassGraphReadyEvent($graphDefinition)],
-                [new FilesReadyEvent([$generatedFileDefinition])]
+                [new FilesReadyEvent([$generatedFileDefinition, $generatedFileDefinitionTwo])]
             );
 
         $fileGenerator = $this->createMock(FileGenerator::class);
@@ -83,27 +91,30 @@ final class ApiServerCodeGeneratorTest extends TestCase
             ->expects(self::once())
             ->method('generateAllFiles')
             ->with($graphDefinition)
-            ->willReturn([$generatedFileDefinition]);
+            ->willReturn([$generatedFileDefinition, $generatedFileDefinitionTwo]);
 
         $fileWriter = $this->createMock(FileWriter::class);
         $fileWriter
-            ->expects(self::once())
+            ->expects(self::exactly(2))
             ->method('write')
-            ->with(
-                $generatedClassDefinition->getFilePath(),
-                $generatedClassDefinition->getFileName(),
-                $generatedFileDefinition->getFileContents()
+            ->withConsecutive(
+                [$generatedClassDefinition->getFilePath(), $generatedClassDefinition->getFileName(), $generatedFileDefinition->getFileContents()],
+                [$generatedClassDefinitionTwo->getFilePath(), $generatedClassDefinitionTwo->getFileName(), $generatedFileDefinitionTwo->getFileContents()]
             );
 
         $apiServerCodeGenerator = new ApiServerCodeGenerator(
             $graphGenerator,
             $nameGenerator,
-            $interfaceGenerator,
             $fileGenerator,
             $attributeGenerator,
             $fileWriter,
             $eventDispatcher
         );
-        $apiServerCodeGenerator->generate();
+
+        $writtenFiles = $apiServerCodeGenerator->generate();
+
+        Assert::count($writtenFiles, 2);
+        Assert::same($writtenFiles[0], 'test_file_path' . DIRECTORY_SEPARATOR . 'test_file_name');
+        Assert::same($writtenFiles[1], 'test_file_path_two' . DIRECTORY_SEPARATOR . 'test_file_name_two');
     }
 }

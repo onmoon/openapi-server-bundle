@@ -6,30 +6,20 @@ namespace OnMoon\OpenApiServerBundle\CodeGenerator\Definitions;
 
 final class OperationDefinition
 {
-    private string $url;
-    private string $method;
-    private string $operationId;
-    private string $requestHandlerName;
-    private ?string $summary                   = null;
-    private ?RequestDtoDefinition $request     = null;
-    private ?ClassDefinition $markersInterface = null;
-    private RequestHandlerInterfaceDefinition $requestHandlerInterface;
-
-    /** @var ResponseDtoDefinition[] */
-    private array $responses;
-
     /**
-     * @param ResponseDtoDefinition[] $responses
+     * @param ResponseDefinition[] $responses
      */
-    public function __construct(string $url, string $method, string $operationId, string $requestHandlerName, ?string $summary, ?RequestDtoDefinition $request, array $responses)
-    {
-        $this->url                = $url;
-        $this->method             = $method;
-        $this->operationId        = $operationId;
-        $this->requestHandlerName = $requestHandlerName;
-        $this->summary            = $summary;
-        $this->request            = $request;
-        $this->responses          = $responses;
+    public function __construct(
+        private string $url,
+        private string $method,
+        private string $operationId,
+        private string $requestHandlerName,
+        private ?string $summary,
+        private ?string $singleHttpCode,
+        private ?DtoReference $request,
+        private array $responses,
+        private RequestHandlerInterfaceDefinition $requestHandlerInterface
+    ) {
     }
 
     public function getUrl(): string
@@ -57,29 +47,17 @@ final class OperationDefinition
         return $this->summary;
     }
 
-    public function getRequest(): ?RequestDtoDefinition
+    public function getRequest(): ?DtoReference
     {
         return $this->request;
     }
 
     /**
-     * @return ResponseDtoDefinition[]
+     * @return ResponseDefinition[]
      */
     public function getResponses(): array
     {
         return $this->responses;
-    }
-
-    public function getMarkersInterface(): ?ClassDefinition
-    {
-        return $this->markersInterface;
-    }
-
-    public function setMarkersInterface(?ClassDefinition $markersInterface): self
-    {
-        $this->markersInterface = $markersInterface;
-
-        return $this;
     }
 
     public function getRequestHandlerInterface(): RequestHandlerInterfaceDefinition
@@ -87,10 +65,8 @@ final class OperationDefinition
         return $this->requestHandlerInterface;
     }
 
-    public function setRequestHandlerInterface(RequestHandlerInterfaceDefinition $requestHandlerInterface): self
+    public function getSingleHttpCode(): ?string
     {
-        $this->requestHandlerInterface = $requestHandlerInterface;
-
-        return $this;
+        return $this->singleHttpCode;
     }
 }

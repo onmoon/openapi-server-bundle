@@ -21,9 +21,9 @@ final class DefaultNamingStrategyTest extends TestCase
 
     public function setUp(): void
     {
-        $someReservedWords           = ['key' => 'SomeReservedWord'];
-        $reservedWords               = new ReservedWords(['keySome' => $someReservedWords]);
-        $this->defaultNamingStrategy = new DefaultNamingStrategy($reservedWords, 'NameSpace', '0');
+        $someReservedWords           = ['namespace' => '8.0', 'method' => '7.4'];
+        $reservedWords               = new ReservedWords(['somereservedword' => $someReservedWords]);
+        $this->defaultNamingStrategy = new DefaultNamingStrategy($reservedWords, 'NameSpace', '8.0');
     }
 
     /**
@@ -36,6 +36,9 @@ final class DefaultNamingStrategyTest extends TestCase
             ['SomeCamelCase', true],
             ['Spaces are not allowed', false],
             ['&^%$!@#', false],
+            ['1SomeClass', false],
+            ['SomeClass1', true],
+            ['SOMEUPPERCASECLASS', true],
         ];
     }
 
@@ -57,7 +60,7 @@ final class DefaultNamingStrategyTest extends TestCase
         return [
             ['test', 'test'],
             ['some Random Phrase', 'someRandomPhrase'],
-            ['SomeReservedWord', 'someReservedWord'],
+            ['SomeReservedWord', '_someReservedWord'],
             ['1test', '_1test'],
             ['9999', '_9999'],
         ];
@@ -70,7 +73,7 @@ final class DefaultNamingStrategyTest extends TestCase
     {
         $actualOutput = $this->defaultNamingStrategy->stringToMethodName($string);
 
-        TestCase::assertEquals($actualOutput, $expectedOutput);
+        TestCase::assertEquals($expectedOutput, $actualOutput);
     }
 
     public function testGetInterfaceFQCN(): void
@@ -81,10 +84,24 @@ final class DefaultNamingStrategyTest extends TestCase
         TestCase::assertEquals($expectedOutput, $actualOutput);
     }
 
-    public function testStringToNamespace(): void
+    /**
+     * @return array<int, array<int, bool|string>>
+     */
+    public function stringToNamespaceDataProvider(): array
     {
-        $expectedOutput = '_1someRandomString';
-        $actualOutput   = $this->defaultNamingStrategy->stringToNamespace('1some random string');
+        return [
+            ['1some random string', '_1someRandomString'],
+            ['SomeReservedWord', '_SomeReservedWord'],
+            ['Some random 1 string', 'SomeRandom1String'],
+        ];
+    }
+
+    /**
+     * @dataProvider stringToNamespaceDataProvider
+     */
+    public function testStringToNamespace(string $string, string $expectedOutput): void
+    {
+        $actualOutput = $this->defaultNamingStrategy->stringToNamespace($string);
 
         TestCase::assertEquals($expectedOutput, $actualOutput);
     }
