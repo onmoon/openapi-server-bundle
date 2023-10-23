@@ -6,7 +6,6 @@ namespace OnMoon\OpenApiServerBundle\Types;
 
 use cebe\openapi\spec\Type;
 
-use function dd;
 use function is_string;
 use function Safe\settype;
 

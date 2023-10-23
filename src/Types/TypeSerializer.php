@@ -12,22 +12,21 @@ use function Safe\base64_decode;
 
 class TypeSerializer
 {
-    private const DESERIALIZATION_DATE_FORMAT = 'Y-m-d';
-    private const SERIALIZATION_DATE_FORMAT = 'c';
-
+    private const DATE_FORMAT     = 'Y-m-d';
+    private const DATETIME_FORMAT = 'c';
 
     public static function deserializeDate(string $date, ?DateTimeInterface $dateTimeClass = null): DateTimeInterface
     {
         if ($dateTimeClass !== null) {
-            return $dateTimeClass::createFromFormat(self::DESERIALIZATION_DATE_FORMAT, $date);
+            return $dateTimeClass::createFromFormat(self::DATE_FORMAT, $date);
         }
 
-        return \Safe\DateTime::createFromFormat(self::DESERIALIZATION_DATE_FORMAT, $date);
+        return \Safe\DateTime::createFromFormat(self::DATE_FORMAT, $date);
     }
 
     public static function serializeDate(DateTime $date): string
     {
-        return $date->format(self::SERIALIZATION_DATE_FORMAT);
+        return $date->format(self::DATE_FORMAT);
     }
 
     public static function deserializeDateTime(string $date, ?DateTimeInterface $dateTimeClass = null): DateTimeInterface
@@ -41,7 +40,7 @@ class TypeSerializer
 
     public static function serializeDateTime(DateTime $date): string
     {
-        return $date->format('c');
+        return $date->format(self::DATETIME_FORMAT);
     }
 
     public static function deserializeByte(string $data): string
