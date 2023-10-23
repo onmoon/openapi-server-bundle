@@ -45,7 +45,7 @@ class SpecificationLoader
     }
 
     /**
-     * @param array{path:string,type:string|null,name_space:string,media_type:string} $spec
+     * @param array{path:string,type:string|null,name_space:string,media_type:string,date_time_class:string|null} $spec
      */
     public function registerSpec(string $name, array $spec): void
     {
@@ -53,7 +53,8 @@ class SpecificationLoader
             $spec['path'],
             $spec['type'] ?? null,
             $spec['name_space'],
-            $spec['media_type']
+            $spec['media_type'],
+            $spec['date_time_class'] ?? null
         );
     }
 

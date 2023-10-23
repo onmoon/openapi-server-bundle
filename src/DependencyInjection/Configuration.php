@@ -33,6 +33,7 @@ final class Configuration implements ConfigurationInterface
                                 ->isRequired()
                                 ->cannotBeEmpty()
                             ->end()
+                            ->scalarNode('date_time_class')->end()
                         ->end()
                 ->end()
             ->end();

@@ -15,6 +15,7 @@ use cebe\openapi\spec\Response;
 use cebe\openapi\spec\Responses;
 use cebe\openapi\spec\Schema;
 use cebe\openapi\spec\Type;
+use DateTimeInterface;
 use OnMoon\OpenApiServerBundle\Exception\CannotParseOpenApi;
 use OnMoon\OpenApiServerBundle\Specification\Definitions\ComponentArray;
 use OnMoon\OpenApiServerBundle\Specification\Definitions\ObjectReference;
@@ -44,12 +45,12 @@ class SpecificationParser
     private ScalarTypesResolver $typeResolver;
     /** @var string[] */
     private array $skipHttpCodes;
+    private ?DateTimeInterface $dateTimeClass = null;
 
     /** @param array<array-key, string|int> $skipHttpCodes */
     public function __construct(ScalarTypesResolver $typeResolver, array $skipHttpCodes)
     {
-        $this->typeResolver = $typeResolver;
-
+        $this->typeResolver  = $typeResolver;
         $this->skipHttpCodes = array_map(static fn ($code) => (string) $code, $skipHttpCodes);
     }
 
@@ -58,6 +59,11 @@ class SpecificationParser
         $componentSchemas = new ComponentArray();
 
         $operationDefinitions = [];
+
+        if ($specificationConfig->getDateTimeClass() !== null) {
+            $this->dateTimeClass = new ($specificationConfig->getDateTimeClass())();
+        }
+
         /**
          * @var string $url
          */
@@ -385,6 +391,10 @@ class SpecificationParser
         if (Type::isScalar($itemProperty->type)) {
             $scalarTypeId = $this->typeResolver->findScalarType($itemProperty->type, $itemProperty->format);
             $propertyDefinition->setScalarTypeId($scalarTypeId);
+
+            if ($this->typeResolver->isDateTime($scalarTypeId) && $this->dateTimeClass !== null) {
+                $propertyDefinition->setOutputType($this->dateTimeClass);
+            }
         } elseif ($itemProperty->type === Type::OBJECT) {
             $objectType = $this->getObjectSchema(
                 $itemProperty,

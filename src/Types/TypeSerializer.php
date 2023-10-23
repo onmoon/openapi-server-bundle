@@ -5,24 +5,37 @@ declare(strict_types=1);
 namespace OnMoon\OpenApiServerBundle\Types;
 
 use DateTime;
+use DateTimeInterface;
 
 use function base64_encode;
 use function Safe\base64_decode;
 
 class TypeSerializer
 {
-    public static function deserializeDate(string $date): DateTime
+    private const DESERIALIZATION_DATE_FORMAT = 'Y-m-d';
+    private const SERIALIZATION_DATE_FORMAT = 'c';
+
+
+    public static function deserializeDate(string $date, ?DateTimeInterface $dateTimeClass = null): DateTimeInterface
     {
-        return \Safe\DateTime::createFromFormat('Y-m-d', $date);
+        if ($dateTimeClass !== null) {
+            return $dateTimeClass::createFromFormat(self::DESERIALIZATION_DATE_FORMAT, $date);
+        }
+
+        return \Safe\DateTime::createFromFormat(self::DESERIALIZATION_DATE_FORMAT, $date);
     }
 
     public static function serializeDate(DateTime $date): string
     {
-        return $date->format('Y-m-d');
+        return $date->format(self::SERIALIZATION_DATE_FORMAT);
     }
 
-    public static function deserializeDateTime(string $date): DateTime
+    public static function deserializeDateTime(string $date, ?DateTimeInterface $dateTimeClass = null): DateTimeInterface
     {
+        if ($dateTimeClass !== null) {
+            return new $dateTimeClass($date);
+        }
+
         return new \Safe\DateTime($date);
     }
 

@@ -10,13 +10,15 @@ final class SpecificationConfig
     private ?string $type;
     private string $nameSpace;
     private string $mediaType;
+    private ?string $dateTimeClass;
 
-    public function __construct(string $path, ?string $type, string $nameSpace, string $mediaType)
+    public function __construct(string $path, ?string $type, string $nameSpace, string $mediaType, ?string $dateTimeClass = null)
     {
-        $this->path      = $path;
-        $this->type      = $type;
-        $this->nameSpace = $nameSpace;
-        $this->mediaType = $mediaType;
+        $this->path          = $path;
+        $this->type          = $type;
+        $this->nameSpace     = $nameSpace;
+        $this->mediaType     = $mediaType;
+        $this->dateTimeClass = $dateTimeClass;
     }
 
     public function getPath(): string
@@ -37,5 +39,10 @@ final class SpecificationConfig
     public function getMediaType(): string
     {
         return $this->mediaType;
+    }
+
+    public function getDateTimeClass(): ?string
+    {
+        return $this->dateTimeClass;
     }
 }

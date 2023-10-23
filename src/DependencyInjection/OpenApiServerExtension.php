@@ -40,7 +40,8 @@ final class OpenApiServerExtension extends Extension implements ExtensionInterfa
          *         path: string,
          *         type?: string,
          *         name_space: string,
-         *         media_type: string
+         *         media_type: string,
+         *         date_time_class?: string,
          *     }
          * } $config
          */

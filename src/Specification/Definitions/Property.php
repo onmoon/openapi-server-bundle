@@ -17,6 +17,7 @@ final class Property
     private ObjectSchema|ObjectReference|null $objectTypeDefinition = null;
     private ?string $description                                    = null;
     private ?string $pattern                                        = null;
+    private ?object $outputType                                     = null;
 
     public function __construct(string $name)
     {
@@ -144,6 +145,18 @@ final class Property
     public function setNullable(bool $nullable): self
     {
         $this->nullable = $nullable;
+
+        return $this;
+    }
+
+    public function getOutputType(): ?object
+    {
+        return $this->outputType;
+    }
+
+    public function setOutputType(?object $outputType): self
+    {
+        $this->outputType = $outputType;
 
         return $this;
     }

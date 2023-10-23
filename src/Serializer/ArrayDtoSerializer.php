@@ -113,8 +113,13 @@ final class ArrayDtoSerializer implements DtoSerializer
                 /** @psalm-suppress MissingClosureParamType */
                 $converter = fn ($v) => $this->convert($deserialize, $v, $objectType->getSchema());
             } else {
+                $outputClass = null;
+                if ($typeId !== null && $this->resolver->isDateTime($typeId)) {
+                    $outputClass = $property->getOutputType();
+                }
+
                 /** @psalm-suppress MissingClosureParamType */
-                $converter = fn ($v) => $this->resolver->convert($deserialize, $typeId ?? 0, $v);
+                $converter = fn ($v) => $this->resolver->convert($deserialize, $typeId ?? 0, $v, $outputClass);
             }
 
             if ($property->isArray()) {
