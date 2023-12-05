@@ -112,4 +112,9 @@ final class CannotParseOpenApi extends OpenApiError
             )
         );
     }
+
+    public static function becauseUnknownType(string $name): self
+    {
+        return new self(sprintf('Class "%s" does not exist', $name));
+    }
 }

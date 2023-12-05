@@ -17,7 +17,7 @@ final class Property
     private ObjectSchema|ObjectReference|null $objectTypeDefinition = null;
     private ?string $description                                    = null;
     private ?string $pattern                                        = null;
-    private ?object $outputType                                     = null;
+    private ?string $outputType                                     = null;
 
     public function __construct(string $name)
     {
@@ -149,12 +149,12 @@ final class Property
         return $this;
     }
 
-    public function getOutputType(): ?object
+    public function getOutputType(): ?string
     {
         return $this->outputType;
     }
 
-    public function setOutputType(?object $outputType): self
+    public function setOutputType(?string $outputType): self
     {
         $this->outputType = $outputType;
 

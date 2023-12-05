@@ -85,6 +85,18 @@ class CodeGeneratorTest extends TestCase
         Assert::assertEquals($expectedClassName, $typeName);
     }
 
+    public function testGetTypeNameReturnsCustomDateTimeClass(): void
+    {
+        $expectedClassName = 'TestCustomDateTimeClass';
+        $property          = new Property('test');
+        $property->setOutputType($expectedClassName);
+        $propertyDefinition = new PropertyDefinition($property);
+        $fileBuilderMock    = $this->createMock(FileBuilder::class);
+        $typeName           = $this->codeGenerator->getTypeName($fileBuilderMock, $propertyDefinition);
+
+        Assert::assertEquals($expectedClassName, $typeName);
+    }
+
     public function testGetTypeNameThrowsException(): void
     {
         $propertyDefinition = new PropertyDefinition(new Property('test'));

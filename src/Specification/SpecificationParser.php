@@ -31,8 +31,10 @@ use function array_filter;
 use function array_key_exists;
 use function array_map;
 use function array_merge;
+use function class_exists;
 use function count;
 use function in_array;
+use function is_a;
 use function is_array;
 use function is_int;
 use function Safe\preg_match;
@@ -45,7 +47,7 @@ class SpecificationParser
     private ScalarTypesResolver $typeResolver;
     /** @var string[] */
     private array $skipHttpCodes;
-    private ?DateTimeInterface $dateTimeClass = null;
+    private ?string $dateTimeClass = null;
 
     /** @param array<array-key, string|int> $skipHttpCodes */
     public function __construct(ScalarTypesResolver $typeResolver, array $skipHttpCodes)
@@ -61,7 +63,7 @@ class SpecificationParser
         $operationDefinitions = [];
 
         if ($specificationConfig->getDateTimeClass() !== null) {
-            $this->dateTimeClass = new ($specificationConfig->getDateTimeClass())();
+            $this->dateTimeClass = $specificationConfig->getDateTimeClass();
         }
 
         /**
@@ -393,6 +395,18 @@ class SpecificationParser
             $propertyDefinition->setScalarTypeId($scalarTypeId);
 
             if ($this->typeResolver->isDateTime($scalarTypeId) && $this->dateTimeClass !== null) {
+                if (! class_exists($this->dateTimeClass)) {
+                    throw CannotParseOpenApi::becauseUnknownType($this->dateTimeClass);
+                }
+
+                if (is_a($this->dateTimeClass, DateTimeInterface::class, true) === false) {
+                    throw CannotParseOpenApi::becauseTypeNotSupported(
+                        $propertyName,
+                        $this->dateTimeClass,
+                        $exceptionContext
+                    );
+                }
+
                 $propertyDefinition->setOutputType($this->dateTimeClass);
             }
         } elseif ($itemProperty->type === Type::OBJECT) {

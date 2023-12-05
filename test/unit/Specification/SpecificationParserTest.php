@@ -15,6 +15,7 @@ use cebe\openapi\spec\Response;
 use cebe\openapi\spec\Responses;
 use cebe\openapi\spec\Schema;
 use cebe\openapi\spec\Type;
+use DateTimeImmutable;
 use OnMoon\OpenApiServerBundle\Exception\CannotParseOpenApi;
 use OnMoon\OpenApiServerBundle\Specification\Definitions\ObjectSchema;
 use OnMoon\OpenApiServerBundle\Specification\Definitions\SpecificationConfig;
@@ -22,8 +23,10 @@ use OnMoon\OpenApiServerBundle\Specification\SpecificationParser;
 use OnMoon\OpenApiServerBundle\Types\ScalarTypesResolver;
 use PHPUnit\Framework\Assert;
 use PHPUnit\Framework\TestCase;
+use stdClass;
 
 use function array_map;
+use function sprintf;
 
 /**
  * @covers \OnMoon\OpenApiServerBundle\Specification\SpecificationParser
@@ -286,6 +289,80 @@ final class SpecificationParserTest extends TestCase
             'pathParam',
             $requestParams['path']->getProperties()[2]->getName()
         );
+    }
+
+    public function testParseOpenApiWithCustomDateTimeClassSuccess(): void
+    {
+        $specificationName   = 'SomeCustomSpecification';
+        $someDateTimeClass   = $this->createMock(DateTimeImmutable::class);
+        $specificationConfig = new SpecificationConfig(
+            '/some/custom/specification/path',
+            null,
+            '\\Some\\Custom\\Namespace',
+            'application/json',
+            $someDateTimeClass::class
+        );
+        $parsedSpecification = new OpenApi([
+            'paths' => new Paths([
+                '/some/custom/url' => [
+                    'post' => new Operation([
+                        'operationId' => 'SomeCustomOperationWithRequestAndResponses',
+                        'requestBody' => new RequestBody([
+                            'description' => 'SomeCustomRequestParam',
+                            'content' => [
+                                'application/json' => new MediaType([
+                                    'schema' => new Schema([
+                                        'type' => Type::OBJECT,
+                                        'properties' => [
+                                            'someDateTimeProperty' => new Schema([
+                                                'type' => Type::STRING,
+                                                'format' => 'date-time',
+                                                'default' => 1605101247,
+                                            ]),
+                                        ],
+                                    ]),
+                                ]),
+                            ],
+                        ]),
+                        'responses' => new Responses([
+                            '200' => new Response([
+                                'description' => 'SomeCustomResponseParam200',
+                                'content' => [
+                                    'application/json' => new MediaType([
+                                        'schema' => new Schema([
+                                            'type' => Type::OBJECT,
+                                            'properties' => [
+                                                'someDateTimeProperty' => new Schema([
+                                                    'type' => Type::STRING,
+                                                    'format' => 'date-time',
+                                                    'default' => 1605101247,
+                                                ]),
+                                            ],
+                                        ]),
+                                    ]),
+                                ],
+                            ]),
+                        ]),
+                    ]),
+                ],
+            ]),
+        ]);
+
+        $specificationParser = new SpecificationParser(new ScalarTypesResolver(), []);
+
+        $specification = $specificationParser->parseOpenApi(
+            $specificationName,
+            $specificationConfig,
+            $parsedSpecification
+        );
+
+        $requestBody = $specification
+            ->getOperation('SomeCustomOperationWithRequestAndResponses')
+            ->getRequestBody();
+        Assert::assertNotNull($requestBody);
+
+        $requestBodyProperties = $requestBody->getProperties();
+        Assert::assertSame($someDateTimeClass::class, $requestBodyProperties[0]->getOutputType());
     }
 
     public function testParseOpenApiSuccessRequestBadMediaType(): void
@@ -927,4 +1004,147 @@ final class SpecificationParserTest extends TestCase
             $parsedSpecification
         );
     }
+
+    public function testParseOpenApiWithCustomDateTimeClassThrowExceptionUnknownType(): void
+    {
+        $specificationName   = 'SomeCustomSpecification';
+        $specificationConfig = new SpecificationConfig(
+            '/some/custom/specification/path',
+            null,
+            '\\Some\\Custom\\Namespace',
+            'application/json',
+            'SomeNotExistedDateTimeClass'
+        );
+        $parsedSpecification = new OpenApi([
+            'paths' => new Paths([
+                '/some/custom/url' => [
+                    'post' => new Operation([
+                        'operationId' => 'SomeCustomOperationWithRequestAndResponses',
+                        'requestBody' => new RequestBody([
+                            'description' => 'SomeCustomRequestParam',
+                            'content' => [
+                                'application/json' => new MediaType([
+                                    'schema' => new Schema([
+                                        'type' => Type::OBJECT,
+                                        'properties' => [
+                                            'someDateTimeProperty' => new Schema([
+                                                'type' => Type::STRING,
+                                                'format' => 'date-time',
+                                                'default' => 1605101247,
+                                            ]),
+                                        ],
+                                    ]),
+                                ]),
+                            ],
+                        ]),
+                        'responses' => new Responses([
+                            '200' => new Response([
+                                'description' => 'SomeCustomResponseParam200',
+                                'content' => [
+                                    'application/json' => new MediaType([
+                                        'schema' => new Schema([
+                                            'type' => Type::OBJECT,
+                                            'properties' => [
+                                                'someDateTimeProperty' => new Schema([
+                                                    'type' => Type::STRING,
+                                                    'format' => 'date-time',
+                                                    'default' => 1605101247,
+                                                ]),
+                                            ],
+                                        ]),
+                                    ]),
+                                ],
+                            ]),
+                        ]),
+                    ]),
+                ],
+            ]),
+        ]);
+
+        $specificationParser = new SpecificationParser(new ScalarTypesResolver(), []);
+
+        $this->expectException(CannotParseOpenApi::class);
+        $this->expectExceptionMessage('Class "SomeNotExistedDateTimeClass" does not exist');
+
+        $specificationParser->parseOpenApi(
+            $specificationName,
+            $specificationConfig,
+            $parsedSpecification
+        );
+    }
+
+    public function testParseOpenApiWithCustomDateTimeClassThrowExceptionTypeNotSupported(): void
+    {
+        $specificationName    = 'SomeCustomSpecification';
+        $someNotDateTimeClass = $this->getMockBuilder(stdClass::class)->getMock();
+        $specificationConfig  = new SpecificationConfig(
+            '/some/custom/specification/path',
+            null,
+            '\\Some\\Custom\\Namespace',
+            'application/json',
+            $someNotDateTimeClass::class
+        );
+        $parsedSpecification  = new OpenApi([
+            'paths' => new Paths([
+                '/some/custom/url' => [
+                    'post' => new Operation([
+                        'operationId' => 'SomeCustomOperationWithRequestAndResponses',
+                        'requestBody' => new RequestBody([
+                            'description' => 'SomeCustomRequestParam',
+                            'content' => [
+                                'application/json' => new MediaType([
+                                    'schema' => new Schema([
+                                        'type' => Type::OBJECT,
+                                        'properties' => [
+                                            'someDateTimeProperty' => new Schema([
+                                                'type' => Type::STRING,
+                                                'format' => 'date-time',
+                                                'default' => 1605101247,
+                                            ]),
+                                        ],
+                                    ]),
+                                ]),
+                            ],
+                        ]),
+                        'responses' => new Responses([
+                            '200' => new Response([
+                                'description' => 'SomeCustomResponseParam200',
+                                'content' => [
+                                    'application/json' => new MediaType([
+                                        'schema' => new Schema([
+                                            'type' => Type::OBJECT,
+                                            'properties' => [
+                                                'someDateTimeProperty' => new Schema([
+                                                    'type' => Type::STRING,
+                                                    'format' => 'date-time',
+                                                    'default' => 1605101247,
+                                                ]),
+                                            ],
+                                        ]),
+                                    ]),
+                                ],
+                            ]),
+                        ]),
+                    ]),
+                ],
+            ]),
+        ]);
+
+        $specificationParser = new SpecificationParser(new ScalarTypesResolver(), []);
+
+        $this->expectException(CannotParseOpenApi::class);
+        $this->expectExceptionMessage(sprintf(
+            'Cannot generate property for DTO class, property "someDateTimeProperty" type "%s" is not supported ' .
+            'in response (code "200") for operation: "post" of path: "/some/custom/url" in specification file: ' .
+            '"/some/custom/specification/path".',
+            $someNotDateTimeClass::class
+        ));
+
+        $specificationParser->parseOpenApi(
+            $specificationName,
+            $specificationConfig,
+            $parsedSpecification
+        );
+    }
+
 }

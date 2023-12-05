@@ -5,11 +5,14 @@ declare(strict_types=1);
 namespace OnMoon\OpenApiServerBundle\Test\Unit\Types;
 
 use DateTime;
+use DateTimeImmutable;
 use OnMoon\OpenApiServerBundle\Types\TypeSerializer;
 use PHPUnit\Framework\Assert;
 use PHPUnit\Framework\TestCase;
 use Safe\Exceptions\DatetimeException;
 use Throwable;
+
+use function sprintf;
 
 /**
  * @covers \OnMoon\OpenApiServerBundle\Types\TypeSerializer
@@ -24,11 +27,42 @@ final class TypeSerializerTest extends TestCase
         Assert::assertEquals($expectedDate, $deserializedDate);
     }
 
+    public function testDeserializeDateWithCustomDateTimeClassReturnsDateTime(): void
+    {
+        $dateString       = '2020-05-12';
+        $expectedDate     = DateTime::createFromFormat('Y-m-d', $dateString);
+        $deserializedDate = TypeSerializer::deserializeDate($dateString, DateTimeImmutable::class);
+        Assert::assertEquals($expectedDate, $deserializedDate);
+    }
+
     public function testDeserializeDateThrowsException(): void
     {
         $dateString = '22-07-2020';
         $this->expectException(DatetimeException::class);
         TypeSerializer::deserializeDate($dateString);
+    }
+
+    public function testDeserializeDateWithCustomDateTimeClassThrowsException(): void
+    {
+        $dateString = '22-07-2020';
+        $this->expectException(DatetimeException::class);
+        TypeSerializer::deserializeDate($dateString, DateTimeImmutable::class);
+    }
+
+    public function testDeserializeDateWithCustomDateTimeClassThrowsNotExistMethodException(): void
+    {
+        $dateString = '2020-05-12';
+        $wrongClass = $this
+            ->getMockBuilder(DateTimeImmutable::class)
+            ->setMockClassName('WrongClass')
+            ->disableProxyingToOriginalMethods();
+
+        $this->expectException(Throwable::class);
+        $this->expectExceptionMessage(sprintf(
+            'Method createFromFormat does not exist in class %s',
+            $wrongClass::class
+        ));
+        TypeSerializer::deserializeDate($dateString, $wrongClass::class);
     }
 
     public function testSerializeDateReturnsSerializedDate(): void
@@ -45,6 +79,14 @@ final class TypeSerializerTest extends TestCase
         $dateString           = '25-12-2020 12:01:55';
         $expectedDateTime     = new \Safe\DateTime($dateString);
         $deserializedDateTime = TypeSerializer::deserializeDateTime($dateString);
+        Assert::assertEquals($expectedDateTime, $deserializedDateTime);
+    }
+
+    public function testDeserializeDateTimeWithCustomDateTimeClassReturnsDateTime(): void
+    {
+        $dateString           = '25-12-2020 12:01:55';
+        $expectedDateTime     = new \Safe\DateTime($dateString);
+        $deserializedDateTime = TypeSerializer::deserializeDateTime($dateString, DateTimeImmutable::class);
         Assert::assertEquals($expectedDateTime, $deserializedDateTime);
     }
 
