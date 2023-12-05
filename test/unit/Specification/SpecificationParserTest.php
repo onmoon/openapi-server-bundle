@@ -294,13 +294,12 @@ final class SpecificationParserTest extends TestCase
     public function testParseOpenApiWithCustomDateTimeClassSuccess(): void
     {
         $specificationName   = 'SomeCustomSpecification';
-        $someDateTimeClass   = $this->createMock(DateTimeImmutable::class);
         $specificationConfig = new SpecificationConfig(
             '/some/custom/specification/path',
             null,
             '\\Some\\Custom\\Namespace',
             'application/json',
-            $someDateTimeClass::class
+            DateTimeImmutable::class
         );
         $parsedSpecification = new OpenApi([
             'paths' => new Paths([
@@ -362,7 +361,7 @@ final class SpecificationParserTest extends TestCase
         Assert::assertNotNull($requestBody);
 
         $requestBodyProperties = $requestBody->getProperties();
-        Assert::assertSame($someDateTimeClass::class, $requestBodyProperties[0]->getOutputType());
+        Assert::assertSame(DateTimeImmutable::class, $requestBodyProperties[0]->getOutputType());
     }
 
     public function testParseOpenApiSuccessRequestBadMediaType(): void
@@ -1146,5 +1145,4 @@ final class SpecificationParserTest extends TestCase
             $parsedSpecification
         );
     }
-
 }
