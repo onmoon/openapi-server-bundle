@@ -62,9 +62,7 @@ class SpecificationParser
 
         $operationDefinitions = [];
 
-        if ($specificationConfig->getDateTimeClass() !== null) {
-            $this->dateTimeClass = $specificationConfig->getDateTimeClass();
-        }
+        $this->dateTimeClass = $specificationConfig->getDateTimeClass();
 
         /**
          * @var string $url
@@ -395,6 +393,10 @@ class SpecificationParser
             $propertyDefinition->setScalarTypeId($scalarTypeId);
 
             if ($this->typeResolver->isDateTime($scalarTypeId) && $this->dateTimeClass !== null) {
+                if (preg_match('/^\\\\/', $this->dateTimeClass) !== 1) {
+                    throw CannotParseOpenApi::becauseNotFQCN($this->dateTimeClass);
+                }
+
                 if (! class_exists($this->dateTimeClass)) {
                     throw CannotParseOpenApi::becauseUnknownType($this->dateTimeClass);
                 }
