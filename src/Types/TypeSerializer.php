@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace OnMoon\OpenApiServerBundle\Types;
 
-use DateTime;
 use DateTimeInterface;
 use Exception;
+use Safe\DateTime;
 use Safe\Exceptions\DatetimeException;
 
 use function base64_encode;
@@ -28,7 +28,7 @@ class TypeSerializer
     public static function deserializeDate(string $date, ?string $dateTimeClass = null): DateTimeInterface
     {
         if ($dateTimeClass === null) {
-            return \Safe\DateTime::createFromFormat(self::DATE_FORMAT, $date);
+            return DateTime::createFromFormat(self::DATE_FORMAT, $date);
         }
 
         if (method_exists($dateTimeClass, 'createFromFormat') === false) {
@@ -50,7 +50,7 @@ class TypeSerializer
         return $deserializedDate;
     }
 
-    public static function serializeDate(DateTime $date): string
+    public static function serializeDate(DateTimeInterface $date): string
     {
         return $date->format(self::DATE_FORMAT);
     }
@@ -63,14 +63,14 @@ class TypeSerializer
     public static function deserializeDateTime(string $date, ?string $dateTimeClass = null): DateTimeInterface
     {
         if ($dateTimeClass === null) {
-            return new \Safe\DateTime($date);
+            return new DateTime($date);
         }
 
         /** @psalm-suppress InvalidStringClass */
         return new $dateTimeClass($date);
     }
 
-    public static function serializeDateTime(DateTime $date): string
+    public static function serializeDateTime(DateTimeInterface $date): string
     {
         return $date->format(self::DATETIME_FORMAT);
     }

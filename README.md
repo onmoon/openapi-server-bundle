@@ -64,6 +64,8 @@ open_api_server:
       type: yaml  # Specification format, either yaml or json. If omitted, the specification file extension will be used.
       name_space: PetStore # Namespace for generated DTOs and Interfaces
       media_type: 'application/json' # media type from the specification files to use for generating request and response DTOs
+      #date_time_class: '\Carbon\CarbonImmutable' # FQCN which implements \DateTimeInterface.
+      ## If set up, then generated DTOs will return instances of this class in DateTime parameters
 ```
 
 Add your OpenApi specifications to the application routes configuration file using standard `resource` keyword 
