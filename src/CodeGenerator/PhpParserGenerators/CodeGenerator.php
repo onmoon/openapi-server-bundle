@@ -63,6 +63,10 @@ abstract class CodeGenerator
             return $builder->getReference($objectType);
         }
 
+        if ($definition->getSpecProperty()->getOutputType() !== null) {
+            return $definition->getSpecProperty()->getOutputType();
+        }
+
         if ($scalarType === null) {
             throw new Exception('One of ObjectTypeDefinition and ScalarTypeId should not be null');
         }

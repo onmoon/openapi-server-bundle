@@ -15,6 +15,7 @@ use cebe\openapi\spec\Response;
 use cebe\openapi\spec\Responses;
 use cebe\openapi\spec\Schema;
 use cebe\openapi\spec\Type;
+use DateTimeInterface;
 use OnMoon\OpenApiServerBundle\Exception\CannotParseOpenApi;
 use OnMoon\OpenApiServerBundle\Specification\Definitions\ComponentArray;
 use OnMoon\OpenApiServerBundle\Specification\Definitions\ObjectReference;
@@ -30,8 +31,10 @@ use function array_filter;
 use function array_key_exists;
 use function array_map;
 use function array_merge;
+use function class_exists;
 use function count;
 use function in_array;
+use function is_a;
 use function is_array;
 use function is_int;
 use function Safe\preg_match;
@@ -44,12 +47,12 @@ class SpecificationParser
     private ScalarTypesResolver $typeResolver;
     /** @var string[] */
     private array $skipHttpCodes;
+    private ?string $dateTimeClass = null;
 
     /** @param array<array-key, string|int> $skipHttpCodes */
     public function __construct(ScalarTypesResolver $typeResolver, array $skipHttpCodes)
     {
-        $this->typeResolver = $typeResolver;
-
+        $this->typeResolver  = $typeResolver;
         $this->skipHttpCodes = array_map(static fn ($code) => (string) $code, $skipHttpCodes);
     }
 
@@ -58,6 +61,9 @@ class SpecificationParser
         $componentSchemas = new ComponentArray();
 
         $operationDefinitions = [];
+
+        $this->dateTimeClass = $specificationConfig->getDateTimeClass();
+
         /**
          * @var string $url
          */
@@ -385,6 +391,26 @@ class SpecificationParser
         if (Type::isScalar($itemProperty->type)) {
             $scalarTypeId = $this->typeResolver->findScalarType($itemProperty->type, $itemProperty->format);
             $propertyDefinition->setScalarTypeId($scalarTypeId);
+
+            if ($this->typeResolver->isDateTime($scalarTypeId) && $this->dateTimeClass !== null) {
+                if (preg_match('/^\\\\/', $this->dateTimeClass) !== 1) {
+                    throw CannotParseOpenApi::becauseNotFQCN($this->dateTimeClass);
+                }
+
+                if (! class_exists($this->dateTimeClass)) {
+                    throw CannotParseOpenApi::becauseUnknownType($this->dateTimeClass);
+                }
+
+                if (is_a($this->dateTimeClass, DateTimeInterface::class, true) === false) {
+                    throw CannotParseOpenApi::becauseTypeNotSupported(
+                        $propertyName,
+                        $this->dateTimeClass,
+                        $exceptionContext
+                    );
+                }
+
+                $propertyDefinition->setOutputType($this->dateTimeClass);
+            }
         } elseif ($itemProperty->type === Type::OBJECT) {
             $objectType = $this->getObjectSchema(
                 $itemProperty,

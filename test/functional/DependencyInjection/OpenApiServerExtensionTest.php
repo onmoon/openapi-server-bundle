@@ -70,7 +70,14 @@ class OpenApiServerExtensionTest extends AbstractExtensionTestCase
             'generated_dir_permissions' => '0444',
             'full_doc_blocks' => true,
             'send_nulls' => true,
-            'specs' => [['path' => 'test', 'name_space' => 'test', 'media_type' => 'application/json']],
+            'specs' => [
+                [
+                    'path' => 'test',
+                    'name_space' => 'test',
+                    'media_type' => 'application/json',
+                    'date_time_class' => 'TestClass',
+                ],
+            ],
         ]);
 
         $this->assertContainerBuilderHasServiceDefinitionWithMethodCall(
@@ -78,7 +85,12 @@ class OpenApiServerExtensionTest extends AbstractExtensionTestCase
             'registerSpec',
             [
                 0,
-                ['path' => 'test', 'name_space' => 'test', 'media_type' => 'application/json'],
+                [
+                    'path' => 'test',
+                    'name_space' => 'test',
+                    'media_type' => 'application/json',
+                    'date_time_class' => 'TestClass',
+                ],
             ]
         );
     }

@@ -195,9 +195,9 @@ class AttributeGeneratorTest extends TestCase
         $property->setDefaultValue('test');
 
         $propertyTwo = new Property('two');
-        $propertyTwo->setNullable(true);
-        $propertyTwo->setRequired(true);
-        $propertyTwo->setDefaultValue('testTwo');
+        $propertyTwo->setNullable(false);
+        $propertyTwo->setRequired(false);
+        $propertyTwo->setDefaultValue(null);
 
         $propertyDefinition    = new PropertyDefinition($property);
         $propertyDefinitionTwo = new PropertyDefinition($propertyTwo);

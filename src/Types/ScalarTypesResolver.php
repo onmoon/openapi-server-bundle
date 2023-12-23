@@ -71,7 +71,7 @@ final class ScalarTypesResolver
      *
      * @return mixed
      */
-    public function convert(bool $deserialize, int $id, $value)
+    public function convert(bool $deserialize, int $id, $value, ?string $outputClass = null)
     {
         if ($value === null) {
             return null;
@@ -80,7 +80,7 @@ final class ScalarTypesResolver
         $format = $this->scalarTypes[$id];
 
         if ($deserialize && isset($format['deserializer'])) {
-            return TypeSerializer::{$format['deserializer']}($value);
+            return TypeSerializer::{$format['deserializer']}($value, $outputClass);
         }
 
         if (! $deserialize && isset($format['serializer'])) {
