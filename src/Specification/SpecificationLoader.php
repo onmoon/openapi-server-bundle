@@ -16,7 +16,6 @@ use Symfony\Contracts\Cache\TagAwareCacheInterface;
 use function array_keys;
 use function file_exists;
 use function implode;
-use function is_string;
 use function pathinfo;
 use function Safe\sprintf;
 use function stream_is_local;
@@ -92,10 +91,6 @@ class SpecificationLoader
     private function parseSpecification(string $specificationName, SpecificationConfig $specificationConfig): Specification
     {
         $specPath = $this->locator->locate($specificationConfig->getPath());
-
-        if (! is_string($specPath)) {
-            throw new Exception(sprintf('More than one file path found for specification "%s".', $specificationConfig->getPath()));
-        }
 
         if (! stream_is_local($specPath)) {
             throw new Exception(sprintf('This is not a local file "%s".', $specPath));
