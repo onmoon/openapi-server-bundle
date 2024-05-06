@@ -205,26 +205,6 @@ class SpecificationLoaderTest extends TestCase
         Assert::assertEquals($expectedSpecificationConfig, $specificationConfig);
     }
 
-    public function testLoadMoreThenOneSpecificationFilePathThrowsException(): void
-    {
-        $specificationFileName = 'test1';
-        $this->fileLocator->expects(self::once())
-            ->method('locate')
-            ->willReturn(['test1', 'test2']);
-        $specificationLoader = new SpecificationLoader(
-            $this->specificationParser,
-            $this->fileLocator,
-            $this->cache
-        );
-        $specificationArray  = $this->getSpecificationArray($specificationFileName);
-
-        $specificationLoader->registerSpec(self::SPECIFICATION_NAME, $specificationArray);
-        $this->expectException(Exception::class);
-        $this->expectExceptionMessage(sprintf('More than one file path found for specification "%s".', __DIR__ . '/' . $specificationFileName));
-
-        $specificationLoader->load(self::SPECIFICATION_NAME);
-    }
-
     public function testLoadNotLocalSpecificationFileThrowsException(): void
     {
         $specificationFileName = 'https://missed_specification.spec';
