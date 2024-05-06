@@ -99,7 +99,7 @@ final class ApiController
         $this->eventDispatcher->dispatch(new ResponseDtoEvent($responseDto, $operationId, $specification));
 
         $response = $this->createResponse($requestHandler, $operation, $requestHandlerInterface, $responseDto);
-        $this->eventDispatcher->dispatch(new ResponseEvent($response, $operationId, $specification));
+        $this->eventDispatcher->dispatch(new ResponseEvent($response, $operationId, $specification, $requestHandler, $request));
 
         return $response;
     }

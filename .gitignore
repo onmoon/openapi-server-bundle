@@ -4,3 +4,4 @@
 /composer.lock
 vendor/
 local-php-security-checker
+/.idea
