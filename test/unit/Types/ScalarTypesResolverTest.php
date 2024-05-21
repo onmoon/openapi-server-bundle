@@ -11,9 +11,7 @@ use PHPUnit\Framework\TestCase;
 use Safe\DateTime;
 use Safe\Exceptions\DatetimeException;
 
-/**
- * @covers \OnMoon\OpenApiServerBundle\Types\ScalarTypesResolver
- */
+/** @covers \OnMoon\OpenApiServerBundle\Types\ScalarTypesResolver */
 final class ScalarTypesResolverTest extends TestCase
 {
     private ScalarTypesResolver $scalarTypeResolver;
@@ -26,6 +24,7 @@ final class ScalarTypesResolverTest extends TestCase
     public function tearDown(): void
     {
         unset($this->scalarTypeResolver);
+
         parent::tearDown();
     }
 
@@ -34,7 +33,7 @@ final class ScalarTypesResolverTest extends TestCase
      *
      * @throws DatetimeException
      */
-    public function convertDeserializeDataProvider(): array
+    public static function convertDeserializeDataProvider(): array
     {
         return [
             'deserialize_null' => [
@@ -154,7 +153,7 @@ final class ScalarTypesResolverTest extends TestCase
      *
      * @throws DatetimeException
      */
-    public function convertSerializeDataProvider(): array
+    public static function convertSerializeDataProvider(): array
     {
         return [
             'serialize_null' => [

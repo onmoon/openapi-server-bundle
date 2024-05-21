@@ -26,9 +26,7 @@ use PHPUnit\Framework\TestCase;
 use function array_map;
 use function sprintf;
 
-/**
- * @covers \OnMoon\OpenApiServerBundle\Specification\SpecificationParser
- */
+/** @covers \OnMoon\OpenApiServerBundle\Specification\SpecificationParser */
 final class SpecificationParserTest extends TestCase
 {
     public function testParseOpenApiSuccess(): void
@@ -484,10 +482,8 @@ final class SpecificationParserTest extends TestCase
         );
     }
 
-    /**
-     * @return mixed[]
-     */
-    public function parseOpenApiSuccessDefaultValueProvider(): array
+    /** @return mixed[] */
+    public static function parseOpenApiSuccessDefaultValueProvider(): array
     {
         return [
             [
@@ -623,10 +619,8 @@ final class SpecificationParserTest extends TestCase
         }
     }
 
-    /**
-     * @return mixed[]
-     */
-    public function parseOpenApiThrowCannotParseOpenApiProvider(): array
+    /** @return mixed[] */
+    public static function parseOpenApiThrowCannotParseOpenApiProvider(): array
     {
         return [
             [

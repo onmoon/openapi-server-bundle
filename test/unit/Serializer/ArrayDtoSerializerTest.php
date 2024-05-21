@@ -21,19 +21,15 @@ use function Safe\fwrite;
 use function Safe\json_encode;
 use function Safe\rewind;
 
-/**
- * @covers \OnMoon\OpenApiServerBundle\Serializer\ArrayDtoSerializer
- */
+/** @covers \OnMoon\OpenApiServerBundle\Serializer\ArrayDtoSerializer */
 class ArrayDtoSerializerTest extends TestCase
 {
     private const OK_RESPONSE_DTO_FIRST_PROP  = 'firstProp';
     private const OK_RESPONSE_DTO_SECOND_PROP = 'secondProp';
     private const OK_RESPONSE_DTO_THIRD_PROP  = 'thirdProp';
 
-    /**
-     * @return mixed[]
-     */
-    public function createRequestDtoWithPathProvider(): array
+    /** @return mixed[] */
+    public static function createRequestDtoWithPathProvider(): array
     {
         return [
             [
@@ -312,7 +308,7 @@ class ArrayDtoSerializerTest extends TestCase
             }
 
             /** @inheritDoc */
-            public static function fromArray(array $data): self
+            public static function fromArray(array $data): Dto
             {
                 $pathDto = new class () implements Dto
                 {
@@ -332,7 +328,7 @@ class ArrayDtoSerializerTest extends TestCase
                     }
 
                     /** @inheritDoc */
-                    public static function fromArray(array $data): self
+                    public static function fromArray(array $data): Dto
                     {
                         $dto             = new self();
                         $dto->firstParam = $data['firstParam'];
@@ -359,7 +355,7 @@ class ArrayDtoSerializerTest extends TestCase
                     }
 
                     /** @inheritDoc */
-                    public static function fromArray(array $data): self
+                    public static function fromArray(array $data): Dto
                     {
                         $dto             = new self();
                         $dto->firstParam = $data['firstParam'];
@@ -402,7 +398,7 @@ class ArrayDtoSerializerTest extends TestCase
                     }
 
                     /** @inheritDoc */
-                    public static function fromArray(array $data): self
+                    public static function fromArray(array $data): Dto
                     {
                         $thirdParamDto = new class () implements Dto
                         {
@@ -422,7 +418,7 @@ class ArrayDtoSerializerTest extends TestCase
                             }
 
                             /** @inheritDoc */
-                            public static function fromArray(array $data): self
+                            public static function fromArray(array $data): Dto
                             {
                                 $dto             = new self();
                                 $dto->firstParam = $data['firstParam'];
@@ -452,10 +448,8 @@ class ArrayDtoSerializerTest extends TestCase
         };
     }
 
-    /**
-     * @return mixed[]
-     */
-    public function createResponseFromDtoPropertyIsNullProvider(): array
+    /** @return mixed[] */
+    public static function createResponseFromDtoPropertyIsNullProvider(): array
     {
         return [
             [
@@ -465,7 +459,7 @@ class ArrayDtoSerializerTest extends TestCase
                     'isNullable' => false,
                 ],
                 'sendNotRequiredNullableNulls' => false,
-                'result' => [],
+                'expectedResult' => [],
             ],
             [
                 'propertyConditions' => [
@@ -474,7 +468,7 @@ class ArrayDtoSerializerTest extends TestCase
                     'isNullable' => false,
                 ],
                 'sendNotRequiredNullableNulls' => false,
-                'result' => [self::OK_RESPONSE_DTO_FIRST_PROP => 'SomeFirstDefaultNotNullValue'],
+                'expectedResult' => [self::OK_RESPONSE_DTO_FIRST_PROP => 'SomeFirstDefaultNotNullValue'],
             ],
             [
                 'propertyConditions' => [
@@ -483,7 +477,7 @@ class ArrayDtoSerializerTest extends TestCase
                     'isNullable' => false,
                 ],
                 'sendNotRequiredNullableNulls' => false,
-                'result' => [self::OK_RESPONSE_DTO_FIRST_PROP => null],
+                'expectedResult' => [self::OK_RESPONSE_DTO_FIRST_PROP => null],
             ],
             [
                 'propertyConditions' => [
@@ -492,7 +486,7 @@ class ArrayDtoSerializerTest extends TestCase
                     'isNullable' => true,
                 ],
                 'sendNotRequiredNullableNulls' => false,
-                'result' => [],
+                'expectedResult' => [],
             ],
             [
                 'propertyConditions' => [
@@ -501,7 +495,7 @@ class ArrayDtoSerializerTest extends TestCase
                     'isNullable' => true,
                 ],
                 'sendNotRequiredNullableNulls' => true,
-                'result' => [self::OK_RESPONSE_DTO_FIRST_PROP => null],
+                'expectedResult' => [self::OK_RESPONSE_DTO_FIRST_PROP => null],
             ],
             [
                 'propertyConditions' => [
@@ -510,7 +504,7 @@ class ArrayDtoSerializerTest extends TestCase
                     'isNullable' => false,
                 ],
                 'sendNotRequiredNullableNulls' => true,
-                'result' => [],
+                'expectedResult' => [],
             ],
         ];
     }
@@ -550,10 +544,8 @@ class ArrayDtoSerializerTest extends TestCase
         Assert::assertSame($expectedResult, $result);
     }
 
-    /**
-     * @return mixed[]
-     */
-    public function createResponseFromDtoMultiplePropertiesProvider(): array
+    /** @return mixed[] */
+    public static function createResponseFromDtoMultiplePropertiesProvider(): array
     {
         return [
             [
@@ -712,7 +704,7 @@ class ArrayDtoSerializerTest extends TestCase
             }
 
             /** @inheritDoc */
-            public static function fromArray(array $data): self
+            public static function fromArray(array $data): Dto
             {
                 $thirdParamDto = new class () implements Dto
                 {
@@ -732,7 +724,7 @@ class ArrayDtoSerializerTest extends TestCase
                     }
 
                     /** @inheritDoc */
-                    public static function fromArray(array $data): self
+                    public static function fromArray(array $data): Dto
                     {
                         $dto             = new self();
                         $dto->firstParam = $data['firstParam'];

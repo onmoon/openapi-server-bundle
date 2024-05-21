@@ -10,15 +10,11 @@ use OnMoon\OpenApiServerBundle\Specification\Definitions\Property;
 use PHPUnit\Framework\Assert;
 use PHPUnit\Framework\TestCase;
 
-/**
- * @covers \OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\PropertyDefinition
- */
+/** @covers \OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\PropertyDefinition */
 final class PropertyDefinitionTest extends TestCase
 {
-    /**
-     * @return mixed[]
-     */
-    public function propertyDefinitionProvider(): array
+    /** @return mixed[] */
+    public static function propertyDefinitionProvider(): array
     {
         return [
             [

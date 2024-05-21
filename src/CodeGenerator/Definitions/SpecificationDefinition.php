@@ -16,9 +16,7 @@ final class SpecificationDefinition
     {
     }
 
-    /**
-     * @return OperationDefinition[]
-     */
+    /** @return OperationDefinition[] */
     public function getOperations(): array
     {
         return $this->operations;
@@ -29,9 +27,7 @@ final class SpecificationDefinition
         return $this->specification;
     }
 
-    /**
-     * @return ComponentDefinition[]
-     */
+    /** @return ComponentDefinition[] */
     public function getComponents(): array
     {
         return $this->components;

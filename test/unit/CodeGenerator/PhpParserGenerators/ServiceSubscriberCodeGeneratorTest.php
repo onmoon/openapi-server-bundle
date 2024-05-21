@@ -21,9 +21,7 @@ use OnMoon\OpenApiServerBundle\Types\ScalarTypesResolver;
 use PhpParser\BuilderFactory;
 use PHPUnit\Framework\TestCase;
 
-/**
- * @covers \OnMoon\OpenApiServerBundle\CodeGenerator\PhpParserGenerators\ServiceSubscriberCodeGenerator
- */
+/** @covers \OnMoon\OpenApiServerBundle\CodeGenerator\PhpParserGenerators\ServiceSubscriberCodeGenerator */
 final class ServiceSubscriberCodeGeneratorTest extends TestCase
 {
     private ServiceSubscriberCodeGenerator $serviceSubscriberCodeGenerator;

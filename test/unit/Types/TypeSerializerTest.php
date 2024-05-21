@@ -14,9 +14,7 @@ use Throwable;
 
 use function sprintf;
 
-/**
- * @covers \OnMoon\OpenApiServerBundle\Types\TypeSerializer
- */
+/** @covers \OnMoon\OpenApiServerBundle\Types\TypeSerializer */
 final class TypeSerializerTest extends TestCase
 {
     public function testDeserializeDateReturnsDateTime(): void

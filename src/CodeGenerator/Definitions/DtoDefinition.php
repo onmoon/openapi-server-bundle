@@ -14,9 +14,7 @@ class DtoDefinition extends GeneratedClassDefinition implements DtoReference
     private array $properties;
     private ?ClassReference $implements;
 
-    /**
-     * @param PropertyDefinition[] $properties
-     */
+    /** @param PropertyDefinition[] $properties */
     public function __construct(array $properties)
     {
         $this->implements = ClassDefinition::fromFQCN(Dto::class);
@@ -28,9 +26,7 @@ class DtoDefinition extends GeneratedClassDefinition implements DtoReference
         return count($this->properties) === 0;
     }
 
-    /**
-     * @return PropertyDefinition[]
-     */
+    /** @return PropertyDefinition[] */
     final public function getProperties(): array
     {
         return $this->properties;

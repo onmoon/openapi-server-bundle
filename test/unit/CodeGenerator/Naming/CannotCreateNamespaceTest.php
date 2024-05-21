@@ -9,9 +9,7 @@ use PHPUnit\Framework\TestCase;
 
 use function Safe\sprintf;
 
-/**
- * @covers  \OnMoon\OpenApiServerBundle\CodeGenerator\Naming\CannotCreateNamespace
- */
+/** @covers  \OnMoon\OpenApiServerBundle\CodeGenerator\Naming\CannotCreateNamespace */
 final class CannotCreateNamespaceTest extends TestCase
 {
     public function testBecauseTestContainsNoValidSymbolsShowCorrectError(): void

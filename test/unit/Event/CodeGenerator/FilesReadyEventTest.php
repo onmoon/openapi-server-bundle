@@ -10,9 +10,7 @@ use OnMoon\OpenApiServerBundle\Event\CodeGenerator\FilesReadyEvent;
 use PHPUnit\Framework\Assert;
 use PHPUnit\Framework\TestCase;
 
-/**
- * @covers \OnMoon\OpenApiServerBundle\Event\CodeGenerator\FilesReadyEvent
- */
+/** @covers \OnMoon\OpenApiServerBundle\Event\CodeGenerator\FilesReadyEvent */
 final class FilesReadyEventTest extends TestCase
 {
     public function testFilesReadyEventTestReturnFiles(): void

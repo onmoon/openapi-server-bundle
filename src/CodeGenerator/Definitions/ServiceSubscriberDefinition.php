@@ -16,17 +16,13 @@ final class ServiceSubscriberDefinition extends GeneratedClassDefinition
         $this->implements = [ClassDefinition::fromFQCN(ApiLoader::class)];
     }
 
-    /**
-     * @return ClassReference[]
-     */
+    /** @return ClassReference[] */
     public function getImplements(): array
     {
         return $this->implements;
     }
 
-    /**
-     * @param ClassReference[] $implements
-     */
+    /** @param ClassReference[] $implements */
     public function setImplements(array $implements): self
     {
         $this->implements = $implements;

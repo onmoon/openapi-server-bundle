@@ -11,15 +11,11 @@ use OnMoon\OpenApiServerBundle\Specification\Definitions\Property;
 use PHPUnit\Framework\Assert;
 use PHPUnit\Framework\TestCase;
 
-/**
- * @covers \OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\DtoDefinition
- */
+/** @covers \OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\DtoDefinition */
 final class DtoDefinitionTest extends TestCase
 {
-    /**
-     * @return mixed[]
-     */
-    public function dtoDefinitionProvider(): array
+    /** @return mixed[] */
+    public static function dtoDefinitionProvider(): array
     {
         return [
             [

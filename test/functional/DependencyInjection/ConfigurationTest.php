@@ -12,9 +12,7 @@ use Symfony\Component\HttpKernel\Kernel;
 use function Safe\sprintf;
 use function version_compare;
 
-/**
- * @covers \OnMoon\OpenApiServerBundle\DependencyInjection\Configuration
- */
+/** @covers \OnMoon\OpenApiServerBundle\DependencyInjection\Configuration */
 class ConfigurationTest extends TestCase
 {
     use ConfigurationTestCaseTrait;
@@ -28,7 +26,7 @@ class ConfigurationTest extends TestCase
      * @return mixed[]
      * @psalm-return list<list<array<string, list<array<string, string>>>|string>>
      */
-    public function parametersIsRequiredDataProvider(): array
+    public static function parametersIsRequiredDataProvider(): array
     {
         return [
             [['specs' => [[]]], 'path'],
@@ -62,7 +60,7 @@ class ConfigurationTest extends TestCase
      * @return mixed[]
      * @psalm-return list<list<array<string, list<array<string, string>>|string>|string>>
      */
-    public function parametersCannotBeEmptyDataProvider(): array
+    public static function parametersCannotBeEmptyDataProvider(): array
     {
         return [
             [['root_name_space' => ''], 'root_name_space'],
@@ -89,7 +87,7 @@ class ConfigurationTest extends TestCase
      * @return mixed[]
      * @psalm-return list<list<array<string, list<array<string, string>>>|string>>
      */
-    public function parametersEnumDataProvider(): array
+    public static function parametersEnumDataProvider(): array
     {
         return [
             [['specs' => [['path' => 'test', 'type' => 'someRandomString']]], 'specs.0.type', 'someRandomString', '"yaml", "json"'],

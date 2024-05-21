@@ -25,9 +25,7 @@ use function Safe\json_decode;
 
 use const DIRECTORY_SEPARATOR;
 
-/**
- * @covers \OnMoon\OpenApiServerBundle\Controller\ApiController
- */
+/** @covers \OnMoon\OpenApiServerBundle\Controller\ApiController */
 class ApiControllerTest extends WebTestCase
 {
     private AbstractBrowser $client;
@@ -60,6 +58,7 @@ class ApiControllerTest extends WebTestCase
         $filesystem = new Filesystem();
         $filesystem->remove([TestKernel::$bundleRootPath]);
         unset($this->client);
+
         parent::tearDown();
     }
 
@@ -100,7 +99,7 @@ class ApiControllerTest extends WebTestCase
 
     private function createGetGoodImpl(): string
     {
-        $content = <<<EOD
+        $content = <<<'EOD'
 <?php
 
 declare(strict_types=1);
@@ -113,7 +112,7 @@ use OnMoon\OpenApiServerBundle\Test\Functional\Generated\Apis\PetStore\GetGood\G
 
 class GetGoodImpl implements GetGood
 {
-    public function getGood(GetGoodRequestDto \$request): GoodResponseSchema
+    public function getGood(GetGoodRequestDto $request): GoodResponseSchema
     {
         return new GoodResponseSchema('test');
     }

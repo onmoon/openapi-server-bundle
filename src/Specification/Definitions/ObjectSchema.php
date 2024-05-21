@@ -9,17 +9,13 @@ final class ObjectSchema implements GetSchema
     /** @var Property[] $properties; */
     private array $properties;
 
-    /**
-     * @param Property[] $properties
-     */
+    /** @param Property[] $properties */
     public function __construct(array $properties)
     {
         $this->properties = $properties;
     }
 
-    /**
-     * @return Property[]
-     */
+    /** @return Property[] */
     public function getProperties(): array
     {
         return $this->properties;

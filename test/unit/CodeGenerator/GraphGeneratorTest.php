@@ -85,6 +85,7 @@ class GraphGeneratorTest extends TestCase
     public function tearDown(): void
     {
         unset($this->specificationLoader);
+
         parent::tearDown();
     }
 

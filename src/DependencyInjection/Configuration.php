@@ -13,7 +13,9 @@ final class Configuration implements ConfigurationInterface
     {
         $treeBuilder = new TreeBuilder('open_api_server');
 
-        $treeBuilder->getRootNode()
+        /** @psalm-suppress UndefinedMethod */
+        $treeBuilder
+            ->getRootNode()
             ->children()
                 ->scalarNode('root_path')->end()
                 ->scalarNode('root_name_space')->defaultValue('App\Generated')->cannotBeEmpty()->end()

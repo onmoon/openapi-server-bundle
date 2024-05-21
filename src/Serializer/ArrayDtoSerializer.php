@@ -60,9 +60,7 @@ final class ArrayDtoSerializer implements DtoSerializer
             $input['body'] = $this->convert(true, $rawBody, $bodyType->getSchema());
         }
 
-        /**
-         * @var Dto $inputDto
-         */
+        /** @var Dto $inputDto */
         $inputDto = $inputDtoFQCN::{'fromArray'}($input);
 
         return $inputDto;

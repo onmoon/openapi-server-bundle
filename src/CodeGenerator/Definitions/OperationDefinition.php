@@ -6,9 +6,7 @@ namespace OnMoon\OpenApiServerBundle\CodeGenerator\Definitions;
 
 final class OperationDefinition
 {
-    /**
-     * @param ResponseDefinition[] $responses
-     */
+    /** @param ResponseDefinition[] $responses */
     public function __construct(
         private string $url,
         private string $method,
@@ -52,9 +50,7 @@ final class OperationDefinition
         return $this->request;
     }
 
-    /**
-     * @return ResponseDefinition[]
-     */
+    /** @return ResponseDefinition[] */
     public function getResponses(): array
     {
         return $this->responses;

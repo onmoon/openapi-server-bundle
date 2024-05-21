@@ -15,14 +15,13 @@ use function ucfirst;
 
 use const DIRECTORY_SEPARATOR;
 
-/**
- * @covers \OnMoon\OpenApiServerBundle\Command\GenerateApiCodeCommand
- */
+/** @covers \OnMoon\OpenApiServerBundle\Command\GenerateApiCodeCommand */
 class GenerateApiCodeCommandTest extends CommandTestCase
 {
     public function setUp(): void
     {
         parent::setUp();
+
         $command             = $this->application->find(GenerateApiCodeCommand::COMMAND);
         $this->commandTester = new CommandTester($command);
     }
@@ -34,6 +33,7 @@ class GenerateApiCodeCommandTest extends CommandTestCase
         ]);
 
         $output = $this->commandTester->getDisplay();
+
         Assert::assertEquals(sprintf('API server code generated in: %s', TestKernel::$bundleRootPath), rtrim($output));
         Assert::assertSame(0, $this->commandTester->getStatusCode());
         Assert::assertDirectoryExists(TestKernel::$bundleRootPath);

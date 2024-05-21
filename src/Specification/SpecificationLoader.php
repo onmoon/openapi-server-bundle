@@ -43,9 +43,7 @@ class SpecificationLoader
         $this->cache   = $cache;
     }
 
-    /**
-     * @param array{path:string,type:string|null,name_space:string,media_type:string,date_time_class:string|null} $spec
-     */
+    /** @param array{path:string,type:string|null,name_space:string,media_type:string,date_time_class:string|null} $spec */
     public function registerSpec(string $name, array $spec): void
     {
         $this->specs[$name] = new SpecificationConfig(

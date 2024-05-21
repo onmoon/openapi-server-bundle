@@ -18,9 +18,7 @@ use function str_replace;
 
 final class OpenApiServerExtension extends Extension implements ExtensionInterface
 {
-    /**
-     * @param mixed[] $configs
-     */
+    /** @param mixed[] $configs */
     public function load(array $configs, ContainerBuilder $container): void
     {
         $loader = new XmlFileLoader($container, new FileLocator(__DIR__ . '/../Resources/config'));

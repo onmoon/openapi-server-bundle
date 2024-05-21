@@ -20,13 +20,12 @@ use OnMoon\OpenApiServerBundle\Event\CodeGenerator\FilesReadyEvent;
 use OnMoon\OpenApiServerBundle\Specification\Definitions\SpecificationConfig;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
+use Symfony\Contracts\EventDispatcher\Event;
 use Webmozart\Assert\Assert;
 
 use const DIRECTORY_SEPARATOR;
 
-/**
- * @covers  \OnMoon\OpenApiServerBundle\CodeGenerator\ApiServerCodeGenerator
- */
+/** @covers  \OnMoon\OpenApiServerBundle\CodeGenerator\ApiServerCodeGenerator */
 final class ApiServerCodeGeneratorTest extends TestCase
 {
     public function testGenerate(): void
@@ -78,13 +77,18 @@ final class ApiServerCodeGeneratorTest extends TestCase
         $generatedFileDefinitionTwo = new GeneratedFileDefinition($generatedClassDefinitionTwo, 'test_two');
 
         $eventDispatcher = $this->createMock(EventDispatcherInterface::class);
+        $matcher         = self::exactly(2);
         $eventDispatcher
-            ->expects(self::exactly(2))
+            ->expects($matcher)
             ->method('dispatch')
-            ->withConsecutive(
-                [new ClassGraphReadyEvent($graphDefinition)],
-                [new FilesReadyEvent([$generatedFileDefinition, $generatedFileDefinitionTwo])]
-            );
+            ->willReturnCallback(function (Event $event) use ($matcher, $graphDefinition, $generatedFileDefinition, $generatedFileDefinitionTwo): object {
+                match ($matcher->numberOfInvocations()) {
+                    1 => $this->assertEquals($event, new ClassGraphReadyEvent($graphDefinition)),
+                    2 => $this->assertEquals($event, new FilesReadyEvent([$generatedFileDefinition, $generatedFileDefinitionTwo])),
+                };
+
+                return $event;
+            });
 
         $fileGenerator = $this->createMock(FileGenerator::class);
         $fileGenerator
@@ -94,13 +98,16 @@ final class ApiServerCodeGeneratorTest extends TestCase
             ->willReturn([$generatedFileDefinition, $generatedFileDefinitionTwo]);
 
         $fileWriter = $this->createMock(FileWriter::class);
+        $matcher    = self::exactly(2);
         $fileWriter
-            ->expects(self::exactly(2))
+            ->expects($matcher)
             ->method('write')
-            ->withConsecutive(
-                [$generatedClassDefinition->getFilePath(), $generatedClassDefinition->getFileName(), $generatedFileDefinition->getFileContents()],
-                [$generatedClassDefinitionTwo->getFilePath(), $generatedClassDefinitionTwo->getFileName(), $generatedFileDefinitionTwo->getFileContents()]
-            );
+            ->willReturnCallback(function (string $path, string $filename, string $contents) use ($matcher, $generatedClassDefinition, $generatedFileDefinition, $generatedClassDefinitionTwo, $generatedFileDefinitionTwo): void {
+                match ($matcher->numberOfInvocations()) {
+                    1 => $this->assertEquals([$path, $filename, $contents], [$generatedClassDefinition->getFilePath(), $generatedClassDefinition->getFileName(), $generatedFileDefinition->getFileContents()]),
+                    2 => $this->assertEquals([$path, $filename, $contents], [$generatedClassDefinitionTwo->getFilePath(), $generatedClassDefinitionTwo->getFileName(), $generatedFileDefinitionTwo->getFileContents()]),
+                };
+            });
 
         $apiServerCodeGenerator = new ApiServerCodeGenerator(
             $graphGenerator,

@@ -14,9 +14,7 @@ use PhpParser\BuilderFactory;
 use PHPUnit\Framework\Assert;
 use PHPUnit\Framework\TestCase;
 
-/**
- * @covers \OnMoon\OpenApiServerBundle\CodeGenerator\PhpParserGenerators\InterfaceCodeGenerator
- */
+/** @covers \OnMoon\OpenApiServerBundle\CodeGenerator\PhpParserGenerators\InterfaceCodeGenerator */
 class InterfaceCodeGeneratorTest extends TestCase
 {
     private InterfaceCodeGenerator $interfaceCodeGenerator;
@@ -38,6 +36,7 @@ class InterfaceCodeGeneratorTest extends TestCase
     protected function tearDown(): void
     {
         unset($this->interfaceCodeGenerator);
+
         parent::tearDown();
     }
 
@@ -50,7 +49,7 @@ class InterfaceCodeGeneratorTest extends TestCase
         $generatedInterfaceDefinition->setNamespace('Test\Test2');
 
         $generatedCode                   =
-            <<<EOD
+            <<<'EOD'
 <?php
 
 declare (strict_types=1);
@@ -88,7 +87,7 @@ EOD;
         $generatedInterfaceDefinition->setNamespace('Test\Test2');
 
         $generatedCode                   =
-            <<<EOD
+            <<<'EOD'
 <?php
 
 declare (strict_types=1);
@@ -102,8 +101,8 @@ use \TestClass as TestClass_;
  */
 interface TestClass extends RequestHandler
 {
-    /** @param TestClass_ \$request */
-    public function test(TestClass_ \$request) : void;
+    /** @param TestClass_ $request */
+    public function test(TestClass_ $request) : void;
 }
 EOD;
         $expectedGeneratedFileDefinition = new GeneratedFileDefinition(
@@ -125,7 +124,7 @@ EOD;
         $generatedInterfaceDefinition->setResponseTypes([ClassDefinition::fromFQCN('TestClass')]);
 
         $generatedCode                   =
-            <<<EOD
+            <<<'EOD'
 <?php
 
 declare (strict_types=1);
@@ -162,7 +161,7 @@ EOD;
         $generatedInterfaceDefinition->setMethodDescription('method description');
 
         $generatedCode                   =
-            <<<EOD
+            <<<'EOD'
 <?php
 
 declare (strict_types=1);

@@ -18,9 +18,7 @@ use Throwable;
 
 use const PHP_EOL;
 
-/**
- * @covers \OnMoon\OpenApiServerBundle\CodeGenerator\PhpParserGenerators\CodeGenerator
- */
+/** @covers \OnMoon\OpenApiServerBundle\CodeGenerator\PhpParserGenerators\CodeGenerator */
 class CodeGeneratorTest extends TestCase
 {
     private CodeGenerator $codeGenerator;
@@ -34,6 +32,7 @@ class CodeGeneratorTest extends TestCase
     public function tearDown(): void
     {
         unset($this->codeGenerator);
+
         parent::tearDown();
     }
 

@@ -28,15 +28,11 @@ use function str_replace;
 
 use const DIRECTORY_SEPARATOR;
 
-/**
- * @covers \OnMoon\OpenApiServerBundle\CodeGenerator\NameGenerator
- */
+/** @covers \OnMoon\OpenApiServerBundle\CodeGenerator\NameGenerator */
 final class NameGeneratorTest extends TestCase
 {
-    /**
-     * @return mixed[]
-     */
-    private function getCommonPayload(): array
+    /** @return mixed[] */
+    private static function getCommonPayload(): array
     {
         return [
             'rootNamespace' => 'Some\\Custom\\Namespace',
@@ -51,15 +47,13 @@ final class NameGeneratorTest extends TestCase
         ];
     }
 
-    /**
-     * @return mixed[]
-     */
-    public function setAllNamesAndPathsProvider(): array
+    /** @return mixed[] */
+    public static function setAllNamesAndPathsProvider(): array
     {
         return [
             [
                 'payload' => array_merge(
-                    $this->getCommonPayload(),
+                    self::getCommonPayload(),
                     [
                         'graph' => [
                             'specifications' => [],
@@ -69,7 +63,7 @@ final class NameGeneratorTest extends TestCase
             ],
             [
                 'payload' => array_merge(
-                    $this->getCommonPayload(),
+                    self::getCommonPayload(),
                     [
                         'graph' => [
                             'specifications' => [
@@ -89,7 +83,7 @@ final class NameGeneratorTest extends TestCase
             ],
             [
                 'payload' => array_merge(
-                    $this->getCommonPayload(),
+                    self::getCommonPayload(),
                     [
                         'graph' => [
                             'specifications' => [
@@ -477,10 +471,8 @@ final class NameGeneratorTest extends TestCase
         Assert::assertSame('Custom\Namespace\Dto\Request', $root->getNamespace());
     }
 
-    /**
-     * @return mixed[]
-     */
-    public function setResponseNamesProvider(): array
+    /** @return mixed[] */
+    public static function setResponseNamesProvider(): array
     {
         return [
             [

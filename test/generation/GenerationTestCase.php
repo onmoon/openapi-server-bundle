@@ -44,9 +44,7 @@ abstract class GenerationTestCase extends TestCase
         return $fileWriter;
     }
 
-    /**
-     * @return Stmt[]
-     */
+    /** @return Stmt[] */
     protected function getStatements(string $phpCode): array
     {
         $statements = $this->phpParser->parse($phpCode);

@@ -14,10 +14,8 @@ use function array_key_exists;
 
 final class RequestDtoDefinitionTest extends TestCase
 {
-    /**
-     * @return mixed[]
-     */
-    public function requestDtoDefinitionProvider(): array
+    /** @return mixed[] */
+    public static function requestDtoDefinitionProvider(): array
     {
         return [
             [

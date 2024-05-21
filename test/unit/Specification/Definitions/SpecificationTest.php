@@ -13,15 +13,11 @@ use PHPUnit\Framework\TestCase;
 
 use function count;
 
-/**
- * @covers \OnMoon\OpenApiServerBundle\Specification\Definitions\Specification
- */
+/** @covers \OnMoon\OpenApiServerBundle\Specification\Definitions\Specification */
 final class SpecificationTest extends TestCase
 {
-    /**
-     * @return mixed[]
-     */
-    public function specificationsProvider(): array
+    /** @return mixed[] */
+    public static function specificationsProvider(): array
     {
         $operationData = [
             'url' => '/some/custom/path',

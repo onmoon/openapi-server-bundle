@@ -8,15 +8,11 @@ use OnMoon\OpenApiServerBundle\Specification\Definitions\SpecificationConfig;
 use PHPUnit\Framework\Assert;
 use PHPUnit\Framework\TestCase;
 
-/**
- * @covers \OnMoon\OpenApiServerBundle\Specification\Definitions\SpecificationConfig
- */
+/** @covers \OnMoon\OpenApiServerBundle\Specification\Definitions\SpecificationConfig */
 final class SpecificationConfigTest extends TestCase
 {
-    /**
-     * @return mixed[]
-     */
-    public function specificationConfigsProvider(): array
+    /** @return mixed[] */
+    public static function specificationConfigsProvider(): array
     {
         return [
             [

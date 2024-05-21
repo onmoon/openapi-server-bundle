@@ -1,29 +1,24 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<phpunit
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/9.3/phpunit.xsd"
-    bootstrap="vendor/autoload.php"
-    colors="true"
->
-    <testsuites>
-        <testsuite name="unit">
-            <directory>./test/unit</directory>
-        </testsuite>
-        <testsuite name="functional">
-            <directory>./test/functional</directory>
-        </testsuite>
-        <testsuite name="generation">
-            <directory>./test/generation</directory>
-        </testsuite>
-    </testsuites>
-    <coverage processUncoveredFiles="true">
-        <include>
-            <directory suffix=".php">./src</directory>
-        </include>
-    </coverage>
-    <php>
-        <ini name="error_reporting" value="E_ALL"/>
-        <env name="APP_ENV" value="test" />
-        <env name="APP_DEBUG" value="false" />
-    </php>
+<phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/10.5/phpunit.xsd" bootstrap="vendor/autoload.php" colors="true" cacheDirectory=".phpunit.cache">
+  <testsuites>
+    <testsuite name="unit">
+      <directory>./test/unit</directory>
+    </testsuite>
+    <testsuite name="functional">
+      <directory>./test/functional</directory>
+    </testsuite>
+    <testsuite name="generation">
+      <directory>./test/generation</directory>
+    </testsuite>
+  </testsuites>
+  <php>
+    <ini name="error_reporting" value="E_ALL"/>
+    <env name="APP_ENV" value="test"/>
+    <env name="APP_DEBUG" value="false"/>
+  </php>
+  <source>
+    <include>
+      <directory suffix=".php">./src</directory>
+    </include>
+  </source>
 </phpunit>

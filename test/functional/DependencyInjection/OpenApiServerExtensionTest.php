@@ -10,14 +10,10 @@ use OnMoon\OpenApiServerBundle\Specification\SpecificationLoader;
 use Symfony\Component\DependencyInjection\Extension\ExtensionInterface;
 use Throwable;
 
-/**
- * @covers \OnMoon\OpenApiServerBundle\DependencyInjection\OpenApiServerExtension
- */
+/** @covers \OnMoon\OpenApiServerBundle\DependencyInjection\OpenApiServerExtension */
 class OpenApiServerExtensionTest extends AbstractExtensionTestCase
 {
-    /**
-     * @return array<ExtensionInterface>
-     */
+    /** @return array<ExtensionInterface> */
     protected function getContainerExtensions(): array
     {
         return [
@@ -29,7 +25,7 @@ class OpenApiServerExtensionTest extends AbstractExtensionTestCase
      * @return mixed[]
      * @psalm-return list<list<string|bool>>
      */
-    public function parameterLoadedDataProvider(): array
+    public static function parameterLoadedDataProvider(): array
     {
         return [
             ['openapi.generated.code.root.path','someRootPath'],

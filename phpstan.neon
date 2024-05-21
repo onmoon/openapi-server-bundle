@@ -3,7 +3,6 @@ parameters:
     paths:
         - src
        # - test
-    checkMissingIterableValueType: false
     treatPhpDocTypesAsCertain: false
     excludePaths:
         - 'src/DependencyInjection/Configuration.php'
@@ -27,6 +26,10 @@ parameters:
             message: '#OnMoon\\OpenApiServerBundle\\Router\\RouteLoader::__construct\(\) does not call parent constructor from Symfony\\Component\\Config\\Loader\\Loader\.#'
             paths:
                 - %currentWorkingDirectory%/src/Router/RouteLoader.php
+        -
+            message: '#Method OnMoon\\OpenApiServerBundle\\Specification\\SpecificationParser::getResponseDtoDefinitions\(\) has parameter \$responses with no value type specified in iterable type array\.#'
+            paths:
+                - %currentWorkingDirectory%/src/Specification/SpecificationParser.php
 includes:
     - vendor/thecodingmachine/phpstan-safe-rule/phpstan-safe-rule.neon
     - vendor/phpstan/phpstan-phpunit/extension.neon

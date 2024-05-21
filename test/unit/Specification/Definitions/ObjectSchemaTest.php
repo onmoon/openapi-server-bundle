@@ -9,9 +9,7 @@ use OnMoon\OpenApiServerBundle\Specification\Definitions\Property;
 use PHPUnit\Framework\Assert;
 use PHPUnit\Framework\TestCase;
 
-/**
- * @covers \OnMoon\OpenApiServerBundle\Specification\Definitions\ObjectSchema
- */
+/** @covers \OnMoon\OpenApiServerBundle\Specification\Definitions\ObjectSchema */
 final class ObjectSchemaTest extends TestCase
 {
     public function testGetProperties(): void

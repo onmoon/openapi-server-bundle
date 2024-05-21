@@ -29,9 +29,7 @@ use Symfony\Contracts\Cache\TagAwareCacheInterface;
 
 final class TestApiServerCodeGeneratorFactory
 {
-    /**
-     * @param mixed[] $specifications
-     */
+    /** @param mixed[] $specifications */
     public static function getCodeGenerator(
         array $specifications,
         FileWriter $fileWriter,

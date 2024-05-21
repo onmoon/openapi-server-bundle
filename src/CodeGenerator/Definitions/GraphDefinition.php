@@ -10,18 +10,14 @@ final class GraphDefinition
     private array $specifications;
     private ServiceSubscriberDefinition $serviceSubscriber;
 
-    /**
-     * @param SpecificationDefinition[] $specifications
-     */
+    /** @param SpecificationDefinition[] $specifications */
     public function __construct(array $specifications, ServiceSubscriberDefinition $serviceSubscriber)
     {
         $this->specifications    = $specifications;
         $this->serviceSubscriber = $serviceSubscriber;
     }
 
-    /**
-     * @return SpecificationDefinition[]
-     */
+    /** @return SpecificationDefinition[] */
     public function getSpecifications(): array
     {
         return $this->specifications;

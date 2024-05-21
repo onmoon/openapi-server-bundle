@@ -9,9 +9,7 @@ use PHPUnit\Framework\TestCase;
 
 use function Safe\sprintf;
 
-/**
- * @covers \OnMoon\OpenApiServerBundle\CodeGenerator\Naming\CannotCreatePropertyName
- */
+/** @covers \OnMoon\OpenApiServerBundle\CodeGenerator\Naming\CannotCreatePropertyName */
 final class CannotCreatePropertyNameTest extends TestCase
 {
     public function testBecauseTextContainsNoValidSymbolsShowsCorrectError(): void

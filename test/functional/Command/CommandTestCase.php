@@ -30,6 +30,7 @@ abstract class CommandTestCase extends KernelTestCase
         $filesystem = new Filesystem();
         $filesystem->remove([TestKernel::$bundleRootPath]);
         unset($this->commandTester, $this->application);
+
         parent::tearDown();
     }
 

@@ -6,6 +6,8 @@
     strictBinaryOperands="true"
     findUnusedVariablesAndParams="true"
     ensureArrayStringOffsetsExist="true"
+    findUnusedBaselineEntry="true"
+    findUnusedCode="false"
     phpVersion="8.1"
 >
     <projectFiles>

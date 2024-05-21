@@ -19,17 +19,13 @@ final class FilesReadyEvent extends Event
     /** @var GeneratedFileDefinition[] */
     private array $files;
 
-    /**
-     * @param GeneratedFileDefinition[] $files
-     */
+    /** @param GeneratedFileDefinition[] $files */
     public function __construct(array $files)
     {
         $this->files = $files;
     }
 
-    /**
-     * @return GeneratedFileDefinition[]
-     */
+    /** @return GeneratedFileDefinition[] */
     public function files(): array
     {
         return $this->files;

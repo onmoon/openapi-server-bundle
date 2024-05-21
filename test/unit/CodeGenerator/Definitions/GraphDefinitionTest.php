@@ -15,15 +15,11 @@ use function str_replace;
 
 use const DIRECTORY_SEPARATOR;
 
-/**
- * @covers \OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\GraphDefinition
- */
+/** @covers \OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\GraphDefinition */
 final class GraphDefinitionTest extends TestCase
 {
-    /**
-     * @return mixed[]
-     */
-    public function graphDefinitionProvider(): array
+    /** @return mixed[] */
+    public static function graphDefinitionProvider(): array
     {
         return [
             [

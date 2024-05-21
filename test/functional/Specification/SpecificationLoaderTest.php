@@ -24,9 +24,7 @@ use Symfony\Contracts\Cache\TagAwareCacheInterface;
 use function array_pop;
 use function Safe\sprintf;
 
-/**
- * @covers \OnMoon\OpenApiServerBundle\Specification\SpecificationLoader
- */
+/** @covers \OnMoon\OpenApiServerBundle\Specification\SpecificationLoader */
 class SpecificationLoaderTest extends TestCase
 {
     /** @var SpecificationParser|MockObject $specificationParser */
@@ -101,9 +99,7 @@ class SpecificationLoaderTest extends TestCase
                 return $item;
             }
 
-            /**
-             * @return array|Specification[]
-             */
+            /** @return array|Specification[] */
             public function getCachedItems(): array
             {
                 return $this->items;
@@ -173,9 +169,7 @@ class SpecificationLoaderTest extends TestCase
         $specificationArray    = $this->getSpecificationArray($specificationFileName);
         $specificationLoader->registerSpec(self::SPECIFICATION_NAME, $specificationArray);
 
-        /**
-         * phpcs:disable SlevomatCodingStandard.Exceptions.ReferenceThrowableOnly
-         */
+        /** phpcs:disable SlevomatCodingStandard.Exceptions.ReferenceThrowableOnly */
         $this->expectException(Exception::class);
         $this->expectExceptionMessage(sprintf('OpenApi spec "%s" is not registered in bundle config, ' .
             'Registered specs are: %s.', $specificationName, self::SPECIFICATION_NAME));
@@ -245,10 +239,8 @@ class SpecificationLoaderTest extends TestCase
         $specificationLoader->load(self::SPECIFICATION_NAME);
     }
 
-    /**
-     * @return string[][]
-     */
-    public function specificationProvider(): array
+    /** @return string[][] */
+    public static function specificationProvider(): array
     {
         return [
             ['specificationFileName' => 'specification.yaml'],
@@ -256,9 +248,7 @@ class SpecificationLoaderTest extends TestCase
         ];
     }
 
-    /**
-     * @dataProvider specificationProvider
-     */
+    /** @dataProvider specificationProvider */
     public function testLoadSavesSpecificationInCache(string $specificationFileName): void
     {
         $this->specificationParser
@@ -322,9 +312,7 @@ class SpecificationLoaderTest extends TestCase
         $specificationLoader->load(self::SPECIFICATION_NAME);
     }
 
-    /**
-     * @return  array{path:string,type:string|null,name_space:string,media_type:string} $spec
-     */
+    /** @return  array{path:string,type:string|null,name_space:string,media_type:string} $spec */
     private function getSpecificationArray(string $specificationFileName): array
     {
         return [

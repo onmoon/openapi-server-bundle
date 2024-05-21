@@ -34,9 +34,7 @@ final class Property
         return $this->array;
     }
 
-    /**
-     * @return Property
-     */
+    /** @return Property */
     public function setArray(bool $array): self
     {
         $this->array = $array;
@@ -44,17 +42,13 @@ final class Property
         return $this;
     }
 
-    /**
-     * @return bool|float|int|string|null
-     */
+    /** @return bool|float|int|string|null */
     public function getDefaultValue()
     {
         return $this->defaultValue;
     }
 
-    /**
-     * @param bool|float|int|string|null $defaultValue
-     */
+    /** @param bool|float|int|string|null $defaultValue */
     public function setDefaultValue($defaultValue): Property
     {
         $this->defaultValue = $defaultValue;
@@ -67,9 +61,7 @@ final class Property
         return $this->required;
     }
 
-    /**
-     * @return Property
-     */
+    /** @return Property */
     public function setRequired(bool $required): self
     {
         $this->required = $required;
@@ -82,9 +74,7 @@ final class Property
         return $this->scalarTypeId;
     }
 
-    /**
-     * @return Property
-     */
+    /** @return Property */
     public function setScalarTypeId(?int $scalarTypeId): self
     {
         $this->scalarTypeId = $scalarTypeId;
@@ -97,9 +87,7 @@ final class Property
         return $this->objectTypeDefinition;
     }
 
-    /**
-     * @return Property
-     */
+    /** @return Property */
     public function setObjectTypeDefinition(ObjectSchema|ObjectReference|null $objectTypeDefinition): self
     {
         $this->objectTypeDefinition = $objectTypeDefinition;
@@ -112,9 +100,7 @@ final class Property
         return $this->description;
     }
 
-    /**
-     * @return Property
-     */
+    /** @return Property */
     public function setDescription(?string $description): self
     {
         $this->description = $description;
@@ -127,9 +113,7 @@ final class Property
         return $this->pattern;
     }
 
-    /**
-     * @return Property
-     */
+    /** @return Property */
     public function setPattern(?string $pattern): self
     {
         $this->pattern = $pattern;

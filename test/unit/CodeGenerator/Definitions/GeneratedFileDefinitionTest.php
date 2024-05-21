@@ -9,9 +9,7 @@ use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\GeneratedFileDefinition
 use PHPUnit\Framework\Assert;
 use PHPUnit\Framework\TestCase;
 
-/**
- * @covers \OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\GeneratedFileDefinition
- */
+/** @covers \OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\GeneratedFileDefinition */
 final class GeneratedFileDefinitionTest extends TestCase
 {
     public function testGeneratedFileDefinition(): void

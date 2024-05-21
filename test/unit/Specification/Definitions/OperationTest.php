@@ -11,15 +11,11 @@ use PHPUnit\Framework\TestCase;
 
 use function count;
 
-/**
- * @covers \OnMoon\OpenApiServerBundle\Specification\Definitions\Operation
- */
+/** @covers \OnMoon\OpenApiServerBundle\Specification\Definitions\Operation */
 final class OperationTest extends TestCase
 {
-    /**
-     * @return mixed[]
-     */
-    public function operationsProvider(): array
+    /** @return mixed[] */
+    public static function operationsProvider(): array
     {
         return [
             [
