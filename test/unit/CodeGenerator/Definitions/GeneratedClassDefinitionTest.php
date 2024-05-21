@@ -8,9 +8,7 @@ use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\GeneratedClassDefinitio
 use PHPUnit\Framework\Assert;
 use PHPUnit\Framework\TestCase;
 
-/**
- * @covers \OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\GeneratedClassDefinition
- */
+/** @covers \OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\GeneratedClassDefinition */
 final class GeneratedClassDefinitionTest extends TestCase
 {
     public function testGeneratedClassDefinition(): void

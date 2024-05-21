@@ -8,9 +8,7 @@ use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\ClassDefinition;
 use PHPUnit\Framework\Assert;
 use PHPUnit\Framework\TestCase;
 
-/**
- * @covers \OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\ClassDefinition
- */
+/** @covers \OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\ClassDefinition */
 final class ClassDefinitionTest extends TestCase
 {
     public function testCorrectDefinitionCreatedFromFQCN(): void

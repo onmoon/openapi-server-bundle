@@ -14,9 +14,7 @@ use PhpParser\Node\Stmt\UseUse;
 use PHPUnit\Framework\Assert;
 use PHPUnit\Framework\TestCase;
 
-/**
- * @covers \OnMoon\OpenApiServerBundle\CodeGenerator\PhpParserGenerators\FileBuilder
- */
+/** @covers \OnMoon\OpenApiServerBundle\CodeGenerator\PhpParserGenerators\FileBuilder */
 class FileBuilderTest extends TestCase
 {
     private FileBuilder $fileBuilder;

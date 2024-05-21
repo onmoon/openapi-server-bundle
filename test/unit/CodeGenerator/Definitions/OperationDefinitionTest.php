@@ -11,15 +11,11 @@ use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\ResponseDefinition;
 use PHPUnit\Framework\Assert;
 use PHPUnit\Framework\TestCase;
 
-/**
- * @covers \OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\OperationDefinition
- */
+/** @covers \OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\OperationDefinition */
 final class OperationDefinitionTest extends TestCase
 {
-    /**
-     * @return mixed[]
-     */
-    public function operationDefinitionProvider(): array
+    /** @return mixed[] */
+    public static function operationDefinitionProvider(): array
     {
         return [
             [

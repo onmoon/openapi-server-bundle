@@ -10,15 +10,11 @@ use OnMoon\OpenApiServerBundle\Interfaces\ApiLoader;
 use PHPUnit\Framework\Assert;
 use PHPUnit\Framework\TestCase;
 
-/**
- * @covers \OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\ServiceSubscriberDefinition
- */
+/** @covers \OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\ServiceSubscriberDefinition */
 final class ServiceSubscriberDefinitionTest extends TestCase
 {
-    /**
-     * @return mixed[]
-     */
-    public function serviceSubscriberDefinitionProvider(): array
+    /** @return mixed[] */
+    public static function serviceSubscriberDefinitionProvider(): array
     {
         return [
             [

@@ -114,9 +114,7 @@ final class ApiController
         return $this->specificationLoader->load($this->getSpecificationName($route));
     }
 
-    /**
-     * @psalm-param class-string<Dto> $inputDtoClass
-     */
+    /** @psalm-param class-string<Dto> $inputDtoClass */
     private function createRequestDto(
         Request $request,
         Operation $operation,
@@ -142,9 +140,7 @@ final class ApiController
         return $responseDto;
     }
 
-    /**
-     * @return array{0: class-string<RequestHandler>, 1: RequestHandler}
-     */
+    /** @return array{0: class-string<RequestHandler>, 1: RequestHandler} */
     private function getRequestHandler(Request $request, Operation $operation): array
     {
         $handlerName = $operation->getRequestHandlerName();

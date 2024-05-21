@@ -9,9 +9,7 @@ use PHPUnit\Framework\TestCase;
 
 use function Safe\sprintf;
 
-/**
- * @covers \OnMoon\OpenApiServerBundle\Exception\ApiCallFailed
- */
+/** @covers \OnMoon\OpenApiServerBundle\Exception\ApiCallFailed */
 final class ApiCallFailedTest extends TestCase
 {
     public function testBecauseApiLoaderNotFoundPrintsCorrectMessage(): void

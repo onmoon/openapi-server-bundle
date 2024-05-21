@@ -14,9 +14,7 @@ use Symfony\Component\DependencyInjection\Reference;
 
 use function get_class;
 
-/**
- * @covers \OnMoon\OpenApiServerBundle\DependencyInjection\CompilerPass
- */
+/** @covers \OnMoon\OpenApiServerBundle\DependencyInjection\CompilerPass */
 class CompilerPassTest extends AbstractCompilerPassTestCase
 {
     protected function registerCompilerPass(ContainerBuilder $container): void

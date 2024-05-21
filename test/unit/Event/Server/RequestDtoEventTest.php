@@ -13,26 +13,20 @@ use PHPUnit\Framework\Assert;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\HttpFoundation\Request;
 
-/**
- * @covers \OnMoon\OpenApiServerBundle\Event\Server\RequestDtoEvent
- */
+/** @covers \OnMoon\OpenApiServerBundle\Event\Server\RequestDtoEvent */
 final class RequestDtoEventTest extends TestCase
 {
     public function testRequestDtoEventGettersReturnCorrectValues(): void
     {
         $request        = new Request();
         $requestDto     = new class () implements Dto {
-            /**
-             * @return mixed[]
-             */
+            /** @return mixed[] */
             public function toArray(): array
             {
                 return [];
             }
 
-            /**
-             * @param mixed[] $data
-             */
+            /** @param mixed[] $data */
             public static function fromArray(array $data): Dto
             {
                 return new self();

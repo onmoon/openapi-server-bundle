@@ -68,9 +68,7 @@ class DtoCodeGenerator extends CodeGenerator
         );
     }
 
-    /**
-     * @return Builder[]
-     */
+    /** @return Builder[] */
     private function generateProperties(FileBuilder $builder, DtoDefinition $definition): array
     {
         $properties = [];
@@ -81,9 +79,7 @@ class DtoCodeGenerator extends CodeGenerator
         return $properties;
     }
 
-    /**
-     * @return Builder[]
-     */
+    /** @return Builder[] */
     private function generateGetters(FileBuilder $builder, DtoDefinition $definition): array
     {
         $properties = [];
@@ -98,9 +94,7 @@ class DtoCodeGenerator extends CodeGenerator
         return $properties;
     }
 
-    /**
-     * @return Builder[]
-     */
+    /** @return Builder[] */
     private function generateSetters(FileBuilder $builder, DtoDefinition $definition): array
     {
         $properties = [];
@@ -115,9 +109,7 @@ class DtoCodeGenerator extends CodeGenerator
         return $properties;
     }
 
-    /**
-     * @return Builder[]
-     */
+    /** @return Builder[] */
     private function generateConstructor(FileBuilder $builder, DtoDefinition $definition): array
     {
         $constructorBuilder = $this->factory->method('__construct')->makePublic();

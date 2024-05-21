@@ -12,9 +12,7 @@ use OnMoon\OpenApiServerBundle\Specification\Definitions\SpecificationConfig;
 use PHPUnit\Framework\Assert;
 use PHPUnit\Framework\TestCase;
 
-/**
- * @covers \OnMoon\OpenApiServerBundle\Event\CodeGenerator\ClassGraphReadyEvent
- */
+/** @covers \OnMoon\OpenApiServerBundle\Event\CodeGenerator\ClassGraphReadyEvent */
 final class ClassGraphReadyEventTest extends TestCase
 {
     public function testGraphMethodReturnGraph(): void

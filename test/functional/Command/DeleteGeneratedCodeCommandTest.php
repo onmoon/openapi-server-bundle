@@ -14,9 +14,7 @@ use function Safe\file_put_contents;
 use function Safe\mkdir;
 use function Safe\sprintf;
 
-/**
- * @covers \OnMoon\OpenApiServerBundle\Command\DeleteGeneratedCodeCommand
- */
+/** @covers \OnMoon\OpenApiServerBundle\Command\DeleteGeneratedCodeCommand */
 class DeleteGeneratedCodeCommandTest extends CommandTestCase
 {
     public function setUp(): void

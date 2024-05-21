@@ -16,9 +16,7 @@ use Psr\Http\Message\ServerRequestInterface;
 use Symfony\Bridge\PsrHttpMessage\Factory\PsrHttpFactory;
 use Symfony\Component\HttpFoundation\Request;
 
-/**
- * @covers \OnMoon\OpenApiServerBundle\Validator\LeaguePSR7RequestSchemaValidator
- */
+/** @covers \OnMoon\OpenApiServerBundle\Validator\LeaguePSR7RequestSchemaValidator */
 final class LeaguePSR7RequestSchemaValidatorTest extends TestCase
 {
     public function testValidate(): void

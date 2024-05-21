@@ -11,9 +11,7 @@ use OnMoon\OpenApiServerBundle\Specification\Definitions\Specification;
 use PHPUnit\Framework\Assert;
 use PHPUnit\Framework\TestCase;
 
-/**
- * @covers \OnMoon\OpenApiServerBundle\Event\Server\ResponseDtoEvent
- */
+/** @covers \OnMoon\OpenApiServerBundle\Event\Server\ResponseDtoEvent */
 final class ResponseDtoEventTest extends TestCase
 {
     public function testResponseDtoGettersReturnCorrectValues(): void

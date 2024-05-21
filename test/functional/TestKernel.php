@@ -56,7 +56,7 @@ abstract class TestKernel extends BaseKernel
     }
 
     /**
-     * {@inheritdoc}
+     * {@inheritDoc}
      */
     public function registerBundles(): iterable
     {

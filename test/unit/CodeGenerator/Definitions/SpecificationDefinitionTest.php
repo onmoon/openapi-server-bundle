@@ -16,15 +16,11 @@ use function str_replace;
 
 use const DIRECTORY_SEPARATOR;
 
-/**
- * @covers \OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\SpecificationDefinition
- */
+/** @covers \OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\SpecificationDefinition */
 final class SpecificationDefinitionTest extends TestCase
 {
-    /**
-     * @return mixed[]
-     */
-    public function specificationDefinitionProvider(): array
+    /** @return mixed[] */
+    public static function specificationDefinitionProvider(): array
     {
         return [
             [

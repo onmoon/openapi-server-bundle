@@ -21,9 +21,7 @@ use PHPUnit\Framework\TestCase;
 
 use function array_map;
 
-/**
- * @covers \OnMoon\OpenApiServerBundle\CodeGenerator\AttributeGenerator
- */
+/** @covers \OnMoon\OpenApiServerBundle\CodeGenerator\AttributeGenerator */
 class AttributeGeneratorTest extends TestCase
 {
     private Property $property;

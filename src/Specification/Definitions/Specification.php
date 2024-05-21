@@ -33,9 +33,7 @@ final class Specification
         return $this->operations[$id];
     }
 
-    /**
-     * @return array<string, ObjectSchema>
-     */
+    /** @return array<string, ObjectSchema> */
     public function getComponentSchemas(): array
     {
         return $this->componentSchemas;

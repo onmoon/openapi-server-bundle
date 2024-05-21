@@ -46,17 +46,13 @@ final class Operation
         return $this->requestBody;
     }
 
-    /**
-     * @return array<string, ObjectSchema>
-     */
+    /** @return array<string, ObjectSchema> */
     public function getRequestParameters(): array
     {
         return $this->requestParameters;
     }
 
-    /**
-     * @return array<string|int, ObjectSchema|ObjectReference>
-     */
+    /** @return array<string|int, ObjectSchema|ObjectReference> */
     public function getResponses(): array
     {
         return $this->responses;

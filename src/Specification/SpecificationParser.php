@@ -64,13 +64,9 @@ class SpecificationParser
 
         $this->dateTimeClass = $specificationConfig->getDateTimeClass();
 
-        /**
-         * @var string $url
-         */
+        /** @var string $url */
         foreach ($parsedSpecification->paths as $url => $pathItem) {
-            /**
-             * @var string $method
-             */
+            /** @var string $method */
             foreach ($pathItem->getOperations() as $method => $operation) {
                 $operationId = $operation->operationId;
                 $summary     = $operation->summary;
@@ -227,9 +223,7 @@ class SpecificationParser
         return array_filter($parameters, static fn ($parameter): bool => $parameter instanceof Parameter);
     }
 
-    /**
-     * @return Parameter[]
-     */
+    /** @return Parameter[] */
     private function mergeParameters(PathItem $pathItem, Operation $operation): array
     {
         $operationParameters = $this->filterParameters($operation->parameters);
@@ -303,9 +297,7 @@ class SpecificationParser
         return null;
     }
 
-    /**
-     * @param array{location:string,method:string,url:string,path:string} $exceptionContext
-     */
+    /** @param array{location:string,method:string,url:string,path:string} $exceptionContext */
     private function getObjectSchema(Schema $schema, ?bool $isRequest, ComponentArray $componentSchemas, array $exceptionContext): ObjectSchema|ObjectReference
     {
         if ($schema->type !== Type::OBJECT) {
@@ -322,9 +314,7 @@ class SpecificationParser
         }
 
         $propertyDefinitions = [];
-        /**
-         * @var string $propertyName
-         */
+        /** @var string $propertyName */
         foreach ($schema->properties as $propertyName => $property) {
             if (! ($property instanceof Schema)) {
                 throw CannotParseOpenApi::becausePropertyIsNotScheme();
@@ -335,9 +325,7 @@ class SpecificationParser
                 continue;
             }
 
-            /**
-             * @psalm-suppress RedundantConditionGivenDocblockType
-             */
+            /** @psalm-suppress RedundantConditionGivenDocblockType */
             $required              = is_array($schema->required) && in_array($propertyName, $schema->required, true);
             $propertyDefinitions[] = $this->getProperty($propertyName, $property, $isRequest, $componentSchemas, $exceptionContext)->setRequired($required);
         }
@@ -353,9 +341,7 @@ class SpecificationParser
         return $objectSchema;
     }
 
-    /**
-     * @param array{location:string,method:string,url:string,path:string} $exceptionContext
-     */
+    /** @param array{location:string,method:string,url:string,path:string} $exceptionContext */
     private function getProperty(
         string $propertyName,
         Schema|Reference|null $property,

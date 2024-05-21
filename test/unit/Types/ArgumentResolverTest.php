@@ -12,9 +12,7 @@ use PHPUnit\Framework\Assert;
 use PHPUnit\Framework\TestCase;
 use Throwable;
 
-/**
- * @covers \OnMoon\OpenApiServerBundle\Types\ArgumentResolver
- */
+/** @covers \OnMoon\OpenApiServerBundle\Types\ArgumentResolver */
 final class ArgumentResolverTest extends TestCase
 {
     private ScalarTypesResolver $typeResolver;

@@ -11,9 +11,7 @@ use Symfony\Component\HttpFoundation\Request;
 
 interface DtoSerializer
 {
-    /**
-     * @psalm-param class-string<Dto> $inputDtoFQCN
-     */
+    /** @psalm-param class-string<Dto> $inputDtoFQCN */
     public function createRequestDto(
         Request $request,
         Operation $operation,

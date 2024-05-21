@@ -12,9 +12,7 @@ use sspat\ReservedWords\ReservedWords;
 
 use const DIRECTORY_SEPARATOR;
 
-/**
- * @covers \OnMoon\OpenApiServerBundle\CodeGenerator\Naming\DefaultNamingStrategy
- */
+/** @covers \OnMoon\OpenApiServerBundle\CodeGenerator\Naming\DefaultNamingStrategy */
 final class DefaultNamingStrategyTest extends TestCase
 {
     private DefaultNamingStrategy $defaultNamingStrategy;
@@ -26,10 +24,8 @@ final class DefaultNamingStrategyTest extends TestCase
         $this->defaultNamingStrategy = new DefaultNamingStrategy($reservedWords, 'NameSpace', '8.0');
     }
 
-    /**
-     * @return array<int, array<int, bool|string>>
-     */
-    public function isAllowedPhpPropertyNameDataProvider(): array
+    /** @return array<int, array<int, bool|string>> */
+    public static function isAllowedPhpPropertyNameDataProvider(): array
     {
         return [
             ['test', true],
@@ -42,9 +38,7 @@ final class DefaultNamingStrategyTest extends TestCase
         ];
     }
 
-    /**
-     * @dataProvider isAllowedPhpPropertyNameDataProvider
-     */
+    /** @dataProvider isAllowedPhpPropertyNameDataProvider */
     public function testIsAllowedPhpPropertyName(string $name, bool $expectedResult): void
     {
         $actualResult = $this->defaultNamingStrategy->isAllowedPhpPropertyName($name);
@@ -52,10 +46,8 @@ final class DefaultNamingStrategyTest extends TestCase
         TestCase::assertEquals($expectedResult, $actualResult);
     }
 
-    /**
-     * @return array<int, array<int, bool|string>>
-     */
-    public function stringToMethodNameDataProvider(): array
+    /** @return array<int, array<int, bool|string>> */
+    public static function stringToMethodNameDataProvider(): array
     {
         return [
             ['test', 'test'],
@@ -66,9 +58,7 @@ final class DefaultNamingStrategyTest extends TestCase
         ];
     }
 
-    /**
-     * @dataProvider stringToMethodNameDataProvider
-     */
+    /** @dataProvider stringToMethodNameDataProvider */
     public function testStringToMethodNameData(string $string, string $expectedOutput): void
     {
         $actualOutput = $this->defaultNamingStrategy->stringToMethodName($string);
@@ -84,10 +74,8 @@ final class DefaultNamingStrategyTest extends TestCase
         TestCase::assertEquals($expectedOutput, $actualOutput);
     }
 
-    /**
-     * @return array<int, array<int, bool|string>>
-     */
-    public function stringToNamespaceDataProvider(): array
+    /** @return array<int, array<int, bool|string>> */
+    public static function stringToNamespaceDataProvider(): array
     {
         return [
             ['1some random string', '_1someRandomString'],
@@ -96,9 +84,7 @@ final class DefaultNamingStrategyTest extends TestCase
         ];
     }
 
-    /**
-     * @dataProvider stringToNamespaceDataProvider
-     */
+    /** @dataProvider stringToNamespaceDataProvider */
     public function testStringToNamespace(string $string, string $expectedOutput): void
     {
         $actualOutput = $this->defaultNamingStrategy->stringToNamespace($string);

@@ -60,6 +60,7 @@ final class GenerateApiCodeCommand extends Command
 
     /**
      * phpcs:disable SlevomatCodingStandard.TypeHints.PropertyTypeHint.MissingNativeTypeHint
+     *
      * @var string|null
      */
     protected static $defaultName = self::COMMAND;
@@ -117,7 +118,10 @@ final class GenerateApiCodeCommand extends Command
             RecursiveIteratorIterator::CHILD_FIRST
         );
 
-        /** @var SplFileInfo $dir */
+        /**
+         * @var SplFileInfo $dir
+         * @psalm-suppress PossiblyNullArgument
+         */
         foreach ($directories as $dir) {
             if (! $dir->isDir() || iterator_count($directories->callGetChildren()) !== 0) {
                 continue;

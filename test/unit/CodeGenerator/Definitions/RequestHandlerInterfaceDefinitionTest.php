@@ -10,15 +10,11 @@ use OnMoon\OpenApiServerBundle\Interfaces\RequestHandler;
 use PHPUnit\Framework\Assert;
 use PHPUnit\Framework\TestCase;
 
-/**
- * @covers \OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\RequestHandlerInterfaceDefinition
- */
+/** @covers \OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\RequestHandlerInterfaceDefinition */
 final class RequestHandlerInterfaceDefinitionTest extends TestCase
 {
-    /**
-     * @return mixed[]
-     */
-    public function requestHandlerInterfaceDefinitionProvider(): array
+    /** @return mixed[] */
+    public static function requestHandlerInterfaceDefinitionProvider(): array
     {
         return [
             [

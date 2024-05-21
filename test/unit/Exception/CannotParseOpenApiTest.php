@@ -9,9 +9,7 @@ use PHPUnit\Framework\TestCase;
 
 use function Safe\sprintf;
 
-/**
- * @covers \OnMoon\OpenApiServerBundle\Exception\CannotParseOpenApi
- */
+/** @covers \OnMoon\OpenApiServerBundle\Exception\CannotParseOpenApi */
 final class CannotParseOpenApiTest extends TestCase
 {
     public function testBecauseNoOperationIdSpecifiedShowsCorrectErrorMessage(): void

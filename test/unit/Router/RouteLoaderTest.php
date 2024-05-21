@@ -19,9 +19,7 @@ use Throwable;
 
 use function count;
 
-/**
- * @covers \OnMoon\OpenApiServerBundle\Router\RouteLoader
- */
+/** @covers \OnMoon\OpenApiServerBundle\Router\RouteLoader */
 final class RouteLoaderTest extends TestCase
 {
     private const SPECIFICATION_DEFAULT_NAME = 'CustomSpecification';
@@ -49,10 +47,8 @@ final class RouteLoaderTest extends TestCase
         parent::tearDown();
     }
 
-    /**
-     * @return mixed[]
-     */
-    public function loadProvider(): array
+    /** @return mixed[] */
+    public static function loadProvider(): array
     {
         return [
             [
@@ -161,10 +157,8 @@ final class RouteLoaderTest extends TestCase
         Assert::assertCount(count($operations), $routeCollection);
     }
 
-    /**
-     * @return mixed[]
-     */
-    public function supportsProvider(): array
+    /** @return mixed[] */
+    public static function supportsProvider(): array
     {
         return [
             [

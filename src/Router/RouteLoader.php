@@ -60,9 +60,7 @@ class RouteLoader extends Loader
         return $routes;
     }
 
-    /**
-     * @inheritDoc
-     */
+    /** @inheritDoc */
     public function supports($resource, ?string $type = null): bool
     {
         return $type === self::OPENAPI_TYPE;

@@ -9,15 +9,11 @@ use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\GeneratedInterfaceDefin
 use PHPUnit\Framework\Assert;
 use PHPUnit\Framework\TestCase;
 
-/**
- * @covers \OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\GeneratedInterfaceDefinition
- */
+/** @covers \OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\GeneratedInterfaceDefinition */
 final class GeneratedInterfaceDefinitionTest extends TestCase
 {
-    /**
-     * @return mixed[]
-     */
-    public function generatedInterfaceDefinitionProvider(): array
+    /** @return mixed[] */
+    public static function generatedInterfaceDefinitionProvider(): array
     {
         return [
             [

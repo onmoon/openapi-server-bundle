@@ -13,9 +13,7 @@ use PHPUnit\Framework\TestCase;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 
-/**
- * @covers \OnMoon\OpenApiServerBundle\Event\Server\ResponseEvent
- */
+/** @covers \OnMoon\OpenApiServerBundle\Event\Server\ResponseEvent */
 final class ResponseEventTest extends TestCase
 {
     public function testResponseEventGettersReturnCorrectValues(): void

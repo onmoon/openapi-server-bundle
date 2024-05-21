@@ -11,9 +11,7 @@ use PHPUnit\Framework\Assert;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\HttpFoundation\Request;
 
-/**
- * @covers \OnMoon\OpenApiServerBundle\Event\Server\RequestEvent
- */
+/** @covers \OnMoon\OpenApiServerBundle\Event\Server\RequestEvent */
 final class RequestEventTest extends TestCase
 {
     public function testRequestEventGettersReturnCorrectValues(): void

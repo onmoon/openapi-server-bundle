@@ -30,9 +30,7 @@ class FileGenerator
         $this->serviceSubscriberGenerator = $serviceSubscriberGenerator;
     }
 
-    /**
-     * @return GeneratedFileDefinition[]
-     */
+    /** @return GeneratedFileDefinition[] */
     public function generateAllFiles(GraphDefinition $graph): array
     {
         /** @var GeneratedFileDefinition[] $result */
@@ -58,9 +56,7 @@ class FileGenerator
         return $result;
     }
 
-    /**
-     * @return GeneratedFileDefinition[]
-     */
+    /** @return GeneratedFileDefinition[] */
     public function generateDtoTree(?DtoReference $root): array
     {
         if (! $root instanceof DtoDefinition) {

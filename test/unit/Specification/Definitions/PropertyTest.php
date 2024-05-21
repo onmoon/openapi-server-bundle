@@ -11,15 +11,11 @@ use PHPUnit\Framework\TestCase;
 
 use function array_key_exists;
 
-/**
- * @covers \OnMoon\OpenApiServerBundle\Specification\Definitions\Property
- */
+/** @covers \OnMoon\OpenApiServerBundle\Specification\Definitions\Property */
 final class PropertyTest extends TestCase
 {
-    /**
-     * @return mixed[]
-     */
-    public function propertiesProvider(): array
+    /** @return mixed[] */
+    public static function propertiesProvider(): array
     {
         return [
             [
