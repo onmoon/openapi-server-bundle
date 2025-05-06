@@ -30,6 +30,10 @@ parameters:
             message: '#Method OnMoon\\OpenApiServerBundle\\Specification\\SpecificationParser::getResponseDtoDefinitions\(\) has parameter \$responses with no value type specified in iterable type array\.#'
             paths:
                 - %currentWorkingDirectory%/src/Specification/SpecificationParser.php
+        -
+            message: '#Parameter \#1 \$json of function Safe\\json_decode expects string, resource\|string given\.#'
+            paths:
+                - %currentWorkingDirectory%/src/Serializer/ArrayDtoSerializer.php
 includes:
     - vendor/thecodingmachine/phpstan-safe-rule/phpstan-safe-rule.neon
     - vendor/phpstan/phpstan-phpunit/extension.neon
