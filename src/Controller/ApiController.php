@@ -42,7 +42,6 @@ use function ltrim;
 use function Safe\sprintf;
 use function strcasecmp;
 
-use const JSON_PRETTY_PRINT;
 use const JSON_THROW_ON_ERROR;
 use const JSON_UNESCAPED_UNICODE;
 
@@ -174,7 +173,7 @@ final class ApiController
         ?Dto $responseDto = null
     ): Response {
         $response = new JsonResponse();
-        $response->setEncodingOptions(JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_THROW_ON_ERROR);
+        $response->setEncodingOptions(JSON_UNESCAPED_UNICODE | JSON_THROW_ON_ERROR);
 
         $allowedCodes = $this->getApiLoader()->getAllowedCodes(
             $handlerInterface,
