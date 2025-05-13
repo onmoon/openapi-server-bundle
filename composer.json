@@ -25,6 +25,10 @@
         {
             "type": "vcs",
             "url": "https://github.com/onmoon/php-openapi"
+        },
+        {
+            "type": "vcs",
+            "url": "https://github.com/innerfly/reserved-words"
         }
     ],
     "require": {
@@ -36,6 +40,7 @@
         "nikic/php-parser": "^v5.4",
         "nyholm/psr7": "^1.5",
         "phpdocumentor/reflection-docblock": "^5.3",
+        "sspat/reserved-words": "dev-master",
         "symfony/cache": "^6.4|^7.0",
         "symfony/cache-contracts": "^3.5",
         "symfony/config": "^6.4|^7.0",
