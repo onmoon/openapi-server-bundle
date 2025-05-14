@@ -21,7 +21,6 @@ use function in_array;
 use function is_dir;
 use function iterator_count;
 use function Safe\rmdir;
-use function Safe\sprintf;
 use function Safe\unlink;
 
 #[AsCommand(name: 'open-api:generate')]

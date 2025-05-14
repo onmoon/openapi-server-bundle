@@ -39,7 +39,6 @@ use function in_array;
 use function intdiv;
 use function is_numeric;
 use function ltrim;
-use function Safe\sprintf;
 use function strcasecmp;
 
 use const JSON_THROW_ON_ERROR;

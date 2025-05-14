@@ -34,7 +34,6 @@ use PhpParser\Node\Stmt\Return_;
 
 use function array_map;
 use function count;
-use function Safe\sprintf;
 
 class DtoCodeGenerator extends CodeGenerator
 {

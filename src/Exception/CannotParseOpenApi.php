@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace OnMoon\OpenApiServerBundle\Exception;
 
-use function Safe\sprintf;
-
 final class CannotParseOpenApi extends OpenApiError
 {
     /** @param array{method:string,url:string,path:string} $context */

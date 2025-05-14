@@ -18,7 +18,6 @@ use Symfony\Component\Console\Question\ConfirmationQuestion;
 
 use function is_dir;
 use function Safe\rmdir;
-use function Safe\sprintf;
 use function Safe\unlink;
 
 #[AsCommand(name: 'open-api:delete')]

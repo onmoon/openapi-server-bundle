@@ -15,7 +15,6 @@ use PhpParser\Node\Stmt\Use_ as UseStmt;
 use function in_array;
 use function Safe\preg_match;
 use function Safe\preg_replace;
-use function Safe\substr;
 
 class FileBuilder
 {

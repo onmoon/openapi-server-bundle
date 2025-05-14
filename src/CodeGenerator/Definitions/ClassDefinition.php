@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace OnMoon\OpenApiServerBundle\CodeGenerator\Definitions;
 
-use function Safe\substr;
 use function strrpos;
 
 class ClassDefinition implements ClassReference
