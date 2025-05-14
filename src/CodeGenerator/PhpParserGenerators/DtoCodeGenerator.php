@@ -316,8 +316,8 @@ class DtoCodeGenerator extends CodeGenerator
             ->method('fromArray')
             ->makePublic()
             ->makeStatic()
-            ->setReturnType('self')
-            ->addParam(new Param_($source, null, 'array'))
+            ->setReturnType(new Name('self'))
+            ->addParam(new Param_($source, null, new Name('array')))
             ->setDocComment($this->getDocComment(['@inheritDoc']))
             ->addStmts($statements);
     }
