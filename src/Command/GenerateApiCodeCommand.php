@@ -88,7 +88,6 @@ final class GenerateApiCodeCommand extends Command
             return;
         }
 
-        /** @var SplFileInfo[] $iterator */
         $iterator = new RecursiveIteratorIterator(
             new RecursiveDirectoryIterator(
                 $root,

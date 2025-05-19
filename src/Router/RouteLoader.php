@@ -41,8 +41,13 @@ class RouteLoader extends Loader
 
             $parameters = $operation->getRequestParameters();
             if (array_key_exists('path', $parameters)) {
-                /** @psalm-var array<(string|Stringable)> $requirements */
-                $requirements = $this->argumentResolver->resolveArgumentPatterns($parameters['path']);
+                $argumentPatterns = $this->argumentResolver->resolveArgumentPatterns($parameters['path']);
+                foreach ($argumentPatterns as $name => $pattern) {
+                    if (is_null($pattern)) {
+                        continue;
+                    }
+                    $requirements[$name] = $pattern;
+                }
             }
 
             $defaults  = [

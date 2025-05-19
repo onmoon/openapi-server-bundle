@@ -82,7 +82,6 @@ final class DeleteGeneratedCodeCommand extends Command
             return;
         }
 
-        /** @var SplFileInfo[] $iterator */
         $iterator = new RecursiveIteratorIterator(
             new RecursiveDirectoryIterator(
                 $directoryPath,

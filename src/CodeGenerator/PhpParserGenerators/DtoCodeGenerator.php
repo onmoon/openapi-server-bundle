@@ -301,7 +301,7 @@ class DtoCodeGenerator extends CodeGenerator
 
         $statements = [];
         if (count($setters) > 0) {
-            $statements[] = new Assign($dto, $new);
+            $statements[] = new Expression(new Assign($dto, $new));
             foreach ($setters as $setter) {
                 $statements[] = $setter;
             }
