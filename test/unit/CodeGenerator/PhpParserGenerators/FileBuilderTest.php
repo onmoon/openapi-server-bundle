@@ -32,7 +32,7 @@ class FileBuilderTest extends TestCase
         /** @var \PhpParser\Node\Stmt\Use_ $statementToCheck */
         $statementToCheck = $this->fileBuilder->getNamespace()->getNode()->stmts[0];
 
-        Assert::assertEquals('test', $statementToCheck->uses[0]->name->parts[0]);
+        Assert::assertEquals('test', $statementToCheck->uses[0]->name->name);
     }
 
     public function testReferenceWithNotMatching(): void
@@ -63,9 +63,7 @@ class FileBuilderTest extends TestCase
         /** @var Name $nodeName */
         $nodeName = $namespace->getNode()->name;
 
-        Assert::assertEquals('NamespaceOne', $nodeName->parts[0]);
-        Assert::assertEquals('NamespaceTwo', $nodeName->parts[1]);
-
+        Assert::assertEquals('NamespaceOne\NamespaceTwo', $nodeName->name);
         Assert::assertEquals('ClassDefinition', $reference);
     }
 

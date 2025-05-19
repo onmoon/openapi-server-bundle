@@ -13,7 +13,8 @@ use Throwable;
 
 use function ucfirst;
 
-final class NameGenerator
+/** @psalm-suppress ClassMustBeFinal */
+class NameGenerator
 {
     private const DTO_NAMESPACE       = 'Dto';
     private const REQUEST_SUFFIX      = 'Request';

@@ -16,7 +16,8 @@ use function in_array;
 use function Safe\preg_match;
 use function Safe\preg_replace;
 
-final class FileBuilder
+/** @psalm-suppress ClassMustBeFinal */
+class FileBuilder
 {
     private ClassDefinition $definition;
     private Namespace_ $namespace;

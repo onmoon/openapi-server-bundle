@@ -14,7 +14,8 @@ use Symfony\Component\Routing\RouteCollection;
 
 use function array_key_exists;
 
-final class RouteLoader extends Loader
+/** @psalm-suppress ClassMustBeFinal */
+class RouteLoader extends Loader
 {
     private SpecificationLoader $loader;
     private ArgumentResolver $argumentResolver;

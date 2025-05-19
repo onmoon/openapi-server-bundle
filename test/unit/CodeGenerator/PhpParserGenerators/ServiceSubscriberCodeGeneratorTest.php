@@ -122,11 +122,11 @@ class ClassName implements ClassName, ClassName
     /**
      * @inheritDoc
      */
-    public static function getSubscribedServices() : array
+    public static function getSubscribedServices(): array
     {
         return ['test' => '?' . ClassName::class];
     }
-    public function get(string $interface) : ?RequestHandler
+    public function get(string $interface): ?RequestHandler
     {
         if (!$this->locator->has($interface)) {
             return null;
@@ -134,7 +134,7 @@ class ClassName implements ClassName, ClassName
         return $this->locator->get($interface);
     }
     /** @return string[] */
-    public function getAllowedCodes(string $apiClass, string $dtoClass) : array
+    public function getAllowedCodes(string $apiClass, string $dtoClass): array
     {
         return self::HTTP_CODES[$apiClass][$dtoClass];
     }

@@ -10,7 +10,8 @@ use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\GraphDefinition;
 use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\PropertyDefinition;
 use OnMoon\OpenApiServerBundle\Specification\Definitions\Property;
 
-final class AttributeGenerator
+/** @psalm-suppress ClassMustBeFinal */
+class AttributeGenerator
 {
     public function setAllAttributes(GraphDefinition $graph): void
     {
