@@ -21,7 +21,7 @@ use function stream_is_local;
 
 use const PATHINFO_EXTENSION;
 
-class SpecificationLoader
+final class SpecificationLoader
 {
     public const CACHE_TAG         = 'openapi.server.bundle.specifications';
     private const CACHE_KEY_PREFIX = 'openapi-server-bundle-specification-';

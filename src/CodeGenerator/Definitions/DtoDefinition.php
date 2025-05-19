@@ -8,7 +8,7 @@ use OnMoon\OpenApiServerBundle\Interfaces\Dto;
 
 use function count;
 
-class DtoDefinition extends GeneratedClassDefinition implements DtoReference
+final class DtoDefinition extends GeneratedClassDefinition implements DtoReference
 {
     /** @var PropertyDefinition[] $properties; */
     private array $properties;
@@ -21,6 +21,7 @@ class DtoDefinition extends GeneratedClassDefinition implements DtoReference
         $this->properties = $properties;
     }
 
+    #[\Override]
     final public function isEmpty(): bool
     {
         return count($this->properties) === 0;

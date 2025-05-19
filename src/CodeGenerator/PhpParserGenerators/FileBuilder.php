@@ -16,7 +16,7 @@ use function in_array;
 use function Safe\preg_match;
 use function Safe\preg_replace;
 
-class FileBuilder
+final class FileBuilder
 {
     private ClassDefinition $definition;
     private Namespace_ $namespace;

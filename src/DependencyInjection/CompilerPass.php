@@ -20,6 +20,7 @@ final class CompilerPass implements CompilerPassInterface
         $this->tag = $tag;
     }
 
+    #[\Override]
     public function process(ContainerBuilder $container): void
     {
         if (! $container->has(ApiController::class)) {

@@ -13,7 +13,7 @@ use Throwable;
 
 use function ucfirst;
 
-class NameGenerator
+final class NameGenerator
 {
     private const DTO_NAMESPACE       = 'Dto';
     private const REQUEST_SUFFIX      = 'Request';

@@ -9,7 +9,7 @@ use OnMoon\OpenApiServerBundle\Specification\Definitions\ObjectSchema;
 
 use function Safe\preg_match;
 
-class ArgumentResolver
+final class ArgumentResolver
 {
     private ScalarTypesResolver $typesResolver;
 

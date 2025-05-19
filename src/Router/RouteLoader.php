@@ -14,7 +14,7 @@ use Symfony\Component\Routing\RouteCollection;
 
 use function array_key_exists;
 
-class RouteLoader extends Loader
+final class RouteLoader extends Loader
 {
     private SpecificationLoader $loader;
     private ArgumentResolver $argumentResolver;
@@ -28,6 +28,7 @@ class RouteLoader extends Loader
         $this->argumentResolver = $argumentResolver;
     }
 
+    #[\Override]
     public function load(mixed $resource, ?string $type = null): RouteCollection
     {
         $specName      = (string) $resource;
@@ -66,6 +67,7 @@ class RouteLoader extends Loader
     }
 
     /** @inheritDoc */
+    #[\Override]
     public function supports($resource, ?string $type = null): bool
     {
         return $type === self::OPENAPI_TYPE;

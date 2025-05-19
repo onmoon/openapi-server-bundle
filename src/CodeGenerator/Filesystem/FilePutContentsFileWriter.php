@@ -19,6 +19,7 @@ final class FilePutContentsFileWriter implements FileWriter
         $this->dirPemissions = $dirPemissions;
     }
 
+    #[\Override]
     public function write(string $path, string $filename, string $contents): void
     {
         if (! is_dir($path)) {

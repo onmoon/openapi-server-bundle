@@ -21,6 +21,7 @@ final class ObjectSchema implements GetSchema
         return $this->properties;
     }
 
+    #[\Override]
     public function getSchema(): ObjectSchema
     {
         return $this;

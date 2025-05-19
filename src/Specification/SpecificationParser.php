@@ -42,7 +42,7 @@ use function str_ends_with;
 use function strcasecmp;
 use function substr;
 
-class SpecificationParser
+final class SpecificationParser
 {
     private ScalarTypesResolver $typeResolver;
     /** @var string[] */

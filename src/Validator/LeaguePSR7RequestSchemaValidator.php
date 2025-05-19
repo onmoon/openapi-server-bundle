@@ -23,6 +23,7 @@ final class LeaguePSR7RequestSchemaValidator implements RequestSchemaValidator
         $this->httpFactory      = $httpFactory;
     }
 
+    #[\Override]
     public function validate(
         Request $request,
         Specification $specification,

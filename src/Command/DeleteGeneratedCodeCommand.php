@@ -41,6 +41,7 @@ final class DeleteGeneratedCodeCommand extends Command
      */
     protected static $defaultName = self::COMMAND;
 
+    #[\Override]
     protected function configure(): void
     {
         $this
@@ -52,6 +53,7 @@ final class DeleteGeneratedCodeCommand extends Command
             );
     }
 
+    #[\Override]
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         if (! (bool) $input->getOption('yes')) {
@@ -82,6 +84,7 @@ final class DeleteGeneratedCodeCommand extends Command
             return;
         }
 
+        /** @var SplFileInfo[] $iterator */
         $iterator = new RecursiveIteratorIterator(
             new RecursiveDirectoryIterator(
                 $directoryPath,

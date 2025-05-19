@@ -11,7 +11,7 @@ use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
 use const DIRECTORY_SEPARATOR;
 
-class ApiServerCodeGenerator
+final class ApiServerCodeGenerator
 {
     private GraphGenerator $graphGenerator;
     private NameGenerator $nameGenerator;

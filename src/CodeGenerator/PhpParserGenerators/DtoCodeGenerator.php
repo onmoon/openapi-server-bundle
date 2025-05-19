@@ -35,7 +35,7 @@ use PhpParser\Node\Stmt\Return_;
 use function array_map;
 use function count;
 
-class DtoCodeGenerator extends CodeGenerator
+final class DtoCodeGenerator extends CodeGenerator
 {
     public function generate(DtoDefinition $definition): GeneratedFileDefinition
     {
