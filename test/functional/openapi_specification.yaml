@@ -3,11 +3,9 @@ info:
   title: 'Test Goods API'
   version: '1.0'
 paths:
-  '/goods/{goodId}':
+  /goods/{goodId}:
     get:
       operationId: "getGood"
-      security:
-        - bearerAuth: []
       parameters:
         - $ref: '#/components/parameters/GoodIdParam'
       responses:
@@ -18,11 +16,6 @@ paths:
               schema:
                 $ref: '#/components/schemas/GoodResponseSchema'
 components:
-  securitySchemes:
-    bearerAuth:
-      type: http
-      scheme: bearer
-      bearerFormat: JWT
   schemas:
     GoodResponseSchema:
       title: Good Response
