@@ -17,11 +17,11 @@ use function array_keys;
 use function file_exists;
 use function implode;
 use function pathinfo;
-use function Safe\sprintf;
 use function stream_is_local;
 
 use const PATHINFO_EXTENSION;
 
+/** @psalm-suppress ClassMustBeFinal */
 class SpecificationLoader
 {
     public const CACHE_TAG         = 'openapi.server.bundle.specifications';

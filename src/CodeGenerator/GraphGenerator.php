@@ -25,6 +25,7 @@ use OnMoon\OpenApiServerBundle\Specification\SpecificationLoader;
 use function array_map;
 use function count;
 
+/** @psalm-suppress ClassMustBeFinal */
 class GraphGenerator
 {
     private SpecificationLoader $loader;

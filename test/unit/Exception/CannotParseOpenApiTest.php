@@ -7,8 +7,6 @@ namespace OnMoon\OpenApiServerBundle\Test\Unit\Exception;
 use OnMoon\OpenApiServerBundle\Exception\CannotParseOpenApi;
 use PHPUnit\Framework\TestCase;
 
-use function Safe\sprintf;
-
 /** @covers \OnMoon\OpenApiServerBundle\Exception\CannotParseOpenApi */
 final class CannotParseOpenApiTest extends TestCase
 {

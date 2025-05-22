@@ -7,8 +7,6 @@ namespace OnMoon\OpenApiServerBundle\Test\Unit\CodeGenerator\Naming;
 use OnMoon\OpenApiServerBundle\CodeGenerator\Naming\CannotCreatePropertyName;
 use PHPUnit\Framework\TestCase;
 
-use function Safe\sprintf;
-
 /** @covers \OnMoon\OpenApiServerBundle\CodeGenerator\Naming\CannotCreatePropertyName */
 final class CannotCreatePropertyNameTest extends TestCase
 {

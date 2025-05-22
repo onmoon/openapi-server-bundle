@@ -21,7 +21,6 @@ use function in_array;
 use function is_dir;
 use function iterator_count;
 use function Safe\rmdir;
-use function Safe\sprintf;
 use function Safe\unlink;
 
 #[AsCommand(name: 'open-api:generate')]
@@ -46,6 +45,7 @@ final class GenerateApiCodeCommand extends Command
         parent::__construct($name);
     }
 
+    #[\Override]
     protected function configure(): void
     {
         $this
@@ -65,6 +65,7 @@ final class GenerateApiCodeCommand extends Command
      */
     protected static $defaultName = self::COMMAND;
 
+    #[\Override]
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $keep = (bool) $input->getOption('keep');
@@ -89,7 +90,6 @@ final class GenerateApiCodeCommand extends Command
             return;
         }
 
-        /** @var SplFileInfo[] $iterator */
         $iterator = new RecursiveIteratorIterator(
             new RecursiveDirectoryIterator(
                 $root,
@@ -98,6 +98,7 @@ final class GenerateApiCodeCommand extends Command
             RecursiveIteratorIterator::CHILD_FIRST
         );
 
+        /** @var SplFileInfo[] $iterator */
         foreach ($iterator as $directoryOrFile) {
             if ($directoryOrFile->isDir() || in_array($directoryOrFile->getPathname(), $generatedFiles, true)) {
                 continue;

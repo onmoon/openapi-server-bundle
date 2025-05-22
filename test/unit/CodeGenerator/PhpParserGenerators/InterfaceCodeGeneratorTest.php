@@ -62,7 +62,7 @@ use OnMoon\OpenApiServerBundle\Interfaces\RequestHandler;
  */
 interface TestClass extends RequestHandler
 {
-    public function test() : void;
+    public function test(): void;
 }
 EOD;
         $expectedGeneratedFileDefinition = new GeneratedFileDefinition(
@@ -102,7 +102,7 @@ use \TestClass as TestClass_;
 interface TestClass extends RequestHandler
 {
     /** @param TestClass_ $request */
-    public function test(TestClass_ $request) : void;
+    public function test(TestClass_ $request): void;
 }
 EOD;
         $expectedGeneratedFileDefinition = new GeneratedFileDefinition(
@@ -139,7 +139,7 @@ use \TestClass as TestClass_;
 interface TestClass extends RequestHandler
 {
     /** @return TestClass_ */
-    public function test() : TestClass_;
+    public function test(): TestClass_;
 }
 EOD;
         $expectedGeneratedFileDefinition = new GeneratedFileDefinition(
@@ -175,7 +175,7 @@ use OnMoon\OpenApiServerBundle\Interfaces\RequestHandler;
 interface TestClass extends RequestHandler
 {
     /** method description */
-    public function test() : void;
+    public function test(): void;
 }
 EOD;
         $expectedGeneratedFileDefinition = new GeneratedFileDefinition(

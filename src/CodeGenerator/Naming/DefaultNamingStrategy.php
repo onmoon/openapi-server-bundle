@@ -37,11 +37,13 @@ final class DefaultNamingStrategy implements NamingStrategy
         $this->languageLevel = $languageLevel;
     }
 
+    #[\Override]
     public function isAllowedPhpPropertyName(string $name): bool
     {
         return preg_match('/^\d/', $name) === 0 && preg_match('/^[A-Za-z0-9_]+$/', $name) === 1;
     }
 
+    #[\Override]
     public function getInterfaceFQCN(string $apiNameSpace, string $operationId): string
     {
         /** @psalm-var class-string<RequestHandler> $interfaceNamespace */
@@ -56,6 +58,7 @@ final class DefaultNamingStrategy implements NamingStrategy
         return $interfaceNamespace;
     }
 
+    #[\Override]
     public function stringToNamespace(string $text): string
     {
         $namespace = $this->padStringThatIsReservedNamespaceName(
@@ -71,6 +74,7 @@ final class DefaultNamingStrategy implements NamingStrategy
         return $namespace;
     }
 
+    #[\Override]
     public function stringToMethodName(string $text): string
     {
         $propertyName = $this->padStringThatIsReservedMethodName(
@@ -88,11 +92,13 @@ final class DefaultNamingStrategy implements NamingStrategy
         return $propertyName;
     }
 
+    #[\Override]
     public function buildNamespace(string ...$parts): string
     {
         return implode('\\', array_map(static fn (string $part): string => trim($part, '\\'), $parts));
     }
 
+    #[\Override]
     public function buildPath(string ...$parts): string
     {
         return implode(

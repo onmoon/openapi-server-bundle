@@ -27,6 +27,7 @@ final class ArrayDtoSerializer implements DtoSerializer
         $this->sendNotRequiredNullableNulls = $sendNulls;
     }
 
+    #[\Override]
     public function createRequestDto(
         Request $request,
         Operation $operation,
@@ -67,6 +68,7 @@ final class ArrayDtoSerializer implements DtoSerializer
     }
 
     /** @inheritDoc */
+    #[\Override]
     public function createResponseFromDto(Dto $responseDto, ObjectSchema $definition): array
     {
         return $this->convert(false, $responseDto->toArray(), $definition);

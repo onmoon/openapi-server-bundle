@@ -13,6 +13,7 @@ final class OpenApiServerBundle extends Bundle
 {
     public const API_LOADER_TAG = 'openapi.api_loader';
 
+    #[\Override]
     public function build(ContainerBuilder $container): void
     {
         $container->registerForAutoconfiguration(ApiLoader::class)->addTag(self::API_LOADER_TAG);

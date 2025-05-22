@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace OnMoon\OpenApiServerBundle\Exception;
 
 use function implode;
-use function Safe\sprintf;
 
 final class ApiCallFailed extends OpenApiError
 {

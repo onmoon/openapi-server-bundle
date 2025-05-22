@@ -15,7 +15,7 @@ use function method_exists;
 use function Safe\base64_decode;
 use function sprintf;
 
-class TypeSerializer
+final class TypeSerializer
 {
     private const DATE_FORMAT     = 'Y-m-d';
     private const DATETIME_FORMAT = 'c';

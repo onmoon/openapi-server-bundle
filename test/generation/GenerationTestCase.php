@@ -9,6 +9,7 @@ use PhpParser\Node\Stmt;
 use PhpParser\NodeFinder;
 use PhpParser\Parser;
 use PhpParser\ParserFactory;
+use PhpParser\PhpVersion;
 use PHPUnit\Framework\TestCase;
 
 abstract class GenerationTestCase extends TestCase
@@ -18,7 +19,7 @@ abstract class GenerationTestCase extends TestCase
 
     public function setUp(): void
     {
-        $this->phpParser  = (new ParserFactory())->create(ParserFactory::PREFER_PHP7);
+        $this->phpParser  = (new ParserFactory())->createForVersion(PhpVersion::fromString('7.0'));
         $this->nodeFinder = new NodeFinder();
     }
 

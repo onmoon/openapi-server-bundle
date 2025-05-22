@@ -7,8 +7,6 @@ namespace OnMoon\OpenApiServerBundle\Test\Unit\CodeGenerator\Naming;
 use OnMoon\OpenApiServerBundle\CodeGenerator\Naming\CannotCreateNamespace;
 use PHPUnit\Framework\TestCase;
 
-use function Safe\sprintf;
-
 /** @covers  \OnMoon\OpenApiServerBundle\CodeGenerator\Naming\CannotCreateNamespace */
 final class CannotCreateNamespaceTest extends TestCase
 {
