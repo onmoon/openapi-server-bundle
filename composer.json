@@ -24,7 +24,7 @@
     "require": {
         "php": "^8.1",
         "ext-json": "*",
-        "cebe/php-openapi": "^1.8",
+        "devizzent/cebe-php-openapi": "1.1.4",
         "league/openapi-psr7-validator": "^0.22.0",
         "lukasoppermann/http-status": "^4.0",
         "nikic/php-parser": "^v5.4",
