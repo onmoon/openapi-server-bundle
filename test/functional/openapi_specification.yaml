@@ -6,8 +6,6 @@ paths:
   /goods/{goodId}:
     get:
       operationId: "getGood"
-      security:
-        - ApiKeyAuth: []
       parameters:
         - $ref: '#/components/parameters/GoodIdParam'
       responses:
@@ -18,11 +16,6 @@ paths:
               schema:
                 $ref: '#/components/schemas/GoodResponseSchema'
 components:
-  securitySchemes:
-    ApiKeyAuth:
-      type: apiKey
-      in: header
-      name: X-API-Key
   schemas:
     GoodResponseSchema:
       title: Good Response
