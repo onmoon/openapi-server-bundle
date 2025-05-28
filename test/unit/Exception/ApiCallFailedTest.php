@@ -7,6 +7,8 @@ namespace OnMoon\OpenApiServerBundle\Test\Unit\Exception;
 use OnMoon\OpenApiServerBundle\Exception\ApiCallFailed;
 use PHPUnit\Framework\TestCase;
 
+use function sprintf;
+
 /** @covers \OnMoon\OpenApiServerBundle\Exception\ApiCallFailed */
 final class ApiCallFailedTest extends TestCase
 {

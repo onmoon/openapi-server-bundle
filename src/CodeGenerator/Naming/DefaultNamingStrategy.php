@@ -7,6 +7,7 @@ namespace OnMoon\OpenApiServerBundle\CodeGenerator\Naming;
 use OnMoon\OpenApiServerBundle\CodeGenerator\NameGenerator;
 // phpcs:ignore SlevomatCodingStandard.Namespaces.UnusedUses.UnusedUse
 use OnMoon\OpenApiServerBundle\Interfaces\RequestHandler;
+use Override;
 use sspat\ReservedWords\ReservedWords;
 
 use function array_map;
@@ -37,13 +38,13 @@ final class DefaultNamingStrategy implements NamingStrategy
         $this->languageLevel = $languageLevel;
     }
 
-    #[\Override]
+    #[Override]
     public function isAllowedPhpPropertyName(string $name): bool
     {
         return preg_match('/^\d/', $name) === 0 && preg_match('/^[A-Za-z0-9_]+$/', $name) === 1;
     }
 
-    #[\Override]
+    #[Override]
     public function getInterfaceFQCN(string $apiNameSpace, string $operationId): string
     {
         /** @psalm-var class-string<RequestHandler> $interfaceNamespace */
@@ -58,7 +59,7 @@ final class DefaultNamingStrategy implements NamingStrategy
         return $interfaceNamespace;
     }
 
-    #[\Override]
+    #[Override]
     public function stringToNamespace(string $text): string
     {
         $namespace = $this->padStringThatIsReservedNamespaceName(
@@ -74,7 +75,7 @@ final class DefaultNamingStrategy implements NamingStrategy
         return $namespace;
     }
 
-    #[\Override]
+    #[Override]
     public function stringToMethodName(string $text): string
     {
         $propertyName = $this->padStringThatIsReservedMethodName(
@@ -92,13 +93,13 @@ final class DefaultNamingStrategy implements NamingStrategy
         return $propertyName;
     }
 
-    #[\Override]
+    #[Override]
     public function buildNamespace(string ...$parts): string
     {
         return implode('\\', array_map(static fn (string $part): string => trim($part, '\\'), $parts));
     }
 
-    #[\Override]
+    #[Override]
     public function buildPath(string ...$parts): string
     {
         return implode(

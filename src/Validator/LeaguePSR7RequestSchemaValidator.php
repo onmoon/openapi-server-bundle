@@ -7,6 +7,7 @@ namespace OnMoon\OpenApiServerBundle\Validator;
 use League\OpenAPIValidation\PSR7\OperationAddress;
 use League\OpenAPIValidation\PSR7\ValidatorBuilder;
 use OnMoon\OpenApiServerBundle\Specification\Definitions\Specification;
+use Override;
 use Symfony\Bridge\PsrHttpMessage\Factory\PsrHttpFactory;
 use Symfony\Component\HttpFoundation\Request;
 
@@ -23,7 +24,7 @@ final class LeaguePSR7RequestSchemaValidator implements RequestSchemaValidator
         $this->httpFactory      = $httpFactory;
     }
 
-    #[\Override]
+    #[Override]
     public function validate(
         Request $request,
         Specification $specification,

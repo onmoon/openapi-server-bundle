@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace OnMoon\OpenApiServerBundle\Specification\Definitions;
 
+use Override;
+
 final class ObjectSchema implements GetSchema
 {
     /** @var Property[] $properties; */
@@ -21,7 +23,7 @@ final class ObjectSchema implements GetSchema
         return $this->properties;
     }
 
-    #[\Override]
+    #[Override]
     public function getSchema(): ObjectSchema
     {
         return $this;

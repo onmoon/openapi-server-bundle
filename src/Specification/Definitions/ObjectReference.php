@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace OnMoon\OpenApiServerBundle\Specification\Definitions;
 
+use Override;
+
 final class ObjectReference implements GetSchema
 {
     public function __construct(private string $schemaName, private ObjectSchema $referencedObject)
@@ -20,7 +22,7 @@ final class ObjectReference implements GetSchema
         return $this->referencedObject;
     }
 
-    #[\Override]
+    #[Override]
     public function getSchema(): ObjectSchema
     {
         return $this->getReferencedObject();

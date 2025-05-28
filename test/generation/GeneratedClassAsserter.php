@@ -28,6 +28,7 @@ use PHPUnit\Framework\Assert;
 use function array_pop;
 use function explode;
 use function is_array;
+use function sprintf;
 use function strpos;
 
 final class GeneratedClassAsserter

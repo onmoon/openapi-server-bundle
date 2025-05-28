@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace OnMoon\OpenApiServerBundle\Command;
 
+use Override;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
 use SplFileInfo;
@@ -19,6 +20,7 @@ use Symfony\Component\Console\Question\ConfirmationQuestion;
 use function is_dir;
 use function Safe\rmdir;
 use function Safe\unlink;
+use function sprintf;
 
 #[AsCommand(name: 'open-api:delete')]
 final class DeleteGeneratedCodeCommand extends Command
@@ -41,7 +43,7 @@ final class DeleteGeneratedCodeCommand extends Command
      */
     protected static $defaultName = self::COMMAND;
 
-    #[\Override]
+    #[Override]
     protected function configure(): void
     {
         $this
@@ -53,7 +55,7 @@ final class DeleteGeneratedCodeCommand extends Command
             );
     }
 
-    #[\Override]
+    #[Override]
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         if (! (bool) $input->getOption('yes')) {

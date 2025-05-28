@@ -24,6 +24,8 @@ use PhpParser\Node\Stmt\If_;
 use PhpParser\Node\Stmt\Return_;
 use Psr\Container\ContainerInterface;
 
+use function sprintf;
+
 final class ServiceSubscriberCodeGenerator extends CodeGenerator
 {
     public function generate(GraphDefinition $graphDefinition): GeneratedFileDefinition

@@ -11,6 +11,7 @@ use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\RequestHandlerInterface
 use function array_map;
 use function count;
 use function implode;
+use function sprintf;
 
 final class InterfaceCodeGenerator extends CodeGenerator
 {

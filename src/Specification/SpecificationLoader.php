@@ -17,6 +17,7 @@ use function array_keys;
 use function file_exists;
 use function implode;
 use function pathinfo;
+use function sprintf;
 use function stream_is_local;
 
 use const PATHINFO_EXTENSION;

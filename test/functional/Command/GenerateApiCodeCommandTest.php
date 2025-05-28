@@ -10,6 +10,7 @@ use PHPUnit\Framework\Assert;
 use Symfony\Component\Console\Tester\CommandTester;
 
 use function rtrim;
+use function sprintf;
 use function ucfirst;
 
 use const DIRECTORY_SEPARATOR;
