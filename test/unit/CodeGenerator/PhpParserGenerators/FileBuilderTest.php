@@ -34,12 +34,10 @@ class FileBuilderTest extends TestCase
         $statementToCheck = $this->fileBuilder->getNamespace()->getNode()->stmts[0];
 
         if ((new ReflectionClass(Name::class))->hasProperty('name')) {
-            $nameSpaceName = $statementToCheck->uses[0]->name->name;
+            Assert::assertEquals('test', $statementToCheck->uses[0]->name->name);
         } else {
-            $nameSpaceName = $statementToCheck->uses[0]->name->parts[0];
+            Assert::assertEquals('test', $statementToCheck->uses[0]->name->parts[0]);
         }
-
-        Assert::assertEquals('test', $nameSpaceName);
     }
 
     public function testReferenceWithNotMatching(): void
@@ -70,7 +68,13 @@ class FileBuilderTest extends TestCase
         /** @var Name $nodeName */
         $nodeName = $namespace->getNode()->name;
 
-        Assert::assertEquals('NamespaceOne\NamespaceTwo', $nodeName->name);
+        if ((new ReflectionClass(Name::class))->hasProperty('name')) {
+            Assert::assertEquals('NamespaceOne\NamespaceTwo', $nodeName->name);
+        } else {
+            Assert::assertEquals('NamespaceOne', $nodeName->parts[0]);
+            Assert::assertEquals('NamespaceTwo', $nodeName->parts[1]);
+        }
+
         Assert::assertEquals('ClassDefinition', $reference);
     }
 
