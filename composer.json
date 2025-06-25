@@ -27,7 +27,7 @@
         "devizzent/cebe-php-openapi": "^1.1.4",
         "league/openapi-psr7-validator": "^0.22.0",
         "lukasoppermann/http-status": "^4.0",
-        "nikic/php-parser": "^v5.4",
+        "nikic/php-parser": "^4.19|^v5.4",
         "nyholm/psr7": "^1.5",
         "phpdocumentor/reflection-docblock": "^5.3",
         "sspat/reserved-words": "^3.0",
@@ -57,7 +57,7 @@
         "symfony/dom-crawler": "^6.4|^7.0",
         "symfony/framework-bundle": "^6.4|^7.0",
         "thecodingmachine/phpstan-safe-rule": "v1.4",
-        "vimeo/psalm": "^5.15|^6.10"
+        "vimeo/psalm": "^5.24|^6.10"
     },
     "minimum-stability": "stable",
     "prefer-stable": true,
