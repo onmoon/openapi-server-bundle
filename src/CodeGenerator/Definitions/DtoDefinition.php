@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace OnMoon\OpenApiServerBundle\CodeGenerator\Definitions;
 
 use OnMoon\OpenApiServerBundle\Interfaces\Dto;
-use Override;
 
 use function count;
 
@@ -22,7 +21,6 @@ final class DtoDefinition extends GeneratedClassDefinition implements DtoReferen
         $this->properties = $properties;
     }
 
-    #[Override]
     final public function isEmpty(): bool
     {
         return count($this->properties) === 0;

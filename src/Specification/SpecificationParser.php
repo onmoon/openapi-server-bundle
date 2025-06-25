@@ -375,8 +375,14 @@ class SpecificationParser
             $itemProperty = $property;
         }
 
-        if (Type::isScalar($itemProperty->type)) {
-            $scalarTypeId = $this->typeResolver->findScalarType($itemProperty->type, $itemProperty->format);
+        $propertyType = $itemProperty->type;
+
+        if (is_array($propertyType)) {
+            throw CannotParseOpenApi::becauseOpenapi31TypesNotSupported($propertyName, $exceptionContext);
+        }
+
+        if (Type::isScalar($propertyType)) {
+            $scalarTypeId = $this->typeResolver->findScalarType($propertyType, $itemProperty->format);
             $propertyDefinition->setScalarTypeId($scalarTypeId);
 
             if ($this->typeResolver->isDateTime($scalarTypeId) && $this->dateTimeClass !== null) {
@@ -398,7 +404,7 @@ class SpecificationParser
 
                 $propertyDefinition->setOutputType($this->dateTimeClass);
             }
-        } elseif ($itemProperty->type === Type::OBJECT) {
+        } elseif ($propertyType === Type::OBJECT) {
             $objectType = $this->getObjectSchema(
                 $itemProperty,
                 $isRequest,
@@ -408,7 +414,7 @@ class SpecificationParser
             $propertyDefinition->setObjectTypeDefinition($objectType);
             $isScalar = false;
         } else {
-            throw CannotParseOpenApi::becauseTypeNotSupported($propertyName, $itemProperty->type, $exceptionContext);
+            throw CannotParseOpenApi::becauseTypeNotSupported($propertyName, $propertyType, $exceptionContext);
         }
 
         /** @var string|int|float|bool|null $schemaDefaultValue */

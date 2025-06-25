@@ -7,7 +7,6 @@ namespace OnMoon\OpenApiServerBundle\Command;
 use FilesystemIterator;
 use OnMoon\OpenApiServerBundle\CodeGenerator\ApiServerCodeGenerator;
 use OnMoon\OpenApiServerBundle\Specification\SpecificationLoader;
-use Override;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
 use SplFileInfo;
@@ -47,7 +46,6 @@ final class GenerateApiCodeCommand extends Command
         parent::__construct($name);
     }
 
-    #[Override]
     protected function configure(): void
     {
         $this
@@ -67,7 +65,6 @@ final class GenerateApiCodeCommand extends Command
      */
     protected static $defaultName = self::COMMAND;
 
-    #[Override]
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $keep = (bool) $input->getOption('keep');
@@ -100,7 +97,7 @@ final class GenerateApiCodeCommand extends Command
             RecursiveIteratorIterator::CHILD_FIRST
         );
 
-        /** @var SplFileInfo[] $iterator */
+        /** @var SplFileInfo $directoryOrFile */
         foreach ($iterator as $directoryOrFile) {
             if ($directoryOrFile->isDir() || in_array($directoryOrFile->getPathname(), $generatedFiles, true)) {
                 continue;

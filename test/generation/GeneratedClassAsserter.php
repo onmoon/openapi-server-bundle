@@ -22,8 +22,8 @@ use PhpParser\Node\Stmt\Use_;
 use PhpParser\Node\Stmt\UseUse;
 use PhpParser\NodeFinder;
 use PhpParser\ParserFactory;
-use PhpParser\PhpVersion;
 use PHPUnit\Framework\Assert;
+use ReflectionClass;
 
 use function array_pop;
 use function explode;
@@ -40,9 +40,14 @@ final class GeneratedClassAsserter
     public function __construct(InMemoryFileWriter $fileWriter, string $path)
     {
         $this->nodeFinder = new NodeFinder();
-        $phpParser        = (new ParserFactory())->createForVersion(PhpVersion::fromString('7.0'));
-        $phpCode          = $fileWriter->getContentsByFullPath($path);
-        $statements       = $phpParser->parse($phpCode);
+        if ((new ReflectionClass(ParserFactory::class))->hasMethod('create')) {
+            $phpParser = (new ParserFactory())->create(1);
+        } else {
+            $phpParser = (new ParserFactory())->createForHostVersion();
+        }
+
+        $phpCode    = $fileWriter->getContentsByFullPath($path);
+        $statements = $phpParser->parse($phpCode);
         if ($statements === null) {
             throw new InvalidArgumentException('No statements found in provided PHP code');
         }

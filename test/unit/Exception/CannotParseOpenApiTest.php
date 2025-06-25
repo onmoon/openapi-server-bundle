@@ -109,6 +109,32 @@ final class CannotParseOpenApiTest extends TestCase
         throw CannotParseOpenApi::becauseOnlyScalarAreAllowed($propertyName, $context);
     }
 
+    public function testBecauseOpenapi31TypesNotSupportedShowsCorrectErrorMessage(): void
+    {
+        $propertyName = 'someRandomName';
+
+        $context = [
+            'location' => 'http://example.com',
+            'method' => 'testMethod',
+            'url' => 'testUrl',
+            'path' => 'testPath',
+        ];
+
+        $exceptionMessage = sprintf(
+            'Cannot generate property for DTO class, property "%s" has multiple types in %s for operation: "%s" of path: "%s" in specification file: "%s".',
+            $propertyName,
+            $context['location'],
+            $context['method'],
+            $context['url'],
+            $context['path']
+        );
+
+        $this->expectException(CannotParseOpenApi::class);
+        $this->expectExceptionMessage($exceptionMessage);
+
+        throw CannotParseOpenApi::becauseOpenapi31TypesNotSupported($propertyName, $context);
+    }
+
     public function testBecauseArrayIsNotDescribedShowsCorrectErrorMessage(): void
     {
         $propertyName = 'someRandomName';

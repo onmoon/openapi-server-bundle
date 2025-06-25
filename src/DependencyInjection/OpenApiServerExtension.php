@@ -6,7 +6,6 @@ namespace OnMoon\OpenApiServerBundle\DependencyInjection;
 
 use Exception;
 use OnMoon\OpenApiServerBundle\Specification\SpecificationLoader;
-use Override;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Extension\Extension;
@@ -20,7 +19,6 @@ use function str_replace;
 final class OpenApiServerExtension extends Extension implements ExtensionInterface
 {
     /** @param mixed[] $configs */
-    #[Override]
     public function load(array $configs, ContainerBuilder $container): void
     {
         $loader = new XmlFileLoader($container, new FileLocator(__DIR__ . '/../Resources/config'));

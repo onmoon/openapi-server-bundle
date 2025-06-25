@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace OnMoon\OpenApiServerBundle\CodeGenerator\Filesystem;
 
-use Override;
-
 use function is_dir;
 use function Safe\file_put_contents;
 use function Safe\mkdir;
@@ -21,7 +19,6 @@ final class FilePutContentsFileWriter implements FileWriter
         $this->dirPemissions = $dirPemissions;
     }
 
-    #[Override]
     public function write(string $path, string $filename, string $contents): void
     {
         if (! is_dir($path)) {

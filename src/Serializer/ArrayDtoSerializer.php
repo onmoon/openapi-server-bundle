@@ -4,17 +4,14 @@ declare(strict_types=1);
 
 namespace OnMoon\OpenApiServerBundle\Serializer;
 
-use Exception;
 use OnMoon\OpenApiServerBundle\Interfaces\Dto;
 use OnMoon\OpenApiServerBundle\Specification\Definitions\ObjectSchema;
 use OnMoon\OpenApiServerBundle\Specification\Definitions\Operation;
 use OnMoon\OpenApiServerBundle\Types\ScalarTypesResolver;
-use Override;
 use Symfony\Component\HttpFoundation\Request;
 
 use function array_key_exists;
 use function array_map;
-use function is_resource;
 use function Safe\json_decode;
 
 final class ArrayDtoSerializer implements DtoSerializer
@@ -28,7 +25,6 @@ final class ArrayDtoSerializer implements DtoSerializer
         $this->sendNotRequiredNullableNulls = $sendNulls;
     }
 
-    #[Override]
     public function createRequestDto(
         Request $request,
         Operation $operation,
@@ -51,11 +47,7 @@ final class ArrayDtoSerializer implements DtoSerializer
 
         $bodyType = $operation->getRequestBody();
         if ($bodyType !== null) {
-            /** @var resource|string $source */
             $source = $request->getContent();
-            if (is_resource($source)) {
-                throw new Exception('Expecting string as contents, resource received');
-            }
 
             /** @var mixed[] $rawBody */
             $rawBody       = json_decode($source, true);
@@ -69,7 +61,6 @@ final class ArrayDtoSerializer implements DtoSerializer
     }
 
     /** @inheritDoc */
-    #[Override]
     public function createResponseFromDto(Dto $responseDto, ObjectSchema $definition): array
     {
         return $this->convert(false, $responseDto->toArray(), $definition);

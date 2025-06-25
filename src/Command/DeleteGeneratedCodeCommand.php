@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace OnMoon\OpenApiServerBundle\Command;
 
-use Override;
+use FilesystemIterator;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
 use SplFileInfo;
@@ -43,7 +43,6 @@ final class DeleteGeneratedCodeCommand extends Command
      */
     protected static $defaultName = self::COMMAND;
 
-    #[Override]
     protected function configure(): void
     {
         $this
@@ -55,7 +54,6 @@ final class DeleteGeneratedCodeCommand extends Command
             );
     }
 
-    #[Override]
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         if (! (bool) $input->getOption('yes')) {
@@ -86,15 +84,15 @@ final class DeleteGeneratedCodeCommand extends Command
             return;
         }
 
-        /** @var SplFileInfo[] $iterator */
         $iterator = new RecursiveIteratorIterator(
             new RecursiveDirectoryIterator(
                 $directoryPath,
-                RecursiveDirectoryIterator::SKIP_DOTS
+                FilesystemIterator::SKIP_DOTS
             ),
             RecursiveIteratorIterator::CHILD_FIRST
         );
 
+        /** @var SplFileInfo $directoryOrFile */
         foreach ($iterator as $directoryOrFile) {
             if ($directoryOrFile->isDir()) {
                 rmdir($directoryOrFile->getPathname());
