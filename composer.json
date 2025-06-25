@@ -57,7 +57,7 @@
         "symfony/dom-crawler": "^6.4|^7.0",
         "symfony/framework-bundle": "^6.4|^7.0",
         "thecodingmachine/phpstan-safe-rule": "v1.4",
-        "vimeo/psalm": "^6.10"
+        "vimeo/psalm": "^5.15|^6.10"
     },
     "minimum-stability": "stable",
     "prefer-stable": true,
