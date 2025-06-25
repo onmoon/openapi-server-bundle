@@ -13,6 +13,7 @@ use PhpParser\Node\Stmt\Use_ as UseStmt;
 use PhpParser\Node\Stmt\UseUse;
 use PHPUnit\Framework\Assert;
 use PHPUnit\Framework\TestCase;
+use ReflectionClass;
 
 /** @covers \OnMoon\OpenApiServerBundle\CodeGenerator\PhpParserGenerators\FileBuilder */
 class FileBuilderTest extends TestCase
@@ -32,7 +33,13 @@ class FileBuilderTest extends TestCase
         /** @var \PhpParser\Node\Stmt\Use_ $statementToCheck */
         $statementToCheck = $this->fileBuilder->getNamespace()->getNode()->stmts[0];
 
-        Assert::assertEquals('test', $statementToCheck->uses[0]->name->name);
+        if ((new ReflectionClass(Name::class))->hasProperty('name')) {
+            $nameSpaceName = $statementToCheck->uses[0]->name->name;
+        } else {
+            $nameSpaceName = $statementToCheck->uses[0]->name->parts[0];
+        }
+
+        Assert::assertEquals('test', $nameSpaceName);
     }
 
     public function testReferenceWithNotMatching(): void
