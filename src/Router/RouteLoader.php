@@ -7,7 +7,6 @@ namespace OnMoon\OpenApiServerBundle\Router;
 use OnMoon\OpenApiServerBundle\Controller\ApiController;
 use OnMoon\OpenApiServerBundle\Specification\SpecificationLoader;
 use OnMoon\OpenApiServerBundle\Types\ArgumentResolver;
-use Override;
 use Stringable;
 use Symfony\Component\Config\Loader\Loader;
 use Symfony\Component\Routing\Route;
@@ -30,7 +29,6 @@ class RouteLoader extends Loader
         $this->argumentResolver = $argumentResolver;
     }
 
-    #[Override]
     public function load(mixed $resource, ?string $type = null): RouteCollection
     {
         $specName      = (string) $resource;
@@ -70,7 +68,6 @@ class RouteLoader extends Loader
     }
 
     /** @inheritDoc */
-    #[Override]
     public function supports($resource, ?string $type = null): bool
     {
         return $type === self::OPENAPI_TYPE;

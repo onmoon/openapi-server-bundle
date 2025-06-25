@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace OnMoon\OpenApiServerBundle\Command;
 
 use FilesystemIterator;
-use Override;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
 use SplFileInfo;
@@ -44,7 +43,6 @@ final class DeleteGeneratedCodeCommand extends Command
      */
     protected static $defaultName = self::COMMAND;
 
-    #[Override]
     protected function configure(): void
     {
         $this
@@ -56,7 +54,6 @@ final class DeleteGeneratedCodeCommand extends Command
             );
     }
 
-    #[Override]
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         if (! (bool) $input->getOption('yes')) {

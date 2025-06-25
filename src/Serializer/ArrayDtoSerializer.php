@@ -8,7 +8,6 @@ use OnMoon\OpenApiServerBundle\Interfaces\Dto;
 use OnMoon\OpenApiServerBundle\Specification\Definitions\ObjectSchema;
 use OnMoon\OpenApiServerBundle\Specification\Definitions\Operation;
 use OnMoon\OpenApiServerBundle\Types\ScalarTypesResolver;
-use Override;
 use Symfony\Component\HttpFoundation\Request;
 
 use function array_key_exists;
@@ -26,7 +25,6 @@ final class ArrayDtoSerializer implements DtoSerializer
         $this->sendNotRequiredNullableNulls = $sendNulls;
     }
 
-    #[Override]
     public function createRequestDto(
         Request $request,
         Operation $operation,
@@ -63,7 +61,6 @@ final class ArrayDtoSerializer implements DtoSerializer
     }
 
     /** @inheritDoc */
-    #[Override]
     public function createResponseFromDto(Dto $responseDto, ObjectSchema $definition): array
     {
         return $this->convert(false, $responseDto->toArray(), $definition);
