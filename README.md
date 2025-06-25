@@ -27,7 +27,7 @@ The preferred way to install this extension is through [composer](http://getcomp
 Run
 
 ```
-composer require cebe/php-openapi:dev-php-81-compat onmoon/openapi-server-bundle 
+composer require onmoon/openapi-server-bundle 
 ```
 
 Then add the bundle class to your `config/bundles.php`:
