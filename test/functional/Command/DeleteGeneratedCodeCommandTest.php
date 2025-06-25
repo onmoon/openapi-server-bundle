@@ -9,10 +9,11 @@ use OnMoon\OpenApiServerBundle\Test\Functional\TestKernel;
 use PHPUnit\Framework\Assert;
 use Symfony\Component\Console\Tester\CommandTester;
 
+use function is_dir;
 use function rtrim;
 use function Safe\file_put_contents;
 use function Safe\mkdir;
-use function Safe\sprintf;
+use function sprintf;
 
 /** @covers \OnMoon\OpenApiServerBundle\Command\DeleteGeneratedCodeCommand */
 class DeleteGeneratedCodeCommandTest extends CommandTestCase
@@ -24,7 +25,10 @@ class DeleteGeneratedCodeCommandTest extends CommandTestCase
         $command             = $this->application->find(DeleteGeneratedCodeCommand::COMMAND);
         $this->commandTester = new CommandTester($command);
 
-        mkdir(TestKernel::$bundleRootPath);
+        if (! is_dir(TestKernel::$bundleRootPath)) {
+            mkdir(TestKernel::$bundleRootPath);
+        }
+
         file_put_contents(TestKernel::$bundleRootPath . '/test.txt', '');
     }
 

@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace OnMoon\OpenApiServerBundle\CodeGenerator\Definitions;
 
-class ComponentReference implements DtoReference
+final class ComponentReference implements DtoReference
 {
     public function __construct(private ComponentDefinition $referencedComponent)
     {

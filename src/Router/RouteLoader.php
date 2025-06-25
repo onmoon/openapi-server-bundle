@@ -14,6 +14,7 @@ use Symfony\Component\Routing\RouteCollection;
 
 use function array_key_exists;
 
+/** @psalm-suppress ClassMustBeFinal */
 class RouteLoader extends Loader
 {
     private SpecificationLoader $loader;
@@ -41,7 +42,6 @@ class RouteLoader extends Loader
 
             $parameters = $operation->getRequestParameters();
             if (array_key_exists('path', $parameters)) {
-                /** @psalm-var array<(string|Stringable)> $requirements */
                 $requirements = $this->argumentResolver->resolveArgumentPatterns($parameters['path']);
             }
 

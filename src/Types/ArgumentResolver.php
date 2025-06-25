@@ -9,6 +9,7 @@ use OnMoon\OpenApiServerBundle\Specification\Definitions\ObjectSchema;
 
 use function Safe\preg_match;
 
+/** @psalm-suppress ClassMustBeFinal */
 class ArgumentResolver
 {
     private ScalarTypesResolver $typesResolver;
@@ -20,7 +21,9 @@ class ArgumentResolver
 
     /**
      * @return string[]
-     * @psalm-return array<string, (string|null)>
+     * @psalm-return array<string, string>
+     *
+     * @psalm-suppress InvalidReturnType
      */
     public function resolveArgumentPatterns(ObjectSchema $pathParameters): array
     {
@@ -46,6 +49,7 @@ class ArgumentResolver
             }
         }
 
+        /** @psalm-suppress InvalidReturnStatement */
         return $patterns;
     }
 }

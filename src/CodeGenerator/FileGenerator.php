@@ -14,6 +14,7 @@ use OnMoon\OpenApiServerBundle\CodeGenerator\PhpParserGenerators\ServiceSubscrib
 
 use function array_push;
 
+/** @psalm-suppress ClassMustBeFinal */
 class FileGenerator
 {
     private DtoCodeGenerator $dtoGenerator;

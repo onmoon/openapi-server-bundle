@@ -16,7 +16,7 @@ use PhpParser\PrettyPrinter\Standard;
 use function array_map;
 use function count;
 use function implode;
-use function Safe\sprintf;
+use function sprintf;
 use function trim;
 
 use const PHP_EOL;

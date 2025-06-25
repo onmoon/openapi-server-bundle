@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace OnMoon\OpenApiServerBundle\Exception;
 
-use function Safe\sprintf;
+use function sprintf;
 
 final class CannotParseOpenApi extends OpenApiError
 {
@@ -73,6 +73,21 @@ final class CannotParseOpenApi extends OpenApiError
         return new self(
             sprintf(
                 'Cannot generate property for DTO class, property "%s" is not scalar in %s for operation: "%s" of path: "%s" in specification file: "%s".',
+                $propertyName,
+                $context['location'],
+                $context['method'],
+                $context['url'],
+                $context['path']
+            )
+        );
+    }
+
+    /** @param array{location:string,method:string,url:string,path:string} $context */
+    public static function becauseOpenapi31TypesNotSupported(string $propertyName, array $context): self
+    {
+        return new self(
+            sprintf(
+                'Cannot generate property for DTO class, property "%s" has multiple types in %s for operation: "%s" of path: "%s" in specification file: "%s".',
                 $propertyName,
                 $context['location'],
                 $context['method'],

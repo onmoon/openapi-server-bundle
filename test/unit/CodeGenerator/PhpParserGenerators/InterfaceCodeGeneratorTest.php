@@ -14,6 +14,8 @@ use PhpParser\BuilderFactory;
 use PHPUnit\Framework\Assert;
 use PHPUnit\Framework\TestCase;
 
+use function str_replace;
+
 /** @covers \OnMoon\OpenApiServerBundle\CodeGenerator\PhpParserGenerators\InterfaceCodeGenerator */
 class InterfaceCodeGeneratorTest extends TestCase
 {
@@ -62,7 +64,7 @@ use OnMoon\OpenApiServerBundle\Interfaces\RequestHandler;
  */
 interface TestClass extends RequestHandler
 {
-    public function test() : void;
+    public function test(): void;
 }
 EOD;
         $expectedGeneratedFileDefinition = new GeneratedFileDefinition(
@@ -71,7 +73,15 @@ EOD;
         );
         $generatedFileDefinition         = $this->interfaceCodeGenerator->generate($generatedInterfaceDefinition);
 
-        Assert::assertEquals($expectedGeneratedFileDefinition, $generatedFileDefinition);
+        Assert::assertEquals(
+            $expectedGeneratedFileDefinition->getClass(),
+            $generatedFileDefinition->getClass()
+        );
+        Assert::assertEquals(
+            $expectedGeneratedFileDefinition->getFileContents(),
+            // to support both versions of nikic/php-parser:"^4.19|^v5.0"
+            str_replace(') : void', '): void', $generatedFileDefinition->getFileContents())
+        );
     }
 
     public function testGenerateWithRequestHandlerInterfaceDefinitionAndRequestedType(): void
@@ -102,7 +112,7 @@ use \TestClass as TestClass_;
 interface TestClass extends RequestHandler
 {
     /** @param TestClass_ $request */
-    public function test(TestClass_ $request) : void;
+    public function test(TestClass_ $request): void;
 }
 EOD;
         $expectedGeneratedFileDefinition = new GeneratedFileDefinition(
@@ -111,7 +121,15 @@ EOD;
         );
         $generatedFileDefinition         = $this->interfaceCodeGenerator->generate($generatedInterfaceDefinition);
 
-        Assert::assertEquals($expectedGeneratedFileDefinition, $generatedFileDefinition);
+        Assert::assertEquals(
+            $expectedGeneratedFileDefinition->getClass(),
+            $generatedFileDefinition->getClass()
+        );
+        Assert::assertEquals(
+            $expectedGeneratedFileDefinition->getFileContents(),
+            // to support both versions of nikic/php-parser:"^4.19|^v5.0"
+            str_replace(') : void', '): void', $generatedFileDefinition->getFileContents())
+        );
     }
 
     public function testGenerateWithRequestHandlerInterfaceDefinitionAndResponseType(): void
@@ -139,7 +157,7 @@ use \TestClass as TestClass_;
 interface TestClass extends RequestHandler
 {
     /** @return TestClass_ */
-    public function test() : TestClass_;
+    public function test(): TestClass_;
 }
 EOD;
         $expectedGeneratedFileDefinition = new GeneratedFileDefinition(
@@ -148,7 +166,15 @@ EOD;
         );
         $generatedFileDefinition         = $this->interfaceCodeGenerator->generate($generatedInterfaceDefinition);
 
-        Assert::assertEquals($expectedGeneratedFileDefinition, $generatedFileDefinition);
+        Assert::assertEquals(
+            $expectedGeneratedFileDefinition->getClass(),
+            $generatedFileDefinition->getClass()
+        );
+        Assert::assertEquals(
+            $expectedGeneratedFileDefinition->getFileContents(),
+            // to support both versions of nikic/php-parser:"^4.19|^v5.0"
+            str_replace(') : TestClass_', '): TestClass_', $generatedFileDefinition->getFileContents())
+        );
     }
 
     public function testGenerateWithRequestHandlerInterfaceDefinitionAndDescription(): void
@@ -175,7 +201,7 @@ use OnMoon\OpenApiServerBundle\Interfaces\RequestHandler;
 interface TestClass extends RequestHandler
 {
     /** method description */
-    public function test() : void;
+    public function test(): void;
 }
 EOD;
         $expectedGeneratedFileDefinition = new GeneratedFileDefinition(
@@ -184,6 +210,14 @@ EOD;
         );
         $generatedFileDefinition         = $this->interfaceCodeGenerator->generate($generatedInterfaceDefinition);
 
-        Assert::assertEquals($expectedGeneratedFileDefinition, $generatedFileDefinition);
+        Assert::assertEquals(
+            $expectedGeneratedFileDefinition->getClass(),
+            $generatedFileDefinition->getClass()
+        );
+        Assert::assertEquals(
+            $expectedGeneratedFileDefinition->getFileContents(),
+            // to support both versions of nikic/php-parser:"^4.19|^v5.0"
+            str_replace(') : void', '): void', $generatedFileDefinition->getFileContents())
+        );
     }
 }

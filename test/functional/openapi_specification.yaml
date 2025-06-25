@@ -3,7 +3,7 @@ info:
   title: 'Test Goods API'
   version: '1.0'
 paths:
-  '/goods/{goodId}':
+  /goods/{goodId}:
     get:
       operationId: "getGood"
       parameters:

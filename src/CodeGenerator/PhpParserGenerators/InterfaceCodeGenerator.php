@@ -11,9 +11,9 @@ use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\RequestHandlerInterface
 use function array_map;
 use function count;
 use function implode;
-use function Safe\sprintf;
+use function sprintf;
 
-class InterfaceCodeGenerator extends CodeGenerator
+final class InterfaceCodeGenerator extends CodeGenerator
 {
     public function generate(RequestHandlerInterfaceDefinition $definition): GeneratedFileDefinition
     {

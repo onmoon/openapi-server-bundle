@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace OnMoon\OpenApiServerBundle\Command;
 
+use FilesystemIterator;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
 use SplFileInfo;
@@ -18,8 +19,8 @@ use Symfony\Component\Console\Question\ConfirmationQuestion;
 
 use function is_dir;
 use function Safe\rmdir;
-use function Safe\sprintf;
 use function Safe\unlink;
+use function sprintf;
 
 #[AsCommand(name: 'open-api:delete')]
 final class DeleteGeneratedCodeCommand extends Command
@@ -83,15 +84,15 @@ final class DeleteGeneratedCodeCommand extends Command
             return;
         }
 
-        /** @var SplFileInfo[] $iterator */
         $iterator = new RecursiveIteratorIterator(
             new RecursiveDirectoryIterator(
                 $directoryPath,
-                RecursiveDirectoryIterator::SKIP_DOTS
+                FilesystemIterator::SKIP_DOTS
             ),
             RecursiveIteratorIterator::CHILD_FIRST
         );
 
+        /** @var SplFileInfo $directoryOrFile */
         foreach ($iterator as $directoryOrFile) {
             if ($directoryOrFile->isDir()) {
                 rmdir($directoryOrFile->getPathname());
