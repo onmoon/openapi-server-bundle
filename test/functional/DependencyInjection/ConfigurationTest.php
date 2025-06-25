@@ -9,7 +9,7 @@ use OnMoon\OpenApiServerBundle\DependencyInjection\Configuration;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\HttpKernel\Kernel;
 
-use function Safe\sprintf;
+use function sprintf;
 use function version_compare;
 
 /** @covers \OnMoon\OpenApiServerBundle\DependencyInjection\Configuration */

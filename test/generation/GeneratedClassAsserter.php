@@ -22,12 +22,13 @@ use PhpParser\Node\Stmt\Use_;
 use PhpParser\Node\Stmt\UseUse;
 use PhpParser\NodeFinder;
 use PhpParser\ParserFactory;
+use PhpParser\PhpVersion;
 use PHPUnit\Framework\Assert;
 
 use function array_pop;
 use function explode;
 use function is_array;
-use function Safe\sprintf;
+use function sprintf;
 use function strpos;
 
 final class GeneratedClassAsserter
@@ -39,7 +40,7 @@ final class GeneratedClassAsserter
     public function __construct(InMemoryFileWriter $fileWriter, string $path)
     {
         $this->nodeFinder = new NodeFinder();
-        $phpParser        = (new ParserFactory())->create(ParserFactory::PREFER_PHP7);
+        $phpParser        = (new ParserFactory())->createForVersion(PhpVersion::fromString('7.0'));
         $phpCode          = $fileWriter->getContentsByFullPath($path);
         $statements       = $phpParser->parse($phpCode);
         if ($statements === null) {

@@ -34,9 +34,9 @@ use PhpParser\Node\Stmt\Return_;
 
 use function array_map;
 use function count;
-use function Safe\sprintf;
+use function sprintf;
 
-class DtoCodeGenerator extends CodeGenerator
+final class DtoCodeGenerator extends CodeGenerator
 {
     public function generate(DtoDefinition $definition): GeneratedFileDefinition
     {
@@ -302,7 +302,7 @@ class DtoCodeGenerator extends CodeGenerator
 
         $statements = [];
         if (count($setters) > 0) {
-            $statements[] = new Assign($dto, $new);
+            $statements[] = new Expression(new Assign($dto, $new));
             foreach ($setters as $setter) {
                 $statements[] = $setter;
             }
@@ -317,8 +317,8 @@ class DtoCodeGenerator extends CodeGenerator
             ->method('fromArray')
             ->makePublic()
             ->makeStatic()
-            ->setReturnType('self')
-            ->addParam(new Param_($source, null, 'array'))
+            ->setReturnType(new Name('self'))
+            ->addParam(new Param_($source, null, new Name('array')))
             ->setDocComment($this->getDocComment(['@inheritDoc']))
             ->addStmts($statements);
     }

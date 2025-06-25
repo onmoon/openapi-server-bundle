@@ -22,7 +22,7 @@ use Symfony\Contracts\Cache\ItemInterface;
 use Symfony\Contracts\Cache\TagAwareCacheInterface;
 
 use function array_pop;
-use function Safe\sprintf;
+use function sprintf;
 
 /** @covers \OnMoon\OpenApiServerBundle\Specification\SpecificationLoader */
 class SpecificationLoaderTest extends TestCase

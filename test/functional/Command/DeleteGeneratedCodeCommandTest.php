@@ -12,7 +12,7 @@ use Symfony\Component\Console\Tester\CommandTester;
 use function rtrim;
 use function Safe\file_put_contents;
 use function Safe\mkdir;
-use function Safe\sprintf;
+use function sprintf;
 
 /** @covers \OnMoon\OpenApiServerBundle\Command\DeleteGeneratedCodeCommand */
 class DeleteGeneratedCodeCommandTest extends CommandTestCase

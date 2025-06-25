@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace OnMoon\OpenApiServerBundle\DependencyInjection;
 
 use OnMoon\OpenApiServerBundle\Controller\ApiController;
+use Override;
 use Symfony\Component\DependencyInjection\Compiler\CompilerPassInterface;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Reference;
@@ -20,6 +21,7 @@ final class CompilerPass implements CompilerPassInterface
         $this->tag = $tag;
     }
 
+    #[Override]
     public function process(ContainerBuilder $container): void
     {
         if (! $container->has(ApiController::class)) {

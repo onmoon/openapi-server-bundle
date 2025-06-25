@@ -6,7 +6,7 @@ namespace OnMoon\OpenApiServerBundle\CodeGenerator\Naming;
 
 use OnMoon\OpenApiServerBundle\Exception\OpenApiError;
 
-use function Safe\sprintf;
+use function sprintf;
 
 final class CannotCreateNamespace extends OpenApiError
 {

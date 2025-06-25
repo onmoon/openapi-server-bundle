@@ -4,14 +4,17 @@ declare(strict_types=1);
 
 namespace OnMoon\OpenApiServerBundle\CodeGenerator\Definitions;
 
-use function Safe\substr;
+use Override;
+
 use function strrpos;
+use function substr;
 
 class ClassDefinition implements ClassReference
 {
     private string $className;
     private string $namespace;
 
+    #[Override]
     final public function getClassName(): string
     {
         return $this->className;
@@ -24,6 +27,7 @@ class ClassDefinition implements ClassReference
         return $this;
     }
 
+    #[Override]
     final public function getNamespace(): string
     {
         return $this->namespace;
@@ -36,6 +40,7 @@ class ClassDefinition implements ClassReference
         return $this;
     }
 
+    #[Override]
     final public function getFQCN(): string
     {
         return $this->namespace . '\\' . $this->className;

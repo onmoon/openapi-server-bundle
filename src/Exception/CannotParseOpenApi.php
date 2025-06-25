@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace OnMoon\OpenApiServerBundle\Exception;
 
-use function Safe\sprintf;
+use function sprintf;
 
 final class CannotParseOpenApi extends OpenApiError
 {
