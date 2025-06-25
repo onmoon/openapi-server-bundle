@@ -27,7 +27,7 @@
         "devizzent/cebe-php-openapi": "^1.1.4",
         "league/openapi-psr7-validator": "^0.22.0",
         "lukasoppermann/http-status": "^4.0",
-        "nikic/php-parser": "^4.19|^v5.4",
+        "nikic/php-parser": "^4.19|^v5.0",
         "nyholm/psr7": "^1.5",
         "phpdocumentor/reflection-docblock": "^5.3",
         "sspat/reserved-words": "^3.0",
