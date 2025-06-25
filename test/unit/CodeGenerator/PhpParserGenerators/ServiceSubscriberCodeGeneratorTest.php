@@ -21,6 +21,8 @@ use OnMoon\OpenApiServerBundle\Types\ScalarTypesResolver;
 use PhpParser\BuilderFactory;
 use PHPUnit\Framework\TestCase;
 
+use function str_replace;
+
 /** @covers \OnMoon\OpenApiServerBundle\CodeGenerator\PhpParserGenerators\ServiceSubscriberCodeGenerator */
 final class ServiceSubscriberCodeGeneratorTest extends TestCase
 {
@@ -141,6 +143,14 @@ class ClassName implements ClassName, ClassName
 }
 EOD;
 
-        self::assertEquals($expectedFileContent, $result->getFileContents());
+        self::assertEquals(
+            $expectedFileContent,
+            // to support both versions of nikic/php-parser:"^4.19|^v5.0"
+            str_replace(
+                [') : array', ') : ?RequestHandler'],
+                ['): array', '): ?RequestHandler'],
+                $result->getFileContents()
+            )
+        );
     }
 }
