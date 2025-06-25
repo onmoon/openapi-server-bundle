@@ -160,9 +160,10 @@ final class DtoCodeGenerator extends CodeGenerator
         $property->setType($this->getTypePhp($builder, $definition));
 
         $docCommentLines = [];
+        $description     = $definition->getDescription();
 
-        if ($definition->getDescription() !== null) {
-            $docCommentLines[] = sprintf('%s', $definition->getDescription());
+        if ($description !== null) {
+            $docCommentLines[] = sprintf('%s', $description);
             $docCommentLines[] = '';
         }
 

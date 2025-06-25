@@ -19,25 +19,8 @@
                 <file name="src/DependencyInjection/Configuration.php" />
             </errorLevel>
         </MixedMethodCall>
-        <PossiblyUndefinedMethod>
-            <errorLevel type="suppress">
-                <file name="src/DependencyInjection/Configuration.php" />
-            </errorLevel>
-        </PossiblyUndefinedMethod>
         <PropertyNotSetInConstructor errorLevel="suppress"/>
         <InternalClass errorLevel="suppress"/>
         <InternalMethod errorLevel="suppress"/>
-        <DeprecatedFunction>
-            <errorLevel type="suppress">
-                <referencedFunction name="Safe\substr" />
-                <referencedFunction name="Safe\sprintf" />
-            </errorLevel>
-        </DeprecatedFunction>
-        <ReservedWord>
-            <errorLevel type="suppress">
-                <file name="src/Controller/ApiController.php" />
-                <file name="src/Serializer/ArrayDtoSerializer.php" />
-            </errorLevel>
-        </ReservedWord>
     </issueHandlers>
 </psalm>

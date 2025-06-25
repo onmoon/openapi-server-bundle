@@ -100,7 +100,7 @@ final class GenerateApiCodeCommand extends Command
             RecursiveIteratorIterator::CHILD_FIRST
         );
 
-        /** @var SplFileInfo[] $iterator */
+        /** @var SplFileInfo $directoryOrFile */
         foreach ($iterator as $directoryOrFile) {
             if ($directoryOrFile->isDir() || in_array($directoryOrFile->getPathname(), $generatedFiles, true)) {
                 continue;
