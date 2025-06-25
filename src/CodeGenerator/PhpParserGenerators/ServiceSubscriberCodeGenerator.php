@@ -69,7 +69,9 @@ final class ServiceSubscriberCodeGenerator extends CodeGenerator
                 } else {
                     foreach ($operation->getResponses() as $response) {
                         $responseTypes[] = new ArrayItem(
+                            // @codeCoverageIgnoreStart
                             new Array_([new ArrayItem(new String_($response->getStatusCode()))], ['kind' => Array_::KIND_SHORT]),
+                            // @codeCoverageIgnoreEnd
                             new ClassConstFetch(
                                 new Name($fileBuilder->getReference($response->getResponseBody())),
                                 'class'
@@ -79,7 +81,9 @@ final class ServiceSubscriberCodeGenerator extends CodeGenerator
                 }
 
                 $responseCodeMapper[] = new ArrayItem(
+                    // @codeCoverageIgnoreStart
                     new Array_($responseTypes, ['kind' => Array_::KIND_SHORT]),
+                    // @codeCoverageIgnoreEnd
                     new ClassConstFetch(
                         new Name($fileBuilder->getReference($operation->getRequestHandlerInterface())),
                         'class'
@@ -90,7 +94,9 @@ final class ServiceSubscriberCodeGenerator extends CodeGenerator
 
         $httpCodeMapper = $this
             ->factory
+            // @codeCoverageIgnoreStart
             ->classConst('HTTP_CODES', new Array_($responseCodeMapper, ['kind' => Array_::KIND_SHORT]))
+            // @codeCoverageIgnoreEnd
             ->makePrivate();
 
         $property = $this
@@ -125,6 +131,7 @@ final class ServiceSubscriberCodeGenerator extends CodeGenerator
             ->setDocComment('/**
                                          * @inheritDoc
                                          */')
+            // @codeCoverageIgnoreStart
             ->addStmt(
                 new Return_(
                     new Array_(
@@ -133,6 +140,7 @@ final class ServiceSubscriberCodeGenerator extends CodeGenerator
                     )
                 )
             );
+            // @codeCoverageIgnoreEnd
 
         $getRequestHandler = $this
             ->factory
