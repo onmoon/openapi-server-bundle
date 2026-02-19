@@ -90,12 +90,17 @@ class ConfigurationTest extends TestCase
     public static function parametersEnumDataProvider(): array
     {
         return [
-            [['specs' => [['path' => 'test', 'type' => 'someRandomString']]], 'specs.0.type', 'someRandomString', '"yaml", "json"'],
+            [
+                ['specs' => [['path' => 'test', 'type' => 'someRandomString']]],
+                'specs\.0\.type',
+                'someRandomString',
+                '"yaml", "json"',
+            ],
             [
                 ['specs' => [['path' => 'test', 'name_space' => 'test', 'media_type' => 'someRandomString']]],
-                'specs.0.media_type',
+                'specs\.0\.media_type',
                 'someRandomString',
-                '"application\/json"',
+                '"application\\\?\/json"',
             ],
         ];
     }
@@ -113,11 +118,11 @@ class ConfigurationTest extends TestCase
         string $permissibleValues
     ): void {
         $this->assertConfigurationIsInvalid([$configuration], sprintf(
-            'The value "%s" is not allowed for path "open_api_server.%s". Permissible values: %s',
+            '/The value "%s" is not allowed for path "open_api_server\.%s"\. Permissible values: %s/',
             $notAllowedValue,
             $parameterName,
             $permissibleValues
-        ));
+        ), true);
     }
 
     public function testParametersDefaultValues(): void

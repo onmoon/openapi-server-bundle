@@ -58,13 +58,6 @@ final class GenerateApiCodeCommand extends Command
             );
     }
 
-    /**
-     * phpcs:disable SlevomatCodingStandard.TypeHints.PropertyTypeHint.MissingNativeTypeHint
-     *
-     * @var string|null
-     */
-    protected static $defaultName = self::COMMAND;
-
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $keep = (bool) $input->getOption('keep');

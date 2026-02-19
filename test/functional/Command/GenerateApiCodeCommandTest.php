@@ -9,7 +9,11 @@ use OnMoon\OpenApiServerBundle\Test\Functional\TestKernel;
 use PHPUnit\Framework\Assert;
 use Symfony\Component\Console\Tester\CommandTester;
 
+use function file_put_contents;
+use function mkdir;
+use function rmdir;
 use function rtrim;
+use function Safe\unlink;
 use function sprintf;
 use function ucfirst;
 
@@ -28,6 +32,13 @@ class GenerateApiCodeCommandTest extends CommandTestCase
 
     public function testGeneration(): void
     {
+        $orphanFilePath      = TestKernel::$bundleRootPath . DIRECTORY_SEPARATOR . 'should_be_deleted.php';
+        $orphanDirectoryPath = TestKernel::$bundleRootPath . DIRECTORY_SEPARATOR . 'ShouldBeDeleted';
+
+        mkdir(TestKernel::$bundleRootPath);
+        mkdir($orphanDirectoryPath);
+        file_put_contents($orphanFilePath, '<?php');
+
         $this->commandTester->execute([
             'command'  => GenerateApiCodeCommand::COMMAND,
         ]);
@@ -43,5 +54,39 @@ class GenerateApiCodeCommandTest extends CommandTestCase
         Assert::assertFileExists(TestKernel::$bundleRootPath . DIRECTORY_SEPARATOR . 'Apis' . DIRECTORY_SEPARATOR . $this->openapiNamespace . DIRECTORY_SEPARATOR . ucfirst($this->openapiOperationId) . DIRECTORY_SEPARATOR . 'Dto' . DIRECTORY_SEPARATOR . 'Request' . DIRECTORY_SEPARATOR . ucfirst($this->openapiOperationId) . 'RequestDto.php');
         Assert::assertFileExists(TestKernel::$bundleRootPath . DIRECTORY_SEPARATOR . 'Apis' . DIRECTORY_SEPARATOR . $this->openapiNamespace . DIRECTORY_SEPARATOR . ucfirst($this->openapiOperationId) . DIRECTORY_SEPARATOR . 'Dto' . DIRECTORY_SEPARATOR . 'Request' . DIRECTORY_SEPARATOR . 'PathParameters' . DIRECTORY_SEPARATOR . 'PathParametersDto.php');
         Assert::assertFileExists(TestKernel::$bundleRootPath . DIRECTORY_SEPARATOR . 'Components' . DIRECTORY_SEPARATOR . $this->openapiNamespace . DIRECTORY_SEPARATOR . 'GoodResponseSchema' . DIRECTORY_SEPARATOR . 'GoodResponseSchema.php');
+        Assert::assertFileDoesNotExist($orphanFilePath);
+        Assert::assertDirectoryDoesNotExist($orphanDirectoryPath);
+    }
+
+    public function testGenerationNoKeep(): void
+    {
+        $orphanFilePath      = TestKernel::$bundleRootPath . DIRECTORY_SEPARATOR . 'should_be_deleted.php';
+        $orphanDirectoryPath = TestKernel::$bundleRootPath . DIRECTORY_SEPARATOR . 'ShouldBeDeleted';
+
+        mkdir(TestKernel::$bundleRootPath);
+        mkdir($orphanDirectoryPath);
+        file_put_contents($orphanFilePath, '<?php');
+
+        $this->commandTester->execute([
+            'command'  => GenerateApiCodeCommand::COMMAND . '-k -z --aaaa=xx',
+            '--keep' => true,
+        ]);
+
+        $output = $this->commandTester->getDisplay();
+
+        Assert::assertEquals(sprintf('API server code generated in: %s', TestKernel::$bundleRootPath), rtrim($output));
+        Assert::assertSame(0, $this->commandTester->getStatusCode());
+        Assert::assertDirectoryExists(TestKernel::$bundleRootPath);
+        Assert::assertDirectoryIsReadable(TestKernel::$bundleRootPath);
+        Assert::assertFileExists(TestKernel::$bundleRootPath . DIRECTORY_SEPARATOR . 'ServiceSubscriber' . DIRECTORY_SEPARATOR . 'ApiServiceLoaderServiceSubscriber.php');
+        Assert::assertFileExists(TestKernel::$bundleRootPath . DIRECTORY_SEPARATOR . 'Apis' . DIRECTORY_SEPARATOR . $this->openapiNamespace . DIRECTORY_SEPARATOR . ucfirst($this->openapiOperationId) . DIRECTORY_SEPARATOR . ucfirst($this->openapiOperationId) . '.php');
+        Assert::assertFileExists(TestKernel::$bundleRootPath . DIRECTORY_SEPARATOR . 'Apis' . DIRECTORY_SEPARATOR . $this->openapiNamespace . DIRECTORY_SEPARATOR . ucfirst($this->openapiOperationId) . DIRECTORY_SEPARATOR . 'Dto' . DIRECTORY_SEPARATOR . 'Request' . DIRECTORY_SEPARATOR . ucfirst($this->openapiOperationId) . 'RequestDto.php');
+        Assert::assertFileExists(TestKernel::$bundleRootPath . DIRECTORY_SEPARATOR . 'Apis' . DIRECTORY_SEPARATOR . $this->openapiNamespace . DIRECTORY_SEPARATOR . ucfirst($this->openapiOperationId) . DIRECTORY_SEPARATOR . 'Dto' . DIRECTORY_SEPARATOR . 'Request' . DIRECTORY_SEPARATOR . 'PathParameters' . DIRECTORY_SEPARATOR . 'PathParametersDto.php');
+        Assert::assertFileExists(TestKernel::$bundleRootPath . DIRECTORY_SEPARATOR . 'Components' . DIRECTORY_SEPARATOR . $this->openapiNamespace . DIRECTORY_SEPARATOR . 'GoodResponseSchema' . DIRECTORY_SEPARATOR . 'GoodResponseSchema.php');
+        Assert::assertFileExists($orphanFilePath);
+        Assert::assertDirectoryExists($orphanDirectoryPath);
+
+        rmdir($orphanDirectoryPath);
+        unlink($orphanFilePath);
     }
 }

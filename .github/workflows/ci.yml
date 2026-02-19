@@ -17,10 +17,10 @@ jobs:
           - "ubuntu-latest"
           - "windows-latest"
         php-version:
-          - "8.1"
           - "8.2"
           - "8.3"
           - "8.4"
+          - "8.5"
         dependencies:
           - "lowest"
           - "highest"
@@ -55,7 +55,7 @@ jobs:
         operating-system:
           - "ubuntu-latest"
         php-version:
-          - "8.4"
+          - "8.5"
     steps:
       - name: "Checkout"
         uses: "actions/checkout@v2"
@@ -83,7 +83,7 @@ jobs:
         operating-system:
           - "ubuntu-latest"
         php-version:
-          - "8.4"
+          - "8.5"
     steps:
       - name: "Checkout"
         uses: "actions/checkout@v2"
@@ -111,7 +111,7 @@ jobs:
         operating-system:
           - "ubuntu-latest"
         php-version:
-          - "8.4"
+          - "8.5"
     steps:
       - name: "Checkout"
         uses: "actions/checkout@v2"
@@ -130,7 +130,7 @@ jobs:
       - name: "Install highest dependencies"
         run: "composer update --no-interaction --no-progress"
       - name: "Execute PhpCs"
-        run: "vendor/bin/phpcs --config-set php_version 7040 && vendor/bin/phpcs -q --report=checkstyle | cs2pr"
+        run: "vendor/bin/phpcs --config-set php_version 8020 && vendor/bin/phpcs -q --report=checkstyle | cs2pr"
   coverage:
     name: "Code coverage"
     runs-on: "ubuntu-latest"
@@ -139,7 +139,7 @@ jobs:
         operating-system:
           - "ubuntu-latest"
         php-version:
-          - "8.4"
+          - "8.5"
     steps:
       - name: "Checkout"
         uses: "actions/checkout@v2"
@@ -172,7 +172,7 @@ jobs:
         operating-system:
           - "ubuntu-latest"
         php-version:
-          - "8.4"
+          - "8.5"
     steps:
       - name: "Checkout"
         uses: "actions/checkout@v2"
@@ -191,7 +191,7 @@ jobs:
       - name: "Install highest dependencies"
         run: "composer update --no-interaction --no-progress"
       - name: "Infection"
-        run: "vendor/bin/roave-infection-static-analysis-plugin --only-covered --test-framework-options=\"--testsuite=unit\""
+        run: "vendor/bin/roave-infection-static-analysis-plugin --test-framework-options=\"--testsuite=unit\""
         env:
           INFECTION_BADGE_API_KEY: ${{ secrets.INFECTION_BADGE_API_KEY }}
           STRYKER_DASHBOARD_API_KEY: ${{ secrets.STRYKER_DASHBOARD_API_KEY }}
@@ -203,7 +203,7 @@ jobs:
         operating-system:
           - "ubuntu-latest"
         php-version:
-          - "8.4"
+          - "8.5"
     steps:
       - name: "Checkout"
         uses: "actions/checkout@v2"

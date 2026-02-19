@@ -8,9 +8,9 @@ use Exception;
 use OnMoon\OpenApiServerBundle\CodeGenerator\Definitions\PropertyDefinition;
 use OnMoon\OpenApiServerBundle\Types\ScalarTypesResolver;
 use PhpParser\BuilderFactory;
-use PhpParser\Node\Scalar\LNumber;
+use PhpParser\Node\DeclareItem;
+use PhpParser\Node\Scalar\Int_;
 use PhpParser\Node\Stmt\Declare_;
-use PhpParser\Node\Stmt\DeclareDeclare;
 use PhpParser\PrettyPrinter\Standard;
 
 use function array_map;
@@ -93,7 +93,7 @@ abstract class CodeGenerator
     public function printFile(FileBuilder $fileBuilder): string
     {
         return (new Standard())->prettyPrintFile([
-            new Declare_([new DeclareDeclare('strict_types', new LNumber(1))]),
+            new Declare_([new DeclareItem('strict_types', new Int_(1))]),
             $fileBuilder->getNamespace()->getNode(),
         ]);
     }
