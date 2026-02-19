@@ -122,28 +122,26 @@ final class ScalarTypesResolver
 
     public function findScalarType(?string $type, ?string $format): int
     {
-        if ($type === null) {
-            return 0;
-        }
+        if ($type !== null) {
+            if ($format !== null) {
+                foreach ($this->scalarTypes as $id => $scalar) {
+                    if (
+                        $scalar['type'] === $type &&
+                        isset($scalar['format']) &&
+                        $scalar['format'] === $format
+                    ) {
+                        return $id;
+                    }
+                }
+            }
 
-        if ($format !== null) {
             foreach ($this->scalarTypes as $id => $scalar) {
                 if (
                     $scalar['type'] === $type &&
-                    isset($scalar['format']) &&
-                    $scalar['format'] === $format
+                    ! isset($scalar['format'])
                 ) {
                     return $id;
                 }
-            }
-        }
-
-        foreach ($this->scalarTypes as $id => $scalar) {
-            if (
-                $scalar['type'] === $type &&
-                ! isset($scalar['format'])
-            ) {
-                return $id;
             }
         }
 

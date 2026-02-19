@@ -13,7 +13,10 @@ final class Configuration implements ConfigurationInterface
     {
         $treeBuilder = new TreeBuilder('open_api_server');
 
-        /** @psalm-suppress UndefinedMethod */
+        /**
+         * @psalm-suppress UndefinedMethod
+         * @psalm-suppress UnusedMethodCall
+         */
         $treeBuilder
             ->getRootNode()
             ->children()

@@ -90,12 +90,17 @@ class ConfigurationTest extends TestCase
     public static function parametersEnumDataProvider(): array
     {
         return [
-            [['specs' => [['path' => 'test', 'type' => 'someRandomString']]], 'specs.0.type', 'someRandomString', '"yaml", "json"'],
+            [
+                ['specs' => [['path' => 'test', 'type' => 'someRandomString']]],
+                'specs.0.type',
+                'someRandomString',
+                '"yaml", "json"',
+            ],
             [
                 ['specs' => [['path' => 'test', 'name_space' => 'test', 'media_type' => 'someRandomString']]],
                 'specs.0.media_type',
                 'someRandomString',
-                '"application\/json"',
+                '"application/json"',
             ],
         ];
     }

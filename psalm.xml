@@ -15,11 +15,6 @@
         <directory name="src" />
     </projectFiles>
     <issueHandlers>
-        <MixedMethodCall>
-            <errorLevel type="suppress">
-                <file name="src/DependencyInjection/Configuration.php" />
-            </errorLevel>
-        </MixedMethodCall>
         <PropertyNotSetInConstructor errorLevel="suppress"/>
         <InternalClass errorLevel="suppress"/>
         <InternalMethod errorLevel="suppress"/>

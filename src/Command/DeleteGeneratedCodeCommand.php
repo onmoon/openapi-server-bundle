@@ -36,13 +36,6 @@ final class DeleteGeneratedCodeCommand extends Command
         parent::__construct($name);
     }
 
-    /**
-     * phpcs:disable SlevomatCodingStandard.TypeHints.PropertyTypeHint.MissingNativeTypeHint
-     *
-     * @var string|null
-     */
-    protected static $defaultName = self::COMMAND;
-
     protected function configure(): void
     {
         $this
