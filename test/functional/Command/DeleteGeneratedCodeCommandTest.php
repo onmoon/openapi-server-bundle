@@ -29,6 +29,7 @@ class DeleteGeneratedCodeCommandTest extends CommandTestCase
             mkdir(TestKernel::$bundleRootPath);
         }
 
+        mkdir(TestKernel::$bundleRootPath . '/Test');
         file_put_contents(TestKernel::$bundleRootPath . '/test.txt', '');
     }
 
@@ -44,6 +45,7 @@ class DeleteGeneratedCodeCommandTest extends CommandTestCase
         Assert::assertEquals(sprintf('Delete all contents of the directory %1$s? (y/n): All contents of directory were deleted: %1$s', TestKernel::$bundleRootPath), rtrim($output));
         Assert::assertSame(0, $this->commandTester->getStatusCode());
         Assert::assertFileDoesNotExist(TestKernel::$bundleRootPath . '/test.txt');
+        Assert::assertDirectoryDoesNotExist(TestKernel::$bundleRootPath . '/Test');
     }
 
     public function testDeletionCancel(): void
@@ -59,5 +61,6 @@ class DeleteGeneratedCodeCommandTest extends CommandTestCase
         Assert::assertSame(0, $this->commandTester->getStatusCode());
         Assert::assertDirectoryExists(TestKernel::$bundleRootPath);
         Assert::assertFileExists(TestKernel::$bundleRootPath . '/test.txt');
+        Assert::assertDirectoryExists(TestKernel::$bundleRootPath . '/Test');
     }
 }
